@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+
+html, body {
+  min-height: 100%;
+  background:
+    radial-gradient(circle at 22% -10%, rgba(59, 130, 246, 0.18), transparent 34%),
+    radial-gradient(circle at 78% 4%, rgba(20, 184, 166, 0.11), transparent 28%),
+    linear-gradient(180deg, #020812 0%, #030914 58%, #020711 100%);
+  color: #eef4ff;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+}
+
+* { scrollbar-color: rgba(120,149,184,0.45) transparent; }
+
+.num { font-variant-numeric: tabular-nums; }
+
+.card {
+  @apply border border-line shadow-card transition-all duration-150;
+  background-color: rgba(7, 17, 29, 0.82);
+  border-radius: 14px;
+  backdrop-filter: blur(16px);
+}
+.card-hover { @apply hover:shadow-cardHover hover:-translate-y-[1px]; }
+
+.chip {
+  @apply inline-flex items-center gap-1.5 text-[11px] font-medium px-2 py-0.5 rounded-md border;
+}
+
+.divide-soft > * + * { border-top: 1px solid rgba(120,149,184,0.16); }
+
+.lab-grid {
+  background-image:
+    linear-gradient(rgba(120,149,184,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120,149,184,0.045) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
