@@ -8,6 +8,8 @@ import StatusBadge from "@/components/badges/StatusBadge";
 import DataSourceStatus from "@/components/research/DataSourceStatus";
 import BacktestChecklist from "@/components/research/BacktestChecklist";
 import StrategySignalPanel from "@/components/research/StrategySignalPanel";
+import WalkForwardPanel from "@/components/research/WalkForwardPanel";
+import { evaluateWalkForward } from "@/lib/quant/walkForward";
 import { STRATEGY_CATALOG } from "@/data/strategyCatalog";
 import { generateStrategyExplanation } from "@/lib/ai/strategyExplainer";
 import { getStrategyResult } from "@/lib/research";
@@ -23,6 +25,7 @@ export default async function StrategyDetailPage({ params }: { params: { id: str
   const result = await getStrategyResult(params.id);
   if (!result) notFound();
   const explanation = await generateStrategyExplanation(result);
+  const walkForward = evaluateWalkForward(result);
 
   return (
     <div className="space-y-8">
@@ -96,6 +99,10 @@ export default async function StrategyDetailPage({ params }: { params: { id: str
       <section className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <DrawdownChart data={result.equityCurve} />
         <BacktestChecklist result={result} />
+      </section>
+
+      <section>
+        <WalkForwardPanel split={walkForward} />
       </section>
 
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
