@@ -3,7 +3,7 @@
 [![CI](https://github.com/bobaoxu2001/FactorForge/actions/workflows/ci.yml/badge.svg)](https://github.com/bobaoxu2001/FactorForge/actions/workflows/ci.yml)
 [![Next.js 14](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![Vitest](https://img.shields.io/badge/tests-26%20passing-22c55e?logo=vitest&logoColor=white)](#testing)
+[![Vitest](https://img.shields.io/badge/tests-57%20passing-22c55e?logo=vitest&logoColor=white)](#testing)
 
 An AI quant research lab that turns daily OHLCV into factor signals, cost-aware backtests, score-weighted portfolios, and LLM-written research memos. Built as a portfolio piece for a full-stack + applied-ML role.
 
@@ -17,9 +17,11 @@ An AI quant research lab that turns daily OHLCV into factor signals, cost-aware 
 |---|---|
 | **Real LLM in the loop** | DeepSeek (`deepseek-chat`) writes the strategy memo and tape note from a deterministic backtest payload. Numbers come from the engine; only prose is generated. Template fallback when the key is unset. |
 | **Multi-symbol portfolio engine** | Score-weighted blend of radar-eligible legs, calendar intersection, per-leg P&L attribution, and pairwise Pearson correlation. Not just N parallel backtests. |
-| **Persisted compute** | SQLite-backed cache keyed by a market/benchmark fingerprint (symbol, row count, first/last bar, fallback/adjusted flags) + 6h TTL. A fresh data fetch auto-invalidates stale entries. |
-| **Honest data provenance** | Every result carries provider, freshness, adjusted-close flag, row count, and an `isFallback` boolean surfaced in the UI. Demo data is never silently promoted to real evidence. |
-| **CI and tests** | 26 vitest tests (engine + components) under jsdom; GitHub Actions runs lint + typecheck + test on every push. |
+| **Walk-forward + factor attribution** | Each strategy detail page reports in-sample vs out-of-sample metrics on the same equity curve, plus an OLS regression against Market / Momentum / Low-vol with t-statistics. Honest answers to "is this overfit?" and "is this alpha or just beta?". |
+| **Provider fan-out** | Composite real-data path: Yahoo → Polygon → Alpha Vantage → synthetic fallback. Each tier's failure reason is structured-logged; the UI labels which provider answered. |
+| **Persisted compute + multi-user** | SQLite stores fingerprint-keyed backtest cache (6h TTL), bcrypt-hashed users, and per-user watchlists. Iron-session cookies gate the protected routes. |
+| **Observability** | JSON-line structured logger and `/admin/cache` page showing live hit rate, per-strategy row counts, and the oldest/newest persisted entries. |
+| **CI and tests** | 57 vitest tests (engine + components + auth + composite-provider mocks) under jsdom; GitHub Actions runs lint + typecheck + test on every push. |
 
 ---
 
@@ -199,13 +201,16 @@ npm run build
 | Variable | Required? | What it does |
 |---|---|---|
 | `DEEPSEEK_API_KEY` | optional | Enables LLM-written strategy memo + market tape note. Without it the platform uses the deterministic template and labels the source as `template memo`. |
-| `ALPHA_VANTAGE_API_KEY`, `POLYGON_API_KEY`, `TWELVE_DATA_API_KEY` | unused (reserved) | Placeholders for future provider fan-out. Yahoo chart API works without a key. |
+| `POLYGON_API_KEY` | optional | Polygon.io aggregates as a second-tier real-data source (split + dividend adjusted). Composite provider tries it after Yahoo. |
+| `ALPHA_VANTAGE_API_KEY` | optional | Alpha Vantage daily as a third-tier real-data source. Free-tier endpoint is NOT corporate-action adjusted; the UI surfaces that honestly. |
+| `LOG_LEVEL` | optional | `debug` / `info` / `warn` / `error`. Default `info`. Logger emits JSON lines to stdout. |
+| `SESSION_PASSWORD` | required in prod | Iron-session signing key (≥32 chars random). The app boots with a dev default if unset — set this before deploying. |
 
 ---
 
 ## Testing
 
-26 tests across 10 files under vitest + jsdom:
+57 tests across 17 files under vitest + jsdom:
 
 - **Engine** — backtest fees + execution semantics, indicators, radar verdict logic, paper-trading risk-budget transitions, portfolio engine (Pearson, calendar intersection, score-weighted blend, phase-shifted decorrelation).
 - **Components** — StatusBadge (including the `idle` state introduced when fixing the zero-observation risk-budget bug), MetricCard tone classes, CorrelationMatrix rendering + empty state.
@@ -221,7 +226,8 @@ Run them locally with `npm test`. CI runs the same command on every push and PR;
 - **TypeScript** strict mode
 - **Tailwind CSS** with a dark research-lab token system
 - **Recharts** for equity / drawdown / portfolio curves
-- **better-sqlite3** for the backtest cache (WAL)
+- **better-sqlite3** for the backtest cache + users + watchlists (WAL)
+- **bcryptjs + iron-session** for auth (hashed passwords, signed cookies)
 - **DeepSeek** (`deepseek-chat`) via OpenAI-compatible JSON mode
 - **Vitest** + **Testing Library** + **jsdom**
 - **GitHub Actions** for lint / typecheck / test on push
@@ -232,11 +238,11 @@ Run them locally with `npm test`. CI runs the same command on every push and PR;
 
 In rough ROI order:
 
-1. **Walk-forward / out-of-sample evaluation** — split the calendar into train / test, fit signal thresholds on train, report metrics only from test. Honest answer to "is this overfit?".
-2. **Factor attribution** — regress strategy returns against momentum / volatility / market factors to separate alpha from known-factor exposure.
-3. **Real broker integration** — Alpaca paper API for actual order flow on radar candidates (paper only, gated by `riskBudgetStatus`).
-4. **Provider fan-out** — Polygon / Alpha Vantage as second-tier real data, not just fallback-to-demo.
-5. **Multi-user** — Clerk/Auth.js + per-user watchlists in SQLite.
+1. **Real broker integration** — Alpaca paper API for actual order flow on radar candidates (paper only, gated by `riskBudgetStatus`).
+2. **Cross-validated walk-forward** — N rolling train/test windows with averaged degradation metrics, not just one split.
+3. **Fama-French style real factor data** — replace the proxied momentum / low-vol baskets with imported daily factor returns.
+4. **Per-user dataset** — use the watchlist symbols to actually drive the engine for that user, not just label them.
+5. **Operational telemetry** — push the in-process counters to a Prometheus exporter so cache hit rates survive process restarts.
 
 ---
 
