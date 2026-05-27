@@ -9,6 +9,7 @@ import { buildPaperAccountSummary, buildPaperObservations } from "@/lib/quant/pa
 import { buildRadar } from "@/lib/quant/radar";
 import { chooseBenchmark, runStrategyOnMarketCached } from "@/lib/quant/strategies";
 import { chooseWeights, runPortfolioBacktest, type PortfolioBacktest } from "@/lib/quant/portfolio";
+import { buildFactorReturns, type FactorReturnsRow } from "@/lib/quant/factorAttribution";
 
 export const RESEARCH_REVALIDATE_SECONDS = 60 * 60;
 
@@ -21,6 +22,8 @@ export interface ResearchDataset {
   paperAccount: ReturnType<typeof buildPaperAccountSummary>;
   marketSummary: MarketSummary;
   portfolio: PortfolioBacktest | null;
+  factorReturns: FactorReturnsRow[];
+  factorBenchmarkSymbol: string;
   metadata: {
     generatedAt: string;
     revalidateSeconds: number;
@@ -66,6 +69,8 @@ export async function buildResearchDatasetFromPrices(
   const paperAccount = buildPaperAccountSummary(paperObservations);
   const marketSummary = await generateMarketSummary(factors);
   const portfolio = buildPortfolio(radarCandidates, pricesBySymbol);
+  const factorReturns = buildFactorReturns(pricesBySymbol);
+  const factorBenchmarkSymbol = pricesBySymbol.SPY ? "SPY" : pricesBySymbol.QQQ ? "QQQ" : Object.keys(pricesBySymbol)[0] ?? "";
   const priceResults = Object.values(pricesBySymbol);
   return {
     pricesBySymbol,
@@ -76,6 +81,8 @@ export async function buildResearchDatasetFromPrices(
     paperAccount,
     marketSummary,
     portfolio,
+    factorReturns,
+    factorBenchmarkSymbol,
     metadata: {
       generatedAt: new Date().toISOString(),
       revalidateSeconds: RESEARCH_REVALIDATE_SECONDS,

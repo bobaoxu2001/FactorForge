@@ -9,10 +9,12 @@ import DataSourceStatus from "@/components/research/DataSourceStatus";
 import BacktestChecklist from "@/components/research/BacktestChecklist";
 import StrategySignalPanel from "@/components/research/StrategySignalPanel";
 import WalkForwardPanel from "@/components/research/WalkForwardPanel";
+import FactorAttributionPanel from "@/components/research/FactorAttributionPanel";
 import { evaluateWalkForward } from "@/lib/quant/walkForward";
+import { attributeFactors } from "@/lib/quant/factorAttribution";
 import { STRATEGY_CATALOG } from "@/data/strategyCatalog";
 import { generateStrategyExplanation } from "@/lib/ai/strategyExplainer";
-import { getStrategyResult } from "@/lib/research";
+import { getResearchDataset } from "@/lib/research";
 import { num, pct, usd } from "@/lib/utils/format";
 
 export const revalidate = 60 * 60;
@@ -22,10 +24,12 @@ export function generateStaticParams() {
 }
 
 export default async function StrategyDetailPage({ params }: { params: { id: string } }) {
-  const result = await getStrategyResult(params.id);
+  const dataset = await getResearchDataset();
+  const result = dataset.strategyResults.find((r) => r.strategyId === params.id) ?? null;
   if (!result) notFound();
   const explanation = await generateStrategyExplanation(result);
   const walkForward = evaluateWalkForward(result);
+  const factorAttribution = attributeFactors(result.equityCurve, dataset.factorReturns, dataset.factorBenchmarkSymbol);
 
   return (
     <div className="space-y-8">
@@ -103,6 +107,10 @@ export default async function StrategyDetailPage({ params }: { params: { id: str
 
       <section>
         <WalkForwardPanel split={walkForward} />
+      </section>
+
+      <section>
+        <FactorAttributionPanel attribution={factorAttribution} />
       </section>
 
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
