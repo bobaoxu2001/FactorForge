@@ -2,7 +2,7 @@ import { DEFAULT_SYMBOLS } from "@/data/watchlist";
 import { STRATEGY_CATALOG } from "@/data/strategyCatalog";
 import type { BacktestResult } from "@/types/backtest";
 import type { FactorSnapshot, HistoricalPriceResult } from "@/types/market";
-import { generateMarketSummary } from "@/lib/ai/marketSummary";
+import { generateMarketSummary, type MarketSummary } from "@/lib/ai/marketSummary";
 import { getWatchlistPrices } from "@/lib/data/marketData";
 import { percentChange, realizedVolatility, rsi, sma, volumeMovingAverage } from "@/lib/quant/indicators";
 import { buildPaperAccountSummary, buildPaperObservations } from "@/lib/quant/paperTrading";
@@ -18,7 +18,7 @@ export interface ResearchDataset {
   radarCandidates: ReturnType<typeof buildRadar>;
   paperObservations: ReturnType<typeof buildPaperObservations>;
   paperAccount: ReturnType<typeof buildPaperAccountSummary>;
-  marketSummary: ReturnType<typeof generateMarketSummary>;
+  marketSummary: MarketSummary;
   metadata: {
     generatedAt: string;
     revalidateSeconds: number;
@@ -52,7 +52,7 @@ export async function getResearchDataset(): Promise<ResearchDataset> {
   const radarCandidates = buildRadar(strategyResults);
   const paperObservations = buildPaperObservations(radarCandidates);
   const paperAccount = buildPaperAccountSummary(paperObservations);
-  const marketSummary = generateMarketSummary(factors);
+  const marketSummary = await generateMarketSummary(factors);
   const priceResults = Object.values(pricesBySymbol);
   return {
     pricesBySymbol,
