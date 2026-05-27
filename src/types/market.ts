@@ -14,7 +14,7 @@ export interface MarketPrice {
 
 export interface MarketDataQuality {
   adjusted: boolean;
-  source: "yahoo" | "fallback";
+  source: "yahoo" | "polygon" | "alphaVantage" | "fallback";
   fetchedAt: string;
   rows: number;
   firstDate: string | null;

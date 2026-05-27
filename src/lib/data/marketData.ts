@@ -1,13 +1,13 @@
 import type { HistoricalPriceResult, PriceRange } from "@/types/market";
 import { DEFAULT_SYMBOLS } from "@/data/watchlist";
-import { fetchYahooHistoricalPrices } from "./providers/yahoo";
+import { fetchHistoricalPricesComposite } from "./providers/composite";
 
 export async function getHistoricalPrices(
   symbol: string,
   range: PriceRange = "3y",
 ): Promise<HistoricalPriceResult> {
   const normalized = symbol.trim().toUpperCase();
-  return fetchYahooHistoricalPrices(normalized, range);
+  return fetchHistoricalPricesComposite(normalized, range);
 }
 
 export async function getWatchlistPrices(range: PriceRange = "3y") {
