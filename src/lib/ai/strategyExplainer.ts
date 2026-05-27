@@ -1,5 +1,6 @@
 import type { BacktestResult } from "@/types/backtest";
 import { pct, num } from "@/lib/utils/format";
+import { callDeepseekJson, isDeepseekConfigured } from "./deepseek";
 
 export interface StrategyExplanation {
   summary: string;
@@ -11,11 +12,150 @@ export interface StrategyExplanation {
   suggestedExperiments: string[];
   confidenceScore: number;
   confidenceLevel: "low" | "medium" | "high";
+  source: "deepseek" | "template";
 }
 
-export function generateStrategyExplanation(result: BacktestResult): StrategyExplanation {
+interface LlmNarrative {
+  summary: string;
+  whyItWorks: string;
+  keyRisks: string;
+  nextStep: string;
+  thesis: string;
+  modelReasoning: string;
+  suggestedExperiments: string[];
+}
+
+const explanationCache = new Map<string, StrategyExplanation>();
+
+export async function generateStrategyExplanation(result: BacktestResult): Promise<StrategyExplanation> {
+  const cacheKey = buildCacheKey(result);
+  const cached = explanationCache.get(cacheKey);
+  if (cached) return cached;
+
+  const baseline = buildTemplateExplanation(result);
+
+  if (!isDeepseekConfigured()) {
+    explanationCache.set(cacheKey, baseline);
+    return baseline;
+  }
+
+  const narrative = await callDeepseekJson<LlmNarrative>({
+    messages: [
+      {
+        role: "system",
+        content:
+          "You are a senior quantitative research analyst writing concise, evidence-based memos for a research dashboard. " +
+          "Never invent numbers — only reference metrics that appear in the user payload. " +
+          "Be sober: if data is fallback/demo or trade count is small, say so. " +
+          "Avoid filler words and never give live trading instructions. " +
+          "Respond ONLY with a valid JSON object using the exact schema requested.",
+      },
+      {
+        role: "user",
+        content: buildPrompt(result),
+      },
+    ],
+    temperature: 0.35,
+    maxTokens: 750,
+  });
+
+  const explanation: StrategyExplanation = narrative
+    ? mergeNarrative(baseline, narrative)
+    : baseline;
+
+  explanationCache.set(cacheKey, explanation);
+  return explanation;
+}
+
+function buildCacheKey(result: BacktestResult): string {
+  return [
+    result.strategyId,
+    result.symbol,
+    result.metrics.lastSignalDate ?? "no-signal",
+    result.metrics.tradeCount,
+    result.dataStatus.isFallback ? "fallback" : "real",
+  ].join("::");
+}
+
+function buildPrompt(result: BacktestResult): string {
+  const { metrics, dataStatus, riskFlags } = result;
+  const payload = {
+    strategy: { id: result.strategyId, name: result.strategyName, type: result.type, description: result.description },
+    symbol: result.symbol,
+    dataStatus: {
+      provider: dataStatus.provider,
+      isFallback: dataStatus.isFallback,
+      adjusted: dataStatus.adjusted,
+      message: dataStatus.message,
+    },
+    metrics: {
+      totalReturn: metrics.totalReturn,
+      annualizedReturn: metrics.annualizedReturn,
+      benchmarkReturn: metrics.benchmarkReturn,
+      excessReturn: metrics.excessReturn,
+      sharpe: metrics.sharpe,
+      maxDrawdown: metrics.maxDrawdown,
+      winRate: metrics.winRate,
+      profitFactor: metrics.profitFactor,
+      tradeCount: metrics.tradeCount,
+      averageHoldingDays: metrics.averageHoldingDays,
+      volatility: metrics.volatility,
+      currentPosition: metrics.currentPosition,
+      lastSignalDate: metrics.lastSignalDate,
+    },
+    riskFlags,
+    recentSignals: result.signals.slice(-3),
+  };
+
+  return [
+    "Write an AI research memo for a long-only equity strategy backtest. Return JSON with these keys:",
+    "  summary           — one sentence stating strategy, symbol, data basis, and the key risk-return metrics.",
+    "  whyItWorks        — 1-2 sentences on the structural reason this rule may produce the observed profile.",
+    "  keyRisks          — 1-2 sentences on the most material risks given the metrics and risk flags.",
+    "  nextStep          — one sentence prescribing the next research action, not a trading instruction.",
+    "  thesis            — 1-2 sentences framing this as research evidence, not a live signal.",
+    "  modelReasoning    — 1-2 sentences explaining what the ranking model weighs and why this strategy looks the way it does.",
+    "  suggestedExperiments — array of exactly 3 short, concrete experiment ideas to validate or stress-test the strategy.",
+    "",
+    "Constraints:",
+    "- Reference only metrics present in the payload. Do not fabricate numbers.",
+    "- If dataStatus.isFallback is true, explicitly call out that the result uses demo data.",
+    "- If tradeCount < 5, explicitly mention sample size is limited.",
+    "- English output. Plain prose, no markdown, no bullets except inside suggestedExperiments array.",
+    "",
+    "Backtest payload:",
+    JSON.stringify(payload),
+  ].join("\n");
+}
+
+function mergeNarrative(baseline: StrategyExplanation, narrative: LlmNarrative): StrategyExplanation {
+  const experiments = Array.isArray(narrative.suggestedExperiments) && narrative.suggestedExperiments.length > 0
+    ? narrative.suggestedExperiments.slice(0, 4).map((item) => String(item))
+    : baseline.suggestedExperiments;
+
+  return {
+    summary: pickString(narrative.summary, baseline.summary),
+    whyItWorks: pickString(narrative.whyItWorks, baseline.whyItWorks),
+    keyRisks: pickString(narrative.keyRisks, baseline.keyRisks),
+    nextStep: pickString(narrative.nextStep, baseline.nextStep),
+    thesis: pickString(narrative.thesis, baseline.thesis),
+    modelReasoning: pickString(narrative.modelReasoning, baseline.modelReasoning),
+    suggestedExperiments: experiments,
+    confidenceScore: baseline.confidenceScore,
+    confidenceLevel: baseline.confidenceLevel,
+    source: "deepseek",
+  };
+}
+
+function pickString(candidate: unknown, fallback: string): string {
+  if (typeof candidate !== "string") return fallback;
+  const trimmed = candidate.trim();
+  return trimmed.length > 0 ? trimmed : fallback;
+}
+
+function buildTemplateExplanation(result: BacktestResult): StrategyExplanation {
   const { metrics } = result;
-  const confidenceLevel =
+  const confidenceLevel: StrategyExplanation["confidenceLevel"] =
     result.dataStatus.isFallback || metrics.tradeCount < 5 ? "low" :
     metrics.sharpe > 1.2 && metrics.maxDrawdown > -0.2 ? "high" : "medium";
 
@@ -65,5 +205,6 @@ export function generateStrategyExplanation(result: BacktestResult): StrategyExp
     suggestedExperiments,
     confidenceScore,
     confidenceLevel,
+    source: "template",
   };
 }
