@@ -7,7 +7,7 @@ import { getWatchlistPrices } from "@/lib/data/marketData";
 import { percentChange, realizedVolatility, rsi, sma, volumeMovingAverage } from "@/lib/quant/indicators";
 import { buildPaperAccountSummary, buildPaperObservations } from "@/lib/quant/paperTrading";
 import { buildRadar } from "@/lib/quant/radar";
-import { chooseBenchmark, runStrategyOnMarket } from "@/lib/quant/strategies";
+import { chooseBenchmark, runStrategyOnMarketCached } from "@/lib/quant/strategies";
 
 export const RESEARCH_REVALIDATE_SECONDS = 60 * 60;
 
@@ -37,7 +37,7 @@ export async function getResearchDataset(): Promise<ResearchDataset> {
         const market = pricesBySymbol[symbol];
         const benchmark = chooseBenchmark(symbol, pricesBySymbol);
         if (!market || !benchmark || market.prices.length === 0 || benchmark.prices.length === 0) return null;
-        return runStrategyOnMarket(definition, market, benchmark);
+        return runStrategyOnMarketCached(definition, market, benchmark);
       })
       .filter((result): result is BacktestResult => result !== null);
     if (runs.length === 0) {

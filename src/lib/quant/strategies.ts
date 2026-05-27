@@ -5,6 +5,11 @@ import type { HistoricalPriceResult, MarketPrice } from "@/types/market";
 import type { StrategyDefinition } from "@/types/strategy";
 import { atr, ema, percentChange, realizedVolatility, rollingHigh, rsi, sma, volumeMovingAverage } from "./indicators";
 import { runLongOnlyBacktest } from "./backtest";
+import {
+  buildBacktestCacheKey,
+  readBacktestFromCache,
+  writeBacktestToCache,
+} from "@/lib/persistence/backtestCache";
 
 interface SignalPlan {
   buy: boolean;
@@ -92,6 +97,23 @@ export function runStrategyOnMarket(
   benchmark: HistoricalPriceResult,
 ): BacktestResult {
   return runLongOnlyBacktest(definition, market, benchmark, buildSignalPlans(definition, market.prices));
+}
+
+export function runStrategyOnMarketCached(
+  definition: StrategyDefinition,
+  market: HistoricalPriceResult,
+  benchmark: HistoricalPriceResult,
+): BacktestResult {
+  const { cacheKey, fingerprint } = buildBacktestCacheKey({
+    strategyId: definition.id,
+    market,
+    benchmark,
+  });
+  const cached = readBacktestFromCache(cacheKey);
+  if (cached) return cached;
+  const result = runStrategyOnMarket(definition, market, benchmark);
+  writeBacktestToCache(cacheKey, fingerprint, result);
+  return result;
 }
 
 export function chooseBenchmark(symbol: string, pricesBySymbol: Record<string, HistoricalPriceResult>): HistoricalPriceResult {
