@@ -1,9 +1,9 @@
 import "server-only";
 import { existsSync, mkdirSync } from "node:fs";
 import path from "node:path";
-import type DatabaseConstructor from "better-sqlite3";
+import Database from "better-sqlite3";
 
-type DatabaseInstance = ReturnType<typeof DatabaseConstructor>;
+type DatabaseInstance = ReturnType<typeof Database>;
 
 let dbInstance: DatabaseInstance | null = null;
 let initFailed = false;
@@ -36,10 +36,6 @@ export function getDb(): DatabaseInstance | null {
   if (dbInstance) return dbInstance;
   if (initFailed) return null;
   try {
-    // Dynamic require so unit tests that don't touch persistence don't fail
-    // if the native binary fails to load.
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const Database = require("better-sqlite3") as typeof DatabaseConstructor;
     const db = new Database(dbPath());
     db.pragma("journal_mode = WAL");
     db.exec(SCHEMA);

@@ -100,8 +100,8 @@ export default async function PortfolioPage() {
         <ul className="mt-4 space-y-2 text-[12.5px] leading-relaxed text-ink-muted">
           <li>• Eligible legs: radar candidates and continue-observing strategies with Sharpe &gt; 0.5, capped at four.</li>
           <li>• Weights are proportional to the composite radar score; falls back to equal-weight if all scores are non-positive.</li>
-          <li>• Calendar = intersection of every leg's equity-curve dates so the blend uses only days when all legs traded.</li>
-          <li>• Each leg's equity is normalized to a $1 base; the portfolio re-aggregates daily — no intra-day rebalancing assumption.</li>
+          <li>• Calendar = intersection of every leg&apos;s equity-curve dates so the blend uses only days when all legs traded.</li>
+          <li>• Each leg&apos;s equity is normalized to a $1 base; the portfolio re-aggregates daily — no intra-day rebalancing assumption.</li>
           <li>• Benchmark is SPY (or the first available substitute) sampled on the same calendar.</li>
           <li>• Correlation cells use Pearson on daily returns; the off-diagonal average drives the diversification badge.</li>
         </ul>
