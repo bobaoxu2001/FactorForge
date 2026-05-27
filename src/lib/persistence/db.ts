@@ -24,6 +24,22 @@ CREATE TABLE IF NOT EXISTS metadata (
   key   TEXT PRIMARY KEY,
   value TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS users (
+  id            TEXT PRIMARY KEY,
+  username      TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL,
+  created_at    INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS watchlist_symbols (
+  user_id   TEXT NOT NULL,
+  symbol    TEXT NOT NULL,
+  added_at  INTEGER NOT NULL,
+  PRIMARY KEY (user_id, symbol),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_watchlist_user ON watchlist_symbols(user_id);
 `;
 
 function dbPath(): string {
