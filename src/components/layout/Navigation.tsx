@@ -13,6 +13,7 @@ import {
   Network,
   PieChart,
   Search,
+  Server,
   Settings,
   Target,
   WalletCards,
@@ -30,6 +31,7 @@ const items = [
   { href: "/ai-market", label: "AI Market", icon: BrainCircuit },
   { href: "/paper-trading", label: "Paper Trading", icon: WalletCards },
   { href: "/reports", label: "Reports", icon: FileText },
+  { href: "/admin/cache", label: "Cache", icon: Server },
 ];
 
 export default function Navigation() {
