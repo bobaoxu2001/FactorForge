@@ -50,7 +50,10 @@ export async function buildResearchDatasetFromPrices(
     const runs = DEFAULT_SYMBOLS
       .map((symbol) => {
         const market = pricesBySymbol[symbol];
-        const benchmark = chooseBenchmark(symbol, pricesBySymbol);
+        const benchmark = chooseBenchmark(symbol, pricesBySymbol, {
+          strategyType: definition.type,
+          selfSymbol: symbol,
+        });
         if (!market || !benchmark || market.prices.length === 0 || benchmark.prices.length === 0) return null;
         return runStrategyOnMarketCached(definition, market, benchmark);
       })
