@@ -15,11 +15,14 @@ export default function DrawdownChart({ data }: { data: EquityPoint[] }) {
       {mounted ? (
         <ResponsiveContainer width="100%" height="86%">
           <AreaChart data={sampled}>
-            <CartesianGrid stroke="#efeff2" vertical={false} />
-            <XAxis dataKey="date" tick={{ fontSize: 11 }} minTickGap={28} />
-            <YAxis tick={{ fontSize: 11 }} tickFormatter={(value) => `${Math.round(Number(value) * 100)}%`} width={48} />
-            <Tooltip formatter={(value) => `${(Number(value) * 100).toFixed(1)}%`} />
-            <Area type="monotone" dataKey="drawdown" stroke="#e11d48" fill="#ffe4e6" strokeWidth={1.5} />
+            <CartesianGrid stroke="rgba(120,149,184,0.14)" vertical={false} />
+            <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#69778d" }} axisLine={false} tickLine={false} minTickGap={28} />
+            <YAxis tick={{ fontSize: 11, fill: "#69778d" }} axisLine={false} tickLine={false} tickFormatter={(value) => `${Math.round(Number(value) * 100)}%`} width={48} />
+            <Tooltip
+              contentStyle={{ background: "rgba(5,13,25,0.96)", border: "1px solid rgba(120,149,184,0.24)", borderRadius: 12, color: "#eef4ff" }}
+              formatter={(value) => `${(Number(value) * 100).toFixed(1)}%`}
+            />
+            <Area type="monotone" dataKey="drawdown" stroke="#fb7185" fill="rgba(251,113,133,0.16)" strokeWidth={1.5} />
           </AreaChart>
         </ResponsiveContainer>
       ) : (

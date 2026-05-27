@@ -15,7 +15,7 @@ export default function BacktestChecklist({ result }: { result: BacktestResult }
       {checks.map((check) => (
         <div key={check.name} className="flex items-center justify-between gap-3 px-4 py-3 text-[13px]">
           <span className="text-ink">{check.name}</span>
-          <span className={`chip ${check.passed ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-rose-200 bg-rose-50 text-rose-700"}`}>
+          <span className={`chip ${check.passed ? "border-emerald-400/35 bg-emerald-500/12 text-emerald-200" : "border-rose-400/35 bg-rose-500/12 text-rose-200"}`}>
             {check.passed ? "passed" : "watch"}
           </span>
         </div>

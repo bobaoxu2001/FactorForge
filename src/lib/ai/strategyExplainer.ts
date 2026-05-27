@@ -6,6 +6,10 @@ export interface StrategyExplanation {
   whyItWorks: string;
   keyRisks: string;
   nextStep: string;
+  thesis: string;
+  modelReasoning: string;
+  suggestedExperiments: string[];
+  confidenceScore: number;
   confidenceLevel: "low" | "medium" | "high";
 }
 
@@ -27,7 +31,7 @@ export function generateStrategyExplanation(result: BacktestResult): StrategyExp
     metrics.tradeCount < 5 ? "Trade count is low; sample size is limited." : null,
     metrics.maxDrawdown < -0.25 ? "Historical drawdown is deep." : null,
     result.dataStatus.isFallback ? "Current market data is fallback/demo and should not be treated as real market validation." : null,
-    result.riskFlags.join("；"),
+    result.riskFlags.join("; "),
   ].filter(Boolean).join(" ");
   const nextStep =
     confidenceLevel === "high"
@@ -35,6 +39,31 @@ export function generateStrategyExplanation(result: BacktestResult): StrategyExp
       : confidenceLevel === "medium"
         ? "Keep it on the radar and prioritize expanding the universe plus testing different market regimes."
         : "Add more real data and samples before considering paper observation.";
+  const confidenceScore = Math.round(
+    Math.min(95, Math.max(18,
+      (metrics.sharpe + 0.5) * 22 +
+      Math.max(0, metrics.maxDrawdown + 0.45) * 70 +
+      Math.min(metrics.tradeCount, 20) * 1.2 -
+      (result.dataStatus.isFallback ? 18 : 0),
+    )),
+  );
+  const thesis = `${result.type} thesis: prioritize ${result.symbol} only when factor evidence, trend structure, and risk-adjusted backtest behavior align. The current model reads the setup as ${confidenceLevel}-confidence research evidence, not a live trading instruction.`;
+  const modelReasoning = `The ranking model weighs annualized return, Sharpe, drawdown containment, trade sample size, data quality, and cost-aware execution. This strategy is strongest when its signal frequency is sufficient and drawdown remains inside the radar threshold.`;
+  const suggestedExperiments = [
+    "Expand the universe beyond the default mega-cap watchlist and rerun the same rule set.",
+    "Test a tighter slippage and fee sensitivity range to understand implementation drag.",
+    "Compare 20%, 10%, and volatility-scaled position sizing across the same signals.",
+  ];
 
-  return { summary, whyItWorks, keyRisks: keyRisks || "No major risk flag is currently triggered, but continued validation is still required.", nextStep, confidenceLevel };
+  return {
+    summary,
+    whyItWorks,
+    keyRisks: keyRisks || "No major risk flag is currently triggered, but continued validation is still required.",
+    nextStep,
+    thesis,
+    modelReasoning,
+    suggestedExperiments,
+    confidenceScore,
+    confidenceLevel,
+  };
 }

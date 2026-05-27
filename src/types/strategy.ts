@@ -6,6 +6,7 @@ export interface StrategyDefinition {
   description: string;
   type: "breakout" | "momentum" | "mean reversion" | "rotation";
   defaultSymbol: string;
+  knownLimitations?: string[];
 }
 
 export interface RadarCandidate {
@@ -26,4 +27,17 @@ export interface PaperObservation {
   currentSymbol: string;
   recentSignal: string;
   nextCheck: string;
+}
+
+export interface PaperAccountSummary {
+  simulatedCapital: number;
+  observationSlots: number;
+  activeObservations: number;
+  totalAllocatedCapital: number;
+  exposurePct: number;
+  concentrationPct: number;
+  maxObservedDrawdown: number;
+  averageRadarScore: number;
+  riskBudgetStatus: "within limits" | "watch exposure" | "paused" | "idle";
+  guardrails: string[];
 }

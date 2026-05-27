@@ -58,11 +58,13 @@ export function runLongOnlyBacktest(
   const signals: StrategySignal[] = [];
   const rawCurve: Omit<EquityPoint, "drawdown">[] = [];
   const benchmarkStart = benchmark.prices[0]?.close ?? 1;
+  const benchmarkByDate = new Map<string, number>();
+  benchmark.prices.forEach((item) => benchmarkByDate.set(item.date, item.close));
 
   market.prices.forEach((price, index) => {
     const previousPlan = index > 0 ? signalPlans[index - 1] ?? { buy: false, reason: "no signal" } : { buy: false, reason: "no signal" };
     const previousPrice = market.prices[index - 1];
-    const benchmarkPrice = benchmark.prices.find((item) => item.date === price.date)?.close ?? benchmark.prices[Math.min(index, benchmark.prices.length - 1)]?.close ?? benchmarkStart;
+    const benchmarkPrice = benchmarkByDate.get(price.date) ?? benchmark.prices[Math.min(index, benchmark.prices.length - 1)]?.close ?? benchmarkStart;
 
     if (shares > 0) {
       holdingDays += 1;
@@ -90,7 +92,7 @@ export function runLongOnlyBacktest(
           fees,
           slippage: Math.abs(baseExitPrice - exitPrice) * shares,
           pnl,
-          returnPct: pnl / (shares * entryPrice + entryFee),
+          returnPct: pnl / (shares * entryPrice + fees),
           holdingDays,
           exitReason,
         });
@@ -171,7 +173,7 @@ function buildRiskFlags(metrics: ReturnType<typeof calculateMetrics>, market: Hi
   if (metrics.tradeCount < 5) flags.push("Trade sample is limited; statistical confidence is low");
   if (metrics.maxDrawdown < -0.25) flags.push("Historical max drawdown is deep");
   if (metrics.sharpe < 0.5) flags.push("Risk-adjusted return is weak");
-  if (definition.id === "lowvol-rotation-proxy") flags.push("dividend component not connected yet");
+  definition.knownLimitations?.forEach((note) => flags.push(note));
   return flags;
 }
 

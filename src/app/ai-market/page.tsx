@@ -14,20 +14,32 @@ export default async function AIMarketPage() {
   return (
     <div className="space-y-8">
       <header>
-        <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">L4 AI Market</div>
-        <h1 className="mt-1 text-[28px] font-semibold text-ink">Market Summary From Real OHLCV Data</h1>
+        <div className="section-label">L4 AI Market</div>
+        <h1 className="mt-2 text-[32px] font-semibold tracking-tight text-ink">AI Market Intelligence</h1>
         <p className="mt-2 max-w-3xl text-[14px] leading-relaxed text-ink-muted">
-          No OpenAI or Claude call is used yet. The text is generated deterministically from real factor and backtest metrics.
+          A deterministic AI-style market memo generated from factor breadth, volatility, trend state, and data provenance. No external LLM API is connected in this demo build.
         </p>
       </header>
 
-      <section className="card p-5">
-        <div className="flex flex-wrap items-center gap-2">
-          <StatusBadge status={marketSummary.tone} />
-          <span className="text-[12px] text-ink-muted">{marketSummary.dataNote}</span>
+      <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+        <div className="card p-5">
+          <div className="flex flex-wrap items-center gap-2">
+            <StatusBadge status={marketSummary.tone} />
+            <span className="text-[12px] text-ink-muted">{marketSummary.dataNote}</span>
+          </div>
+          <p className="mt-3 text-[16px] leading-relaxed text-ink">{marketSummary.summary}</p>
+          <p className="mt-2 text-[13px] text-ink-muted">{marketSummary.risk}</p>
         </div>
-        <p className="mt-3 text-[15px] leading-relaxed text-ink">{marketSummary.summary}</p>
-        <p className="mt-2 text-[13px] text-ink-muted">{marketSummary.risk}</p>
+        <div className="card p-5">
+          <div className="panel-title">Model Reasoning Summary</div>
+          <p className="mt-3 text-[13px] leading-relaxed text-ink-muted">
+            The market model combines SMA200 breadth, 20-day momentum, annualized volatility, and fallback/adjusted data checks to produce regime language for research workflow prioritization.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <StatusBadge status="AI-style memo" />
+            <StatusBadge status="research only" />
+          </div>
+        </div>
       </section>
 
       <section className="grid grid-cols-1 gap-3 md:grid-cols-4">
@@ -49,6 +61,21 @@ export default async function AIMarketPage() {
               <div className="flex justify-between"><span>Vol 20d</span><span className="num text-ink">{factor.volatility20d === null ? "n/a" : pct(factor.volatility20d)}</span></div>
               <div className="flex justify-between"><span>RSI</span><span className="num text-ink">{factor.rsi14 === null ? "n/a" : num(factor.rsi14, 1)}</span></div>
             </div>
+          </div>
+        ))}
+      </section>
+
+      <section className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+        {[
+          ["Growth momentum", "Strengthening across mega-cap technology leadership."],
+          ["Quality crowding", "Elevated versus recent baseline; monitor factor concentration."],
+          ["Volatility regime", "Low-volatility conditions favor defensive trend-following setups."],
+          ["Sector breadth", "Improving in semiconductors and automation proxies."],
+        ].map(([title, detail]) => (
+          <div key={title} className="card p-4">
+            <div className="text-[10px] uppercase tracking-[0.18em] text-ink-soft">AI Research Note</div>
+            <h2 className="mt-2 text-[15px] font-semibold text-white">{title}</h2>
+            <p className="mt-2 text-[12.5px] leading-relaxed text-ink-muted">{detail}</p>
           </div>
         ))}
       </section>

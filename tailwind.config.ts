@@ -10,15 +10,15 @@ const config: Config = {
         panel2: "#0b1624",
         ink: { DEFAULT: "#eef4ff", muted: "#a8b3c5", soft: "#69778d" },
         line: "rgba(120, 149, 184, 0.20)",
-        brand: { red: "#ff5c4d", green: "#34d399", blue: "#3b82f6", amber: "#f59e0b", purple: "#a855f7" },
+        brand: { red: "#fb7185", green: "#34d399", blue: "#60a5fa", cyan: "#22d3ee", amber: "#fbbf24", purple: "#a78bfa" },
       },
       fontFamily: {
         sans: ["ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "Inter", "sans-serif"],
         mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
       },
       boxShadow: {
-        card: "0 1px 0 rgba(255,255,255,0.04), 0 18px 60px -48px rgba(59,130,246,0.55)",
-        cardHover: "0 16px 42px -28px rgba(59,130,246,0.45), 0 1px 0 rgba(255,255,255,0.08)",
+        card: "0 1px 0 rgba(255,255,255,0.06), 0 22px 70px -54px rgba(59,130,246,0.70)",
+        cardHover: "0 22px 58px -34px rgba(59,130,246,0.52), 0 1px 0 rgba(255,255,255,0.10)",
       },
       borderRadius: { xl2: "14px" },
     },

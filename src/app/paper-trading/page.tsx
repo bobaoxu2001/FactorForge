@@ -9,7 +9,7 @@ import { pct, usd } from "@/lib/utils/format";
 export const revalidate = 60 * 60;
 
 export default async function PaperTradingPage() {
-  const { paperObservations } = await getResearchDataset();
+  const { paperObservations, paperAccount } = await getResearchDataset();
   return (
     <div className="space-y-8">
       <header>
@@ -19,6 +19,36 @@ export default async function PaperTradingPage() {
           This page is for simulated observation only. It does not connect to a broker or place real orders. Observed strategies must come from radar candidates.
         </p>
       </header>
+
+      <section className="card p-5">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">Simulated account controls</div>
+            <h2 className="mt-1 text-[20px] font-semibold text-ink">Observation Risk Budget</h2>
+            <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-muted">
+              Paper observation is constrained by radar admission, fixed simulated position sizing, exposure limits, and explicit data-provenance labels.
+            </p>
+          </div>
+          <StatusBadge status={paperAccount.riskBudgetStatus} />
+        </div>
+
+        <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-6">
+          <MetricCard label="Sim account" value={usd(paperAccount.simulatedCapital)} />
+          <MetricCard label="Slots used" value={`${paperObservations.length}/${paperAccount.observationSlots}`} />
+          <MetricCard label="Active signals" value={String(paperAccount.activeObservations)} />
+          <MetricCard label="Exposure" value={pct(paperAccount.exposurePct)} tone={paperAccount.exposurePct > 0.6 ? "negative" : "accent"} />
+          <MetricCard label="Max observed DD" value={pct(paperAccount.maxObservedDrawdown)} tone={paperAccount.maxObservedDrawdown < -0.2 ? "negative" : "default"} />
+          <MetricCard label="Avg score" value={String(paperAccount.averageRadarScore)} tone="positive" />
+        </div>
+
+        <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
+          {paperAccount.guardrails.map((guardrail) => (
+            <div key={guardrail} className="rounded-2xl border border-line bg-white/[0.035] p-3 text-[12px] leading-relaxed text-ink-muted">
+              {guardrail}
+            </div>
+          ))}
+        </div>
+      </section>
 
       {paperObservations.length === 0 && (
         <EmptyState title="Strategy is online and waiting for the next entry signal." message="No strategy currently meets radar admission rules. Paper observation only accepts radar candidates and does not inject fake results." />

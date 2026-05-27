@@ -1,3 +1,4 @@
+import { CheckCircle2, Database, ShieldAlert } from "lucide-react";
 import MetricCard from "@/components/cards/MetricCard";
 import StatusBadge from "@/components/badges/StatusBadge";
 import { getResearchDataset } from "@/lib/research";
@@ -11,10 +12,10 @@ export default async function DataPage() {
   return (
     <div className="space-y-8">
       <header>
-        <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">L0 Data</div>
-        <h1 className="mt-1 text-[28px] font-semibold text-ink">Real Market Data Status</h1>
+        <div className="section-label">L0 Data</div>
+        <h1 className="mt-2 text-[32px] font-semibold tracking-tight text-ink">Market Data Control Plane</h1>
         <p className="mt-2 max-w-3xl text-[14px] leading-relaxed text-ink-muted">
-          The default provider is Yahoo Finance chart API for US equity daily OHLCV. Network or provider failures switch to deterministic fallback and are clearly labeled.
+          The default provider is Yahoo Finance chart API for US equity daily OHLCV. Every result carries provider, freshness, adjusted-close, and fallback metadata.
         </p>
       </header>
 
@@ -29,6 +30,12 @@ export default async function DataPage() {
       <div className="card p-4 text-[12.5px] leading-relaxed text-ink-muted">
         Dataset generated {new Date(metadata.generatedAt).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}; routes revalidate every {Math.round(metadata.revalidateSeconds / 60)} minutes.
       </div>
+
+      <section className="grid grid-cols-1 gap-3 md:grid-cols-3">
+        <DataCredCard icon={Database} title="Provider Transparency" detail="Yahoo Finance chart API remains visible in the UI, and all fallback/demo substitutions are disclosed." />
+        <DataCredCard icon={CheckCircle2} title="Adjusted Close Awareness" detail="Corporate-action-adjusted price series are used when Yahoo provides adjusted close data." />
+        <DataCredCard icon={ShieldAlert} title="Fallback Discipline" detail="Fallback data keeps the demo resilient, but it is never presented as real market validation." />
+      </section>
 
       <div className="card overflow-x-auto">
         <table className="w-full min-w-[920px] text-[13px]">
@@ -45,7 +52,7 @@ export default async function DataPage() {
           </thead>
           <tbody className="divide-soft">
             {rows.map((row) => (
-              <tr key={row.symbol}>
+              <tr key={row.symbol} className="table-row">
                 <td className="px-4 py-3 font-semibold text-ink">{row.symbol}</td>
                 <td className="px-4 py-3 text-ink-muted">{row.provider}</td>
                 <td className="px-4 py-3"><StatusBadge status={row.isFallback ? "fallback/demo" : "real data ok"} /></td>
@@ -58,6 +65,18 @@ export default async function DataPage() {
           </tbody>
         </table>
       </div>
+    </div>
+  );
+}
+
+function DataCredCard({ icon: Icon, title, detail }: { icon: React.ComponentType<{ className?: string }>; title: string; detail: string }) {
+  return (
+    <div className="card p-4">
+      <div className="grid h-10 w-10 place-items-center rounded-xl border border-blue-300/20 bg-blue-300/10">
+        <Icon className="h-5 w-5 text-blue-200" />
+      </div>
+      <h2 className="mt-4 text-[15px] font-semibold text-white">{title}</h2>
+      <p className="mt-2 text-[12.5px] leading-relaxed text-ink-muted">{detail}</p>
     </div>
   );
 }

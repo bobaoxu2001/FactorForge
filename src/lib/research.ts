@@ -5,7 +5,7 @@ import type { FactorSnapshot, HistoricalPriceResult } from "@/types/market";
 import { generateMarketSummary } from "@/lib/ai/marketSummary";
 import { getWatchlistPrices } from "@/lib/data/marketData";
 import { percentChange, realizedVolatility, rsi, sma, volumeMovingAverage } from "@/lib/quant/indicators";
-import { buildPaperObservations } from "@/lib/quant/paperTrading";
+import { buildPaperAccountSummary, buildPaperObservations } from "@/lib/quant/paperTrading";
 import { buildRadar } from "@/lib/quant/radar";
 import { chooseBenchmark, runStrategyOnMarket } from "@/lib/quant/strategies";
 
@@ -17,6 +17,7 @@ export interface ResearchDataset {
   strategyResults: BacktestResult[];
   radarCandidates: ReturnType<typeof buildRadar>;
   paperObservations: ReturnType<typeof buildPaperObservations>;
+  paperAccount: ReturnType<typeof buildPaperAccountSummary>;
   marketSummary: ReturnType<typeof generateMarketSummary>;
   metadata: {
     generatedAt: string;
@@ -50,6 +51,7 @@ export async function getResearchDataset(): Promise<ResearchDataset> {
     .map((result) => buildFactorSnapshot(result));
   const radarCandidates = buildRadar(strategyResults);
   const paperObservations = buildPaperObservations(radarCandidates);
+  const paperAccount = buildPaperAccountSummary(paperObservations);
   const marketSummary = generateMarketSummary(factors);
   const priceResults = Object.values(pricesBySymbol);
   return {
@@ -58,6 +60,7 @@ export async function getResearchDataset(): Promise<ResearchDataset> {
     strategyResults,
     radarCandidates,
     paperObservations,
+    paperAccount,
     marketSummary,
     metadata: {
       generatedAt: new Date().toISOString(),

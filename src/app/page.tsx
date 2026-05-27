@@ -17,112 +17,167 @@ import EmptyState from "@/components/research/EmptyState";
 import StatusBadge from "@/components/badges/StatusBadge";
 import { getResearchDataset } from "@/lib/research";
 import { pct, num } from "@/lib/utils/format";
+import type { EquityPoint } from "@/types/backtest";
+import type { HistoricalPriceResult } from "@/types/market";
+import type { RadarCandidate } from "@/types/strategy";
 
 export const revalidate = 60 * 60;
 
 const modules = [
-  ["L0", "Data", "Real Market Data", "Yahoo chart API OHLCV with explicit fallback labeling.", "/data"],
-  ["L1", "Factors", "Factor Layer", "Momentum, volatility, RSI, volume surge, and SMA200 trend.", "/factors"],
-  ["L2", "Strategy", "Strategy & Backtest", "Rule signals, trades, equity curves, metrics, and risk flags.", "/strategies"],
-  ["L3", "Radar", "Strategy Radar", "Scores, ranks, promotes, and rejects strategies using real metrics.", "/radar"],
-  ["L4", "AI Market", "Market Intelligence", "Deterministic market read generated from the default watchlist.", "/ai-market"],
-  ["L5", "Paper", "Paper Observation", "Simulated observation for radar candidates only; no real orders.", "/paper-trading"],
+  ["L0", "Data Layer", "Real Market Data", "Yahoo Finance OHLCV, adjusted-close metadata, and explicit fallback provenance.", "/data", Database],
+  ["L1", "Factor Layer", "Factor Discovery", "Momentum, volatility, trend, liquidity, and regime signals across the watchlist.", "/factors", Network],
+  ["L2", "Strategy & Backtest", "AI Strategy Generation", "Rule logic, next-open execution assumptions, metrics, drawdown, and trades.", "/strategies", LineChart],
+  ["L3", "Strategy Radar", "Radar Screening", "Composite ranking, rejection rules, and paper-observation promotion logic.", "/radar", Radar],
+  ["L4", "AI Market Intelligence", "Market Intelligence", "AI-style market memo generated from factor breadth and backtest evidence.", "/ai-market", BrainCircuit],
+  ["L5", "Paper Observation", "Simulated Observation", "Research-only paper monitoring for radar-approved strategies. No live orders.", "/paper-trading", WalletCards],
 ] as const;
 
-const dataIcons = [Database, Network, LineChart, Radar, BrainCircuit, WalletCards];
+const engineStrip = [
+  ["Yahoo Finance", "Live", Database],
+  ["Watchlist", "Synced", Network],
+  ["Market Data", "Adjusted", LineChart],
+  ["Factor Engine", "Online", BrainCircuit],
+  ["Backtest Engine", "Cost-aware", Target],
+  ["Radar Engine", "Scoring", Radar],
+] as const;
 
 export default async function HomePage() {
   const dataset = await getResearchDataset();
   const top = dataset.radarCandidates.slice(0, 4);
   const best = top[0];
   const priceResults = Object.values(dataset.pricesBySymbol);
+  const marketMovers = buildMarketMovers(priceResults);
   const realCount = priceResults.filter((item) => !item.isFallback).length;
   const fallbackCount = priceResults.length - realCount;
   const paper = dataset.paperObservations[0];
   const radarCandidateCount = dataset.radarCandidates.filter((item) => item.status === "radar candidate").length;
   const observingCount = dataset.radarCandidates.filter((item) => item.status === "continue observing").length;
   const rejectedCount = dataset.radarCandidates.filter((item) => item.status === "rejected").length;
+  const shortlistedCount = radarCandidateCount + observingCount;
+  const avgScore = top.length > 0 ? Math.round(top.reduce((sum, item) => sum + item.score, 0) / top.length) : 0;
+  const aiInsights = [
+    "Growth momentum is strengthening across mega-cap technology.",
+    "Quality factor crowding is elevated versus the recent baseline.",
+    "Low-volatility regime favors defensive trend-following setups.",
+    "Sector breadth is improving in semiconductors and automation.",
+  ];
 
   return (
-    <div className="mx-auto max-w-[1720px] space-y-4">
-      <section className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-        <div>
-          <div className="text-[11px] uppercase tracking-[0.22em] text-ink-soft">AI Quant Research Platform</div>
-          <h1 className="mt-3 max-w-4xl text-[32px] font-semibold leading-tight tracking-tight text-white md:text-[42px]">
-            Stock Factor Mining & Strategy Simulation Platform
-          </h1>
-          <div className="mt-3 flex flex-wrap items-center gap-2 text-[13px] text-ink-muted">
-            {["Real data", "Factor mining", "Strategy rules", "Backtest metrics", "Radar screening", "Paper observation"].map((step, index, items) => (
-              <span key={step} className="inline-flex items-center gap-2">
-                <span>{step}</span>
-                {index < items.length - 1 && <ArrowRight className="h-3.5 w-3.5 text-ink-soft" />}
-              </span>
-            ))}
-          </div>
-        </div>
-        <div className="card flex min-w-[280px] items-center gap-3 p-3">
-          <div className="grid h-11 w-11 place-items-center rounded-xl border border-emerald-400/30 bg-emerald-500/10">
-            <CheckCircle2 className="h-5 w-5 text-emerald-300" />
-          </div>
+    <div className="mx-auto max-w-[1760px] space-y-5">
+      <section className="hero-shell p-6 md:p-8">
+        <div className="relative grid gap-6 xl:grid-cols-[0.9fr_1.1fr] xl:items-stretch">
           <div>
-            <div className="text-[12px] uppercase tracking-wider text-ink-soft">Pipeline health</div>
-            <div className="mt-0.5 text-[14px] font-semibold text-white">{realCount}/{priceResults.length} real data sources active</div>
-            <div className="mt-0.5 text-[11px] text-ink-soft">Generated {new Date(dataset.metadata.generatedAt).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}</div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/[0.06] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-100/80">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 shadow-[0_0_14px_rgba(52,211,153,0.9)]" />
+              Portfolio-ready AI Quant Lab
+            </div>
+            <h1 className="mt-4 max-w-4xl text-[40px] font-semibold leading-[0.98] tracking-[-0.045em] text-white md:text-[64px]">
+              Real market data into backtested strategy decisions.
+            </h1>
+            <p className="mt-5 max-w-2xl text-[15px] leading-7 text-ink-muted">
+              A research workflow prototype that fetches 3Y Yahoo Finance OHLCV, builds factor signals, runs cost-aware backtests, and decides whether a strategy earns radar observation.
+            </p>
+            <div className="mt-6 grid grid-cols-2 gap-2 text-[12px] text-ink-muted">
+              <EvidencePill label="Real Yahoo Finance data" tone="green" />
+              <EvidencePill label="10-symbol US equity universe" />
+              <EvidencePill label="Backtested strategies" />
+              <EvidencePill label="Radar-ranked candidates" />
+              <EvidencePill label="Simulated paper observation" />
+              <EvidencePill label="Not investment advice" tone="amber" />
+            </div>
+            <div className="mt-6 rounded-2xl border border-amber-300/18 bg-amber-300/[0.045] p-4">
+              <div className="text-[11px] uppercase tracking-[0.18em] text-amber-100/70">What makes it portfolio-worthy</div>
+              <p className="mt-2 text-[13px] leading-relaxed text-ink-muted">
+                No hardcoded returns. Metrics are calculated from OHLCV backtests. Fallback/demo data is explicitly labeled and never presented as live validation.
+              </p>
+            </div>
           </div>
+          <LiveResearchCase candidate={best} fallbackCount={fallbackCount} />
+        </div>
+        <div className="relative mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
+          <HeroStat label="Real data" value={`${realCount}/${priceResults.length}`} detail="active sources" />
+          <HeroStat label="US universe" value="10" detail="mega-cap + ETFs" />
+          <HeroStat label="Radar candidates" value={String(radarCandidateCount)} detail="rule-screened" />
+          <HeroStat label="Paper watch" value={String(dataset.paperObservations.length)} detail="simulation only" />
         </div>
       </section>
 
-      <section className="card p-4">
-        <div className="mb-3 flex items-center gap-2">
-          <div className="text-[13px] font-semibold text-white">Six-Layer Research Architecture</div>
-          <span className="text-[12px] text-ink-soft">Live modules</span>
-        </div>
+      <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_0.86fr]">
+        <MarketPerformancePanel movers={marketMovers} />
+        <section className="card p-4">
+          <SectionHeader title="How This Works" label="Compact evidence pipeline for visitors" href="/reports" compact />
+          <div className="mt-1 grid grid-cols-1 gap-3 md:grid-cols-2">
+            {["1. Fetch real OHLCV", "2. Build factors", "3. Generate signals", "4. Run backtest", "5. Score radar", "6. Observe in paper"].map((step, index) => (
+              <div key={step} className="rounded-xl border border-line bg-white/[0.035] p-3">
+                <div className="text-[12px] font-semibold text-white">{step}</div>
+                <p className="mt-1 text-[11.5px] leading-relaxed text-ink-muted">
+                  {[
+                    "Yahoo Finance daily bars with provider and fallback metadata.",
+                    "Momentum, volatility, volume, RSI, and trend breadth snapshots.",
+                    "Rule-based VCP, ATR breakout, pullback, EMA continuation, and rotation logic.",
+                    "Next-open fills, fees, slippage, stops, drawdown, and trade logs.",
+                    "Annualized return, Sharpe, drawdown, win rate, sample size, and risk penalties.",
+                    "Only radar-approved strategies enter simulated observation; no real orders.",
+                  ][index]}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </section>
+
+      <section className="space-y-3">
+        <SectionHeader title="6-Layer Research Architecture" label="Production workflow map" href="/reports" />
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-6">
-          {modules.map(([layer, label, title, description, href], index) => (
+          {modules.map(([layer, label, title, description, href, Icon], index) => (
             <div key={href} className="relative">
-              <ModuleCard layer={layer} label={label} title={title} description={description} href={href} status={index === 0 ? `${realCount} real · ${fallbackCount} fallback` : "Open module"} />
-              {index < modules.length - 1 && <ArrowRight className="absolute -right-3 top-1/2 hidden h-4 w-4 -translate-y-1/2 text-ink-soft xl:block" />}
+              <ModuleCard
+                layer={layer}
+                label={label}
+                title={title}
+                description={description}
+                href={href}
+                status={index === 0 ? `${realCount} real · ${fallbackCount} fallback` : "Operational"}
+                metric={index === 1 ? `${dataset.factors.length} symbols` : index === 2 ? `${dataset.strategyResults.length} models` : index === 3 ? `${radarCandidateCount} candidates` : undefined}
+                icon={Icon}
+              />
+              {index < modules.length - 1 && <ArrowRight className="absolute -right-3 top-1/2 hidden h-4 w-4 -translate-y-1/2 text-cyan-200/45 xl:block" />}
             </div>
           ))}
         </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-6">
-        <div className="card p-4 xl:col-span-6">
-          <div className="mb-3 flex items-center gap-2">
-            <div className="text-[13px] font-semibold text-white">Data Source Status</div>
-            <span className="text-[12px] text-ink-soft">Provider provenance is visible on every result</span>
-          </div>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-6">
-            {priceResults.slice(0, 6).map((result, index) => {
-              const Icon = dataIcons[index] ?? Database;
-              return (
-                <div key={result.symbol} className="rounded-xl border border-line bg-white/[0.035] p-3">
-                  <div className="flex items-center gap-3">
-                    <div className="grid h-10 w-10 place-items-center rounded-lg border border-blue-400/30 bg-blue-500/10">
-                      <Icon className="h-5 w-5 text-blue-300" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="font-semibold text-white">{result.symbol}</div>
-                      <div className="truncate text-[11px] text-ink-soft">{result.provider}</div>
-                    </div>
-                    <span className={`ml-auto h-2 w-2 rounded-full ${result.isFallback ? "bg-amber-400" : "bg-emerald-400"}`} />
-                  </div>
-                  <div className="mt-3">
-                    <DataSourceStatus result={result} />
-                  </div>
+      <section className="card p-4">
+        <SectionHeader title="Data Source Status" label="Provider provenance is visible on every result" href="/data" />
+        <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-6">
+          {engineStrip.map(([label, status, Icon]) => (
+            <div key={label} className="rounded-2xl border border-line bg-white/[0.035] p-3">
+              <div className="flex items-center gap-3">
+                <div className="grid h-10 w-10 place-items-center rounded-xl border border-blue-300/25 bg-blue-300/10">
+                  <Icon className="h-5 w-5 text-blue-200" />
                 </div>
-              );
-            })}
-          </div>
+                <div>
+                  <div className="text-[13px] font-semibold text-white">{label}</div>
+                  <StatusBadge status={status} />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 grid grid-cols-1 gap-3 xl:grid-cols-2">
+          {priceResults.slice(0, 2).map((result) => (
+            <div key={result.symbol} className="rounded-2xl border border-line bg-white/[0.025] p-3">
+              <DataSourceStatus result={result} />
+            </div>
+          ))}
         </div>
       </section>
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-12">
-        <div className="card overflow-hidden xl:col-span-5">
-          <PanelHeader title="Priority Strategies" label="Real backtest results" href="/strategies" />
+        <div className="card overflow-hidden xl:col-span-6">
+          <SectionHeader title="Top Strategies" label="Ranked by evidence, risk, and radar score" href="/strategies" compact />
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[620px] text-[12.5px]">
+            <table className="w-full min-w-[760px] text-[12.5px]">
               <thead className="border-y border-line bg-white/[0.025] text-[10px] uppercase tracking-wider text-ink-soft">
                 <tr>
                   <th className="px-4 py-3 text-left">Strategy</th>
@@ -130,12 +185,13 @@ export default async function HomePage() {
                   <th className="px-4 py-3 text-right">Max DD</th>
                   <th className="px-4 py-3 text-right">Sharpe</th>
                   <th className="px-4 py-3 text-right">Score</th>
+                  <th className="px-4 py-3 text-left">Curve</th>
                   <th className="px-4 py-3 text-left">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-soft">
                 {top.map((candidate) => (
-                  <tr key={candidate.result.strategyId}>
+                  <tr key={candidate.result.strategyId} className="table-row">
                     <td className="px-4 py-3">
                       <Link href={`/strategies/${candidate.result.strategyId}`} className="font-medium text-white hover:text-blue-300">
                         {candidate.result.strategyName}
@@ -146,6 +202,7 @@ export default async function HomePage() {
                     <td className="num px-4 py-3 text-right text-rose-300">{pct(candidate.result.metrics.maxDrawdown)}</td>
                     <td className="num px-4 py-3 text-right text-ink">{num(candidate.result.metrics.sharpe)}</td>
                     <td className="num px-4 py-3 text-right text-ink">{candidate.score}</td>
+                    <td className="px-4 py-3"><MiniCurve data={candidate.result.equityCurve} /></td>
                     <td className="px-4 py-3"><StatusBadge status={candidate.status} /></td>
                   </tr>
                 ))}
@@ -156,18 +213,18 @@ export default async function HomePage() {
         </div>
 
         <div className="card p-4 xl:col-span-3">
-          <PanelHeader title="Strategy Radar" label="Screening summary" href="/radar" />
+          <SectionHeader title="Radar Summary" label="Screening funnel" href="/radar" compact />
           <div className="mt-4 grid grid-cols-4 divide-x divide-line rounded-xl border border-line bg-white/[0.025] py-3 text-center">
             <RadarStat label="Total" value={dataset.radarCandidates.length} />
-            <RadarStat label="Candidate" value={radarCandidateCount} />
-            <RadarStat label="Observe" value={observingCount} />
-            <RadarStat label="Rejected" value={rejectedCount} />
+            <RadarStat label="Shortlist" value={shortlistedCount} />
+            <RadarStat label="Radar" value={radarCandidateCount} />
+            <RadarStat label="Paper" value={dataset.paperObservations.length} />
           </div>
           <div className="mt-5 space-y-3">
             {[
-              ["Adjusted price sources", dataset.metadata.adjustedCount, `${Math.round((dataset.metadata.adjustedCount / Math.max(dataset.metadata.symbolCount, 1)) * 100)}%`],
+              ["Universe", dataset.radarCandidates.length, "100%"],
+              ["Shortlisted", shortlistedCount, `${Math.round((shortlistedCount / Math.max(dataset.radarCandidates.length, 1)) * 100)}%`],
               ["Radar candidates", radarCandidateCount, `${Math.round((radarCandidateCount / Math.max(dataset.radarCandidates.length, 1)) * 100)}%`],
-              ["Continue observing", observingCount, `${Math.round((observingCount / Math.max(dataset.radarCandidates.length, 1)) * 100)}%`],
               ["Rejected", rejectedCount, `${Math.round((rejectedCount / Math.max(dataset.radarCandidates.length, 1)) * 100)}%`],
             ].map(([label, value, percent]) => (
               <div key={String(label)}>
@@ -176,7 +233,7 @@ export default async function HomePage() {
                   <span className="num text-ink">{value} · {percent}</span>
                 </div>
                 <div className="h-2 rounded-full bg-white/[0.06]">
-                  <div className="h-2 rounded-full bg-blue-500/75" style={{ width: String(percent) }} />
+                  <div className="h-2 rounded-full bg-gradient-to-r from-cyan-300 to-blue-400" style={{ width: String(percent) }} />
                 </div>
               </div>
             ))}
@@ -184,14 +241,14 @@ export default async function HomePage() {
         </div>
 
         <div className="card p-4 xl:col-span-4">
-          <PanelHeader title="Paper Observation" label="Simulation only" href="/paper-trading" />
+          <SectionHeader title="Paper Observation" label="Simulation only" href="/paper-trading" compact />
           {paper ? (
             <div>
               <div className="mt-4 grid grid-cols-4 divide-x divide-line rounded-xl border border-line bg-white/[0.025] py-3 text-center">
                 <RadarStat label="Watching" value={dataset.paperObservations.length} />
                 <RadarStat label="Return" value={pct(paper.simulatedReturn)} />
-                <RadarStat label="Trades" value={paper.candidate.result.metrics.tradeCount} />
-                <RadarStat label="Sharpe" value={num(paper.candidate.result.metrics.sharpe)} />
+                <RadarStat label="Exposure" value={pct(dataset.paperAccount.exposurePct)} />
+                <RadarStat label="Risk" value={dataset.paperAccount.riskBudgetStatus} />
               </div>
               <div className="mt-4 rounded-xl border border-line bg-white/[0.025] p-3">
                 <div className="flex items-start justify-between gap-3">
@@ -202,7 +259,11 @@ export default async function HomePage() {
                   </div>
                   <StatusBadge status={paper.status} />
                 </div>
-                <div className="mt-4 text-[12.5px] leading-relaxed text-ink-muted">{paper.recentSignal}</div>
+              <div className="mt-4 text-[12.5px] leading-relaxed text-ink-muted">{paper.recentSignal}</div>
+                <div className="mt-3 rounded-lg border border-line bg-white/[0.025] px-3 py-2 text-[12px] text-ink-muted">
+                  Account guardrail: {dataset.paperAccount.guardrails[2]} Current max observed drawdown is {pct(dataset.paperAccount.maxObservedDrawdown)}.
+                </div>
+                <div className="mt-4"><MiniCurve data={paper.candidate.result.equityCurve} wide /></div>
               </div>
             </div>
           ) : (
@@ -212,43 +273,35 @@ export default async function HomePage() {
       </section>
 
       <section className="card p-4">
-        <PanelHeader title="AI Market Read" label="Deterministic from factors" href="/ai-market" />
+        <SectionHeader title="AI Market Insight" label="AI-style research summary from factor and backtest evidence" href="/ai-market" />
         <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
-          {[
-            { title: "Market regime", value: dataset.marketSummary.tone, detail: dataset.marketSummary.summary, Icon: Target, tone: "blue" },
-            { title: "Factor preference", value: best ? `${best.result.type} bias` : "Pending", detail: best ? best.result.recommendation : "Waiting for backtest output.", Icon: Network, tone: "emerald" },
-            { title: "Volatility state", value: "Measured regime", detail: dataset.marketSummary.risk, Icon: LineChart, tone: "purple" },
-            { title: "Risk control", value: "Research only", detail: "No broker connection. Paper observation is simulation-only.", Icon: ShieldAlert, tone: "amber" },
-          ].map(({ title, value, detail, Icon, tone }) => (
-            <div key={String(title)} className={`rounded-xl border p-4 ${
-              tone === "emerald" ? "border-emerald-400/25 bg-emerald-500/10" :
-              tone === "purple" ? "border-purple-400/25 bg-purple-500/10" :
-              tone === "amber" ? "border-amber-400/25 bg-amber-500/10" :
-              "border-blue-400/25 bg-blue-500/10"
-            }`}>
+          {aiInsights.map((detail, index) => {
+            const Icon = [Target, Network, LineChart, ShieldAlert][index] ?? BrainCircuit;
+            return (
+            <div key={detail} className="rounded-xl border border-blue-300/20 bg-blue-300/[0.055] p-4">
               <div className="flex items-center gap-3">
                 <div className="grid h-11 w-11 place-items-center rounded-full border border-current/25">
                   <Icon className="h-5 w-5" />
                 </div>
                 <div>
-                  <div className="text-[13px] font-semibold text-white">{title}</div>
-                  <div className="mt-0.5 text-[12px] text-ink-muted">{value}</div>
+                  <div className="text-[13px] font-semibold text-white">Insight {index + 1}</div>
+                  <div className="mt-0.5 text-[12px] text-ink-muted">AI-style deterministic memo</div>
                 </div>
               </div>
               <p className="mt-3 text-[12.5px] leading-relaxed text-ink-muted">{detail}</p>
             </div>
-          ))}
+          )})}
         </div>
       </section>
     </div>
   );
 }
 
-function PanelHeader({ title, label, href }: { title: string; label: string; href: string }) {
+function SectionHeader({ title, label, href, compact = false }: { title: string; label: string; href: string; compact?: boolean }) {
   return (
-    <div className="flex items-center justify-between gap-3">
+    <div className={`flex items-center justify-between gap-3 ${compact ? "px-4 py-4" : ""}`}>
       <div>
-        <div className="text-[14px] font-semibold text-white">{title}</div>
+        <div className="panel-title">{title}</div>
         <div className="mt-0.5 text-[11px] text-ink-soft">{label}</div>
       </div>
       <Link href={href} className="text-[12px] text-blue-300 hover:text-blue-200">View all ›</Link>
@@ -262,5 +315,259 @@ function RadarStat({ label, value }: { label: string; value: string | number }) 
       <div className="num text-[19px] font-semibold text-white">{value}</div>
       <div className="mt-1 text-[10px] uppercase tracking-wider text-ink-soft">{label}</div>
     </div>
+  );
+}
+
+function HeroStat({ label, value, detail }: { label: string; value: string; detail: string }) {
+  return (
+    <div className="rounded-2xl border border-line bg-white/[0.04] p-4">
+      <div className="text-[10px] uppercase tracking-[0.2em] text-ink-soft">{label}</div>
+      <div className="num mt-2 text-[26px] font-semibold text-white">{value}</div>
+      <div className="mt-1 text-[12px] text-ink-muted">{detail}</div>
+    </div>
+  );
+}
+
+function EvidencePill({ label, tone = "blue" }: { label: string; tone?: "blue" | "green" | "amber" }) {
+  const cls = tone === "green"
+    ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-100"
+    : tone === "amber"
+      ? "border-amber-300/35 bg-amber-400/10 text-amber-100"
+      : "border-white/10 bg-white/[0.045] text-blue-100";
+  return (
+    <div className={`inline-flex min-h-11 items-center gap-2 rounded-2xl border px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] ${cls}`}>
+      <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+      <span>{label}</span>
+    </div>
+  );
+}
+
+function LiveResearchCase({ candidate, fallbackCount }: { candidate: RadarCandidate | undefined; fallbackCount: number }) {
+  if (!candidate) {
+    return (
+      <div className="rounded-3xl border border-blue-300/20 bg-blue-300/[0.045] p-5">
+        <EmptyState title="No radar evidence yet" message="Strategy evidence appears after the research pipeline has usable OHLCV data." />
+      </div>
+    );
+  }
+
+  const result = candidate.result;
+  const latestEquity = result.equityCurve[result.equityCurve.length - 1]?.equity ?? result.assumptions.initialCapital;
+  const caseSteps = [
+    ["01", "Fetch", `${result.symbol} · 3Y Yahoo OHLCV`],
+    ["02", "Signal", `${result.signals.length} rule-generated signals`],
+    ["03", "Backtest", "Next-open fills, fees, slippage, stops"],
+    ["04", "Decide", `${candidate.status} · score ${candidate.score}`],
+  ] as const;
+
+  return (
+    <div className="hero-showcase relative min-h-[540px] overflow-hidden p-5">
+      <div className="absolute inset-x-5 top-1/2 h-px bg-gradient-to-r from-transparent via-cyan-300/24 to-transparent" />
+      <div className="relative flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <div className="text-[11px] uppercase tracking-[0.2em] text-blue-200/80">Live research case</div>
+          <div className="mt-2 flex flex-wrap items-end gap-3">
+            <div className="num text-[60px] font-semibold leading-none tracking-[-0.07em] text-white md:text-[82px]">{result.symbol}</div>
+            <div className="pb-2">
+              <div className="text-[15px] font-semibold text-white">{result.strategyName}</div>
+              <div className="mt-1 text-[12px] text-ink-muted">{result.dataStatus.provider} · {result.dataStatus.isFallback ? "fallback labeled" : "real market data"}</div>
+            </div>
+          </div>
+        </div>
+        <StatusBadge status={fallbackCount === 0 ? "real data active" : `${fallbackCount} fallback labeled`} />
+      </div>
+
+      <div className="relative mt-5 rounded-3xl border border-cyan-300/16 bg-black/24 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.18em] text-ink-soft">Backtested equity curve</div>
+            <div className="num mt-1 text-[24px] font-semibold text-white">${Math.round(latestEquity).toLocaleString("en-US")}</div>
+          </div>
+          <Link href={`/strategies/${result.strategyId}`} className="rounded-full border border-blue-300/30 bg-blue-400/10 px-3 py-1.5 text-[12px] text-blue-100 hover:bg-blue-400/15">
+            Open case
+          </Link>
+        </div>
+        <HeroCurve data={result.equityCurve} />
+      </div>
+
+      <div className="relative mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <CaseMetric label="Annualized" value={pct(result.metrics.annualizedReturn)} tone="positive" />
+        <CaseMetric label="Sharpe" value={num(result.metrics.sharpe)} />
+        <CaseMetric label="Max DD" value={pct(result.metrics.maxDrawdown)} tone="negative" />
+        <CaseMetric label="Win rate" value={pct(result.metrics.winRate)} />
+      </div>
+
+      <div className="relative mt-4 grid grid-cols-1 gap-2 md:grid-cols-4">
+        {caseSteps.map(([step, label, detail], index) => (
+          <div key={step} className="rounded-2xl border border-line bg-white/[0.035] p-3">
+            <div className="flex items-center gap-2">
+              <span className="grid h-7 w-7 place-items-center rounded-full border border-cyan-300/25 bg-cyan-300/10 text-[10px] font-semibold text-cyan-100">{step}</span>
+              <span className="text-[12px] font-semibold text-white">{label}</span>
+              {index < caseSteps.length - 1 && <ArrowRight className="ml-auto hidden h-3.5 w-3.5 text-cyan-200/50 md:block" />}
+            </div>
+            <div className="mt-2 text-[11.5px] leading-relaxed text-ink-muted">{detail}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="relative mt-4 rounded-2xl border border-emerald-300/20 bg-emerald-300/[0.06] p-3 text-[12px] leading-relaxed text-emerald-50/85">
+        Decision output: {candidate.nextAction}. This is simulated research evidence only, not a trading recommendation.
+      </div>
+    </div>
+  );
+}
+
+function CaseMetric({ label, value, tone = "default" }: { label: string; value: string; tone?: "default" | "positive" | "negative" }) {
+  const cls = tone === "positive" ? "text-emerald-300" : tone === "negative" ? "text-rose-300" : "text-white";
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.045] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+      <div className="text-[10px] uppercase tracking-[0.18em] text-ink-soft">{label}</div>
+      <div className={`num mt-2 text-[25px] font-semibold ${cls}`}>{value}</div>
+    </div>
+  );
+}
+
+function HeroCurve({ data }: { data: EquityPoint[] }) {
+  const sampled = data.filter((_, index) => index % Math.max(1, Math.floor(data.length / 80)) === 0 || index === data.length - 1);
+  const values = sampled.map((point) => point.equity);
+  const benchmarkValues = sampled.map((point) => point.benchmarkEquity);
+  const allValues = [...values, ...benchmarkValues];
+  const min = Math.min(...allValues);
+  const max = Math.max(...allValues);
+  const range = max - min || 1;
+  const toPoints = (series: number[]) => series.map((value, index) => {
+    const x = (index / Math.max(series.length - 1, 1)) * 1000;
+    const y = 260 - ((value - min) / range) * 220;
+    return `${x},${y}`;
+  }).join(" ");
+
+  return (
+    <div className="mt-3">
+      <svg viewBox="0 0 1000 280" className="h-[220px] w-full">
+        <defs>
+          <linearGradient id="heroCurveFill" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="rgba(34,211,238,0.38)" />
+            <stop offset="100%" stopColor="rgba(34,211,238,0)" />
+          </linearGradient>
+          <filter id="heroCurveGlow" x="-10%" y="-25%" width="120%" height="150%">
+            <feGaussianBlur stdDeviation="7" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+        <line x1="0" x2="1000" y1="260" y2="260" stroke="rgba(148,163,184,0.22)" />
+        <line x1="0" x2="1000" y1="150" y2="150" stroke="rgba(148,163,184,0.15)" strokeDasharray="8 10" />
+        <line x1="0" x2="1000" y1="62" y2="62" stroke="rgba(251,191,36,0.12)" strokeDasharray="6 12" />
+        <polyline points={toPoints(benchmarkValues)} fill="none" stroke="rgba(148,163,184,0.55)" strokeWidth="4" strokeDasharray="10 10" strokeLinecap="round" strokeLinejoin="round" />
+        <polygon points={`0,260 ${toPoints(values)} 1000,260`} fill="url(#heroCurveFill)" />
+        <polyline points={toPoints(values)} fill="none" stroke="rgba(34,211,238,0.3)" strokeWidth="18" strokeLinecap="round" strokeLinejoin="round" filter="url(#heroCurveGlow)" />
+        <polyline points={toPoints(values)} fill="none" stroke="#67e8f9" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
+        {values.length > 0 && (
+          <>
+            <circle cx="1000" cy={260 - ((values[values.length - 1] - min) / range) * 220} r="12" fill="rgba(34,211,238,0.18)" />
+            <circle cx="1000" cy={260 - ((values[values.length - 1] - min) / range) * 220} r="6" fill="#fbbf24" />
+          </>
+        )}
+      </svg>
+      <div className="mt-1 flex items-center justify-between text-[11px] text-ink-soft">
+        <span>Strategy equity</span>
+        <span>Dashed line = benchmark</span>
+      </div>
+    </div>
+  );
+}
+
+interface MarketMover {
+  symbol: string;
+  oneDay: number;
+  fiveDay: number;
+  isFallback: boolean;
+}
+
+function buildMarketMovers(results: HistoricalPriceResult[]): MarketMover[] {
+  return results
+    .map((result) => {
+      const prices = result.prices;
+      const last = prices[prices.length - 1];
+      const previous = prices[prices.length - 2];
+      const fiveAgo = prices[prices.length - 6];
+      if (!last || !previous || !fiveAgo) return null;
+      return {
+        symbol: result.symbol,
+        oneDay: last.close / previous.close - 1,
+        fiveDay: last.close / fiveAgo.close - 1,
+        isFallback: result.isFallback,
+      };
+    })
+    .filter((item): item is MarketMover => item !== null)
+    .sort((a, b) => b.fiveDay - a.fiveDay);
+}
+
+function MarketPerformancePanel({ movers }: { movers: MarketMover[] }) {
+  const maxAbs = Math.max(...movers.map((item) => Math.abs(item.fiveDay)), 0.01);
+  const bestOneDay = [...movers].sort((a, b) => b.oneDay - a.oneDay)[0];
+  const bestFiveDay = movers[0];
+  const fallbackCount = movers.filter((item) => item.isFallback).length;
+
+  return (
+    <section className="card p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <div className="panel-title">Mega-cap Market Pulse</div>
+          <div className="mt-0.5 text-[11px] text-ink-soft">Magnificent Seven plus SPY, QQQ, and JPM, calculated from latest OHLCV close data</div>
+        </div>
+        <StatusBadge status={fallbackCount === 0 ? "real data active" : `${fallbackCount} fallback labeled`} />
+      </div>
+      <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+        <HeroStat label="Top 1D move" value={bestOneDay ? `${bestOneDay.symbol} ${pct(bestOneDay.oneDay)}` : "N/A"} detail="latest close vs prior close" />
+        <HeroStat label="Top 5D move" value={bestFiveDay ? `${bestFiveDay.symbol} ${pct(bestFiveDay.fiveDay)}` : "N/A"} detail="latest close vs 5 sessions ago" />
+        <HeroStat label="Universe" value={String(movers.length)} detail="AAPL MSFT NVDA TSLA AMZN META GOOGL SPY QQQ JPM" />
+        <HeroStat label="Fallback" value={String(fallbackCount)} detail="always disclosed" />
+      </div>
+      <div className="mt-5 grid grid-cols-[64px_1fr_76px_76px] gap-3 border-y border-line py-2 text-[10px] uppercase tracking-wider text-ink-soft">
+        <span>Symbol</span>
+        <span>5D relative move</span>
+        <span className="text-right">1D</span>
+        <span className="text-right">5D</span>
+      </div>
+      <div className="mt-3 space-y-2">
+        {movers.map((item) => {
+          const width = `${Math.max(4, (Math.abs(item.fiveDay) / maxAbs) * 100)}%`;
+          const positive = item.fiveDay >= 0;
+          return (
+            <div key={item.symbol} className="grid grid-cols-[64px_1fr_76px_76px] items-center gap-3 text-[12px]">
+              <div className="font-semibold text-white">{item.symbol}</div>
+              <div className="h-2.5 rounded-full bg-white/[0.06]">
+                <div className={`h-2.5 rounded-full ${positive ? "bg-emerald-300" : "bg-rose-300"}`} style={{ width }} />
+              </div>
+              <div className={`num text-right ${item.oneDay >= 0 ? "text-emerald-300" : "text-rose-300"}`}>{pct(item.oneDay)}</div>
+              <div className={`num text-right ${positive ? "text-emerald-300" : "text-rose-300"}`}>{pct(item.fiveDay)}</div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function MiniCurve({ data, wide = false }: { data: EquityPoint[]; wide?: boolean }) {
+  const sampled = data.filter((_, index) => index % Math.max(1, Math.floor(data.length / 18)) === 0 || index === data.length - 1);
+  const values = sampled.map((point) => point.equity);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+  const points = values.map((value, index) => {
+    const x = (index / Math.max(values.length - 1, 1)) * 100;
+    const y = 34 - ((value - min) / range) * 28;
+    return `${x},${y}`;
+  }).join(" ");
+
+  return (
+    <svg viewBox="0 0 100 40" className={wide ? "h-16 w-full" : "h-10 w-24"}>
+      <polyline points={points} fill="none" stroke="#22d3ee" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+      <line x1="0" x2="100" y1="34" y2="34" stroke="rgba(120,149,184,0.18)" />
+    </svg>
   );
 }

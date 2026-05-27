@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  BarChart3,
   Bell,
   BrainCircuit,
   Database,
@@ -27,7 +26,7 @@ const items = [
   { href: "/strategies", label: "Strategies", icon: LineChart },
   { href: "/radar", label: "Radar", icon: Target },
   { href: "/ai-market", label: "AI Market", icon: BrainCircuit },
-  { href: "/paper-trading", label: "Paper", icon: WalletCards },
+  { href: "/paper-trading", label: "Paper Trading", icon: WalletCards },
   { href: "/reports", label: "Reports", icon: FileText },
 ];
 
@@ -37,9 +36,16 @@ export default function Navigation() {
 
   return (
     <>
-      <aside className="fixed inset-y-0 left-0 z-50 hidden w-[236px] border-r border-line bg-[#030914]/95 px-4 py-5 backdrop-blur-xl lg:block">
+      <aside className="fixed inset-y-0 left-0 z-50 hidden w-[256px] border-r border-line bg-[#030914]/88 px-4 py-5 shadow-[18px_0_80px_-70px_rgba(96,165,250,0.9)] backdrop-blur-xl lg:block">
         <Brand />
-        <nav className="mt-8 space-y-1.5">
+        <div className="mt-6 rounded-2xl border border-line bg-white/[0.035] p-3">
+          <div className="text-[10px] uppercase tracking-[0.22em] text-ink-soft">Research Mode</div>
+          <div className="mt-2 flex items-center justify-between">
+            <span className="text-[13px] font-medium text-white">AI Quant Lab</span>
+            <span className="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_16px_rgba(52,211,153,0.9)]" />
+          </div>
+        </div>
+        <nav className="mt-6 space-y-1.5">
           {items.map((item) => {
             const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
             const Icon = item.icon;
@@ -47,10 +53,10 @@ export default function Navigation() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`group flex h-11 items-center gap-3 rounded-lg border px-3 text-[13px] transition-all ${
+                className={`group flex h-11 items-center gap-3 rounded-xl border px-3 text-[13px] transition-all ${
                   active
-                    ? "border-blue-500/45 bg-blue-500/14 text-white shadow-[inset_3px_0_0_rgba(59,130,246,0.95)]"
-                    : "border-transparent text-ink-muted hover:border-line hover:bg-white/[0.04] hover:text-white"
+                    ? "border-blue-400/45 bg-blue-400/12 text-white shadow-[inset_3px_0_0_rgba(34,211,238,0.92)]"
+                    : "border-transparent text-ink-muted hover:border-line hover:bg-white/[0.045] hover:text-white"
                 }`}
               >
                 <Icon className={`h-4 w-4 ${active ? "text-blue-300" : "text-ink-soft group-hover:text-blue-300"}`} />
@@ -59,15 +65,19 @@ export default function Navigation() {
             );
           })}
         </nav>
-        <div className="absolute bottom-5 left-4 right-4">
-          <button className="flex h-11 w-full items-center justify-between rounded-lg border border-line bg-white/[0.035] px-3 text-[13px] text-ink-muted">
+        <div className="absolute bottom-5 left-4 right-4 space-y-3">
+          <div className="rounded-2xl border border-cyan-300/15 bg-cyan-300/[0.045] p-3">
+            <div className="text-[10px] uppercase tracking-[0.2em] text-cyan-100/60">Status</div>
+            <div className="mt-1 text-[12.5px] leading-relaxed text-ink-muted">Research-only workflow. No broker connection.</div>
+          </div>
+          <button className="flex h-11 w-full items-center justify-between rounded-xl border border-line bg-white/[0.035] px-3 text-[13px] text-ink-muted">
             <span className="inline-flex items-center gap-3"><Settings className="h-4 w-4" /> System</span>
             <span>›</span>
           </button>
         </div>
       </aside>
 
-      <header className="sticky top-0 z-40 border-b border-line bg-[#030914]/88 backdrop-blur-xl lg:ml-[236px]">
+      <header className="sticky top-0 z-40 border-b border-line bg-[#030914]/78 backdrop-blur-xl lg:ml-[256px]">
         <div className="flex h-16 items-center justify-between gap-4 px-4 md:px-6">
           <button
             type="button"
@@ -78,15 +88,15 @@ export default function Navigation() {
             <Menu className="h-4 w-4" />
           </button>
 
-          <div className="hidden min-w-[280px] max-w-xl flex-1 items-center gap-2 rounded-lg border border-line bg-white/[0.035] px-3 py-2 text-[13px] text-ink-soft md:flex">
+          <div className="hidden min-w-[280px] max-w-2xl flex-1 items-center gap-2 rounded-xl border border-line bg-white/[0.04] px-3 py-2 text-[13px] text-ink-soft md:flex">
             <Search className="h-4 w-4" />
-            <span>Search strategies, factors, symbols...</span>
+            <span>Search strategies, factors, symbols, research memos...</span>
             <span className="ml-auto rounded border border-line px-1.5 py-0.5 text-[10px]">⌘ K</span>
           </div>
 
           <div className="ml-auto flex items-center gap-3">
             <div className="hidden rounded-lg border border-line bg-white/[0.035] px-3 py-2 text-[12px] text-ink-muted sm:block">
-              Live research mode
+              {new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
             </div>
             <button className="relative grid h-10 w-10 place-items-center rounded-lg border border-line bg-white/[0.04] text-ink-muted">
               <Bell className="h-4 w-4" />
@@ -98,7 +108,7 @@ export default function Navigation() {
               </div>
               <div>
                 <div className="text-[13px] font-semibold text-ink">Researcher</div>
-                <div className="text-[11px] text-ink-soft">Quant Lab</div>
+                <div className="text-[11px] text-ink-soft">FactorForge Lab</div>
               </div>
             </div>
           </div>
@@ -135,12 +145,14 @@ export default function Navigation() {
 function Brand() {
   return (
     <Link href="/" className="flex items-center gap-3">
-      <div className="grid h-10 w-10 place-items-center rounded-xl border border-blue-400/35 bg-blue-500/10">
-        <BarChart3 className="h-5 w-5 text-blue-300" />
+      <div className="grid h-11 w-11 place-items-center rounded-2xl border border-cyan-300/25 bg-white/[0.045] shadow-[0_0_34px_rgba(34,211,238,0.12)]">
+        <div className="brand-mark" aria-hidden="true">
+          {Array.from({ length: 9 }).map((_, index) => <span key={index} />)}
+        </div>
       </div>
       <div>
-        <div className="text-[15px] font-semibold tracking-tight text-white">Quant Lab</div>
-        <div className="text-[11px] text-ink-soft">AI Strategy Research</div>
+        <div className="text-[16px] font-semibold tracking-[-0.02em] text-white">FactorForge</div>
+        <div className="text-[11px] text-cyan-100/55">AI Quant Research Lab</div>
       </div>
     </Link>
   );

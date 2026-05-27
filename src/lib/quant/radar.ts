@@ -10,7 +10,7 @@ export function scoreBacktest(result: BacktestResult): number {
   const drawdownScore = clamp((metrics.maxDrawdown + 0.25) / 0.25 * 100);
   const winScore = clamp(metrics.winRate * 100);
   const tradeScore = metrics.tradeCount < 5 ? metrics.tradeCount * 12 : metrics.tradeCount > 80 ? 70 : 100;
-      const overfitPenalty = result.riskFlags.some((flag) => flag.includes("sample")) ? 45 : result.riskFlags.some((flag) => flag.includes("fallback")) ? 25 : 0;
+  const overfitPenalty = result.riskFlags.some((flag) => flag.includes("sample")) ? 45 : result.riskFlags.some((flag) => flag.includes("fallback")) ? 25 : 0;
   return Math.round(
     annualScore * 0.25 +
       sharpeScore * 0.25 +
@@ -49,8 +49,9 @@ export function buildRadar(results: BacktestResult[]): RadarCandidate[] {
 
 function buildReasons(result: BacktestResult, score: number, status: RadarCandidate["status"]): string[] {
   const reasons = [`Composite score ${score}`];
-  if (result.metrics.sharpe > 1) reasons.push("Sharpe is above 1");
-  if (result.metrics.maxDrawdown > -0.25) reasons.push("Max drawdown is within the -25% threshold");
+  const includePositives = status !== "rejected";
+  if (includePositives && result.metrics.sharpe > 1) reasons.push("Sharpe is above 1");
+  if (includePositives && result.metrics.maxDrawdown > -0.25) reasons.push("Max drawdown is within the -25% threshold");
   if (result.metrics.tradeCount < 5) reasons.push("Fewer than 5 completed trades");
   if (result.metrics.maxDrawdown < -0.35) reasons.push("Max drawdown breaches rejection threshold");
   if (result.metrics.sharpe < 0) reasons.push("Sharpe is negative");

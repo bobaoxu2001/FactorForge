@@ -15,12 +15,15 @@ export default function EquityCurveChart({ data }: { data: EquityPoint[] }) {
       {mounted ? (
         <ResponsiveContainer width="100%" height="88%">
           <LineChart data={sampled}>
-            <CartesianGrid stroke="#efeff2" vertical={false} />
-            <XAxis dataKey="date" tick={{ fontSize: 11 }} minTickGap={28} />
-            <YAxis tick={{ fontSize: 11 }} width={64} domain={["auto", "auto"]} />
-            <Tooltip formatter={(value) => Number(value).toLocaleString("en-US", { maximumFractionDigits: 0 })} />
-            <Line type="monotone" dataKey="equity" stroke="#b42318" strokeWidth={2} dot={false} name="Strategy" />
-            <Line type="monotone" dataKey="benchmarkEquity" stroke="#1d4ed8" strokeWidth={1.5} dot={false} name="Benchmark" />
+            <CartesianGrid stroke="rgba(120,149,184,0.14)" vertical={false} />
+            <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#69778d" }} axisLine={false} tickLine={false} minTickGap={28} />
+            <YAxis tick={{ fontSize: 11, fill: "#69778d" }} axisLine={false} tickLine={false} width={64} domain={["auto", "auto"]} />
+            <Tooltip
+              contentStyle={{ background: "rgba(5,13,25,0.96)", border: "1px solid rgba(120,149,184,0.24)", borderRadius: 12, color: "#eef4ff" }}
+              formatter={(value) => Number(value).toLocaleString("en-US", { maximumFractionDigits: 0 })}
+            />
+            <Line type="monotone" dataKey="equity" stroke="#22d3ee" strokeWidth={2.3} dot={false} name="Strategy" />
+            <Line type="monotone" dataKey="benchmarkEquity" stroke="#60a5fa" strokeWidth={1.5} dot={false} name="Benchmark" />
           </LineChart>
         </ResponsiveContainer>
       ) : (
