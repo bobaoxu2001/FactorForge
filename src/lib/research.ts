@@ -8,6 +8,7 @@ import { percentChange, realizedVolatility, rsi, sma, volumeMovingAverage } from
 import { buildPaperAccountSummary, buildPaperObservations } from "@/lib/quant/paperTrading";
 import { buildRadar } from "@/lib/quant/radar";
 import { chooseBenchmark, runStrategyOnMarketCached } from "@/lib/quant/strategies";
+import { chooseWeights, runPortfolioBacktest, type PortfolioBacktest } from "@/lib/quant/portfolio";
 
 export const RESEARCH_REVALIDATE_SECONDS = 60 * 60;
 
@@ -19,6 +20,7 @@ export interface ResearchDataset {
   paperObservations: ReturnType<typeof buildPaperObservations>;
   paperAccount: ReturnType<typeof buildPaperAccountSummary>;
   marketSummary: MarketSummary;
+  portfolio: PortfolioBacktest | null;
   metadata: {
     generatedAt: string;
     revalidateSeconds: number;
@@ -53,6 +55,7 @@ export async function getResearchDataset(): Promise<ResearchDataset> {
   const paperObservations = buildPaperObservations(radarCandidates);
   const paperAccount = buildPaperAccountSummary(paperObservations);
   const marketSummary = await generateMarketSummary(factors);
+  const portfolio = buildPortfolio(radarCandidates, pricesBySymbol);
   const priceResults = Object.values(pricesBySymbol);
   return {
     pricesBySymbol,
@@ -62,6 +65,7 @@ export async function getResearchDataset(): Promise<ResearchDataset> {
     paperObservations,
     paperAccount,
     marketSummary,
+    portfolio,
     metadata: {
       generatedAt: new Date().toISOString(),
       revalidateSeconds: RESEARCH_REVALIDATE_SECONDS,
@@ -105,6 +109,32 @@ function buildFactorSnapshot(result: HistoricalPriceResult): FactorSnapshot {
     isFallback: result.isFallback,
     adjusted: result.quality.adjusted,
   };
+}
+
+function buildPortfolio(
+  radarCandidates: ReturnType<typeof buildRadar>,
+  pricesBySymbol: Record<string, HistoricalPriceResult>,
+): PortfolioBacktest | null {
+  // Eligible legs: radar candidates + continue-observing with positive Sharpe.
+  const eligible = radarCandidates
+    .filter((candidate) =>
+      candidate.status === "radar candidate" ||
+      (candidate.status === "continue observing" && candidate.result.metrics.sharpe > 0.5),
+    )
+    .slice(0, 4);
+  if (eligible.length < 2) return null;
+
+  const benchmark = pricesBySymbol.SPY ?? pricesBySymbol.QQQ ?? Object.values(pricesBySymbol)[0];
+  if (!benchmark || benchmark.prices.length === 0) return null;
+
+  try {
+    const weights = chooseWeights(
+      eligible.map((candidate) => ({ result: candidate.result, score: candidate.score })),
+    );
+    return runPortfolioBacktest(weights, benchmark);
+  } catch {
+    return null;
+  }
 }
 
 export async function getStrategyResult(id: string): Promise<BacktestResult | null> {
