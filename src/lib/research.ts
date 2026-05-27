@@ -33,6 +33,16 @@ export interface ResearchDataset {
 
 export async function getResearchDataset(): Promise<ResearchDataset> {
   const pricesBySymbol = await getWatchlistPrices("3y");
+  return buildResearchDatasetFromPrices(pricesBySymbol);
+}
+
+/**
+ * Pure compute over a price map. Exposed so tests and offline scripts can
+ * exercise the full research pipeline against a fixture without hitting Yahoo.
+ */
+export async function buildResearchDatasetFromPrices(
+  pricesBySymbol: Record<string, HistoricalPriceResult>,
+): Promise<ResearchDataset> {
   const strategyResults = STRATEGY_CATALOG.map((definition) => {
     const runs = DEFAULT_SYMBOLS
       .map((symbol) => {
