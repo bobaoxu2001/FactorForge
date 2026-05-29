@@ -42,8 +42,8 @@ export async function fetchHistoricalPricesComposite(
     }
     try {
       const result = await attempt.call();
-      // Yahoo's provider already builds its own fallback on failure — recognize
-      // that and continue rather than treating it as a real-data success.
+      // Defensive: providers are expected to throw on failure, but if any tier
+      // ever hands back a synthetic fallback, treat it as a miss and try the next.
       if (result.isFallback) {
         reasons.push({ name: attempt.name, error: `provider returned fallback: ${result.message}` });
         log.info("provider downgraded to fallback, trying next tier", { symbol, provider: attempt.name });

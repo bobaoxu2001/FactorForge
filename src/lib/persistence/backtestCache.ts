@@ -8,6 +8,16 @@ import { createLogger } from "@/lib/observability/logger";
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
 const log = createLogger("backtestCache");
 
+/**
+ * In-process cache instrumentation.
+ *
+ * SCOPE CAVEAT: these counters live in module-level state, so they only reflect
+ * the activity of the current Node process since it started. Under a serverless
+ * or multi-instance deployment (e.g. Vercel lambdas) every instance keeps its
+ * own counters and the /admin/cache numbers will undercount aggregate traffic.
+ * The persisted backtest_cache table is the source of truth for what's cached;
+ * these counters are a best-effort hit/miss feel for a single long-lived process.
+ */
 interface RuntimeCounters {
   hits: number;
   misses: number;

@@ -3,6 +3,17 @@ import { dailyReturns, maxDrawdownFromSeries } from "./indicators";
 
 const annualization = 252;
 
+// Floating-point guard: returns series with effectively-zero dispersion would
+// otherwise produce Infinity/NaN Sharpe. Compared against the daily stdev.
+const VOL_EPSILON = 1e-12;
+
+// Annualized risk-free rate used in the Sharpe numerator. Kept at 0 by default —
+// a flat assumption that's honest for a research MVP — but documented and
+// overridable so it isn't a silent hidden constant. Converted to a per-day rate
+// via simple division (close enough at these magnitudes).
+const ANNUAL_RISK_FREE_RATE = Number(process.env.RISK_FREE_RATE ?? 0) || 0;
+const DAILY_RISK_FREE_RATE = ANNUAL_RISK_FREE_RATE / annualization;
+
 export function calculateMetrics(
   equityCurve: EquityPoint[],
   trades: Trade[],
@@ -34,10 +45,16 @@ export function calculateMetrics(
   const annualizedReturn = (1 + totalReturn) ** (1 / years) - 1;
   const returns = dailyReturns(equityCurve.map((point) => point.equity));
   const mean = returns.reduce((sum, value) => sum + value, 0) / Math.max(returns.length, 1);
-  const variance = returns.reduce((sum, value) => sum + (value - mean) ** 2, 0) / Math.max(returns.length, 1);
+  // Sample variance (Bessel's correction, ÷ n-1) — the returns are a sample of
+  // the strategy's behavior, not the whole population. Needs at least 2 points.
+  const variance =
+    returns.length > 1
+      ? returns.reduce((sum, value) => sum + (value - mean) ** 2, 0) / (returns.length - 1)
+      : 0;
   const dailyVol = Math.sqrt(variance);
   const volatility = dailyVol * Math.sqrt(annualization);
-  const sharpe = dailyVol === 0 ? 0 : (mean / dailyVol) * Math.sqrt(annualization);
+  const sharpe =
+    dailyVol < VOL_EPSILON ? 0 : ((mean - DAILY_RISK_FREE_RATE) / dailyVol) * Math.sqrt(annualization);
   const wins = trades.filter((trade) => trade.pnl > 0);
   const losses = trades.filter((trade) => trade.pnl < 0);
   const grossProfit = wins.reduce((sum, trade) => sum + trade.pnl, 0);

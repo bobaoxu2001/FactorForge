@@ -54,6 +54,10 @@ export function getDb(): DatabaseInstance | null {
   try {
     const db = new Database(dbPath());
     db.pragma("journal_mode = WAL");
+    // SQLite disables foreign-key enforcement per-connection by default, so the
+    // ON DELETE CASCADE on watchlist_symbols would silently never fire. Turn it
+    // on before applying the schema.
+    db.pragma("foreign_keys = ON");
     db.exec(SCHEMA);
     dbInstance = db;
     return db;

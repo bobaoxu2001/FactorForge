@@ -9,15 +9,21 @@ export interface SessionData {
 
 const COOKIE_NAME = "factorforge_session";
 
+const DEV_SECRET = "factorforge-dev-secret-do-not-use-in-production-_______";
+
 function password(): string {
   const value = process.env.SESSION_PASSWORD;
-  if (!value || value.length < 32) {
-    // Iron-session refuses passwords shorter than 32 chars. In production, set
-    // a long random SESSION_PASSWORD; in dev/tests, derive a deterministic
-    // default so the app still boots and tests don't need a secret to run.
-    return "factorforge-dev-secret-do-not-use-in-production-_______";
+  if (value && value.length >= 32) return value;
+
+  // Iron-session refuses passwords shorter than 32 chars. Production must set
+  // a long random SESSION_PASSWORD — booting with a publicly-known default
+  // would mean any attacker could forge session cookies.
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "SESSION_PASSWORD must be set to a random string of at least 32 characters in production",
+    );
   }
-  return value;
+  return DEV_SECRET;
 }
 
 export function sessionOptions(): SessionOptions {

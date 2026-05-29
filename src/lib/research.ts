@@ -1,6 +1,7 @@
 import { DEFAULT_SYMBOLS } from "@/data/watchlist";
 import { STRATEGY_CATALOG } from "@/data/strategyCatalog";
 import type { BacktestResult } from "@/types/backtest";
+import type { StrategyDefinition } from "@/types/strategy";
 import type { FactorSnapshot, HistoricalPriceResult } from "@/types/market";
 import { generateMarketSummary, type MarketSummary } from "@/lib/ai/marketSummary";
 import { getWatchlistPrices } from "@/lib/data/marketData";
@@ -10,6 +11,9 @@ import { buildRadar } from "@/lib/quant/radar";
 import { chooseBenchmark, runStrategyOnMarketCached } from "@/lib/quant/strategies";
 import { chooseWeights, runPortfolioBacktest, type PortfolioBacktest } from "@/lib/quant/portfolio";
 import { buildFactorReturns, type FactorReturnsRow } from "@/lib/quant/factorAttribution";
+import { createLogger } from "@/lib/observability/logger";
+
+const log = createLogger("research");
 
 export const RESEARCH_REVALIDATE_SECONDS = 60 * 60;
 
@@ -46,23 +50,9 @@ export async function getResearchDataset(): Promise<ResearchDataset> {
 export async function buildResearchDatasetFromPrices(
   pricesBySymbol: Record<string, HistoricalPriceResult>,
 ): Promise<ResearchDataset> {
-  const strategyResults = STRATEGY_CATALOG.map((definition) => {
-    const runs = DEFAULT_SYMBOLS
-      .map((symbol) => {
-        const market = pricesBySymbol[symbol];
-        const benchmark = chooseBenchmark(symbol, pricesBySymbol, {
-          strategyType: definition.type,
-          selfSymbol: symbol,
-        });
-        if (!market || !benchmark || market.prices.length === 0 || benchmark.prices.length === 0) return null;
-        return runStrategyOnMarketCached(definition, market, benchmark);
-      })
-      .filter((result): result is BacktestResult => result !== null);
-    if (runs.length === 0) {
-      throw new Error(`No usable market data for strategy ${definition.id}`);
-    }
-    return runs.sort((a, b) => quickResearchScore(b) - quickResearchScore(a))[0];
-  });
+  const strategyResults = STRATEGY_CATALOG.map((definition) =>
+    runStrategyBestSymbol(definition, pricesBySymbol),
+  );
   const factors = DEFAULT_SYMBOLS
     .map((symbol) => pricesBySymbol[symbol])
     .filter((result): result is HistoricalPriceResult => Boolean(result && result.prices.length > 0))
@@ -73,7 +63,7 @@ export async function buildResearchDatasetFromPrices(
   const marketSummary = await generateMarketSummary(factors);
   const portfolio = buildPortfolio(radarCandidates, pricesBySymbol);
   const factorReturns = buildFactorReturns(pricesBySymbol);
-  const factorBenchmarkSymbol = pricesBySymbol.SPY ? "SPY" : pricesBySymbol.QQQ ? "QQQ" : Object.keys(pricesBySymbol)[0] ?? "";
+  const factorBenchmarkSymbol = chooseFactorBenchmarkSymbol(pricesBySymbol);
   const priceResults = Object.values(pricesBySymbol);
   return {
     pricesBySymbol,
@@ -95,6 +85,37 @@ export async function buildResearchDatasetFromPrices(
       symbolCount: priceResults.length,
     },
   };
+}
+
+/**
+ * Run a single strategy definition against every symbol in the watchlist and
+ * return the single best-scoring run.
+ *
+ * NOTE — this is a deliberate "best symbol per strategy" showcase, not a
+ * realistic backtest of trading every symbol. Each catalog strategy is matched
+ * to the symbol where it historically looked strongest (per {@link quickResearchScore}).
+ * It surfaces what a strategy *can* do, and is explicitly not survivorship-bias
+ * free. The radar/portfolio layers downstream apply their own gating.
+ */
+export function runStrategyBestSymbol(
+  definition: StrategyDefinition,
+  pricesBySymbol: Record<string, HistoricalPriceResult>,
+): BacktestResult {
+  const runs = DEFAULT_SYMBOLS
+    .map((symbol) => {
+      const market = pricesBySymbol[symbol];
+      const benchmark = chooseBenchmark(symbol, pricesBySymbol, {
+        strategyType: definition.type,
+        selfSymbol: symbol,
+      });
+      if (!market || !benchmark || market.prices.length === 0 || benchmark.prices.length === 0) return null;
+      return runStrategyOnMarketCached(definition, market, benchmark);
+    })
+    .filter((result): result is BacktestResult => result !== null);
+  if (runs.length === 0) {
+    throw new Error(`No usable market data for strategy ${definition.id}`);
+  }
+  return runs.sort((a, b) => quickResearchScore(b) - quickResearchScore(a))[0];
 }
 
 function quickResearchScore(result: BacktestResult): number {
@@ -131,6 +152,17 @@ function buildFactorSnapshot(result: HistoricalPriceResult): FactorSnapshot {
   };
 }
 
+/**
+ * Pick the benchmark used for factor-return regressions. Prefers SPY, then QQQ,
+ * then falls back to the alphabetically-first available symbol so the choice is
+ * deterministic across runs (plain `Object.keys()[0]` depends on insertion order).
+ */
+function chooseFactorBenchmarkSymbol(pricesBySymbol: Record<string, HistoricalPriceResult>): string {
+  if (pricesBySymbol.SPY) return "SPY";
+  if (pricesBySymbol.QQQ) return "QQQ";
+  return Object.keys(pricesBySymbol).sort()[0] ?? "";
+}
+
 function buildPortfolio(
   radarCandidates: ReturnType<typeof buildRadar>,
   pricesBySymbol: Record<string, HistoricalPriceResult>,
@@ -152,12 +184,27 @@ function buildPortfolio(
       eligible.map((candidate) => ({ result: candidate.result, score: candidate.score })),
     );
     return runPortfolioBacktest(weights, benchmark);
-  } catch {
+  } catch (error) {
+    // Don't fail the whole research page if the portfolio optimizer rejects the
+    // inputs (e.g. singular covariance) — degrade to "no portfolio" but record why.
+    log.warn("portfolio backtest skipped", {
+      reason: error instanceof Error ? error.message : String(error),
+      legs: eligible.length,
+    });
     return null;
   }
 }
 
 export async function getStrategyResult(id: string): Promise<BacktestResult | null> {
-  const dataset = await getResearchDataset();
-  return dataset.strategyResults.find((result) => result.strategyId === id) ?? null;
+  const definition = STRATEGY_CATALOG.find((entry) => entry.id === id);
+  if (!definition) return null;
+  // Only fetch prices and run the one requested strategy instead of building the
+  // entire research dataset (LLM summary, portfolio, factor attribution, …) just
+  // to discard all but one result.
+  const pricesBySymbol = await getWatchlistPrices("3y");
+  try {
+    return runStrategyBestSymbol(definition, pricesBySymbol);
+  } catch {
+    return null;
+  }
 }

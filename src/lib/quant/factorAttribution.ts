@@ -179,11 +179,15 @@ export function attributeFactors(
   const dof = n - 4;
   const sigma2 = dof > 0 ? sse / dof : 0;
   const stdErrors = inv.map((row, i) => Math.sqrt(Math.max(sigma2 * row[i], 0)));
+  // Guard against dividing by a (near-)zero standard error rather than an exact
+  // float === 0 check, which almost never triggers for computed values.
+  const SE_EPSILON = 1e-12;
+  const tStat = (coef: number, se: number) => (se < SE_EPSILON ? 0 : coef / se);
   const tStats = {
-    alpha: stdErrors[0] === 0 ? 0 : alpha / stdErrors[0],
-    mkt: stdErrors[1] === 0 ? 0 : bMkt / stdErrors[1],
-    mom: stdErrors[2] === 0 ? 0 : bMom / stdErrors[2],
-    vol: stdErrors[3] === 0 ? 0 : bVol / stdErrors[3],
+    alpha: tStat(alpha, stdErrors[0]),
+    mkt: tStat(bMkt, stdErrors[1]),
+    mom: tStat(bMom, stdErrors[2]),
+    vol: tStat(bVol, stdErrors[3]),
   };
 
   return {

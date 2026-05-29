@@ -49,6 +49,28 @@ describe("users + watchlist persistence", () => {
     await expect(createUser(username, "short")).rejects.toMatchObject({ code: "weak_password" });
   });
 
+  it("rejects too-short usernames with invalid_username (not username_taken)", async () => {
+    const { createUser } = await import("./users");
+    await expect(createUser("ab", "password123")).rejects.toMatchObject({ code: "invalid_username" });
+  });
+
+  it("rejects usernames with illegal characters", async () => {
+    const { createUser } = await import("./users");
+    await expect(createUser("bad name!", "password123")).rejects.toMatchObject({
+      code: "invalid_username",
+    });
+    await expect(createUser("inject';--", "password123")).rejects.toMatchObject({
+      code: "invalid_username",
+    });
+  });
+
+  it("accepts usernames with allowed separators", async () => {
+    const { createUser } = await import("./users");
+    const username = `ok.user-name_${Math.random().toString(36).slice(2, 6)}`;
+    const user = await createUser(username, "password123");
+    expect(user.username).toBe(username.toLowerCase());
+  });
+
   it("adds, lists, and removes watchlist symbols per user", async () => {
     const { createUser } = await import("./users");
     const { addSymbolToWatchlist, getWatchlistFor, removeSymbolFromWatchlist } = await import(

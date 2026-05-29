@@ -21,23 +21,45 @@ interface UserRow {
 }
 
 export class AuthError extends Error {
-  constructor(public code: "username_taken" | "weak_password" | "invalid_credentials" | "db_unavailable", message: string) {
+  constructor(
+    public code:
+      | "username_taken"
+      | "invalid_username"
+      | "weak_password"
+      | "invalid_credentials"
+      | "db_unavailable",
+    message: string,
+  ) {
     super(message);
     this.name = "AuthError";
   }
 }
 
-function normalize(username: string): string {
+// Lowercase letters, digits, and a few safe separators. Anchored, so the whole
+// string must match. Length is checked separately for a clearer error message.
+const USERNAME_PATTERN = /^[a-z0-9._-]+$/;
+
+export function normalizeUsername(username: string): string {
   return username.trim().toLowerCase();
+}
+
+function assertValidUsername(username: string): void {
+  if (username.length < 3 || username.length > 32) {
+    throw new AuthError("invalid_username", "Username must be 3-32 characters");
+  }
+  if (!USERNAME_PATTERN.test(username)) {
+    throw new AuthError(
+      "invalid_username",
+      "Username may only contain letters, digits, dot, underscore, and hyphen",
+    );
+  }
 }
 
 export async function createUser(usernameRaw: string, passwordRaw: string): Promise<User> {
   const db = getDb();
   if (!db) throw new AuthError("db_unavailable", "Persistence layer unavailable");
-  const username = normalize(usernameRaw);
-  if (username.length < 3 || username.length > 32) {
-    throw new AuthError("username_taken", "Username must be 3-32 characters");
-  }
+  const username = normalizeUsername(usernameRaw);
+  assertValidUsername(username);
   if (passwordRaw.length < 8) {
     throw new AuthError("weak_password", "Password must be at least 8 characters");
   }
@@ -62,7 +84,7 @@ export async function createUser(usernameRaw: string, passwordRaw: string): Prom
 export async function verifyCredentials(usernameRaw: string, passwordRaw: string): Promise<User> {
   const db = getDb();
   if (!db) throw new AuthError("db_unavailable", "Persistence layer unavailable");
-  const username = normalize(usernameRaw);
+  const username = normalizeUsername(usernameRaw);
   const row = db
     .prepare<[string], UserRow>("SELECT id, username, password_hash, created_at FROM users WHERE username = ?")
     .get(username);
