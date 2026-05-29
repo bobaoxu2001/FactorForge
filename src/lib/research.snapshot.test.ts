@@ -3,6 +3,8 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import type { HistoricalPriceResult } from "@/types/market";
 import { buildResearchDatasetFromPrices } from "./research";
+import { effectiveBets } from "./quant/signalConcentration";
+import { MAX_OBSERVATION_SLOTS } from "./quant/paperTrading";
 
 const FIXTURE_PATH = path.join(process.cwd(), "src", "__fixtures__", "yahoo-snapshot.json");
 
@@ -130,5 +132,49 @@ describe("research pipeline snapshot (real Yahoo data)", () => {
 
     // Benchmark wiring
     expect(["SPY", "QQQ"]).toContain(portfolio.benchmarkSymbol);
+  });
+
+  it("holds the concentration invariants across radar, paper, and portfolio", async () => {
+    const fixture = loadFixture();
+    const dataset = await buildResearchDatasetFromPrices(fixture);
+    const report = dataset.signalConcentration;
+    expect(report).not.toBeNull();
+    if (!report) return;
+
+    // N_eff is bounded and self-consistent with the average correlation.
+    expect(report.effectiveStrategies).toBeGreaterThanOrEqual(1);
+    expect(report.effectiveStrategies).toBeLessThanOrEqual(report.strategyCount);
+    expect(report.averagePairwiseCorrelation).toBeGreaterThanOrEqual(-1);
+    expect(report.averagePairwiseCorrelation).toBeLessThanOrEqual(1);
+    expect(["low", "medium", "high"]).toContain(report.level);
+    expect(report.effectiveStrategies).toBeCloseTo(
+      effectiveBets(report.strategyCount, report.averagePairwiseCorrelation),
+      6,
+    );
+
+    // Gate -> paper consistency: a demoted near-duplicate must NEVER hold a paper slot.
+    const demotedIds = new Set(
+      dataset.radarCandidates.filter((c) => c.redundancy?.demoted).map((c) => c.result.strategyId),
+    );
+    dataset.paperObservations.forEach((obs) => {
+      expect(demotedIds.has(obs.candidate.result.strategyId)).toBe(false);
+    });
+
+    // Gate -> portfolio consistency: a demoted near-duplicate must NEVER be a leg.
+    if (dataset.portfolio) {
+      dataset.portfolio.legs.forEach((leg) => {
+        expect(demotedIds.has(leg.strategyId)).toBe(false);
+      });
+      // Portfolio N_eff is also self-consistent.
+      expect(dataset.portfolio.effectiveBets).toBeCloseTo(
+        effectiveBets(dataset.portfolio.legs.length, dataset.portfolio.averagePairwiseCorrelation),
+        6,
+      );
+    }
+
+    // Paper slots are capped at the effective number of independent bets.
+    const slotCap = Math.max(1, Math.min(MAX_OBSERVATION_SLOTS, Math.floor(report.effectiveStrategies)));
+    expect(dataset.paperObservations.length).toBeLessThanOrEqual(slotCap);
+    expect(dataset.paperAccount.observationSlots).toBe(slotCap);
   });
 });

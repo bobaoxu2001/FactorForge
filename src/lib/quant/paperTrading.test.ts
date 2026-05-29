@@ -85,4 +85,23 @@ describe("paper observation controls", () => {
     expect(account.riskBudgetStatus).toBe("within limits");
     expect(account.guardrails.some((item) => item.includes("radar candidates"))).toBe(true);
   });
+
+  it("caps observation slots at the requested maxSlots (N_eff gate)", () => {
+    const distinct = (id: string): RadarCandidate => {
+      const c = candidate("radar candidate");
+      return { ...c, result: { ...c.result, strategyId: id } };
+    };
+    const candidates = [distinct("a"), distinct("b"), distinct("c")];
+
+    // Effective bets ≈ 1 → only one slot, even though three candidates qualify.
+    const observations = buildPaperObservations(candidates, 1);
+    expect(observations).toHaveLength(1);
+
+    const account = buildPaperAccountSummary(observations, {
+      maxSlots: 1,
+      slotNote: "Observation slots capped at the effective number of independent bets (N_eff 1.0) → 1 of 3.",
+    });
+    expect(account.observationSlots).toBe(1);
+    expect(account.guardrails.some((g) => g.includes("N_eff"))).toBe(true);
+  });
 });

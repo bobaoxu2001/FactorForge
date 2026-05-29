@@ -3,7 +3,7 @@
 [![CI](https://github.com/bobaoxu2001/FactorForge/actions/workflows/ci.yml/badge.svg)](https://github.com/bobaoxu2001/FactorForge/actions/workflows/ci.yml)
 [![Next.js 14](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![Vitest](https://img.shields.io/badge/tests-57%20passing-22c55e?logo=vitest&logoColor=white)](#testing)
+[![Vitest](https://img.shields.io/badge/tests-88%20passing-22c55e?logo=vitest&logoColor=white)](#testing)
 
 An AI quant research lab that turns daily OHLCV into factor signals, cost-aware backtests, score-weighted portfolios, and LLM-written research memos. Built as a portfolio piece for a full-stack + applied-ML role.
 
@@ -18,10 +18,11 @@ An AI quant research lab that turns daily OHLCV into factor signals, cost-aware 
 | **Real LLM in the loop** | DeepSeek (`deepseek-chat`) writes the strategy memo and tape note from a deterministic backtest payload. Numbers come from the engine; only prose is generated. Template fallback when the key is unset. |
 | **Multi-symbol portfolio engine** | Score-weighted blend of radar-eligible legs, calendar intersection, per-leg P&L attribution, and pairwise Pearson correlation. Not just N parallel backtests. |
 | **Walk-forward + factor attribution** | Each strategy detail page reports in-sample vs out-of-sample metrics on the same equity curve, plus an OLS regression against Market / Momentum / Low-vol with t-statistics. Honest answers to "is this overfit?" and "is this alpha or just beta?". |
+| **Concentration gate (one risk metric, five surfaces)** | Effective-number-of-bets `N_eff = N / (1 + (N-1)·ρ̄)` from pairwise return correlation. The *same* number drives: a radar diagnostic panel, demotion of near-duplicate candidates, the paper-trading slot cap, exclusion of redundant portfolio legs, and an LLM-written diversification memo. Answers "are these four strategies actually four bets, or one bet wearing four hats?". |
 | **Provider fan-out** | Composite real-data path: Yahoo → Polygon → Alpha Vantage → synthetic fallback. Each tier's failure reason is structured-logged; the UI labels which provider answered. |
 | **Persisted compute + multi-user** | SQLite stores fingerprint-keyed backtest cache (6h TTL), bcrypt-hashed users, and per-user watchlists. Iron-session cookies gate the protected routes. |
 | **Observability** | JSON-line structured logger and `/admin/cache` page showing live hit rate, per-strategy row counts, and the oldest/newest persisted entries. |
-| **CI and tests** | 57 vitest tests (engine + components + auth + composite-provider mocks) under jsdom; GitHub Actions runs lint + typecheck + test on every push. |
+| **CI and tests** | 88 vitest tests (engine + concentration gate + components + auth + composite-provider and DeepSeek-branch mocks) under jsdom; GitHub Actions runs lint + typecheck + test on every push. |
 
 ---
 
@@ -42,6 +43,7 @@ flowchart TB
     BT[Long-only backtest<br/>next-open exec, slippage,<br/>stops, trailing, holding cap]
     MET[Metrics<br/>Sharpe, drawdown, profit factor]
     RAD[Radar scoring<br/>composite + hard rejects]
+    CONC[Concentration<br/>N_eff + correlation gate]
     PORT[Portfolio engine<br/>weighting + correlation matrix]
   end
 
@@ -53,6 +55,7 @@ flowchart TB
     DS[DeepSeek client<br/>server-only, JSON mode]
     EXP[Strategy explainer<br/>memo + thesis]
     MS[Market summary<br/>regime + highlights]
+    CN[Concentration note<br/>diversification memo]
   end
 
   subgraph UI["Next.js App Router (src/app)"]
@@ -69,16 +72,21 @@ flowchart TB
   FB --> NORM
   NORM --> IND --> SIG --> BT --> MET
   BT <-.cache by fingerprint.-> DB
-  MET --> RAD --> PORT
+  MET --> RAD --> CONC --> PORT
+  CONC -.gate / N_eff cap.-> RAD
   MET --> EXP
   IND --> MS
+  CONC --> CN
   EXP --> DS
   MS --> DS
+  CN --> DS
   MET --> UI
   RAD --> UI
+  CONC --> UI
   PORT --> UI
   EXP --> UI
   MS --> UI
+  CN --> UI
 ```
 
 The page-level data flow is consolidated in `src/lib/research.ts → getResearchDataset()`, which is the single entry point all routes call.
@@ -103,10 +111,12 @@ src/
   lib/
     data/                  Market data facade + Yahoo provider + fallback
     quant/                 indicators, strategies, backtest, metrics,
-                           radar, paper trading, portfolio
+                           radar, signal concentration (N_eff + gate),
+                           paper trading, portfolio
     persistence/           SQLite client + backtest cache
     ai/                    DeepSeek client + strategy explainer +
-                           market summary (both LLM-or-template)
+                           market summary + concentration note
+                           (all LLM-or-template)
     utils/                 formatters
   types/                   market, strategy, backtest contracts
 ```
@@ -210,9 +220,11 @@ npm run build
 
 ## Testing
 
-57 tests across 17 files under vitest + jsdom:
+88 tests across 23 files under vitest + jsdom:
 
-- **Engine** — backtest fees + execution semantics, indicators, radar verdict logic, paper-trading risk-budget transitions, portfolio engine (Pearson, calendar intersection, score-weighted blend, phase-shifted decorrelation).
+- **Engine** — backtest fees + execution semantics, indicators, radar verdict logic, paper-trading risk-budget transitions + N_eff slot cap, portfolio engine (Pearson, calendar intersection, score-weighted blend, phase-shifted decorrelation).
+- **Concentration** — `effectiveBets` / `concentrationLevel` math (monotonicity, bounds), the correlation gate demoting near-duplicate candidates, and the shared pairwise-correlation builder.
+- **AI layer** — concentration-note template prose plus a mocked DeepSeek branch proving LLM prose is adopted while computed numbers are passed through (blank fields fall back via `pickString`).
 - **Components** — StatusBadge (including the `idle` state introduced when fixing the zero-observation risk-budget bug), MetricCard tone classes, CorrelationMatrix rendering + empty state.
 - **Data providers** — Yahoo and fallback adapters.
 
