@@ -14,7 +14,8 @@ import { evaluateWalkForward } from "@/lib/quant/walkForward";
 import { attributeFactors } from "@/lib/quant/factorAttribution";
 import { STRATEGY_CATALOG } from "@/data/strategyCatalog";
 import { generateStrategyExplanation } from "@/lib/ai/strategyExplainer";
-import { getResearchDataset } from "@/lib/research";
+import { getResearchDataset, runStrategyAcrossSymbols } from "@/lib/research";
+import SymbolSwitcher from "@/components/research/SymbolSwitcher";
 import { num, pct, pctPlain, usd } from "@/lib/utils/format";
 
 export const revalidate = 60 * 60;
@@ -23,13 +24,40 @@ export function generateStaticParams() {
   return STRATEGY_CATALOG.map((strategy) => ({ id: strategy.id }));
 }
 
-export default async function StrategyDetailPage({ params }: { params: { id: string } }) {
+export default async function StrategyDetailPage({
+  params,
+  searchParams,
+}: {
+  params: { id: string };
+  searchParams: { symbol?: string };
+}) {
   const dataset = await getResearchDataset();
-  const result = dataset.strategyResults.find((r) => r.strategyId === params.id) ?? null;
-  if (!result) notFound();
+  const definition = STRATEGY_CATALOG.find((s) => s.id === params.id);
+  if (!definition) notFound();
+
+  // Run the strategy across the whole watchlist so the user can switch symbols.
+  // Default = the historically strongest symbol (the "showcase" pick); ?symbol=
+  // overrides it. This makes the selection assumption explicit instead of hidden.
+  const runs = runStrategyAcrossSymbols(definition, dataset.pricesBySymbol);
+  if (runs.length === 0) notFound();
+  const best = runs[0];
+  const requestedSymbol = searchParams.symbol?.toUpperCase();
+  const requested = requestedSymbol ? runs.find((r) => r.symbol === requestedSymbol) : undefined;
+  const active = requested ?? best;
+  const result = active.result;
+  const isDefaultSymbol = active.symbol === best.symbol;
+
   const explanation = await generateStrategyExplanation(result);
   const walkForward = evaluateWalkForward(result);
   const factorAttribution = attributeFactors(result.equityCurve, dataset.factorReturns, dataset.factorBenchmarkSymbol);
+
+  const symbolOptions = runs.map((r) => ({
+    symbol: r.symbol,
+    score: r.score,
+    annualizedReturn: r.result.metrics.annualizedReturn,
+    sharpe: r.result.metrics.sharpe,
+    isBest: r.isBest,
+  }));
 
   return (
     <div className="space-y-8">
@@ -40,6 +68,27 @@ export default async function StrategyDetailPage({ params }: { params: { id: str
         <p className="mt-2 max-w-3xl text-[14px] leading-relaxed text-ink-muted">{result.description}</p>
         <div className="mt-4"><DataSourceStatus result={result.dataStatus} /></div>
       </header>
+
+      {/* Selection-bias disclaimer — turns a hidden methodological assumption into a visible product feature. */}
+      <section className="rounded-2xl border border-amber-300/30 bg-amber-300/[0.06] p-4">
+        <div className="flex items-start gap-3">
+          <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" />
+          <div className="text-[12.5px] leading-relaxed text-ink-muted">
+            <span className="font-medium text-amber-100">Selection-bias notice. </span>
+            Headline metrics default to <span className="font-medium text-ink">{best.symbol}</span> — the symbol where
+            this rule scored highest across the {runs.length}-name watchlist. That is a deliberate <em>showcase</em> pick,
+            not a survivorship-bias-free result, so the default numbers are optimistic by construction. Switch symbols
+            below to see how the same rule behaves elsewhere.
+            {!isDefaultSymbol && (
+              <span className="ml-1 text-ink">
+                Currently viewing <span className="font-medium">{active.symbol}</span> (rank {runs.indexOf(active) + 1} of {runs.length}).
+              </span>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <SymbolSwitcher strategyId={params.id} options={symbolOptions} selected={active.symbol} />
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1.2fr_0.8fr]">
         <div className="card p-5">

@@ -1,19 +1,24 @@
 import Link from "next/link";
 import StatusBadge from "@/components/badges/StatusBadge";
 import { generateStrategyExplanation } from "@/lib/ai/strategyExplainer";
+import { generateConcentrationNote } from "@/lib/ai/concentrationNote";
 import { getResearchDataset } from "@/lib/research";
-import { pct, num } from "@/lib/utils/format";
+import { num, pct, pctPlain } from "@/lib/utils/format";
 
 export const revalidate = 60 * 60;
 
 export default async function ReportsPage() {
-  const { radarCandidates, metadata } = await getResearchDataset();
-  const cards = await Promise.all(
-    radarCandidates.map(async (candidate) => ({
-      candidate,
-      explanation: await generateStrategyExplanation(candidate.result),
-    })),
-  );
+  const { radarCandidates, signalConcentration, metadata } = await getResearchDataset();
+  const demotedCount = radarCandidates.filter((c) => c.redundancy?.demoted).length;
+  const [cards, concentrationNote] = await Promise.all([
+    Promise.all(
+      radarCandidates.map(async (candidate) => ({
+        candidate,
+        explanation: await generateStrategyExplanation(candidate.result),
+      })),
+    ),
+    generateConcentrationNote(signalConcentration, { demotedCount }),
+  ]);
 
   return (
     <div className="space-y-8">
@@ -27,6 +32,29 @@ export default async function ReportsPage() {
           Dataset generated {new Date(metadata.generatedAt).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}; backtests use next-open execution with modeled costs.
         </p>
       </header>
+
+      {concentrationNote && signalConcentration && (
+        <section className="card p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">Portfolio Concentration Note</div>
+            <div className="flex items-center gap-2">
+              <StatusBadge status={`${signalConcentration.level} overlap`} />
+              <span className="text-[12px] text-ink-soft">{concentrationNote.source === "deepseek" ? "deepseek memo" : "template memo"}</span>
+            </div>
+          </div>
+          <h2 className="mt-3 text-[18px] font-semibold text-ink">{concentrationNote.headline}</h2>
+          <p className="mt-2 text-[13px] leading-relaxed text-ink">{concentrationNote.assessment}</p>
+          <p className="mt-2 text-[13px] leading-relaxed text-brand-blue">{concentrationNote.recommendation}</p>
+          <div className="mt-4 grid grid-cols-3 gap-3 text-[12px]">
+            <Mini label="Screened" value={String(signalConcentration.strategyCount)} />
+            <Mini label="Effective bets" value={num(signalConcentration.effectiveStrategies, 1)} />
+            <Mini label="Avg correlation" value={pctPlain(signalConcentration.averagePairwiseCorrelation)} />
+          </div>
+          <Link href="/radar" className="mt-4 inline-flex text-[12px] text-ink-muted hover:text-ink">
+            See the concentration gate on Radar →
+          </Link>
+        </section>
+      )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {cards.map(({ candidate, explanation }) => {

@@ -2,12 +2,31 @@ import { BrainCircuit, Database, LineChart, Network, Target } from "lucide-react
 import StatusBadge from "@/components/badges/StatusBadge";
 import MetricCard from "@/components/cards/MetricCard";
 import { getResearchDataset } from "@/lib/research";
+import { pearson } from "@/lib/quant/indicators";
 import { pct, pctPlain, num } from "@/lib/utils/format";
 
 export const revalidate = 60 * 60;
 
+function regimeLabel(corr: number): string {
+  const a = Math.abs(corr);
+  return a >= 0.6 ? "High" : a >= 0.3 ? "Medium" : "Low";
+}
+
 export default async function FactorsPage() {
-  const { factors } = await getResearchDataset();
+  const { factors, factorReturns } = await getResearchDataset();
+
+  // Real pairwise correlations between the daily factor-return series
+  // (Market / Momentum / Low-vol) — the same series the attribution OLS uses.
+  const mkt = factorReturns.map((r) => r.mkt);
+  const mom = factorReturns.map((r) => r.mom);
+  const vol = factorReturns.map((r) => r.vol);
+  const factorCorrelations: Array<[string, number]> = factorReturns.length >= 2
+    ? [
+        ["Momentum / Market", pearson(mom, mkt)],
+        ["Low-vol / Market", pearson(vol, mkt)],
+        ["Momentum / Low-vol", pearson(mom, vol)],
+      ]
+    : [];
   const avgMomentum = factors.reduce((sum, factor) => sum + (factor.momentum60d ?? 0), 0) / Math.max(factors.length, 1);
   const avgVol = factors.reduce((sum, factor) => sum + (factor.volatility20d ?? 0), 0) / Math.max(factors.length, 1);
   const trendCount = factors.filter((factor) => factor.aboveSma200).length;
@@ -67,23 +86,25 @@ export default async function FactorsPage() {
         </div>
         <div className="card p-5">
           <div className="panel-title">Factor Correlation Mini Panel</div>
+          <p className="mt-1 text-[11px] text-ink-soft">Pearson correlation of daily factor-return series ({factorReturns.length} obs).</p>
           <div className="mt-4 space-y-3">
-            {[
-              ["Momentum / Trend", 0.72, "High"],
-              ["Volatility / Drawdown", 0.58, "Medium"],
-              ["Volume / Breakout", 0.44, "Medium"],
-              ["Low Vol / Rotation", 0.31, "Low"],
-            ].map(([label, value, regime]) => (
-              <div key={String(label)}>
+            {factorCorrelations.map(([label, value]) => (
+              <div key={label}>
                 <div className="mb-1 flex justify-between text-[12px]">
                   <span className="text-ink-muted">{label}</span>
-                  <span className="num text-white">{num(Number(value))} · {regime}</span>
+                  <span className="num text-white">{num(value)} · {regimeLabel(value)}</span>
                 </div>
                 <div className="h-2 rounded-full bg-white/[0.06]">
-                  <div className="h-2 rounded-full bg-gradient-to-r from-cyan-300 to-blue-400" style={{ width: `${Number(value) * 100}%` }} />
+                  <div
+                    className={`h-2 rounded-full ${value < 0 ? "bg-gradient-to-r from-rose-300 to-amber-300" : "bg-gradient-to-r from-cyan-300 to-blue-400"}`}
+                    style={{ width: `${Math.min(100, Math.abs(value) * 100)}%` }}
+                  />
                 </div>
               </div>
             ))}
+            {factorCorrelations.length === 0 && (
+              <p className="text-[12px] text-ink-muted">Not enough overlapping history to compute factor correlations yet.</p>
+            )}
           </div>
           <StatusBadge status={avgVol > 0.35 ? "crowding watch" : "balanced regime"} />
         </div>

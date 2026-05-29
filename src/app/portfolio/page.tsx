@@ -3,6 +3,7 @@ import CorrelationMatrix from "@/components/research/CorrelationMatrix";
 import MetricCard from "@/components/cards/MetricCard";
 import StatusBadge from "@/components/badges/StatusBadge";
 import { getResearchDataset } from "@/lib/research";
+import { concentrationLevel } from "@/lib/quant/signalConcentration";
 import { num, pct, pctPlain } from "@/lib/utils/format";
 
 export const revalidate = 60 * 60;
@@ -28,6 +29,13 @@ export default async function PortfolioPage() {
   }
 
   const concentration = Math.max(...portfolio.legs.map((leg) => leg.weight));
+  const level = concentrationLevel(portfolio.averagePairwiseCorrelation);
+  const levelClass =
+    level === "high"
+      ? "border-rose-300/30 bg-rose-300/[0.06] text-rose-100"
+      : level === "medium"
+        ? "border-amber-300/30 bg-amber-300/[0.06] text-amber-100"
+        : "border-emerald-300/30 bg-emerald-300/[0.06] text-emerald-100";
   const dataNote =
     metadata.fallbackCount === 0
       ? "All legs use real Yahoo daily OHLCV data."
@@ -57,7 +65,15 @@ export default async function PortfolioPage() {
         <MetricCard label="Volatility" value={pctPlain(portfolio.metrics.volatility)} />
         <MetricCard label="Max drawdown" value={pct(portfolio.metrics.maxDrawdown)} />
         <MetricCard label="Avg correlation" value={num(portfolio.averagePairwiseCorrelation)} />
-        <MetricCard label="Max concentration" value={pctPlain(concentration)} />
+        <MetricCard label="Effective bets" value={num(portfolio.effectiveBets, 1)} tone="accent" />
+      </section>
+
+      <section className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border px-4 py-3 text-[12.5px] ${levelClass}`}>
+        <span className="uppercase tracking-wider text-ink-soft">Diversification</span>
+        <span className="num text-right">
+          {portfolio.legs.length} legs ≈ {num(portfolio.effectiveBets, 1)} independent bets · {level} overlap ·
+          max weight {pctPlain(concentration)}
+        </span>
       </section>
 
       <section className="grid grid-cols-1 gap-5 lg:grid-cols-[1.45fr_1fr]">
@@ -99,6 +115,8 @@ export default async function PortfolioPage() {
         <div className="panel-title">Methodology</div>
         <ul className="mt-4 space-y-2 text-[12.5px] leading-relaxed text-ink-muted">
           <li>• Eligible legs: radar candidates and continue-observing strategies with Sharpe &gt; 0.5, capped at four.</li>
+          <li>• Legs the concentration gate flagged as near-duplicates (&gt; 80% return correlation with a higher-ranked leg) are excluded — the portfolio reuses the same diversification decision as the paper-trade queue.</li>
+          <li>• Effective bets = N / (1 + (N−1)·ρ̄), the same N_eff measure shown on the radar panel and home overview.</li>
           <li>• Weights are proportional to the composite radar score; falls back to equal-weight if all scores are non-positive.</li>
           <li>• Calendar = intersection of every leg&apos;s equity-curve dates so the blend uses only days when all legs traded.</li>
           <li>• Each leg&apos;s equity is normalized to a $1 base; the portfolio re-aggregates daily — no intra-day rebalancing assumption.</li>
