@@ -42,7 +42,7 @@ export default function Navigation() {
 
   return (
     <>
-      <aside className="fixed inset-y-0 left-0 z-50 hidden w-[256px] border-r border-line bg-[#030914]/88 px-4 py-5 shadow-[18px_0_80px_-70px_rgba(96,165,250,0.9)] backdrop-blur-xl lg:block">
+      <aside className="fixed inset-y-0 left-0 z-50 hidden w-[256px] flex-col border-r border-line bg-[#030914]/88 px-4 py-5 shadow-[18px_0_80px_-70px_rgba(96,165,250,0.9)] backdrop-blur-xl lg:flex">
         <Brand />
         <div className="mt-6 rounded-2xl border border-line bg-white/[0.035] p-3">
           <div className="text-[10px] uppercase tracking-[0.22em] text-ink-soft">Research Mode</div>
@@ -51,7 +51,7 @@ export default function Navigation() {
             <span className="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_16px_rgba(52,211,153,0.9)]" />
           </div>
         </div>
-        <nav className="mt-6 space-y-1.5">
+        <nav className="mt-6 min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-1">
           {items.map((item) => {
             const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
             const Icon = item.icon;
@@ -71,7 +71,7 @@ export default function Navigation() {
             );
           })}
         </nav>
-        <div className="absolute bottom-5 left-4 right-4 space-y-3">
+        <div className="mt-4 shrink-0 space-y-3">
           <div className="rounded-2xl border border-cyan-300/15 bg-cyan-300/[0.045] p-3">
             <div className="text-[10px] uppercase tracking-[0.2em] text-cyan-100/60">Status</div>
             <div className="mt-1 text-[12.5px] leading-relaxed text-ink-muted">Research-only workflow. No broker connection.</div>
