@@ -1,11 +1,8 @@
 import { redirect } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import StatusBadge from "@/components/badges/StatusBadge";
-import {
-  addWatchlistSymbolAction,
-  removeWatchlistSymbolAction,
-  signOutAction,
-} from "@/lib/auth/actions";
+import AddSymbolForm from "@/components/auth/AddSymbolForm";
+import { removeWatchlistSymbolAction, signOutAction } from "@/lib/auth/actions";
 import { getSession } from "@/lib/auth/session";
 import { getWatchlistFor } from "@/lib/persistence/watchlist";
 import { DEFAULT_SYMBOLS } from "@/data/watchlist";
@@ -37,25 +34,7 @@ export default async function MyWatchlistPage() {
 
       <section className="card p-5">
         <div className="panel-title">Add a symbol</div>
-        <form action={addWatchlistSymbolAction} className="mt-4 flex flex-wrap items-center gap-3">
-          <input
-            name="symbol"
-            type="text"
-            required
-            maxLength={8}
-            placeholder="e.g. AAPL"
-            className="h-10 w-40 rounded-xl border border-line bg-white/[0.04] px-3 text-[13px] uppercase text-ink focus:border-blue-400/45 focus:outline-none"
-          />
-          <button
-            type="submit"
-            className="h-10 rounded-xl border border-cyan-300/35 bg-cyan-300/10 px-4 text-[13px] font-semibold text-cyan-100 hover:bg-cyan-300/20"
-          >
-            Add
-          </button>
-          <span className="text-[11.5px] text-ink-soft">
-            1–8 alphanumeric characters. Duplicate adds are ignored.
-          </span>
-        </form>
+        <AddSymbolForm />
       </section>
 
       <section className="card overflow-x-auto">
@@ -64,7 +43,7 @@ export default async function MyWatchlistPage() {
         </div>
         {entries.length === 0 ? (
           <div className="p-6 text-[13px] text-ink-muted">
-            Empty list. The research dataset still uses the platform default watchlist ({defaultSymbols.join(", ")}); your personal list is layered on top once you add anything.
+            Empty list. The shared research dataset runs on the default universe ({defaultSymbols.join(", ")}). Symbols you save here are kept on your account; ones already in the default universe are fully researched across the platform, while custom additions are bookmarked for follow-up but not yet fed into the shared backtest run.
           </div>
         ) : (
           <table className="w-full min-w-[480px] text-[13px]">

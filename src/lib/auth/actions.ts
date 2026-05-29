@@ -11,6 +11,11 @@ export interface AuthFormState {
   error?: string;
 }
 
+export interface WatchlistFormState {
+  error?: string;
+  added?: string;
+}
+
 // 5 credential attempts per username per 5 minutes.
 const AUTH_LIMIT = 5;
 const AUTH_WINDOW_MS = 5 * 60 * 1000;
@@ -71,14 +76,22 @@ export async function signOutAction(): Promise<void> {
   redirect("/sign-in");
 }
 
-export async function addWatchlistSymbolAction(formData: FormData): Promise<void> {
+export async function addWatchlistSymbolAction(
+  _prev: WatchlistFormState,
+  formData: FormData,
+): Promise<WatchlistFormState> {
   const session = await getSession();
   if (!session.userId) {
     redirect("/sign-in");
   }
   const symbol = String(formData.get("symbol") ?? "");
-  addSymbolToWatchlist(session.userId!, symbol);
+  const result = addSymbolToWatchlist(session.userId!, symbol);
+  if (!result.ok) {
+    // Surface the validation reason instead of silently dropping the input.
+    return { error: result.reason };
+  }
   revalidatePath("/my-watchlist");
+  return { added: symbol.trim().toUpperCase() };
 }
 
 export async function removeWatchlistSymbolAction(formData: FormData): Promise<void> {

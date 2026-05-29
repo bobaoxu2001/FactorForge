@@ -18,9 +18,20 @@ interface Bucket {
 
 const buckets = new Map<string, Bucket>();
 
+// Once the map crosses this many keys we sweep out expired buckets on the next
+// check. Without this, a flood of distinct keys (e.g. random usernames) would
+// grow the map unboundedly since entries are otherwise only replaced, never removed.
+const SWEEP_THRESHOLD = 10_000;
+
 export interface RateLimitResult {
   allowed: boolean;
   retryAfterSeconds: number;
+}
+
+function sweepExpired(now: number): void {
+  for (const [key, bucket] of buckets) {
+    if (now >= bucket.resetAt) buckets.delete(key);
+  }
 }
 
 export function checkRateLimit(
@@ -29,6 +40,7 @@ export function checkRateLimit(
   windowMs: number,
   now: number = Date.now(),
 ): RateLimitResult {
+  if (buckets.size >= SWEEP_THRESHOLD) sweepExpired(now);
   const existing = buckets.get(key);
   if (!existing || now >= existing.resetAt) {
     buckets.set(key, { count: 1, resetAt: now + windowMs });

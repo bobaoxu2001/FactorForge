@@ -1,5 +1,7 @@
+import { redirect } from "next/navigation";
 import MetricCard from "@/components/cards/MetricCard";
 import StatusBadge from "@/components/badges/StatusBadge";
+import { getSession } from "@/lib/auth/session";
 import {
   getCacheCounters,
   getCacheStats,
@@ -11,6 +13,12 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function CacheAdminPage() {
+  // Internal cache instrumentation — require a signed-in session. There's no
+  // role system yet, so any authenticated user qualifies; tighten to an allowlist
+  // if real multi-tenant separation is ever needed.
+  const session = await getSession();
+  if (!session.userId) redirect("/sign-in");
+
   const counters = getCacheCounters();
   const stats = getCacheStats();
   const byStrategy = getPerStrategyStats();

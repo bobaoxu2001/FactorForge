@@ -194,17 +194,3 @@ function buildPortfolio(
     return null;
   }
 }
-
-export async function getStrategyResult(id: string): Promise<BacktestResult | null> {
-  const definition = STRATEGY_CATALOG.find((entry) => entry.id === id);
-  if (!definition) return null;
-  // Only fetch prices and run the one requested strategy instead of building the
-  // entire research dataset (LLM summary, portfolio, factor attribution, …) just
-  // to discard all but one result.
-  const pricesBySymbol = await getWatchlistPrices("3y");
-  try {
-    return runStrategyBestSymbol(definition, pricesBySymbol);
-  } catch {
-    return null;
-  }
-}

@@ -64,6 +64,10 @@ export function runLongOnlyBacktest(
   market.prices.forEach((price, index) => {
     const previousPlan = index > 0 ? signalPlans[index - 1] ?? { buy: false, reason: "no signal" } : { buy: false, reason: "no signal" };
     const previousPrice = market.prices[index - 1];
+    // Prefer an exact date match for the benchmark close. If the benchmark
+    // calendar has a gap on this date (holiday mismatch, late listing), fall
+    // back to the positional close — approximate, but bounded to the same index
+    // window so the benchmark equity can't run away from the strategy's timeline.
     const benchmarkPrice = benchmarkByDate.get(price.date) ?? benchmark.prices[Math.min(index, benchmark.prices.length - 1)]?.close ?? benchmarkStart;
 
     if (shares > 0) {
