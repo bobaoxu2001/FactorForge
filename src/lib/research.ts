@@ -6,11 +6,12 @@ import type { FactorSnapshot, HistoricalPriceResult } from "@/types/market";
 import { generateMarketSummary, type MarketSummary } from "@/lib/ai/marketSummary";
 import { getWatchlistPrices } from "@/lib/data/marketData";
 import { percentChange, realizedVolatility, rsi, sma, volumeMovingAverage } from "@/lib/quant/indicators";
-import { buildPaperAccountSummary, buildPaperObservations } from "@/lib/quant/paperTrading";
+import { buildPaperAccountSummary, buildPaperObservations, MAX_OBSERVATION_SLOTS } from "@/lib/quant/paperTrading";
 import { buildRadar } from "@/lib/quant/radar";
 import { chooseBenchmark, runStrategyOnMarketCached } from "@/lib/quant/strategies";
 import { chooseWeights, runPortfolioBacktest, type PortfolioBacktest } from "@/lib/quant/portfolio";
 import { buildFactorReturns, type FactorReturnsRow } from "@/lib/quant/factorAttribution";
+import { applyConcentrationGate, buildSignalConcentration, type SignalConcentrationReport } from "@/lib/quant/signalConcentration";
 import { createLogger } from "@/lib/observability/logger";
 
 const log = createLogger("research");
@@ -28,6 +29,7 @@ export interface ResearchDataset {
   portfolio: PortfolioBacktest | null;
   factorReturns: FactorReturnsRow[];
   factorBenchmarkSymbol: string;
+  signalConcentration: SignalConcentrationReport | null;
   metadata: {
     generatedAt: string;
     revalidateSeconds: number;
@@ -57,13 +59,41 @@ export async function buildResearchDatasetFromPrices(
     .map((symbol) => pricesBySymbol[symbol])
     .filter((result): result is HistoricalPriceResult => Boolean(result && result.prices.length > 0))
     .map((result) => buildFactorSnapshot(result));
-  const radarCandidates = buildRadar(strategyResults);
-  const paperObservations = buildPaperObservations(radarCandidates);
-  const paperAccount = buildPaperAccountSummary(paperObservations);
-  const marketSummary = await generateMarketSummary(factors);
-  const portfolio = buildPortfolio(radarCandidates, pricesBySymbol);
   const factorReturns = buildFactorReturns(pricesBySymbol);
   const factorBenchmarkSymbol = chooseFactorBenchmarkSymbol(pricesBySymbol);
+
+  // 1. Score every strategy on its own merits.
+  const rawCandidates = buildRadar(strategyResults);
+
+  // 2. Measure concentration over the strategies that actually matter for
+  //    capital allocation — radar candidates + continue-observing — so it
+  //    answers "are the ones we'd promote actually diversified?".
+  const concentrationInputs = rawCandidates
+    .filter((c) => c.status === "radar candidate" || c.status === "continue observing")
+    .map((c) => c.result);
+  const signalConcentration = buildSignalConcentration(
+    concentrationInputs.length >= 2 ? concentrationInputs : strategyResults,
+    factorReturns,
+    factorBenchmarkSymbol,
+  );
+
+  // 3. Apply the concentration gate BEFORE building the paper queue / portfolio,
+  //    so near-duplicate candidates can't each claim a paper-trading slot.
+  const radarCandidates = applyConcentrationGate(rawCandidates, signalConcentration);
+
+  // 4. Cap paper-observation slots at the effective number of independent bets,
+  //    so "run the low-correlation Top-N" is enforced by the system rather than
+  //    left as advice. Falls back to the hard cap when concentration is unknown.
+  const effectiveBets = signalConcentration?.effectiveStrategies ?? MAX_OBSERVATION_SLOTS;
+  const slotCap = Math.max(1, Math.min(MAX_OBSERVATION_SLOTS, Math.floor(effectiveBets)));
+  const slotNote = signalConcentration
+    ? `Observation slots capped at the effective number of independent bets (N_eff ${effectiveBets.toFixed(1)}) → ${slotCap} of ${MAX_OBSERVATION_SLOTS}.`
+    : `Observation slots: ${slotCap} of ${MAX_OBSERVATION_SLOTS} hard cap.`;
+
+  const paperObservations = buildPaperObservations(radarCandidates, slotCap);
+  const paperAccount = buildPaperAccountSummary(paperObservations, { maxSlots: slotCap, slotNote });
+  const marketSummary = await generateMarketSummary(factors);
+  const portfolio = buildPortfolio(radarCandidates, pricesBySymbol);
   const priceResults = Object.values(pricesBySymbol);
   return {
     pricesBySymbol,
@@ -76,6 +106,7 @@ export async function buildResearchDatasetFromPrices(
     portfolio,
     factorReturns,
     factorBenchmarkSymbol,
+    signalConcentration,
     metadata: {
       generatedAt: new Date().toISOString(),
       revalidateSeconds: RESEARCH_REVALIDATE_SECONDS,
@@ -85,6 +116,45 @@ export async function buildResearchDatasetFromPrices(
       symbolCount: priceResults.length,
     },
   };
+}
+
+export interface StrategySymbolRun {
+  symbol: string;
+  result: BacktestResult;
+  score: number;
+  /** True for the single highest-scoring run — the default shown on the detail page. */
+  isBest: boolean;
+}
+
+/**
+ * Run a single strategy definition against EVERY symbol in the watchlist and
+ * return each run ranked by {@link quickResearchScore} (best first, `isBest` flagged).
+ *
+ * This is the raw material behind the "best symbol per strategy" showcase. The
+ * detail page uses it to (a) default to the strongest symbol and (b) let the
+ * user switch to any other symbol, making the selection assumption explicit
+ * rather than hidden.
+ */
+export function runStrategyAcrossSymbols(
+  definition: StrategyDefinition,
+  pricesBySymbol: Record<string, HistoricalPriceResult>,
+): StrategySymbolRun[] {
+  const runs = DEFAULT_SYMBOLS
+    .map((symbol): StrategySymbolRun | null => {
+      const market = pricesBySymbol[symbol];
+      const benchmark = chooseBenchmark(symbol, pricesBySymbol, {
+        strategyType: definition.type,
+        selfSymbol: symbol,
+      });
+      if (!market || !benchmark || market.prices.length === 0 || benchmark.prices.length === 0) return null;
+      const result = runStrategyOnMarketCached(definition, market, benchmark);
+      return { symbol, result, score: quickResearchScore(result), isBest: false };
+    })
+    .filter((run): run is StrategySymbolRun => run !== null)
+    .sort((a, b) => b.score - a.score);
+
+  if (runs.length > 0) runs[0].isBest = true;
+  return runs;
 }
 
 /**
@@ -101,21 +171,11 @@ export function runStrategyBestSymbol(
   definition: StrategyDefinition,
   pricesBySymbol: Record<string, HistoricalPriceResult>,
 ): BacktestResult {
-  const runs = DEFAULT_SYMBOLS
-    .map((symbol) => {
-      const market = pricesBySymbol[symbol];
-      const benchmark = chooseBenchmark(symbol, pricesBySymbol, {
-        strategyType: definition.type,
-        selfSymbol: symbol,
-      });
-      if (!market || !benchmark || market.prices.length === 0 || benchmark.prices.length === 0) return null;
-      return runStrategyOnMarketCached(definition, market, benchmark);
-    })
-    .filter((result): result is BacktestResult => result !== null);
+  const runs = runStrategyAcrossSymbols(definition, pricesBySymbol);
   if (runs.length === 0) {
     throw new Error(`No usable market data for strategy ${definition.id}`);
   }
-  return runs.sort((a, b) => quickResearchScore(b) - quickResearchScore(a))[0];
+  return runs[0].result;
 }
 
 function quickResearchScore(result: BacktestResult): number {
@@ -167,8 +227,12 @@ function buildPortfolio(
   radarCandidates: ReturnType<typeof buildRadar>,
   pricesBySymbol: Record<string, HistoricalPriceResult>,
 ): PortfolioBacktest | null {
-  // Eligible legs: radar candidates + continue-observing with positive Sharpe.
+  // Eligible legs: radar candidates + continue-observing with positive Sharpe,
+  // but NEVER a leg the concentration gate flagged as a near-duplicate — the
+  // portfolio uses the same diversification decision as the paper-trade queue,
+  // so we don't blend two versions of the same bet.
   const eligible = radarCandidates
+    .filter((candidate) => !candidate.redundancy?.demoted)
     .filter((candidate) =>
       candidate.status === "radar candidate" ||
       (candidate.status === "continue observing" && candidate.result.metrics.sharpe > 0.5),

@@ -1,6 +1,7 @@
 import type { BacktestResult, EquityPoint } from "@/types/backtest";
 import type { HistoricalPriceResult } from "@/types/market";
-import { dailyReturns, maxDrawdownFromSeries } from "./indicators";
+import { dailyReturns, maxDrawdownFromSeries, pearson } from "./indicators";
+import { effectiveBets } from "./signalConcentration";
 
 const TRADING_DAYS = 252;
 
@@ -52,6 +53,8 @@ export interface PortfolioBacktest {
   metrics: PortfolioMetrics;
   correlation: CorrelationCell[];
   averagePairwiseCorrelation: number;
+  /** Effective number of independent bets across the legs (same N_eff math as the radar panel). */
+  effectiveBets: number;
   benchmarkSymbol: string;
   benchmarkProvider: string;
   rebalance: "buy-and-hold within legs";
@@ -206,6 +209,7 @@ export function runPortfolioBacktest(
     },
     correlation,
     averagePairwiseCorrelation,
+    effectiveBets: effectiveBets(legContributions.length, averagePairwiseCorrelation),
     benchmarkSymbol: benchmark.symbol,
     benchmarkProvider: benchmark.provider,
     rebalance: "buy-and-hold within legs",
@@ -251,28 +255,6 @@ function drawdownSeries(equity: number[]): number[] {
     peak = Math.max(peak, value);
     return peak === 0 ? 0 : value / peak - 1;
   });
-}
-
-function pearson(a: number[], b: number[]): number {
-  const n = Math.min(a.length, b.length);
-  if (n < 2) return 0;
-  const x = a.slice(0, n);
-  const y = b.slice(0, n);
-  const meanX = x.reduce((sum, value) => sum + value, 0) / n;
-  const meanY = y.reduce((sum, value) => sum + value, 0) / n;
-  let num = 0;
-  let denomX = 0;
-  let denomY = 0;
-  for (let i = 0; i < n; i += 1) {
-    const dx = x[i] - meanX;
-    const dy = y[i] - meanY;
-    num += dx * dy;
-    denomX += dx * dx;
-    denomY += dy * dy;
-  }
-  const denom = Math.sqrt(denomX * denomY);
-  if (denom === 0) return 0;
-  return num / denom;
 }
 
 export const __testing = { intersectDates, alignSeries, pearson, drawdownSeries };

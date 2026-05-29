@@ -16,6 +16,16 @@ export interface RadarCandidate {
   result: BacktestResult;
   reasons: string[];
   nextAction: string;
+  /**
+   * Set when the concentration gate found this candidate to be a near-duplicate
+   * of a higher-ranked one. `demoted` means it was downgraded out of the radar-
+   * candidate tier so capital isn't allocated twice to the same bet.
+   */
+  redundancy?: {
+    correlatedWith: string;
+    correlation: number;
+    demoted: boolean;
+  };
 }
 
 export interface PaperObservation {

@@ -1,15 +1,20 @@
 import type { PaperAccountSummary, PaperObservation, RadarCandidate } from "@/types/strategy";
 
 const SIMULATED_CAPITAL = 100_000;
-const MAX_OBSERVATION_SLOTS = 3;
+/** Hard ceiling on simultaneous paper observations, regardless of how many candidates pass. */
+export const MAX_OBSERVATION_SLOTS = 3;
 const POSITION_FRACTION = 0.2;
 const MAX_TOTAL_EXPOSURE = 0.6;
 const MAX_CONCENTRATION = 0.25;
 const DRAWDOWN_PAUSE_LEVEL = -0.3;
 const DRAWDOWN_WATCH_LEVEL = -0.2;
 
-export function buildPaperObservations(candidates: RadarCandidate[]): PaperObservation[] {
-  const selected = candidates.filter((candidate) => candidate.status === "radar candidate").slice(0, MAX_OBSERVATION_SLOTS);
+export function buildPaperObservations(
+  candidates: RadarCandidate[],
+  maxSlots: number = MAX_OBSERVATION_SLOTS,
+): PaperObservation[] {
+  const slots = Math.max(0, Math.min(MAX_OBSERVATION_SLOTS, Math.floor(maxSlots)));
+  const selected = candidates.filter((candidate) => candidate.status === "radar candidate").slice(0, slots);
   return selected.map((candidate) => {
     const result = candidate.result;
     const lastSignal = result.signals[result.signals.length - 1];
@@ -34,7 +39,14 @@ export function buildPaperObservations(candidates: RadarCandidate[]): PaperObser
   });
 }
 
-export function buildPaperAccountSummary(observations: PaperObservation[]): PaperAccountSummary {
+export function buildPaperAccountSummary(
+  observations: PaperObservation[],
+  options: { maxSlots?: number; slotNote?: string } = {},
+): PaperAccountSummary {
+  const observationSlots = Math.max(
+    0,
+    Math.min(MAX_OBSERVATION_SLOTS, Math.floor(options.maxSlots ?? MAX_OBSERVATION_SLOTS)),
+  );
   const activeObservations = observations.filter((observation) => observation.status === "active" || observation.status === "holding").length;
   const totalAllocatedCapital = activeObservations * SIMULATED_CAPITAL * POSITION_FRACTION;
   const exposurePct = totalAllocatedCapital / SIMULATED_CAPITAL;
@@ -56,7 +68,7 @@ export function buildPaperAccountSummary(observations: PaperObservation[]): Pape
 
   return {
     simulatedCapital: SIMULATED_CAPITAL,
-    observationSlots: MAX_OBSERVATION_SLOTS,
+    observationSlots,
     activeObservations,
     totalAllocatedCapital,
     exposurePct,
@@ -69,6 +81,8 @@ export function buildPaperAccountSummary(observations: PaperObservation[]): Pape
       "No broker connection, live order routing, or execution automation is enabled.",
       `Each active signal is capped at ${(POSITION_FRACTION * 100).toFixed(0)}% simulated capital.`,
       `Total simulated exposure target stays below ${(MAX_TOTAL_EXPOSURE * 100).toFixed(0)}%.`,
+      options.slotNote ??
+        `Observation slots: ${observationSlots} of ${MAX_OBSERVATION_SLOTS} hard cap.`,
       "Fallback/demo market data remains labeled and is not promoted as live evidence.",
     ],
   };
