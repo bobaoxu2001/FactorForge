@@ -11,6 +11,23 @@ export default async function AIMarketPage() {
   const avgMom20 = factors.reduce((sum, factor) => sum + (factor.momentum20d ?? 0), 0) / Math.max(factors.length, 1);
   const avgVol = factors.reduce((sum, factor) => sum + (factor.volatility20d ?? 0), 0) / Math.max(factors.length, 1);
 
+  // Data-derived regime notes (computed from the live factor snapshot — no static copy).
+  const byMomentum = [...factors].filter((f) => f.momentum20d !== null).sort((a, b) => (b.momentum20d ?? 0) - (a.momentum20d ?? 0));
+  const leader = byMomentum[0];
+  const laggard = byMomentum[byMomentum.length - 1];
+  const rsiExtreme = [...factors].filter((f) => f.rsi14 !== null).sort((a, b) => Math.abs((b.rsi14 ?? 50) - 50) - Math.abs((a.rsi14 ?? 50) - 50))[0];
+  const breadthPct = factors.length > 0 ? above / factors.length : 0;
+  const derivedNotes: Array<[string, string]> = [
+    ["Trend breadth", `${above}/${factors.length} names above the 200-day average — ${breadthPct >= 0.7 ? "broad participation" : breadthPct <= 0.4 ? "narrow, defensive tape" : "mixed breadth"}.`],
+    leader && leader.momentum20d !== null
+      ? ["Momentum leader", `${leader.symbol} leads 20-day return at ${pct(leader.momentum20d)}${laggard && laggard.symbol !== leader.symbol && laggard.momentum20d !== null ? `; ${laggard.symbol} lags at ${pct(laggard.momentum20d)}` : ""}.`]
+      : ["Momentum leader", "Insufficient momentum data in the current snapshot."],
+    ["Volatility regime", `Average annualized 20-day volatility is ${pctPlain(avgVol)} — ${avgVol > 0.4 ? "elevated; tighten stops and sizing" : "controlled; continuation setups are viable"}.`],
+    rsiExtreme && rsiExtreme.rsi14 !== null
+      ? ["RSI watch", `${rsiExtreme.symbol} RSI14 at ${rsiExtreme.rsi14.toFixed(0)} is the watchlist extreme — ${rsiExtreme.rsi14 >= 70 ? "overbought" : rsiExtreme.rsi14 <= 30 ? "oversold" : "neutral"}.`]
+      : ["RSI watch", "No RSI extreme in the current snapshot."],
+  ];
+
   return (
     <div className="space-y-8">
       <header>
@@ -73,14 +90,9 @@ export default async function AIMarketPage() {
       </section>
 
       <section className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
-        {[
-          ["Growth momentum", "Strengthening across mega-cap technology leadership."],
-          ["Quality crowding", "Elevated versus recent baseline; monitor factor concentration."],
-          ["Volatility regime", "Low-volatility conditions favor defensive trend-following setups."],
-          ["Sector breadth", "Improving in semiconductors and automation proxies."],
-        ].map(([title, detail]) => (
+        {derivedNotes.map(([title, detail]) => (
           <div key={title} className="card p-4">
-            <div className="text-[10px] uppercase tracking-[0.18em] text-ink-soft">AI Research Note</div>
+            <div className="text-[10px] uppercase tracking-[0.18em] text-ink-soft">Data-Derived Note</div>
             <h2 className="mt-2 text-[15px] font-semibold text-white">{title}</h2>
             <p className="mt-2 text-[12.5px] leading-relaxed text-ink-muted">{detail}</p>
           </div>

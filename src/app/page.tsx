@@ -55,12 +55,14 @@ export default async function HomePage() {
   const rejectedCount = dataset.radarCandidates.filter((item) => item.status === "rejected").length;
   const shortlistedCount = radarCandidateCount + observingCount;
   const avgScore = top.length > 0 ? Math.round(top.reduce((sum, item) => sum + item.score, 0) / top.length) : 0;
+  const conc = dataset.signalConcentration;
+  // Real, engine-derived insights — market-summary prose + the live concentration finding.
   const aiInsights = [
-    "Growth momentum is strengthening across mega-cap technology.",
-    "Quality factor crowding is elevated versus the recent baseline.",
-    "Low-volatility regime favors defensive trend-following setups.",
-    "Sector breadth is improving in semiconductors and automation.",
-  ];
+    dataset.marketSummary.summary,
+    dataset.marketSummary.risk,
+    conc ? `${conc.strategyCount} screened strategies behave like ~${conc.effectiveStrategies.toFixed(1)} independent bets (${conc.level} overlap).` : null,
+    dataset.marketSummary.highlights[0] ?? null,
+  ].filter((item): item is string => Boolean(item)).slice(0, 4);
 
   return (
     <div className="mx-auto max-w-[1760px] space-y-5">
@@ -96,7 +98,7 @@ export default async function HomePage() {
         </div>
         <div className="relative mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
           <HeroStat label="Real data" value={`${realCount}/${priceResults.length}`} detail="active sources" />
-          <HeroStat label="US universe" value="10" detail="mega-cap + ETFs" />
+          <HeroStat label="Independent bets" value={conc ? `~${conc.effectiveStrategies.toFixed(1)}` : "—"} detail={conc ? `of ${conc.strategyCount} screened` : "mega-cap + ETFs"} />
           <HeroStat label="Radar candidates" value={String(radarCandidateCount)} detail="rule-screened" />
           <HeroStat label="Paper watch" value={String(dataset.paperObservations.length)} detail="simulation only" />
         </div>
@@ -238,6 +240,25 @@ export default async function HomePage() {
               </div>
             ))}
           </div>
+          {dataset.signalConcentration && (
+            <div
+              className={[
+                "mt-5 flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-[12px]",
+                dataset.signalConcentration.level === "high"
+                  ? "border-rose-300/30 bg-rose-300/[0.06] text-rose-100"
+                  : dataset.signalConcentration.level === "medium"
+                    ? "border-amber-300/30 bg-amber-300/[0.06] text-amber-100"
+                    : "border-emerald-300/30 bg-emerald-300/[0.06] text-emerald-100",
+              ].join(" ")}
+            >
+              <span className="uppercase tracking-wider text-ink-soft">Diversification</span>
+              <span className="num text-right">
+                {dataset.signalConcentration.strategyCount} screened ≈{" "}
+                {dataset.signalConcentration.effectiveStrategies.toFixed(1)} independent bets ·{" "}
+                {dataset.signalConcentration.level} overlap
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="card p-4 xl:col-span-4">
@@ -285,7 +306,7 @@ export default async function HomePage() {
                 </div>
                 <div>
                   <div className="text-[13px] font-semibold text-white">Insight {index + 1}</div>
-                  <div className="mt-0.5 text-[12px] text-ink-muted">AI-style deterministic memo</div>
+                  <div className="mt-0.5 text-[12px] text-ink-muted">Derived from live metrics</div>
                 </div>
               </div>
               <p className="mt-3 text-[12.5px] leading-relaxed text-ink-muted">{detail}</p>
