@@ -2,7 +2,7 @@ import { BrainCircuit, Database, LineChart, Network, Target } from "lucide-react
 import StatusBadge from "@/components/badges/StatusBadge";
 import MetricCard from "@/components/cards/MetricCard";
 import { getResearchDataset } from "@/lib/research";
-import { pct, num } from "@/lib/utils/format";
+import { pct, pctPlain, num } from "@/lib/utils/format";
 
 export const revalidate = 60 * 60;
 
@@ -34,7 +34,7 @@ export default async function FactorsPage() {
         <MetricCard label="Factor strength" value={String(strengthScore)} tone="accent" hint="Composite watchlist score" />
         <MetricCard label="Trend breadth" value={`${trendCount}/${factors.length}`} hint="Above SMA200" />
         <MetricCard label="Avg 60d momentum" value={pct(avgMomentum)} tone={avgMomentum >= 0 ? "positive" : "negative"} />
-        <MetricCard label="Avg 20d volatility" value={pct(avgVol)} />
+        <MetricCard label="Avg 20d volatility" value={pctPlain(avgVol)} />
       </section>
 
       <section className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
@@ -109,7 +109,7 @@ export default async function FactorsPage() {
                 <td className="px-4 py-3 font-semibold text-ink">{factor.symbol}</td>
                 <td className="num px-4 py-3 text-right">{factor.momentum20d === null ? "n/a" : pct(factor.momentum20d)}</td>
                 <td className="num px-4 py-3 text-right">{factor.momentum60d === null ? "n/a" : pct(factor.momentum60d)}</td>
-                <td className="num px-4 py-3 text-right">{factor.volatility20d === null ? "n/a" : pct(factor.volatility20d)}</td>
+                <td className="num px-4 py-3 text-right">{factor.volatility20d === null ? "n/a" : pctPlain(factor.volatility20d)}</td>
                 <td className="num px-4 py-3 text-right">{factor.volumeSurge === null ? "n/a" : `${num(factor.volumeSurge)}x`}</td>
                 <td className="num px-4 py-3 text-right">{factor.rsi14 === null ? "n/a" : num(factor.rsi14, 1)}</td>
                 <td className="px-4 py-3"><StatusBadge status={factor.aboveSma200 ? "above SMA200" : "below SMA200"} /></td>

@@ -34,7 +34,7 @@ export default async function MyWatchlistPage() {
 
       <section className="card p-5">
         <div className="panel-title">Add a symbol</div>
-        <AddSymbolForm />
+        <AddSymbolForm entryCount={entries.length} />
       </section>
 
       <section className="card overflow-x-auto">

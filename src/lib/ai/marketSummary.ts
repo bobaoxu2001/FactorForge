@@ -1,5 +1,5 @@
 import type { FactorSnapshot } from "@/types/market";
-import { pct } from "@/lib/utils/format";
+import { pct, pctPlain } from "@/lib/utils/format";
 import { boundedSet } from "@/lib/utils/boundedCache";
 import { callDeepseekJson, isDeepseekConfigured } from "./deepseek";
 
@@ -150,7 +150,7 @@ function buildTemplateSummary(factors: FactorSnapshot[]): MarketSummary {
 
   return {
     tone,
-    summary: `${aboveTrend}/${factors.length} symbols in the default watchlist are above SMA200. Average 20-day return is ${pct(avgMomentum20)} and average annualized 20-day volatility is about ${pct(avgVol)}.`,
+    summary: `${aboveTrend}/${factors.length} symbols in the default watchlist are above SMA200. Average 20-day return is ${pct(avgMomentum20)} and average annualized 20-day volatility is about ${pctPlain(avgVol)}.`,
     risk: avgVol > 0.4
       ? "Volatility is elevated; breakout strategies need stricter stops and position sizing."
       : "Volatility is within an observable range, but concentration and drawdown still need monitoring.",

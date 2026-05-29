@@ -4,7 +4,7 @@ import MetricCard from "@/components/cards/MetricCard";
 import StatusBadge from "@/components/badges/StatusBadge";
 import EmptyState from "@/components/research/EmptyState";
 import { getResearchDataset } from "@/lib/research";
-import { pct, usd } from "@/lib/utils/format";
+import { pct, pctPlain, usd } from "@/lib/utils/format";
 
 export const revalidate = 60 * 60;
 
@@ -36,7 +36,7 @@ export default async function PaperTradingPage() {
           <MetricCard label="Sim account" value={usd(paperAccount.simulatedCapital)} />
           <MetricCard label="Slots used" value={`${paperObservations.length}/${paperAccount.observationSlots}`} />
           <MetricCard label="Active signals" value={String(paperAccount.activeObservations)} />
-          <MetricCard label="Exposure" value={pct(paperAccount.exposurePct)} tone={paperAccount.exposurePct > 0.6 ? "negative" : "accent"} />
+          <MetricCard label="Exposure" value={pctPlain(paperAccount.exposurePct)} tone={paperAccount.exposurePct > 0.6 ? "negative" : "accent"} />
           <MetricCard label="Max observed DD" value={pct(paperAccount.maxObservedDrawdown)} tone={paperAccount.maxObservedDrawdown < -0.2 ? "negative" : "default"} />
           <MetricCard label="Avg score" value={String(paperAccount.averageRadarScore)} tone="positive" />
         </div>

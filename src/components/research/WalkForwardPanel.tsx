@@ -1,5 +1,5 @@
 import type { WalkForwardSplit } from "@/lib/quant/walkForward";
-import { num, pct } from "@/lib/utils/format";
+import { num, pct, pctPlain } from "@/lib/utils/format";
 
 interface Props {
   split: WalkForwardSplit | null;
@@ -74,7 +74,7 @@ function WindowCard({ label, window, accent }: { label: string; window: WalkForw
         <dt className="text-ink-soft">Trades</dt>
         <dd className="num text-right text-ink">{window.tradeCount}</dd>
         <dt className="text-ink-soft">Win rate</dt>
-        <dd className="num text-right text-ink">{pct(window.winRate)}</dd>
+        <dd className="num text-right text-ink">{pctPlain(window.winRate)}</dd>
       </dl>
     </div>
   );

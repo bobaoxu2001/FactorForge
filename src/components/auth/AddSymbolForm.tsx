@@ -1,12 +1,16 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { addWatchlistSymbolAction, type WatchlistFormState } from "@/lib/auth/actions";
 
-export default function AddSymbolForm() {
+export default function AddSymbolForm({ entryCount }: { entryCount: number }) {
   const [state, formAction] = useFormState<WatchlistFormState, FormData>(addWatchlistSymbolAction, {});
   const inputRef = useRef<HTMLInputElement>(null);
+  const prevCount = useRef(entryCount);
+  // Hide stale add feedback once the list changes for a reason unrelated to this
+  // form (e.g. removing a row), so a leftover error/success doesn't linger.
+  const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     // Clear the field after a successful add so the next symbol can be typed.
@@ -15,6 +19,17 @@ export default function AddSymbolForm() {
       inputRef.current.focus();
     }
   }, [state.added]);
+
+  // A fresh submit (add attempt) should always surface its own result.
+  useEffect(() => {
+    setDismissed(false);
+  }, [state]);
+
+  // A drop in entry count means a removal happened elsewhere — clear stale feedback.
+  useEffect(() => {
+    if (entryCount < prevCount.current) setDismissed(true);
+    prevCount.current = entryCount;
+  }, [entryCount]);
 
   return (
     <div>
@@ -33,12 +48,12 @@ export default function AddSymbolForm() {
           1–8 alphanumeric characters. Duplicate adds are ignored.
         </span>
       </form>
-      {state.error && (
+      {!dismissed && state.error && (
         <div className="mt-3 rounded-xl border border-rose-300/35 bg-rose-400/10 px-3 py-2 text-[12.5px] text-rose-100">
           {state.error}
         </div>
       )}
-      {state.added && (
+      {!dismissed && state.added && (
         <div className="mt-3 rounded-xl border border-emerald-300/30 bg-emerald-400/10 px-3 py-2 text-[12.5px] text-emerald-100">
           Added {state.added} to your watchlist.
         </div>

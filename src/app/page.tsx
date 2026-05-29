@@ -16,7 +16,7 @@ import DataSourceStatus from "@/components/research/DataSourceStatus";
 import EmptyState from "@/components/research/EmptyState";
 import StatusBadge from "@/components/badges/StatusBadge";
 import { getResearchDataset } from "@/lib/research";
-import { pct, num } from "@/lib/utils/format";
+import { pct, pctPlain, num } from "@/lib/utils/format";
 import type { EquityPoint } from "@/types/backtest";
 import type { HistoricalPriceResult } from "@/types/market";
 import type { RadarCandidate } from "@/types/strategy";
@@ -247,7 +247,7 @@ export default async function HomePage() {
               <div className="mt-4 grid grid-cols-4 divide-x divide-line rounded-xl border border-line bg-white/[0.025] py-3 text-center">
                 <RadarStat label="Watching" value={dataset.paperObservations.length} />
                 <RadarStat label="Return" value={pct(paper.simulatedReturn)} />
-                <RadarStat label="Exposure" value={pct(dataset.paperAccount.exposurePct)} />
+                <RadarStat label="Exposure" value={pctPlain(dataset.paperAccount.exposurePct)} />
                 <RadarStat label="Risk" value={dataset.paperAccount.riskBudgetStatus} />
               </div>
               <div className="mt-4 rounded-xl border border-line bg-white/[0.025] p-3">
@@ -394,7 +394,7 @@ function LiveResearchCase({ candidate, fallbackCount }: { candidate: RadarCandid
         <CaseMetric label="Annualized" value={pct(result.metrics.annualizedReturn)} tone="positive" />
         <CaseMetric label="Sharpe" value={num(result.metrics.sharpe)} />
         <CaseMetric label="Max DD" value={pct(result.metrics.maxDrawdown)} tone="negative" />
-        <CaseMetric label="Win rate" value={pct(result.metrics.winRate)} />
+        <CaseMetric label="Win rate" value={pctPlain(result.metrics.winRate)} />
       </div>
 
       <div className="relative mt-4 grid grid-cols-1 gap-2 md:grid-cols-4">

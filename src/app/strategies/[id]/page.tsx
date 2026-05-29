@@ -15,7 +15,7 @@ import { attributeFactors } from "@/lib/quant/factorAttribution";
 import { STRATEGY_CATALOG } from "@/data/strategyCatalog";
 import { generateStrategyExplanation } from "@/lib/ai/strategyExplainer";
 import { getResearchDataset } from "@/lib/research";
-import { num, pct, usd } from "@/lib/utils/format";
+import { num, pct, pctPlain, usd } from "@/lib/utils/format";
 
 export const revalidate = 60 * 60;
 
@@ -82,9 +82,15 @@ export default async function StrategyDetailPage({ params }: { params: { id: str
         <MetricCard label="Excess" value={pct(result.metrics.excessReturn)} tone="accent" />
         <MetricCard label="Max drawdown" value={pct(result.metrics.maxDrawdown)} />
         <MetricCard label="Sharpe" value={num(result.metrics.sharpe)} />
-        <MetricCard label="Win rate" value={pct(result.metrics.winRate)} />
+        <MetricCard label="Win rate" value={pctPlain(result.metrics.winRate)} />
         <MetricCard label="Trades" value={String(result.metrics.tradeCount)} />
       </section>
+
+      <p className="-mt-3 text-[11.5px] leading-relaxed text-ink-soft">
+        Benchmark and excess are measured against buy-and-hold of {result.symbol} over the same window. A long-only,
+        risk-managed rule that trades infrequently is expected to trail a strong buy-and-hold tape — the goal here is
+        risk-adjusted behavior (Sharpe, drawdown), not beating the index.
+      </p>
 
       <section className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         <div className="lg:col-span-2"><EquityCurveChart data={result.equityCurve} /></div>

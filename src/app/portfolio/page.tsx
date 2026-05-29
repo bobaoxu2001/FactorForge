@@ -3,7 +3,7 @@ import CorrelationMatrix from "@/components/research/CorrelationMatrix";
 import MetricCard from "@/components/cards/MetricCard";
 import StatusBadge from "@/components/badges/StatusBadge";
 import { getResearchDataset } from "@/lib/research";
-import { num, pct } from "@/lib/utils/format";
+import { num, pct, pctPlain } from "@/lib/utils/format";
 
 export const revalidate = 60 * 60;
 
@@ -54,10 +54,10 @@ export default async function PortfolioPage() {
         <MetricCard label="Annualized" value={pct(portfolio.metrics.annualizedReturn)} tone="positive" />
         <MetricCard label={`vs ${portfolio.benchmarkSymbol}`} value={pct(portfolio.metrics.excessReturn)} tone="accent" />
         <MetricCard label="Sharpe" value={num(portfolio.metrics.sharpe)} />
-        <MetricCard label="Volatility" value={pct(portfolio.metrics.volatility)} />
+        <MetricCard label="Volatility" value={pctPlain(portfolio.metrics.volatility)} />
         <MetricCard label="Max drawdown" value={pct(portfolio.metrics.maxDrawdown)} />
         <MetricCard label="Avg correlation" value={num(portfolio.averagePairwiseCorrelation)} />
-        <MetricCard label="Max concentration" value={pct(concentration)} />
+        <MetricCard label="Max concentration" value={pctPlain(concentration)} />
       </section>
 
       <section className="grid grid-cols-1 gap-5 lg:grid-cols-[1.45fr_1fr]">

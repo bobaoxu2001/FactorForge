@@ -1,7 +1,7 @@
 import MarketInsightCard from "@/components/cards/MarketInsightCard";
 import StatusBadge from "@/components/badges/StatusBadge";
 import { getResearchDataset } from "@/lib/research";
-import { pct, num } from "@/lib/utils/format";
+import { pct, pctPlain, num } from "@/lib/utils/format";
 
 export const revalidate = 60 * 60;
 
@@ -52,7 +52,7 @@ export default async function AIMarketPage() {
       <section className="grid grid-cols-1 gap-3 md:grid-cols-4">
         <MarketInsightCard label="Above SMA200" value={`${above}/${factors.length}`} detail="Trend filter across the default watchlist." />
         <MarketInsightCard label="Average 20d return" value={pct(avgMom20)} detail="Calculated from 20-day close-to-close returns." />
-        <MarketInsightCard label="Average 20d volatility" value={pct(avgVol)} detail="Annualized from daily returns." />
+        <MarketInsightCard label="Average 20d volatility" value={pctPlain(avgVol)} detail="Annualized from daily returns." />
         <MarketInsightCard label="Adjusted sources" value={`${metadata.adjustedCount}/${metadata.symbolCount}`} detail="Corporate-action-adjusted price series used when available." />
       </section>
 
@@ -65,7 +65,7 @@ export default async function AIMarketPage() {
             </div>
             <div className="mt-3 space-y-1.5 text-[12px] text-ink-muted">
               <div className="flex justify-between"><span>Mom 20d</span><span className="num text-ink">{factor.momentum20d === null ? "n/a" : pct(factor.momentum20d)}</span></div>
-              <div className="flex justify-between"><span>Vol 20d</span><span className="num text-ink">{factor.volatility20d === null ? "n/a" : pct(factor.volatility20d)}</span></div>
+              <div className="flex justify-between"><span>Vol 20d</span><span className="num text-ink">{factor.volatility20d === null ? "n/a" : pctPlain(factor.volatility20d)}</span></div>
               <div className="flex justify-between"><span>RSI</span><span className="num text-ink">{factor.rsi14 === null ? "n/a" : num(factor.rsi14, 1)}</span></div>
             </div>
           </div>

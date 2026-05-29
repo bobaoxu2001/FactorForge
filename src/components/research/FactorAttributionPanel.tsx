@@ -1,5 +1,5 @@
 import type { FactorAttribution } from "@/lib/quant/factorAttribution";
-import { num, pct } from "@/lib/utils/format";
+import { num, pct, pctPlain } from "@/lib/utils/format";
 
 interface Props {
   attribution: FactorAttribution | null;
@@ -56,7 +56,7 @@ export default function FactorAttributionPanel({ attribution }: Props) {
 
       <div className="mt-4 grid grid-cols-2 gap-3 text-[12.5px] md:grid-cols-4">
         <Mini label="R²" value={num(attribution.rSquared, 3)} />
-        <Mini label="Residual vol (ann.)" value={pct(attribution.residualVolatility)} />
+        <Mini label="Residual vol (ann.)" value={pctPlain(attribution.residualVolatility)} />
         <Mini label="Observations" value={String(attribution.observations)} />
         <Mini label="Sample" value={`${attribution.startDate} → ${attribution.endDate}`} />
       </div>

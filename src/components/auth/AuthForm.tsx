@@ -33,7 +33,8 @@ export default function AuthForm({ mode, action }: Props) {
   const copy = COPY[mode];
 
   return (
-    <div className="mx-auto max-w-md py-12">
+    <div className="flex min-h-[72vh] items-center justify-center py-12">
+      <div className="w-full max-w-md">
       <div className="card p-6">
         <div className="section-label">{copy.title}</div>
         <p className="mt-3 text-[13px] leading-relaxed text-ink-muted">{copy.subtitle}</p>
@@ -78,6 +79,7 @@ export default function AuthForm({ mode, action }: Props) {
             {copy.altCta}
           </Link>
         </div>
+      </div>
       </div>
     </div>
   );
