@@ -86,6 +86,32 @@ export function dailyReturns(values: number[]): number[] {
   return values.slice(1).map((value, index) => value / values[index] - 1);
 }
 
+/** Pearson correlation of two equal-length numeric series. Returns 0 when undefined. */
+export function pearson(a: number[], b: number[]): number {
+  const n = Math.min(a.length, b.length);
+  if (n < 2) return 0;
+  let meanA = 0;
+  let meanB = 0;
+  for (let i = 0; i < n; i += 1) {
+    meanA += a[i];
+    meanB += b[i];
+  }
+  meanA /= n;
+  meanB /= n;
+  let num = 0;
+  let dA = 0;
+  let dB = 0;
+  for (let i = 0; i < n; i += 1) {
+    const x = a[i] - meanA;
+    const y = b[i] - meanB;
+    num += x * y;
+    dA += x * x;
+    dB += y * y;
+  }
+  const denom = Math.sqrt(dA * dB);
+  return denom === 0 ? 0 : num / denom;
+}
+
 export function realizedVolatility(values: number[], period: number): Array<number | null> {
   const changes = percentChange(values);
   return values.map((_, index) => {
