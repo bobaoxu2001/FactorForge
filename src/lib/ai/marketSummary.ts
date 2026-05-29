@@ -1,5 +1,6 @@
 import type { FactorSnapshot } from "@/types/market";
 import { pct } from "@/lib/utils/format";
+import { boundedSet } from "@/lib/utils/boundedCache";
 import { callDeepseekJson, isDeepseekConfigured } from "./deepseek";
 
 export interface MarketSummary {
@@ -18,6 +19,9 @@ interface LlmNarrative {
 }
 
 const summaryCache = new Map<string, MarketSummary>();
+// Keyed by day + symbol set, so this realistically holds only a handful of
+// entries — but cap it so a long-lived process can't accumulate forever.
+const SUMMARY_CACHE_MAX = 256;
 
 export async function generateMarketSummary(factors: FactorSnapshot[]): Promise<MarketSummary> {
   const baseline = buildTemplateSummary(factors);
@@ -26,7 +30,7 @@ export async function generateMarketSummary(factors: FactorSnapshot[]): Promise<
   if (cached) return cached;
 
   if (!isDeepseekConfigured()) {
-    summaryCache.set(cacheKey, baseline);
+    boundedSet(summaryCache, cacheKey, baseline, SUMMARY_CACHE_MAX);
     return baseline;
   }
 
@@ -58,7 +62,7 @@ export async function generateMarketSummary(factors: FactorSnapshot[]): Promise<
       }
     : baseline;
 
-  summaryCache.set(cacheKey, summary);
+  boundedSet(summaryCache, cacheKey, summary, SUMMARY_CACHE_MAX);
   return summary;
 }
 

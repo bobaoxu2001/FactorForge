@@ -1,5 +1,6 @@
 import type { BacktestResult } from "@/types/backtest";
 import { pct, num } from "@/lib/utils/format";
+import { boundedSet } from "@/lib/utils/boundedCache";
 import { callDeepseekJson, isDeepseekConfigured } from "./deepseek";
 
 export interface StrategyExplanation {
@@ -26,6 +27,9 @@ interface LlmNarrative {
 }
 
 const explanationCache = new Map<string, StrategyExplanation>();
+// Keyed by strategy + symbol + last-signal date; bounded so it can't grow
+// without limit over a long-lived process.
+const EXPLANATION_CACHE_MAX = 256;
 
 export async function generateStrategyExplanation(result: BacktestResult): Promise<StrategyExplanation> {
   const cacheKey = buildCacheKey(result);
@@ -35,7 +39,7 @@ export async function generateStrategyExplanation(result: BacktestResult): Promi
   const baseline = buildTemplateExplanation(result);
 
   if (!isDeepseekConfigured()) {
-    explanationCache.set(cacheKey, baseline);
+    boundedSet(explanationCache, cacheKey, baseline, EXPLANATION_CACHE_MAX);
     return baseline;
   }
 
@@ -63,7 +67,7 @@ export async function generateStrategyExplanation(result: BacktestResult): Promi
     ? mergeNarrative(baseline, narrative)
     : baseline;
 
-  explanationCache.set(cacheKey, explanation);
+  boundedSet(explanationCache, cacheKey, explanation, EXPLANATION_CACHE_MAX);
   return explanation;
 }
 
