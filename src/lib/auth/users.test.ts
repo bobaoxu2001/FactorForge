@@ -49,6 +49,12 @@ describe("users + watchlist persistence", () => {
     await expect(createUser(username, "short")).rejects.toMatchObject({ code: "weak_password" });
   });
 
+  it("rejects passwords beyond the bcrypt 72-byte limit", async () => {
+    const { createUser } = await import("./users");
+    const username = `t_${Math.random().toString(36).slice(2, 10)}`;
+    await expect(createUser(username, "a".repeat(73))).rejects.toMatchObject({ code: "weak_password" });
+  });
+
   it("rejects too-short usernames with invalid_username (not username_taken)", async () => {
     const { createUser } = await import("./users");
     await expect(createUser("ab", "password123")).rejects.toMatchObject({ code: "invalid_username" });

@@ -7,6 +7,23 @@ import { createLogger } from "@/lib/observability/logger";
 const log = createLogger("users");
 const SALT_ROUNDS = 10;
 
+// bcrypt only consumes the first 72 bytes of the input; anything longer is
+// silently truncated, so two long passwords sharing a 72-byte prefix would be
+// interchangeable. Reject over-long input rather than hash a truncated secret.
+const MAX_PASSWORD_BYTES = 72;
+const MIN_PASSWORD_LENGTH = 8;
+
+// A dummy hash compared against when a username doesn't exist, so a missing
+// account costs the same time as a wrong password. Without it, response timing
+// leaks which usernames are registered (enumeration). Computed once, lazily.
+let dummyHashPromise: Promise<string> | null = null;
+function getDummyHash(): Promise<string> {
+  if (!dummyHashPromise) {
+    dummyHashPromise = bcrypt.hash("timing-equalizer-not-a-real-password", SALT_ROUNDS);
+  }
+  return dummyHashPromise;
+}
+
 export interface User {
   id: string;
   username: string;
@@ -60,8 +77,11 @@ export async function createUser(usernameRaw: string, passwordRaw: string): Prom
   if (!db) throw new AuthError("db_unavailable", "Persistence layer unavailable");
   const username = normalizeUsername(usernameRaw);
   assertValidUsername(username);
-  if (passwordRaw.length < 8) {
-    throw new AuthError("weak_password", "Password must be at least 8 characters");
+  if (passwordRaw.length < MIN_PASSWORD_LENGTH) {
+    throw new AuthError("weak_password", `Password must be at least ${MIN_PASSWORD_LENGTH} characters`);
+  }
+  if (Buffer.byteLength(passwordRaw, "utf8") > MAX_PASSWORD_BYTES) {
+    throw new AuthError("weak_password", `Password must be ${MAX_PASSWORD_BYTES} bytes or fewer`);
   }
   const existing = db
     .prepare<[string], { id: string }>("SELECT id FROM users WHERE username = ?")
@@ -88,7 +108,11 @@ export async function verifyCredentials(usernameRaw: string, passwordRaw: string
   const row = db
     .prepare<[string], UserRow>("SELECT id, username, password_hash, created_at FROM users WHERE username = ?")
     .get(username);
-  if (!row) throw new AuthError("invalid_credentials", "Invalid username or password");
+  if (!row) {
+    // Equalize timing with the wrong-password path to avoid username enumeration.
+    await bcrypt.compare(passwordRaw, await getDummyHash());
+    throw new AuthError("invalid_credentials", "Invalid username or password");
+  }
   const ok = await bcrypt.compare(passwordRaw, row.password_hash);
   if (!ok) throw new AuthError("invalid_credentials", "Invalid username or password");
   return { id: row.id, username: row.username, createdAt: row.created_at };
