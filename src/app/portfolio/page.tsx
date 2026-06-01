@@ -63,8 +63,8 @@ export default async function PortfolioPage() {
         Instead of betting on one strategy, this combines the best few into a single mix — the classic
         &ldquo;don&rsquo;t put all your eggs in one basket.&rdquo; The catch it checks for: if the pieces all move
         together (high <Term term="correlation">correlation</Term>), you&rsquo;re not really diversified. The{" "}
-        <Term term="neff">effective bets</Term> number tells you how many genuinely independent bets the mix is — the
-        higher, the safer.
+        <Term term="neff">effective bets</Term> number tells you how many genuinely independent bets the mix really
+        amounts to — the higher, the safer.
       </PlainEnglish>
 
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
