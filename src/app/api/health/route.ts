@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { validateEnv } from "@/lib/config/env";
 import { getDb } from "@/lib/persistence/db";
+import { rateLimitBackend } from "@/lib/ratelimit";
 
 // Liveness/readiness probe for load balancers, container orchestrators, and
 // uptime monitors. Never cached — it must reflect the live process.
@@ -28,6 +29,7 @@ export async function GET() {
       checks: {
         database: dbUp ? "up" : "down",
         sessionConfigured: env.features.sessionConfigured,
+        rateLimitBackend: rateLimitBackend(),
       },
       features: env.features,
       warnings: env.warnings,

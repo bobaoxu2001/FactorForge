@@ -22,6 +22,8 @@ export interface EnvFeatures {
   alphaVantage: boolean;
   /** A non-default, sufficiently long session signing key is set. */
   sessionConfigured: boolean;
+  /** A shared (multi-instance-safe) rate-limit store is configured. */
+  distributedRateLimit: boolean;
 }
 
 export interface EnvValidation {
@@ -57,11 +59,19 @@ export function validateEnv(env: EnvLike = process.env): EnvValidation {
     warnings.push(`LOG_LEVEL "${env.LOG_LEVEL}" is not one of ${VALID_LOG_LEVELS.join(" | ")}; defaulting to info.`);
   }
 
+  // A shared rate-limit store needs both a REST URL and token. Accept either the
+  // Upstash or the Vercel-KV env-var names (same REST protocol).
+  const distributedRateLimit = Boolean(
+    (env.UPSTASH_REDIS_REST_URL ?? env.KV_REST_API_URL) &&
+      (env.UPSTASH_REDIS_REST_TOKEN ?? env.KV_REST_API_TOKEN),
+  );
+
   const features: EnvFeatures = {
     llm: Boolean(env.DEEPSEEK_API_KEY),
     polygon: Boolean(env.POLYGON_API_KEY),
     alphaVantage: Boolean(env.ALPHA_VANTAGE_API_KEY),
     sessionConfigured,
+    distributedRateLimit,
   };
 
   if (!features.llm) {
@@ -69,6 +79,14 @@ export function validateEnv(env: EnvLike = process.env): EnvValidation {
   }
   if (!features.polygon && !features.alphaVantage) {
     warnings.push("No secondary data provider key — relying on Yahoo with synthetic fallback only.");
+  }
+  // In production the per-process limiter is a real weakness: under multiple
+  // instances an attacker gets N× the auth attempts. Warn (don't hard-fail —
+  // a single-instance prod deploy is still legitimately protected).
+  if (isProduction && !distributedRateLimit) {
+    warnings.push(
+      "No shared rate-limit store (UPSTASH_REDIS_REST_URL/TOKEN) — auth throttling is per-process and will not hold across multiple instances.",
+    );
   }
 
   return { ok: errors.length === 0, nodeEnv, errors, warnings, features };

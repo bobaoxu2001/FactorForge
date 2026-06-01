@@ -38,6 +38,43 @@ describe("validateEnv", () => {
     expect(result.warnings.join(" ")).not.toMatch(/secondary data provider/);
   });
 
+  it("detects a distributed rate-limit store from Upstash or Vercel-KV env vars", () => {
+    expect(validateEnv({ NODE_ENV: "development", SESSION_PASSWORD: longSecret }).features.distributedRateLimit).toBe(false);
+
+    const upstash = validateEnv({
+      NODE_ENV: "development",
+      SESSION_PASSWORD: longSecret,
+      UPSTASH_REDIS_REST_URL: "https://x.upstash.io",
+      UPSTASH_REDIS_REST_TOKEN: "tok",
+    });
+    expect(upstash.features.distributedRateLimit).toBe(true);
+
+    const vercelKv = validateEnv({
+      NODE_ENV: "development",
+      SESSION_PASSWORD: longSecret,
+      KV_REST_API_URL: "https://x.kv.vercel-storage.com",
+      KV_REST_API_TOKEN: "tok",
+    });
+    expect(vercelKv.features.distributedRateLimit).toBe(true);
+  });
+
+  it("warns in production when no shared rate-limit store is configured", () => {
+    const result = validateEnv({ NODE_ENV: "production", SESSION_PASSWORD: longSecret });
+    // Still ok (single-instance prod is legitimate) but flagged.
+    expect(result.ok).toBe(true);
+    expect(result.warnings.join(" ")).toMatch(/shared rate-limit store/);
+  });
+
+  it("does not warn about rate limiting when a shared store is configured in production", () => {
+    const result = validateEnv({
+      NODE_ENV: "production",
+      SESSION_PASSWORD: longSecret,
+      UPSTASH_REDIS_REST_URL: "https://x.upstash.io",
+      UPSTASH_REDIS_REST_TOKEN: "tok",
+    });
+    expect(result.warnings.join(" ")).not.toMatch(/shared rate-limit store/);
+  });
+
   it("warns on an invalid LOG_LEVEL", () => {
     const result = validateEnv({ NODE_ENV: "development", SESSION_PASSWORD: longSecret, LOG_LEVEL: "verbose" });
     expect(result.warnings.join(" ")).toMatch(/LOG_LEVEL/);
