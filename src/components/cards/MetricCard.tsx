@@ -1,8 +1,15 @@
+import Term from "@/components/learn/Term";
+
 interface Props {
   label: string;
   value: string;
   hint?: string;
   tone?: "default" | "positive" | "negative" | "accent";
+  /**
+   * Optional glossary key. When set, the label becomes a hoverable plain-English
+   * explainer for beginners (experts just see a faint dotted underline).
+   */
+  termId?: string;
 }
 
 const tones: Record<NonNullable<Props["tone"]>, string> = {
@@ -12,11 +19,13 @@ const tones: Record<NonNullable<Props["tone"]>, string> = {
   accent: "text-brand-blue",
 };
 
-export default function MetricCard({ label, value, hint, tone = "default" }: Props) {
+export default function MetricCard({ label, value, hint, tone = "default", termId }: Props) {
   return (
     <div className="card group relative overflow-hidden p-4">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-300/35 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-      <div className="text-[10.5px] uppercase tracking-[0.18em] text-ink-soft">{label}</div>
+      <div className="text-[10.5px] uppercase tracking-[0.18em] text-ink-soft">
+        {termId ? <Term term={termId}>{label}</Term> : label}
+      </div>
       <div className={`num mt-2 text-[24px] font-semibold tracking-tight ${tones[tone]}`}>{value}</div>
       {hint && <div className="mt-1 text-[12px] text-ink-muted">{hint}</div>}
     </div>

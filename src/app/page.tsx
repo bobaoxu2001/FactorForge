@@ -4,6 +4,7 @@ import {
   BrainCircuit,
   CheckCircle2,
   Database,
+  GraduationCap,
   LineChart,
   Network,
   Radar,
@@ -82,6 +83,14 @@ export default async function HomePage() {
             <p className="mt-5 max-w-2xl text-[15px] leading-7 text-ink-muted">
               A research workflow prototype that fetches 3Y Yahoo Finance OHLCV, builds factor signals, runs cost-aware backtests, and decides whether a strategy earns radar observation.
             </p>
+            <Link
+              href="/learn"
+              className="mt-4 inline-flex items-center gap-2 rounded-full border border-cyan-300/30 bg-cyan-300/[0.07] px-3.5 py-1.5 text-[12.5px] text-cyan-100 transition-colors hover:border-cyan-300/55 hover:bg-cyan-300/[0.12]"
+            >
+              <GraduationCap className="h-3.5 w-3.5" />
+              New to stocks? Start with Stocks 101 — every term in plain English
+              <span aria-hidden>→</span>
+            </Link>
             <div className="mt-6 grid grid-cols-2 gap-2 text-[12px] text-ink-muted">
               <EvidencePill label="Real Yahoo Finance data" tone="green" />
               <EvidencePill label={`${universeSize} names · ${sectorBreadth} sectors`} />

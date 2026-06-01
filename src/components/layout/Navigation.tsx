@@ -8,6 +8,7 @@ import {
   Database,
   FileText,
   Gauge,
+  GraduationCap,
   LineChart,
   Menu,
   Network,
@@ -24,6 +25,7 @@ import { useState } from "react";
 
 const items = [
   { href: "/", label: "Overview", icon: Gauge },
+  { href: "/learn", label: "Learn (Stocks 101)", icon: GraduationCap },
   { href: "/data", label: "Data", icon: Database },
   { href: "/factors", label: "Factors", icon: Network },
   { href: "/strategies", label: "Strategies", icon: LineChart },
