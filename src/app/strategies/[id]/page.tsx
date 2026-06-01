@@ -125,13 +125,13 @@ export default async function StrategyDetailPage({
       </section>
 
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <MetricCard label="Total return" value={pct(result.metrics.totalReturn)} tone="positive" />
-        <MetricCard label="Annualized" value={pct(result.metrics.annualizedReturn)} tone="positive" />
-        <MetricCard label="Benchmark" value={pct(result.metrics.benchmarkReturn)} />
+        <MetricCard label="Total return" value={pct(result.metrics.totalReturn)} tone="positive" termId="return" />
+        <MetricCard label="Annualized" value={pct(result.metrics.annualizedReturn)} tone="positive" termId="annualized" />
+        <MetricCard label="Benchmark" value={pct(result.metrics.benchmarkReturn)} termId="benchmark" />
         <MetricCard label="Excess" value={pct(result.metrics.excessReturn)} tone="accent" />
-        <MetricCard label="Max drawdown" value={pct(result.metrics.maxDrawdown)} />
-        <MetricCard label="Sharpe" value={num(result.metrics.sharpe)} />
-        <MetricCard label="Win rate" value={pctPlain(result.metrics.winRate)} />
+        <MetricCard label="Max drawdown" value={pct(result.metrics.maxDrawdown)} termId="drawdown" />
+        <MetricCard label="Sharpe" value={num(result.metrics.sharpe)} termId="sharpe" />
+        <MetricCard label="Win rate" value={pctPlain(result.metrics.winRate)} termId="winrate" />
         <MetricCard label="Trades" value={String(result.metrics.tradeCount)} />
       </section>
 
