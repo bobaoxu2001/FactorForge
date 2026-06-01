@@ -1,6 +1,8 @@
 import { CheckCircle2, Database, ShieldAlert } from "lucide-react";
 import MetricCard from "@/components/cards/MetricCard";
 import StatusBadge from "@/components/badges/StatusBadge";
+import PlainEnglish from "@/components/learn/PlainEnglish";
+import Term from "@/components/learn/Term";
 import { getResearchDataset } from "@/lib/research";
 
 export const revalidate = 60 * 60;
@@ -15,9 +17,15 @@ export default async function DataPage() {
         <div className="section-label">L0 Data</div>
         <h1 className="mt-2 text-[32px] font-semibold tracking-tight text-ink">Market Data Control Plane</h1>
         <p className="mt-2 max-w-3xl text-[14px] leading-relaxed text-ink-muted">
-          The default provider is Yahoo Finance chart API for US equity daily OHLCV. Every result carries provider, freshness, adjusted-close, and fallback metadata.
+          The default provider is Yahoo Finance chart API for US equity daily <Term term="ohlcv">OHLCV</Term>. Every result carries provider, freshness, adjusted-close, and fallback metadata.
         </p>
       </header>
+
+      <PlainEnglish>
+        Everything on this platform is built from real daily price history — the open, high, low, close, and trading
+        volume for each stock. This page is the receipts: where each number came from, how fresh it is, and whether any
+        stand-in <Term term="fallback">demo data</Term> was used (it&rsquo;s always labeled, never faked).
+      </PlainEnglish>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
         <MetricCard label="Symbols" value={String(rows.length)} />

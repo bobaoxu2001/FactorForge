@@ -3,6 +3,8 @@ import MetricCard from "@/components/cards/MetricCard";
 import StatusBadge from "@/components/badges/StatusBadge";
 import EmptyState from "@/components/research/EmptyState";
 import SignalConcentrationPanel from "@/components/research/SignalConcentrationPanel";
+import PlainEnglish from "@/components/learn/PlainEnglish";
+import Term from "@/components/learn/Term";
 import { getResearchDataset } from "@/lib/research";
 import { num, pct } from "@/lib/utils/format";
 
@@ -16,9 +18,15 @@ export default async function RadarPage() {
         <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">L3 Radar</div>
         <h1 className="mt-1 text-[28px] font-semibold text-ink">Strategy Radar Screening</h1>
         <p className="mt-2 max-w-3xl text-[14px] leading-relaxed text-ink-muted">
-          Scoring rules live in code: annualized return, Sharpe, drawdown, win rate, trade count, data provenance, and cost-aware backtest assumptions determine candidate status.
+          Scoring rules live in code: <Term term="annualized">annualized return</Term>, <Term term="sharpe">Sharpe</Term>, <Term term="drawdown">drawdown</Term>, <Term term="winrate">win rate</Term>, trade count, data provenance, and cost-aware <Term term="backtest">backtest</Term> assumptions determine candidate status.
         </p>
       </header>
+
+      <PlainEnglish>
+        Think of this as a talent scout for trading strategies. Each strategy is graded on how much it made,
+        how bumpy the ride was, and how reliable the evidence is. The best-graded ones become
+        &ldquo;candidates&rdquo; worth watching; the risky ones get rejected. Nothing here trades real money.
+      </PlainEnglish>
 
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <MetricCard label="Total" value={String(radarCandidates.length)} />
