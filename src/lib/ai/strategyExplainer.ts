@@ -194,7 +194,7 @@ function buildTemplateExplanation(result: BacktestResult): StrategyExplanation {
   const thesis = `${result.type} thesis: prioritize ${result.symbol} only when factor evidence, trend structure, and risk-adjusted backtest behavior align. The current model reads the setup as ${confidenceLevel}-confidence research evidence, not a live trading instruction.`;
   const modelReasoning = `The ranking model weighs annualized return, Sharpe, drawdown containment, trade sample size, data quality, and cost-aware execution. This strategy is strongest when its signal frequency is sufficient and drawdown remains inside the radar threshold.`;
   const suggestedExperiments = [
-    "Expand the universe beyond the default mega-cap watchlist and rerun the same rule set.",
+    "Expand the universe beyond the current sector-diversified watchlist and rerun the same rule set.",
     "Test a tighter slippage and fee sensitivity range to understand implementation drag.",
     "Compare 20%, 10%, and volatility-scaled position sizing across the same signals.",
   ];
