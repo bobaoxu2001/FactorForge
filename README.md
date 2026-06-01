@@ -3,7 +3,8 @@
 [![CI](https://github.com/bobaoxu2001/FactorForge/actions/workflows/ci.yml/badge.svg)](https://github.com/bobaoxu2001/FactorForge/actions/workflows/ci.yml)
 [![Next.js 14](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![Vitest](https://img.shields.io/badge/tests-88%20passing-22c55e?logo=vitest&logoColor=white)](#testing)
+[![Vitest](https://img.shields.io/badge/tests-98%20passing-22c55e?logo=vitest&logoColor=white)](#testing)
+[![Docker](https://img.shields.io/badge/Docker-standalone-2496ed?logo=docker&logoColor=white)](#deployment)
 
 An AI quant research lab that turns daily OHLCV into factor signals, cost-aware backtests, score-weighted portfolios, and LLM-written research memos. Built as a portfolio piece for a full-stack + applied-ML role.
 
@@ -21,8 +22,10 @@ An AI quant research lab that turns daily OHLCV into factor signals, cost-aware 
 | **Concentration gate (one risk metric, five surfaces)** | Effective-number-of-bets `N_eff = N / (1 + (N-1)·ρ̄)` from pairwise return correlation. The *same* number drives: a radar diagnostic panel, demotion of near-duplicate candidates, the paper-trading slot cap, exclusion of redundant portfolio legs, and an LLM-written diversification memo. Answers "are these four strategies actually four bets, or one bet wearing four hats?". |
 | **Provider fan-out** | Composite real-data path: Yahoo → Polygon → Alpha Vantage → synthetic fallback. Each tier's failure reason is structured-logged; the UI labels which provider answered. |
 | **Persisted compute + multi-user** | SQLite stores fingerprint-keyed backtest cache (6h TTL), bcrypt-hashed users, and per-user watchlists. Iron-session cookies gate the protected routes. |
-| **Observability** | JSON-line structured logger and `/admin/cache` page showing live hit rate, per-strategy row counts, and the oldest/newest persisted entries. |
-| **CI and tests** | 88 vitest tests (engine + concentration gate + components + auth + composite-provider and DeepSeek-branch mocks) under jsdom; GitHub Actions runs lint + typecheck + test on every push. |
+| **Observability** | JSON-line structured logger, `/admin/cache` page (live hit rate, per-strategy row counts, oldest/newest entries), a `/api/health` liveness/readiness probe, and a `/api/csp-report` sink that logs CSP violations into the same JSON stream. |
+| **Hardened HTTP + auth** | Strict Content-Security-Policy plus `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, and HSTS on every response; `poweredByHeader` off. Auth adds a 7-day session TTL, constant-time login (dummy-hash compare blocks username enumeration), and a bcrypt 72-byte password guard. |
+| **Deploy-ready** | Multi-stage `Dockerfile` building Next's `standalone` server as a non-root container with a `HEALTHCHECK`, plus centralized env validation that fails fast in production on a missing `SESSION_PASSWORD`. |
+| **CI and tests** | 98 vitest tests (engine + concentration gate + components + auth + env validation + composite-provider and DeepSeek-branch mocks) under jsdom; GitHub Actions runs lint + typecheck + test on every push. |
 
 ---
 
@@ -215,18 +218,40 @@ npm run build
 | `ALPHA_VANTAGE_API_KEY` | optional | Alpha Vantage daily as a third-tier real-data source. Free-tier endpoint is NOT corporate-action adjusted; the UI surfaces that honestly. |
 | `LOG_LEVEL` | optional | `debug` / `info` / `warn` / `error`. Default `info`. Logger emits JSON lines to stdout. |
 | `SESSION_PASSWORD` | required in prod | Iron-session signing key (≥32 chars random). The app boots with a dev default if unset — set this before deploying. |
+| `SITE_URL` | optional | Public origin used for absolute metadata / OpenGraph URLs. Defaults to `http://localhost:3000`. |
+
+Env is validated centrally in `src/lib/config/env.ts`. In production a missing/short `SESSION_PASSWORD` is a hard error (`assertProductionEnv` / `/api/health` → 503); optional keys that are unset become *warnings* and the corresponding feature degrades gracefully (LLM → template, providers → Yahoo-only).
+
+---
+
+## Deployment
+
+```bash
+# Build the standalone server and run it directly
+npm run build && node .next/standalone/server.js   # serves on $PORT (default 3000)
+
+# …or build the container (multi-stage, non-root, with a HEALTHCHECK)
+docker build -t factorforge .
+docker run -p 3000:3000 -e SESSION_PASSWORD="$(openssl rand -hex 32)" factorforge
+```
+
+- **`output: "standalone"`** (next.config.js) emits a self-contained server bundle, so the runtime image ships only what it needs. `better-sqlite3` is kept as an external server package so its native `.node` binding resolves at runtime instead of being mis-bundled.
+- **Security headers** are applied to every response in `next.config.js`: a tight `Content-Security-Policy` (with `report-uri` → `/api/csp-report`), `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Permissions-Policy`, and HSTS. `poweredByHeader` is disabled.
+- **`GET /api/health`** returns `ok` / `degraded` / `unhealthy` (503) with DB reachability, wired features, and env warnings — point a load balancer or `docker HEALTHCHECK` at it.
 
 ---
 
 ## Testing
 
-88 tests across 23 files under vitest + jsdom:
+98 tests across 24 files under vitest + jsdom:
 
 - **Engine** — backtest fees + execution semantics, indicators, radar verdict logic, paper-trading risk-budget transitions + N_eff slot cap, portfolio engine (Pearson, calendar intersection, score-weighted blend, phase-shifted decorrelation).
 - **Concentration** — `effectiveBets` / `concentrationLevel` math (monotonicity, bounds), the correlation gate demoting near-duplicate candidates, and the shared pairwise-correlation builder.
 - **AI layer** — concentration-note template prose plus a mocked DeepSeek branch proving LLM prose is adopted while computed numbers are passed through (blank fields fall back via `pickString`).
 - **Components** — StatusBadge (including the `idle` state introduced when fixing the zero-observation risk-budget bug), MetricCard tone classes, CorrelationMatrix rendering + empty state.
 - **Data providers** — Yahoo and fallback adapters.
+- **Auth** — bcrypt round-trip, username-collision + validation rules, the bcrypt 72-byte password guard, and per-user watchlist isolation.
+- **Env validation** — production fail-fast on a missing session secret, dev warnings, and feature-flag detection from optional keys.
 
 Run them locally with `npm test`. CI runs the same command on every push and PR; see [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
 
@@ -239,9 +264,10 @@ Run them locally with `npm test`. CI runs the same command on every push and PR;
 - **Tailwind CSS** with a dark research-lab token system
 - **Recharts** for equity / drawdown / portfolio curves
 - **better-sqlite3** for the backtest cache + users + watchlists (WAL)
-- **bcryptjs + iron-session** for auth (hashed passwords, signed cookies)
+- **bcryptjs + iron-session** for auth (hashed passwords, signed cookies, 7-day TTL)
 - **DeepSeek** (`deepseek-chat`) via OpenAI-compatible JSON mode
 - **Vitest** + **Testing Library** + **jsdom**
+- **Docker** multi-stage build of the Next.js `standalone` server (non-root + `HEALTHCHECK`)
 - **GitHub Actions** for lint / typecheck / test on push
 
 ---

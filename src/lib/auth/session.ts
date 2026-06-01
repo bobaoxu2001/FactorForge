@@ -11,6 +11,10 @@ const COOKIE_NAME = "factorforge_session";
 
 const DEV_SECRET = "factorforge-dev-secret-do-not-use-in-production-_______";
 
+// Sessions expire after 7 days. iron-session re-derives the cookie maxAge from
+// this, so an idle cookie stops being accepted instead of living forever.
+const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
+
 function password(): string {
   const value = process.env.SESSION_PASSWORD;
   if (value && value.length >= 32) return value;
@@ -30,11 +34,13 @@ export function sessionOptions(): SessionOptions {
   return {
     password: password(),
     cookieName: COOKIE_NAME,
+    ttl: SESSION_TTL_SECONDS,
     cookieOptions: {
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,
       sameSite: "lax",
       path: "/",
+      maxAge: SESSION_TTL_SECONDS,
     },
   };
 }

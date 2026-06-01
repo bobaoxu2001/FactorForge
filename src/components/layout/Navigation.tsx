@@ -76,10 +76,10 @@ export default function Navigation() {
             <div className="text-[10px] uppercase tracking-[0.2em] text-cyan-100/60">Status</div>
             <div className="mt-1 text-[12.5px] leading-relaxed text-ink-muted">Research-only workflow. No broker connection.</div>
           </div>
-          <button className="flex h-11 w-full items-center justify-between rounded-xl border border-line bg-white/[0.035] px-3 text-[13px] text-ink-muted">
+          <Link href="/admin/cache" className="flex h-11 w-full items-center justify-between rounded-xl border border-line bg-white/[0.035] px-3 text-[13px] text-ink-muted transition-colors hover:text-ink">
             <span className="inline-flex items-center gap-3"><Settings className="h-4 w-4" /> System</span>
             <span>›</span>
-          </button>
+          </Link>
         </div>
       </aside>
 
@@ -104,19 +104,19 @@ export default function Navigation() {
             <div className="hidden rounded-lg border border-line bg-white/[0.035] px-3 py-2 text-[12px] text-ink-muted sm:block">
               {new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
             </div>
-            <button className="relative grid h-10 w-10 place-items-center rounded-lg border border-line bg-white/[0.04] text-ink-muted">
+            <Link href="/reports" aria-label="Research reports" className="relative grid h-10 w-10 place-items-center rounded-lg border border-line bg-white/[0.04] text-ink-muted transition-colors hover:text-ink">
               <Bell className="h-4 w-4" />
               <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-blue-400" />
-            </button>
-            <div className="hidden items-center gap-3 md:flex">
+            </Link>
+            <Link href="/my-watchlist" aria-label="Account and watchlist" className="hidden items-center gap-3 rounded-lg px-1.5 py-1 transition-colors hover:bg-white/[0.04] md:flex">
               <div className="grid h-10 w-10 place-items-center rounded-full border border-line bg-gradient-to-br from-blue-500/45 to-emerald-400/25 text-[12px] font-semibold text-white">
                 QR
               </div>
               <div>
-                <div className="text-[13px] font-semibold text-ink">Researcher</div>
-                <div className="text-[11px] text-ink-soft">FactorForge Lab</div>
+                <div className="text-[13px] font-semibold text-ink">Account</div>
+                <div className="text-[11px] text-ink-soft">Sign in · Watchlist</div>
               </div>
-            </div>
+            </Link>
           </div>
         </div>
       </header>
