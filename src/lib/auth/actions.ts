@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getSession } from "./session";
 import { AuthError, createUser, verifyCredentials, normalizeUsername } from "./users";
-import { checkRateLimit } from "./rateLimit";
+import { checkRateLimit } from "@/lib/ratelimit";
 import { addSymbolToWatchlist, removeSymbolFromWatchlist } from "@/lib/persistence/watchlist";
 
 export interface AuthFormState {
@@ -20,7 +20,7 @@ export interface WatchlistFormState {
 const AUTH_LIMIT = 5;
 const AUTH_WINDOW_MS = 5 * 60 * 1000;
 
-function rateLimitMessage(action: string, username: string): string | null {
+async function rateLimitMessage(action: string, username: string): Promise<string | null> {
   // Bucket by action + best-effort normalized username so a typo'd username
   // doesn't share a bucket with the real one but brute force on one is throttled.
   let key: string;
@@ -29,7 +29,7 @@ function rateLimitMessage(action: string, username: string): string | null {
   } catch {
     key = `${action}:${username.trim().toLowerCase()}`;
   }
-  const result = checkRateLimit(key, AUTH_LIMIT, AUTH_WINDOW_MS);
+  const result = await checkRateLimit(key, AUTH_LIMIT, AUTH_WINDOW_MS);
   if (result.allowed) return null;
   return `Too many attempts. Try again in ${result.retryAfterSeconds}s.`;
 }
@@ -37,7 +37,7 @@ function rateLimitMessage(action: string, username: string): string | null {
 export async function signInAction(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
   const username = String(formData.get("username") ?? "");
   const password = String(formData.get("password") ?? "");
-  const limited = rateLimitMessage("signin", username);
+  const limited = await rateLimitMessage("signin", username);
   if (limited) return { error: limited };
   try {
     const user = await verifyCredentials(username, password);
@@ -55,7 +55,7 @@ export async function signInAction(_prev: AuthFormState, formData: FormData): Pr
 export async function signUpAction(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
   const username = String(formData.get("username") ?? "");
   const password = String(formData.get("password") ?? "");
-  const limited = rateLimitMessage("signup", username);
+  const limited = await rateLimitMessage("signup", username);
   if (limited) return { error: limited };
   try {
     const user = await createUser(username, password);
