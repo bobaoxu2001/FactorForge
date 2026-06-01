@@ -2,6 +2,8 @@ import PortfolioCurveChart from "@/components/charts/PortfolioCurveChart";
 import CorrelationMatrix from "@/components/research/CorrelationMatrix";
 import MetricCard from "@/components/cards/MetricCard";
 import StatusBadge from "@/components/badges/StatusBadge";
+import PlainEnglish from "@/components/learn/PlainEnglish";
+import Term from "@/components/learn/Term";
 import { getResearchDataset } from "@/lib/research";
 import { concentrationLevel } from "@/lib/quant/signalConcentration";
 import { num, pct, pctPlain } from "@/lib/utils/format";
@@ -57,15 +59,23 @@ export default async function PortfolioPage() {
         </div>
       </header>
 
+      <PlainEnglish>
+        Instead of betting on one strategy, this combines the best few into a single mix — the classic
+        &ldquo;don&rsquo;t put all your eggs in one basket.&rdquo; The catch it checks for: if the pieces all move
+        together (high <Term term="correlation">correlation</Term>), you&rsquo;re not really diversified. The{" "}
+        <Term term="neff">effective bets</Term> number tells you how many genuinely independent bets the mix really
+        amounts to — the higher, the safer.
+      </PlainEnglish>
+
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <MetricCard label="Total return" value={pct(portfolio.metrics.totalReturn)} tone="positive" />
-        <MetricCard label="Annualized" value={pct(portfolio.metrics.annualizedReturn)} tone="positive" />
-        <MetricCard label={`vs ${portfolio.benchmarkSymbol}`} value={pct(portfolio.metrics.excessReturn)} tone="accent" />
-        <MetricCard label="Sharpe" value={num(portfolio.metrics.sharpe)} />
-        <MetricCard label="Volatility" value={pctPlain(portfolio.metrics.volatility)} />
-        <MetricCard label="Max drawdown" value={pct(portfolio.metrics.maxDrawdown)} />
-        <MetricCard label="Avg correlation" value={num(portfolio.averagePairwiseCorrelation)} />
-        <MetricCard label="Effective bets" value={num(portfolio.effectiveBets, 1)} tone="accent" />
+        <MetricCard label="Total return" value={pct(portfolio.metrics.totalReturn)} tone="positive" termId="return" />
+        <MetricCard label="Annualized" value={pct(portfolio.metrics.annualizedReturn)} tone="positive" termId="annualized" />
+        <MetricCard label={`vs ${portfolio.benchmarkSymbol}`} value={pct(portfolio.metrics.excessReturn)} tone="accent" termId="benchmark" />
+        <MetricCard label="Sharpe" value={num(portfolio.metrics.sharpe)} termId="sharpe" />
+        <MetricCard label="Volatility" value={pctPlain(portfolio.metrics.volatility)} termId="volatility" />
+        <MetricCard label="Max drawdown" value={pct(portfolio.metrics.maxDrawdown)} termId="drawdown" />
+        <MetricCard label="Avg correlation" value={num(portfolio.averagePairwiseCorrelation)} termId="correlation" />
+        <MetricCard label="Effective bets" value={num(portfolio.effectiveBets, 1)} tone="accent" termId="neff" />
       </section>
 
       <section className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border px-4 py-3 text-[12.5px] ${levelClass}`}>

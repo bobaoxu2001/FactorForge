@@ -16,7 +16,16 @@ import { STRATEGY_CATALOG } from "@/data/strategyCatalog";
 import { generateStrategyExplanation } from "@/lib/ai/strategyExplainer";
 import { getResearchDataset, runStrategyAcrossSymbols } from "@/lib/research";
 import SymbolSwitcher from "@/components/research/SymbolSwitcher";
+import PlainEnglish from "@/components/learn/PlainEnglish";
 import { num, pct, pctPlain, usd } from "@/lib/utils/format";
+
+// One-line, jargon-free description of what each strategy family is trying to do.
+const STRATEGY_TYPE_PLAIN: Record<string, string> = {
+  breakout: "a “breakout” strategy — it buys when a stock pushes above its recent ceiling, betting the move keeps going.",
+  momentum: "a “momentum” strategy — it buys stocks that are already trending up, betting strength continues for a while.",
+  "mean reversion": "a “mean-reversion” strategy — it buys a solid stock after a dip, betting the price snaps back toward normal.",
+  rotation: "a “rotation” strategy — it leans toward steadier, lower-volatility names and rotates as conditions change.",
+};
 
 export const revalidate = 60 * 60;
 
@@ -68,6 +77,12 @@ export default async function StrategyDetailPage({
         <p className="mt-2 max-w-3xl text-[14px] leading-relaxed text-ink-muted">{result.description}</p>
         <div className="mt-4"><DataSourceStatus result={result.dataStatus} /></div>
       </header>
+
+      <PlainEnglish>
+        In plain terms, this is {STRATEGY_TYPE_PLAIN[result.type] ?? "a rules-based strategy that buys and sells on fixed signals."}{" "}
+        The numbers below show how it would have done on real past prices for {result.symbol}. Hover any underlined
+        label (like Sharpe or drawdown) for a one-line explanation.
+      </PlainEnglish>
 
       {/* Selection-bias disclaimer — turns a hidden methodological assumption into a visible product feature. */}
       <section className="rounded-2xl border border-amber-300/30 bg-amber-300/[0.06] p-4">

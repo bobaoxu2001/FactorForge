@@ -1,5 +1,7 @@
 import StrategyCard from "@/components/cards/StrategyCard";
 import EmptyState from "@/components/research/EmptyState";
+import PlainEnglish from "@/components/learn/PlainEnglish";
+import Term from "@/components/learn/Term";
 import { getResearchDataset } from "@/lib/research";
 
 export const revalidate = 60 * 60;
@@ -34,6 +36,12 @@ export default async function StrategiesPage({
           Each card is produced from real market data or explicitly labeled fallback data, strategy rules, long-only backtests, and calculated metrics.
         </p>
       </header>
+
+      <PlainEnglish>
+        A <Term term="strategy">strategy</Term> is a fixed set of buy/sell rules. Each card below shows how one would
+        have done if you&rsquo;d followed it on real past prices — a <Term term="backtest">backtest</Term>. Green-tinted
+        numbers are good, red are warning signs. Remember: doing well in the past is evidence, not a promise.
+      </PlainEnglish>
 
       <form className="card flex flex-col gap-3 p-3 md:flex-row md:items-center" action="/strategies">
         <input type="hidden" name="status" value={status} />

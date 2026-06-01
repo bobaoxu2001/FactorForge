@@ -1,6 +1,8 @@
 import { BrainCircuit, Database, LineChart, Network, Target } from "lucide-react";
 import StatusBadge from "@/components/badges/StatusBadge";
 import MetricCard from "@/components/cards/MetricCard";
+import PlainEnglish from "@/components/learn/PlainEnglish";
+import Term from "@/components/learn/Term";
 import { getResearchDataset } from "@/lib/research";
 import { pearson } from "@/lib/quant/indicators";
 import { pct, pctPlain, num } from "@/lib/utils/format";
@@ -45,9 +47,16 @@ export default async function FactorsPage() {
         <div className="section-label">L1 Factors</div>
         <h1 className="mt-2 text-[32px] font-semibold tracking-tight text-ink">Factor Discovery Console</h1>
         <p className="mt-2 max-w-3xl text-[14px] leading-relaxed text-ink-muted">
-          FactorForge converts daily OHLCV into interpretable momentum, volatility, trend, and liquidity evidence. Fallback symbols remain visible and explicitly labeled.
+          FactorForge converts daily <Term term="ohlcv">OHLCV</Term> into interpretable momentum, volatility, trend, and liquidity evidence. Fallback symbols remain visible and explicitly labeled.
         </p>
       </header>
+
+      <PlainEnglish>
+        A <Term term="factor">factor</Term> is just a recurring trait that helps explain why stocks move — like
+        &ldquo;has it been going up lately?&rdquo; (<Term term="momentum">momentum</Term>) or &ldquo;how wild are its
+        swings?&rdquo; (<Term term="volatility">volatility</Term>). This page scores every stock on those traits, so a
+        strategy can pick names with the qualities it wants instead of guessing.
+      </PlainEnglish>
 
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <MetricCard label="Factor strength" value={String(strengthScore)} tone="accent" hint="Composite watchlist score" />

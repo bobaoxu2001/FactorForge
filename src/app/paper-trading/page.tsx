@@ -3,6 +3,8 @@ import EquityCurveChart from "@/components/charts/EquityCurveChart";
 import MetricCard from "@/components/cards/MetricCard";
 import StatusBadge from "@/components/badges/StatusBadge";
 import EmptyState from "@/components/research/EmptyState";
+import PlainEnglish from "@/components/learn/PlainEnglish";
+import Term from "@/components/learn/Term";
 import { getResearchDataset } from "@/lib/research";
 import { pct, pctPlain, usd } from "@/lib/utils/format";
 
@@ -19,6 +21,13 @@ export default async function PaperTradingPage() {
           This page is for simulated observation only. It does not connect to a broker or place real orders. Observed strategies must come from radar candidates.
         </p>
       </header>
+
+      <PlainEnglish>
+        This is a practice run with <strong>pretend money</strong> — what traders call{" "}
+        <Term term="papertrading">paper trading</Term>. The promising strategies from the radar are watched live here so
+        you can see how they&rsquo;d behave, with zero real money at risk and no broker connected. It&rsquo;s the safe
+        rehearsal step before anyone would ever consider the real thing.
+      </PlainEnglish>
 
       <section className="card p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
