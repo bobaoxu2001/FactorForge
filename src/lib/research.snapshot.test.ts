@@ -1,10 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import type { HistoricalPriceResult } from "@/types/market";
-import { buildResearchDatasetFromPrices } from "./research";
+import { buildResearchDatasetFromPrices, type ResearchDataset } from "./research";
 import { effectiveBets } from "./quant/signalConcentration";
 import { MAX_OBSERVATION_SLOTS } from "./quant/paperTrading";
+import { DEFAULT_SYMBOLS } from "@/data/watchlist";
 
 const FIXTURE_PATH = path.join(process.cwd(), "src", "__fixtures__", "yahoo-snapshot.json");
 
@@ -14,12 +15,23 @@ function loadFixture(): Record<string, HistoricalPriceResult> {
 }
 
 describe("research pipeline snapshot (real Yahoo data)", () => {
-  it("loads the fixture with the full default watchlist of adjusted real-data series", () => {
-    const fixture = loadFixture();
+  // The full pipeline (5 strategies × ~28 symbols = ~140 backtests, plus factor
+  // returns and concentration) is real compute. Build it ONCE and share it across
+  // the invariant tests instead of rebuilding per-test — faster and avoids the
+  // default 5s per-test timeout on the larger universe.
+  let fixture: Record<string, HistoricalPriceResult>;
+  let dataset: ResearchDataset;
+
+  beforeAll(async () => {
+    fixture = loadFixture();
+    dataset = await buildResearchDatasetFromPrices(fixture);
+  }, 60_000);
+
+  it("loads the fixture with the full universe of adjusted real-data series", () => {
     const symbols = Object.keys(fixture);
-    expect(symbols).toEqual(
-      expect.arrayContaining(["AAPL", "MSFT", "NVDA", "TSLA", "AMZN", "META", "GOOGL", "JPM", "SPY", "QQQ"]),
-    );
+    // The committed fixture must cover exactly the configured universe — no more,
+    // no less — so a universe change without a fixture rebuild fails CI.
+    expect(symbols.sort()).toEqual([...DEFAULT_SYMBOLS].sort());
     for (const symbol of symbols) {
       const result = fixture[symbol];
       expect(result.isFallback).toBe(false);
@@ -31,10 +43,7 @@ describe("research pipeline snapshot (real Yahoo data)", () => {
     expect(anyAdjusted).toBe(true);
   });
 
-  it("runs the entire research pipeline end-to-end against the fixture", async () => {
-    const fixture = loadFixture();
-    const dataset = await buildResearchDatasetFromPrices(fixture);
-
+  it("runs the entire research pipeline end-to-end against the fixture", () => {
     // Every catalog strategy must produce a usable backtest from the watchlist
     expect(dataset.strategyResults.length).toBe(5);
     for (const result of dataset.strategyResults) {
@@ -87,9 +96,7 @@ describe("research pipeline snapshot (real Yahoo data)", () => {
     expect(dataset.metadata.realDataCount).toBe(Object.keys(fixture).length);
   });
 
-  it("portfolio backtest holds the diversification invariants when eligible legs exist", async () => {
-    const fixture = loadFixture();
-    const dataset = await buildResearchDatasetFromPrices(fixture);
+  it("portfolio backtest holds the diversification invariants when eligible legs exist", () => {
     if (!dataset.portfolio) {
       // It is legitimate for a fresh data snapshot to have <2 eligible legs.
       // We still want to observe the radar state in that case.
@@ -134,9 +141,7 @@ describe("research pipeline snapshot (real Yahoo data)", () => {
     expect(["SPY", "QQQ"]).toContain(portfolio.benchmarkSymbol);
   });
 
-  it("holds the concentration invariants across radar, paper, and portfolio", async () => {
-    const fixture = loadFixture();
-    const dataset = await buildResearchDatasetFromPrices(fixture);
+  it("holds the concentration invariants across radar, paper, and portfolio", () => {
     const report = dataset.signalConcentration;
     expect(report).not.toBeNull();
     if (!report) return;

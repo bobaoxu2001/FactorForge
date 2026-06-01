@@ -3,7 +3,7 @@
 [![CI](https://github.com/bobaoxu2001/FactorForge/actions/workflows/ci.yml/badge.svg)](https://github.com/bobaoxu2001/FactorForge/actions/workflows/ci.yml)
 [![Next.js 14](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![Vitest](https://img.shields.io/badge/tests-98%20passing-22c55e?logo=vitest&logoColor=white)](#testing)
+[![Vitest](https://img.shields.io/badge/tests-105%20passing-22c55e?logo=vitest&logoColor=white)](#testing)
 [![Docker](https://img.shields.io/badge/Docker-standalone-2496ed?logo=docker&logoColor=white)](#deployment)
 
 An AI quant research lab that turns daily OHLCV into factor signals, cost-aware backtests, score-weighted portfolios, and LLM-written research memos. Built as a portfolio piece for a full-stack + applied-ML role.
@@ -17,6 +17,7 @@ An AI quant research lab that turns daily OHLCV into factor signals, cost-aware 
 | | |
 |---|---|
 | **Real LLM in the loop** | DeepSeek (`deepseek-chat`) writes the strategy memo and tape note from a deterministic backtest payload. Numbers come from the engine; only prose is generated. Template fallback when the key is unset. |
+| **Sector-diversified universe** | 28 real-data names spanning 11 GICS-style sectors (single-name equities + SPY/QQQ benchmarks), not a mega-cap tech monoculture. This is what makes the cross-sectional momentum / low-vol factors and the N_eff analysis statistically meaningful — a basket of "seven tech names" is one factor wearing seven hats. `UNIVERSE` is the single source of truth; a guard test locks the committed fixture to it so the two can't drift. |
 | **Multi-symbol portfolio engine** | Score-weighted blend of radar-eligible legs, calendar intersection, per-leg P&L attribution, and pairwise Pearson correlation. Not just N parallel backtests. |
 | **Walk-forward + factor attribution** | Each strategy detail page reports in-sample vs out-of-sample metrics on the same equity curve, plus an OLS regression against Market / Momentum / Low-vol with t-statistics. Honest answers to "is this overfit?" and "is this alpha or just beta?". |
 | **Concentration gate (one risk metric, five surfaces)** | Effective-number-of-bets `N_eff = N / (1 + (N-1)·ρ̄)` from pairwise return correlation. The *same* number drives: a radar diagnostic panel, demotion of near-duplicate candidates, the paper-trading slot cap, exclusion of redundant portfolio legs, and an LLM-written diversification memo. Answers "are these four strategies actually four bets, or one bet wearing four hats?". |
@@ -25,7 +26,7 @@ An AI quant research lab that turns daily OHLCV into factor signals, cost-aware 
 | **Observability** | JSON-line structured logger, `/admin/cache` page (live hit rate, per-strategy row counts, oldest/newest entries), a `/api/health` liveness/readiness probe, and a `/api/csp-report` sink that logs CSP violations into the same JSON stream. |
 | **Hardened HTTP + auth** | Strict Content-Security-Policy plus `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, and HSTS on every response; `poweredByHeader` off. Auth adds a 7-day session TTL, constant-time login (dummy-hash compare blocks username enumeration), and a bcrypt 72-byte password guard. |
 | **Deploy-ready** | Multi-stage `Dockerfile` building Next's `standalone` server as a non-root container with a `HEALTHCHECK`, plus centralized env validation that fails fast in production on a missing `SESSION_PASSWORD`. |
-| **CI and tests** | 98 vitest tests (engine + concentration gate + components + auth + env validation + composite-provider and DeepSeek-branch mocks) under jsdom; GitHub Actions runs lint + typecheck + test on every push. |
+| **CI and tests** | 105 vitest tests (engine + concentration gate + universe/sector breadth + components + auth + env validation + composite-provider and DeepSeek-branch mocks) under jsdom; GitHub Actions runs lint + typecheck + test on every push. |
 
 ---
 
@@ -243,15 +244,17 @@ docker run -p 3000:3000 -e SESSION_PASSWORD="$(openssl rand -hex 32)" factorforg
 
 ## Testing
 
-98 tests across 24 files under vitest + jsdom:
+105 tests across 25 files under vitest + jsdom:
 
 - **Engine** — backtest fees + execution semantics, indicators, radar verdict logic, paper-trading risk-budget transitions + N_eff slot cap, portfolio engine (Pearson, calendar intersection, score-weighted blend, phase-shifted decorrelation).
 - **Concentration** — `effectiveBets` / `concentrationLevel` math (monotonicity, bounds), the correlation gate demoting near-duplicate candidates, and the shared pairwise-correlation builder.
+- **Universe** — sector-diversification invariants (≥8 sectors, no sector >⅓ of single names), case-insensitive sector lookups, strategy-default coverage, and a guard that the committed fixture matches `DEFAULT_SYMBOLS` exactly.
 - **AI layer** — concentration-note template prose plus a mocked DeepSeek branch proving LLM prose is adopted while computed numbers are passed through (blank fields fall back via `pickString`).
 - **Components** — StatusBadge (including the `idle` state introduced when fixing the zero-observation risk-budget bug), MetricCard tone classes, CorrelationMatrix rendering + empty state.
 - **Data providers** — Yahoo and fallback adapters.
 - **Auth** — bcrypt round-trip, username-collision + validation rules, the bcrypt 72-byte password guard, and per-user watchlist isolation.
 - **Env validation** — production fail-fast on a missing session secret, dev warnings, and feature-flag detection from optional keys.
+- **Pipeline snapshot** — the full factors → backtests → radar → portfolio → concentration run against the committed real-data fixture, built once and shared across invariant checks.
 
 Run them locally with `npm test`. CI runs the same command on every push and PR; see [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
 

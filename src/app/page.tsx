@@ -16,6 +16,7 @@ import DataSourceStatus from "@/components/research/DataSourceStatus";
 import EmptyState from "@/components/research/EmptyState";
 import StatusBadge from "@/components/badges/StatusBadge";
 import { getResearchDataset } from "@/lib/research";
+import { sectorCount, sectorOf } from "@/data/watchlist";
 import { pct, pctPlain, num } from "@/lib/utils/format";
 import type { EquityPoint } from "@/types/backtest";
 import type { HistoricalPriceResult } from "@/types/market";
@@ -56,6 +57,8 @@ export default async function HomePage() {
   const shortlistedCount = radarCandidateCount + observingCount;
   const avgScore = top.length > 0 ? Math.round(top.reduce((sum, item) => sum + item.score, 0) / top.length) : 0;
   const conc = dataset.signalConcentration;
+  const sectorBreadth = sectorCount();
+  const universeSize = priceResults.length;
   // Real, engine-derived insights — market-summary prose + the live concentration finding.
   const aiInsights = [
     dataset.marketSummary.summary,
@@ -81,7 +84,7 @@ export default async function HomePage() {
             </p>
             <div className="mt-6 grid grid-cols-2 gap-2 text-[12px] text-ink-muted">
               <EvidencePill label="Real Yahoo Finance data" tone="green" />
-              <EvidencePill label="10-symbol US equity universe" />
+              <EvidencePill label={`${universeSize} names · ${sectorBreadth} sectors`} />
               <EvidencePill label="Backtested strategies" />
               <EvidencePill label="Radar-ranked candidates" />
               <EvidencePill label="Simulated paper observation" />
@@ -531,44 +534,58 @@ function MarketPerformancePanel({ movers }: { movers: MarketMover[] }) {
   const bestOneDay = [...movers].sort((a, b) => b.oneDay - a.oneDay)[0];
   const bestFiveDay = movers[0];
   const fallbackCount = movers.filter((item) => item.isFallback).length;
+  const sectorsCovered = sectorCount();
+  // movers is sorted by 5D desc. Show the 6 strongest + 4 weakest so the panel
+  // stays compact while still surfacing both leaders and laggards across sectors.
+  const topMovers = movers.length > 12
+    ? [...movers.slice(0, 6), ...movers.slice(-4)]
+    : movers;
 
   return (
     <section className="card p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="panel-title">Mega-cap Market Pulse</div>
-          <div className="mt-0.5 text-[11px] text-ink-soft">Magnificent Seven plus SPY, QQQ, and JPM, calculated from latest OHLCV close data</div>
+          <div className="panel-title">Sector-Diversified Market Pulse</div>
+          <div className="mt-0.5 text-[11px] text-ink-soft">{movers.length} US names across {sectorsCovered} sectors, calculated from latest OHLCV close data</div>
         </div>
         <StatusBadge status={fallbackCount === 0 ? "real data active" : `${fallbackCount} fallback labeled`} />
       </div>
       <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
         <HeroStat label="Top 1D move" value={bestOneDay ? `${bestOneDay.symbol} ${pct(bestOneDay.oneDay)}` : "N/A"} detail="latest close vs prior close" />
         <HeroStat label="Top 5D move" value={bestFiveDay ? `${bestFiveDay.symbol} ${pct(bestFiveDay.fiveDay)}` : "N/A"} detail="latest close vs 5 sessions ago" />
-        <HeroStat label="Universe" value={String(movers.length)} detail="AAPL MSFT NVDA TSLA AMZN META GOOGL SPY QQQ JPM" />
+        <HeroStat label="Universe" value={String(movers.length)} detail={`${sectorsCovered} sectors · single-name + ETF benchmarks`} />
         <HeroStat label="Fallback" value={String(fallbackCount)} detail="always disclosed" />
       </div>
-      <div className="mt-5 grid grid-cols-[64px_1fr_76px_76px] gap-3 border-y border-line py-2 text-[10px] uppercase tracking-wider text-ink-soft">
+      <div className="mt-5 grid grid-cols-[56px_1fr_88px_76px_76px] gap-3 border-y border-line py-2 text-[10px] uppercase tracking-wider text-ink-soft">
         <span>Symbol</span>
         <span>5D relative move</span>
+        <span>Sector</span>
         <span className="text-right">1D</span>
         <span className="text-right">5D</span>
       </div>
       <div className="mt-3 space-y-2">
-        {movers.map((item) => {
+        {topMovers.map((item) => {
           const width = `${Math.max(4, (Math.abs(item.fiveDay) / maxAbs) * 100)}%`;
           const positive = item.fiveDay >= 0;
           return (
-            <div key={item.symbol} className="grid grid-cols-[64px_1fr_76px_76px] items-center gap-3 text-[12px]">
+            <div key={item.symbol} className="grid grid-cols-[56px_1fr_88px_76px_76px] items-center gap-3 text-[12px]">
               <div className="font-semibold text-white">{item.symbol}</div>
               <div className="h-2.5 rounded-full bg-white/[0.06]">
                 <div className={`h-2.5 rounded-full ${positive ? "bg-emerald-300" : "bg-rose-300"}`} style={{ width }} />
               </div>
+              <div className="truncate text-[11px] text-ink-soft">{sectorOf(item.symbol) ?? "—"}</div>
               <div className={`num text-right ${item.oneDay >= 0 ? "text-emerald-300" : "text-rose-300"}`}>{pct(item.oneDay)}</div>
               <div className={`num text-right ${positive ? "text-emerald-300" : "text-rose-300"}`}>{pct(item.fiveDay)}</div>
             </div>
           );
         })}
       </div>
+      {movers.length > topMovers.length && (
+        <div className="mt-3 text-[11px] text-ink-soft">
+          Showing the {topMovers.length} largest 5-day movers of {movers.length} names. Full table on the{" "}
+          <Link href="/data" className="text-blue-300 hover:text-blue-200">Data</Link> page.
+        </div>
+      )}
     </section>
   );
 }
