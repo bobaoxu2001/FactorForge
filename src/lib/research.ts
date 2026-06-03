@@ -7,6 +7,9 @@ import { generateMarketSummary, type MarketSummary } from "@/lib/ai/marketSummar
 import { getWatchlistPrices } from "@/lib/data/marketData";
 import { percentChange, realizedVolatility, rsi, sma, volumeMovingAverage } from "@/lib/quant/indicators";
 import { buildPaperAccountSummary, buildPaperObservations, MAX_OBSERVATION_SLOTS } from "@/lib/quant/paperTrading";
+import { buildDailyReview } from "@/lib/quant/dailyReview";
+import { generateDailyReviewNote, type DailyReviewNote } from "@/lib/ai/dailyReviewNote";
+import type { DailyReview } from "@/types/strategy";
 import { buildRadar } from "@/lib/quant/radar";
 import { chooseBenchmark, runStrategyOnMarketCached } from "@/lib/quant/strategies";
 import { chooseWeights, runPortfolioBacktest, type PortfolioBacktest } from "@/lib/quant/portfolio";
@@ -25,6 +28,8 @@ export interface ResearchDataset {
   radarCandidates: ReturnType<typeof buildRadar>;
   paperObservations: ReturnType<typeof buildPaperObservations>;
   paperAccount: ReturnType<typeof buildPaperAccountSummary>;
+  dailyReview: DailyReview;
+  dailyReviewNote: DailyReviewNote | null;
   marketSummary: MarketSummary;
   portfolio: PortfolioBacktest | null;
   factorReturns: FactorReturnsRow[];
@@ -92,6 +97,13 @@ export async function buildResearchDatasetFromPrices(
 
   const paperObservations = buildPaperObservations(radarCandidates, slotCap);
   const paperAccount = buildPaperAccountSummary(paperObservations, { maxSlots: slotCap, slotNote });
+
+  // 5. Post-market auto-review of the simulated book. Deterministic blotter +
+  //    LLM/template prose, same "numbers in code, prose on top" contract as the
+  //    other AI surfaces.
+  const dailyReview = buildDailyReview(paperObservations, paperAccount, radarCandidates);
+  const dailyReviewNote = await generateDailyReviewNote(dailyReview);
+
   const marketSummary = await generateMarketSummary(factors);
   const portfolio = buildPortfolio(radarCandidates, pricesBySymbol);
   const priceResults = Object.values(pricesBySymbol);
@@ -102,6 +114,8 @@ export async function buildResearchDatasetFromPrices(
     radarCandidates,
     paperObservations,
     paperAccount,
+    dailyReview,
+    dailyReviewNote,
     marketSummary,
     portfolio,
     factorReturns,

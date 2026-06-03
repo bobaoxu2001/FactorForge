@@ -51,3 +51,45 @@ export interface PaperAccountSummary {
   riskBudgetStatus: "within limits" | "watch exposure" | "paused" | "idle";
   guardrails: string[];
 }
+
+/**
+ * End-of-session tape: how many entries/exits the radar produced today and how
+ * many were screened out. Mirrors a real desk's post-close trade blotter, but
+ * every count is a simulated observation — no orders are routed.
+ */
+export interface DailyReviewTape {
+  /** Observations that opened a simulated position on the review date. */
+  entries: number;
+  /** Observations that closed a simulated position on the review date. */
+  exits: number;
+  /** Candidates that signalled but were left in "continue observing" — not promoted. */
+  skipped: number;
+  /** Near-duplicate candidates the concentration gate refused a slot ("rejected orders"). */
+  rejected: number;
+}
+
+/**
+ * Deterministic post-market review of the paper-observation book. Every field is
+ * computed in the engine from the same observations the rest of the app renders;
+ * the LLM layer ({@link DailyReviewNote}) only writes prose on top of these
+ * numbers, never new ones.
+ */
+export interface DailyReview {
+  /** Review date (ET session), derived from the freshest signal in the book. */
+  asOf: string;
+  /** Number of observations currently held in the simulated book. */
+  bookSize: number;
+  /** Observations whose simulated return is at or above breakeven. */
+  winners: number;
+  /** Observations whose simulated return is below breakeven. */
+  losers: number;
+  /** Share of simulated capital deployed across active observations. */
+  deployedExposurePct: number;
+  /** The single weakest observation by simulated return, if the book is non-empty. */
+  weakest: { label: string; symbol: string; returnPct: number } | null;
+  /** Largest cluster of observations admitted on the same signal date. */
+  largestBatch: { signalDate: string; count: number } | null;
+  tape: DailyReviewTape;
+  /** Ranked things a researcher should look at before the next session. */
+  watchItems: string[];
+}

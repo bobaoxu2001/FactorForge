@@ -3,6 +3,7 @@ import EquityCurveChart from "@/components/charts/EquityCurveChart";
 import MetricCard from "@/components/cards/MetricCard";
 import StatusBadge from "@/components/badges/StatusBadge";
 import EmptyState from "@/components/research/EmptyState";
+import DailyReviewPanel from "@/components/research/DailyReviewPanel";
 import PlainEnglish from "@/components/learn/PlainEnglish";
 import Term from "@/components/learn/Term";
 import { getResearchDataset } from "@/lib/research";
@@ -11,7 +12,7 @@ import { pct, pctPlain, usd } from "@/lib/utils/format";
 export const revalidate = 60 * 60;
 
 export default async function PaperTradingPage() {
-  const { paperObservations, paperAccount } = await getResearchDataset();
+  const { paperObservations, paperAccount, dailyReview, dailyReviewNote } = await getResearchDataset();
   return (
     <div className="space-y-8">
       <header>
@@ -58,6 +59,8 @@ export default async function PaperTradingPage() {
           ))}
         </div>
       </section>
+
+      <DailyReviewPanel review={dailyReview} note={dailyReviewNote} />
 
       {paperObservations.length === 0 && (
         <EmptyState title="Strategy is online and waiting for the next entry signal." message="No strategy currently meets radar admission rules. Paper observation only accepts radar candidates and does not inject fake results." />
