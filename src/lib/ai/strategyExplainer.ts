@@ -7,7 +7,7 @@ export interface StrategyExplanation {
   summary: string;
   whyItWorks: string;
   keyRisks: string;
-  nextStep: string;
+  researchFollowUp: string;
   thesis: string;
   modelReasoning: string;
   suggestedExperiments: string[];
@@ -20,7 +20,7 @@ interface LlmNarrative {
   summary: string;
   whyItWorks: string;
   keyRisks: string;
-  nextStep: string;
+  researchFollowUp: string;
   thesis: string;
   modelReasoning: string;
   suggestedExperiments: string[];
@@ -116,7 +116,7 @@ function buildPrompt(result: BacktestResult): string {
     "  summary           — one sentence stating strategy, symbol, data basis, and the key risk-return metrics.",
     "  whyItWorks        — 1-2 sentences on the structural reason this rule may produce the observed profile.",
     "  keyRisks          — 1-2 sentences on the most material risks given the metrics and risk flags.",
-    "  nextStep          — one sentence prescribing the next research action, not a trading instruction.",
+    "  researchFollowUp  — one sentence naming the next validation check for the research workflow, not a trading instruction.",
     "  thesis            — 1-2 sentences framing this as research evidence, not a live signal.",
     "  modelReasoning    — 1-2 sentences explaining what the ranking model weighs and why this strategy looks the way it does.",
     "  suggestedExperiments — array of exactly 3 short, concrete experiment ideas to validate or stress-test the strategy.",
@@ -141,7 +141,7 @@ function mergeNarrative(baseline: StrategyExplanation, narrative: LlmNarrative):
     summary: pickString(narrative.summary, baseline.summary),
     whyItWorks: pickString(narrative.whyItWorks, baseline.whyItWorks),
     keyRisks: pickString(narrative.keyRisks, baseline.keyRisks),
-    nextStep: pickString(narrative.nextStep, baseline.nextStep),
+    researchFollowUp: pickString(narrative.researchFollowUp, baseline.researchFollowUp),
     thesis: pickString(narrative.thesis, baseline.thesis),
     modelReasoning: pickString(narrative.modelReasoning, baseline.modelReasoning),
     suggestedExperiments: experiments,
@@ -177,12 +177,12 @@ function buildTemplateExplanation(result: BacktestResult): StrategyExplanation {
     result.dataStatus.isFallback ? "Current market data is fallback/demo and should not be treated as real market validation." : null,
     result.riskFlags.join("; "),
   ].filter(Boolean).join(" ");
-  const nextStep =
+  const researchFollowUp =
     confidenceLevel === "high"
-      ? "Move into paper-observation mode and keep checking whether future signals preserve the same risk-return profile."
+      ? "For research review, include this rule in simulated paper observation and check whether future signals preserve the same risk-return profile."
       : confidenceLevel === "medium"
-        ? "Keep it on the radar and prioritize expanding the universe plus testing different market regimes."
-        : "Add more real data and samples before considering paper observation.";
+        ? "Keep it on the radar and expand the evidence set across more symbols and market regimes."
+        : "Add more real data and samples before using this rule in simulated paper observation.";
   const confidenceScore = Math.round(
     Math.min(95, Math.max(18,
       (metrics.sharpe + 0.5) * 22 +
@@ -191,7 +191,7 @@ function buildTemplateExplanation(result: BacktestResult): StrategyExplanation {
       (result.dataStatus.isFallback ? 18 : 0),
     )),
   );
-  const thesis = `${result.type} thesis: prioritize ${result.symbol} only when factor evidence, trend structure, and risk-adjusted backtest behavior align. The current model reads the setup as ${confidenceLevel}-confidence research evidence, not a live trading instruction.`;
+  const thesis = `${result.type} thesis: treat ${result.symbol} as research evidence only when factor evidence, trend structure, and risk-adjusted backtest behavior align. The current model reads the setup as ${confidenceLevel}-confidence research evidence, not a live trading instruction.`;
   const modelReasoning = `The ranking model weighs annualized return, Sharpe, drawdown containment, trade sample size, data quality, and cost-aware execution. This strategy is strongest when its signal frequency is sufficient and drawdown remains inside the radar threshold.`;
   const suggestedExperiments = [
     "Expand the universe beyond the current sector-diversified watchlist and rerun the same rule set.",
@@ -203,7 +203,7 @@ function buildTemplateExplanation(result: BacktestResult): StrategyExplanation {
     summary,
     whyItWorks,
     keyRisks: keyRisks || "No major risk flag is currently triggered, but continued validation is still required.",
-    nextStep,
+    researchFollowUp,
     thesis,
     modelReasoning,
     suggestedExperiments,

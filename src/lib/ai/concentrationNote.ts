@@ -14,14 +14,14 @@ import { callDeepseekJson, isDeepseekConfigured } from "./deepseek";
 export interface ConcentrationNote {
   headline: string;
   assessment: string;
-  recommendation: string;
+  researchAction: string;
   source: "deepseek" | "template";
 }
 
 interface LlmNarrative {
   headline: string;
   assessment: string;
-  recommendation: string;
+  researchAction: string;
 }
 
 const noteCache = new Map<string, ConcentrationNote>();
@@ -64,7 +64,7 @@ export async function generateConcentrationNote(
     ? {
         headline: pickString(narrative.headline, baseline.headline),
         assessment: pickString(narrative.assessment, baseline.assessment),
-        recommendation: pickString(narrative.recommendation, baseline.recommendation),
+        researchAction: pickString(narrative.researchAction, baseline.researchAction),
         source: "deepseek",
       }
     : baseline;
@@ -103,7 +103,7 @@ function buildPrompt(report: SignalConcentrationReport, demotedCount: number): s
     "Write a portfolio diversification note. Return JSON with these keys:",
     "  headline       — one sentence stating how many strategies were screened and roughly how many independent bets they represent.",
     "  assessment     — 1-2 sentences interpreting the overlap level, the most correlated pair, and any shared dominant factor.",
-    "  recommendation — one sentence on what to do (e.g. promote one per cluster vs. run in parallel), framed as research guidance, not a trade instruction.",
+    "  researchAction — one sentence naming the next review step for the simulated observation set, not a trading instruction.",
     "",
     "Constraints:",
     "- Use only the numbers in the payload. Do not fabricate values.",
@@ -135,12 +135,12 @@ function buildTemplateNote(report: SignalConcentrationReport, demotedCount: numb
     : "";
   const assessment = `Average pairwise return correlation is ${avg}.${sharedClause}${pairClause}`;
 
-  const recommendation =
+  const researchAction =
     report.level === "high"
-      ? "Promote only the strongest strategy within each correlated cluster — adding more concentrates risk rather than diversifying it."
+      ? "For review, keep only the strongest strategy within each correlated cluster in the simulated observation set because adding more concentrates risk rather than diversifying it."
       : report.level === "medium"
-        ? "Favor the highest-scoring strategy per cluster and avoid running near-duplicates side by side."
-        : "The set is genuinely diversified; running these in parallel adds real independent exposure.";
+        ? "For review, compare the highest-scoring strategy per cluster and flag near-duplicates before simulated observation."
+        : "For review, the set shows lower overlap and can be studied as separate simulated exposures.";
 
   const gateClause = demotedCount > 0
     ? ` ${demotedCount} near-duplicate candidate${demotedCount > 1 ? "s were" : " was"} already demoted by the concentration gate.`
@@ -149,7 +149,7 @@ function buildTemplateNote(report: SignalConcentrationReport, demotedCount: numb
   return {
     headline,
     assessment: assessment + gateClause,
-    recommendation,
+    researchAction,
     source: "template",
   };
 }

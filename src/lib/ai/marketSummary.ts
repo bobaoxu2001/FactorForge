@@ -39,7 +39,7 @@ export async function generateMarketSummary(factors: FactorSnapshot[]): Promise<
       {
         role: "system",
         content:
-          "You are a buy-side market microstructure analyst writing brief tape-reading notes for a research dashboard. " +
+          "You are a market-data research analyst writing brief tape-reading notes for a research dashboard. " +
           "Cite only numbers present in the user payload — never invent levels, prices, or percentages. " +
           "Be concrete: name specific symbols when calling out leadership or weakness. " +
           "If any symbol has isFallback=true, label that tape as demo data and do not draw real-market conclusions from it. " +
@@ -152,7 +152,7 @@ function buildTemplateSummary(factors: FactorSnapshot[]): MarketSummary {
     tone,
     summary: `${aboveTrend}/${factors.length} symbols in the default watchlist are above SMA200. Average 20-day return is ${pct(avgMomentum20)} and average annualized 20-day volatility is about ${pctPlain(avgVol)}.`,
     risk: avgVol > 0.4
-      ? "Volatility is elevated; breakout strategies need stricter stops and position sizing."
+      ? "Volatility is elevated; breakout strategy experiments should be reviewed with stricter stop and position-sizing assumptions."
       : "Volatility is within an observable range, but concentration and drawdown still need monitoring.",
     dataNote: realCount === factors.length
       ? "Market summary is generated from real Yahoo daily OHLCV data."

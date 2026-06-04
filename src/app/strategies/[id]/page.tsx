@@ -22,9 +22,9 @@ import { num, pct, pctPlain, usd } from "@/lib/utils/format";
 
 // One-line, jargon-free description of what each strategy family is trying to do.
 const STRATEGY_TYPE_PLAIN: Record<string, string> = {
-  breakout: "a “breakout” strategy — it buys when a stock pushes above its recent ceiling, betting the move keeps going.",
-  momentum: "a “momentum” strategy — it buys stocks that are already trending up, betting strength continues for a while.",
-  "mean reversion": "a “mean-reversion” strategy — it buys a solid stock after a dip, betting the price snaps back toward normal.",
+  breakout: "a “breakout” strategy — it studies what happened after a stock pushed above its recent ceiling.",
+  momentum: "a “momentum” strategy — it studies stocks that were already trending up to see whether strength persisted.",
+  "mean reversion": "a “mean-reversion” strategy — it studies whether a solid stock recovered after a dip.",
   rotation: "a “rotation” strategy — it leans toward steadier, lower-volatility names and rotates as conditions change.",
 };
 
@@ -175,7 +175,7 @@ export default async function StrategyDetailPage({
             <p className="mt-2 text-[13px] leading-relaxed text-ink">{explanation.summary}</p>
             <p className="mt-2 text-[13px] leading-relaxed text-ink-muted">{explanation.whyItWorks}</p>
             <p className="mt-2 text-[13px] leading-relaxed text-rose-200">{explanation.keyRisks}</p>
-            <p className="mt-2 text-[13px] leading-relaxed text-brand-blue">{explanation.nextStep}</p>
+            <p className="mt-2 text-[13px] leading-relaxed text-brand-blue">{explanation.researchFollowUp}</p>
           </div>
         </div>
       </section>

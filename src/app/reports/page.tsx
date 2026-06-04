@@ -47,7 +47,7 @@ export default async function ReportsPage() {
           </div>
           <h2 className="mt-3 text-[18px] font-semibold text-ink">{concentrationNote.headline}</h2>
           <p className="mt-2 text-[13px] leading-relaxed text-ink">{concentrationNote.assessment}</p>
-          <p className="mt-2 text-[13px] leading-relaxed text-brand-blue">{concentrationNote.recommendation}</p>
+          <p className="mt-2 text-[13px] leading-relaxed text-brand-blue">{concentrationNote.researchAction}</p>
           <div className="mt-4 grid grid-cols-3 gap-3 text-[12px]">
             <Mini label="Screened" value={String(signalConcentration.strategyCount)} />
             <Mini label="Effective bets" value={num(signalConcentration.effectiveStrategies, 1)} />

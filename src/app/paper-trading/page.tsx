@@ -25,10 +25,10 @@ export default async function PaperTradingPage() {
       </header>
 
       <PlainEnglish>
-        This is a practice run with <strong>pretend money</strong> — what traders call{" "}
-        <Term term="papertrading">paper trading</Term>. The promising strategies from the radar are watched live here so
-        you can see how they&rsquo;d behave, with zero real money at risk and no broker connected. It&rsquo;s the safe
-        rehearsal step before anyone would ever consider the real thing.
+        This is a simulated observation queue with <strong>pretend money</strong> — what traders call{" "}
+        <Term term="papertrading">paper trading</Term>. Strategies from the radar are tracked as research cases so
+        you can inspect how the rules behave, with zero real money at risk and no broker connected. It stays inside
+        the research workflow and does not prepare or route real trades.
       </PlainEnglish>
 
       <MethodologyCallout

@@ -38,21 +38,21 @@ describe("generateConcentrationNote — DeepSeek branch", () => {
     mockedCall.mockResolvedValue({
       headline: "LLM: four strategies, one bet.",
       assessment: "LLM: they all ride the same financials factor.",
-      recommendation: "LLM: keep only the strongest.",
+      researchAction: "LLM: keep only the strongest in review.",
     });
 
     const note = await generateConcentrationNote(report({ strategyCount: 4, averagePairwiseCorrelation: 0.701 }));
     expect(note!.source).toBe("deepseek");
     expect(note!.headline).toBe("LLM: four strategies, one bet.");
     expect(note!.assessment).toBe("LLM: they all ride the same financials factor.");
-    expect(note!.recommendation).toBe("LLM: keep only the strongest.");
+    expect(note!.researchAction).toBe("LLM: keep only the strongest in review.");
   });
 
   it("falls back to the template for blank LLM fields (pickString guard)", async () => {
     mockedCall.mockResolvedValue({
       headline: "   ",
       assessment: "",
-      recommendation: "LLM: only this field is valid.",
+      researchAction: "LLM: only this field is valid.",
     });
 
     const note = await generateConcentrationNote(report({ strategyCount: 5, averagePairwiseCorrelation: 0.702, effectiveStrategies: 1.6 }));
@@ -62,7 +62,7 @@ describe("generateConcentrationNote — DeepSeek branch", () => {
     expect(note!.headline).toContain("high overlap");
     expect(note!.assessment).toContain("Low-vol");
     // ...while the one valid field is adopted verbatim.
-    expect(note!.recommendation).toBe("LLM: only this field is valid.");
+    expect(note!.researchAction).toBe("LLM: only this field is valid.");
   });
 
   it("falls back fully to template when the LLM call returns null", async () => {

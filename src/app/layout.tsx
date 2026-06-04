@@ -4,26 +4,26 @@ import AppShell from "@/components/layout/AppShell";
 
 const SITE_URL = process.env.SITE_URL ?? "http://localhost:3000";
 const DESCRIPTION =
-  "An AI quant research lab: real market data into factor signals, cost-aware backtests, score-weighted portfolios, and LLM-written research memos.";
+  "An open-source AI-assisted quantitative research workbench for factor signals, backtests, portfolio diagnostics, and clearly labeled research memos.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "FactorForge — AI Quant Research Lab",
+    default: "FactorForge — OSS Quant Research Workbench",
     template: "%s · FactorForge",
   },
   description: DESCRIPTION,
   applicationName: "FactorForge",
   authors: [{ name: "FactorForge" }],
-  keywords: ["quant", "backtest", "factor investing", "research", "trading", "Next.js"],
+  keywords: ["quant research", "backtest", "factor signals", "portfolio diagnostics", "open source", "Next.js"],
   openGraph: {
     type: "website",
     siteName: "FactorForge",
-    title: "FactorForge — AI Quant Research Lab",
+    title: "FactorForge — OSS Quant Research Workbench",
     description: DESCRIPTION,
     url: SITE_URL,
   },
-  twitter: { card: "summary_large_image", title: "FactorForge — AI Quant Research Lab", description: DESCRIPTION },
+  twitter: { card: "summary_large_image", title: "FactorForge — OSS Quant Research Workbench", description: DESCRIPTION },
   icons: { icon: "/favicon.ico" },
 };
 

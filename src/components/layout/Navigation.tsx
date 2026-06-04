@@ -160,7 +160,7 @@ function Brand() {
       </div>
       <div>
         <div className="text-[16px] font-semibold tracking-[-0.02em] text-white">FactorForge</div>
-        <div className="text-[11px] text-cyan-100/55">AI Quant Research Lab</div>
+        <div className="text-[11px] text-cyan-100/55">OSS Research Workbench</div>
       </div>
     </Link>
   );

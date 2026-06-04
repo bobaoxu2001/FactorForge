@@ -31,13 +31,13 @@ describe("generateConcentrationNote", () => {
     expect(note!.headline).toContain("high overlap");
     expect(note!.assessment).toContain("Low-vol"); // shared dominant factor label
     expect(note!.assessment).toMatch(/demoted by the concentration gate/);
-    expect(note!.recommendation).toMatch(/strongest strategy within each correlated cluster/);
+    expect(note!.researchAction).toMatch(/strongest strategy within each correlated cluster/);
   });
 
-  it("gives a diversified recommendation when overlap is low", async () => {
+  it("gives a diversified research action when overlap is low", async () => {
     const note = await generateConcentrationNote(
       report({ level: "low", averagePairwiseCorrelation: 0.1, effectiveStrategies: 3.6, sharedDominantFactor: null }),
     );
-    expect(note!.recommendation).toMatch(/genuinely diversified/);
+    expect(note!.researchAction).toMatch(/lower overlap/);
   });
 });
