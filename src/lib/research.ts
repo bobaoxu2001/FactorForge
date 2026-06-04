@@ -15,6 +15,7 @@ import { chooseBenchmark, runStrategyOnMarketCached } from "@/lib/quant/strategi
 import { chooseWeights, runPortfolioBacktest, type PortfolioBacktest } from "@/lib/quant/portfolio";
 import { buildFactorReturns, type FactorReturnsRow } from "@/lib/quant/factorAttribution";
 import { applyConcentrationGate, buildSignalConcentration, type SignalConcentrationReport } from "@/lib/quant/signalConcentration";
+import { buildSignalConsensus, type SignalConsensusReport, type StrategyScan } from "@/lib/quant/signalConsensus";
 import { createLogger } from "@/lib/observability/logger";
 
 const log = createLogger("research");
@@ -35,6 +36,7 @@ export interface ResearchDataset {
   factorReturns: FactorReturnsRow[];
   factorBenchmarkSymbol: string;
   signalConcentration: SignalConcentrationReport | null;
+  signalConsensus: SignalConsensusReport;
   metadata: {
     generatedAt: string;
     revalidateSeconds: number;
@@ -57,9 +59,27 @@ export async function getResearchDataset(): Promise<ResearchDataset> {
 export async function buildResearchDatasetFromPrices(
   pricesBySymbol: Record<string, HistoricalPriceResult>,
 ): Promise<ResearchDataset> {
-  const strategyResults = STRATEGY_CATALOG.map((definition) =>
-    runStrategyBestSymbol(definition, pricesBySymbol),
-  );
+  // Run every strategy across the whole universe once. The best run per strategy
+  // feeds the existing showcase; the full grid feeds multi-strategy consensus.
+  const strategyScans: StrategyScan[] = STRATEGY_CATALOG.map((definition) => ({
+    strategyId: definition.id,
+    strategyName: definition.name,
+    type: definition.type,
+    runs: runStrategyAcrossSymbols(definition, pricesBySymbol).map((run) => ({
+      strategyId: definition.id,
+      strategyName: definition.name,
+      type: definition.type,
+      score: run.score,
+      result: run.result,
+    })),
+  }));
+  const strategyResults = strategyScans.map((scan) => {
+    // runStrategyAcrossSymbols returns runs sorted best-first.
+    const best = scan.runs[0];
+    if (!best) throw new Error(`No usable market data for strategy ${scan.strategyId}`);
+    return best.result;
+  });
+  const signalConsensus = buildSignalConsensus(strategyScans);
   const factors = DEFAULT_SYMBOLS
     .map((symbol) => pricesBySymbol[symbol])
     .filter((result): result is HistoricalPriceResult => Boolean(result && result.prices.length > 0))
@@ -121,6 +141,7 @@ export async function buildResearchDatasetFromPrices(
     factorReturns,
     factorBenchmarkSymbol,
     signalConcentration,
+    signalConsensus,
     metadata: {
       generatedAt: new Date().toISOString(),
       revalidateSeconds: RESEARCH_REVALIDATE_SECONDS,
