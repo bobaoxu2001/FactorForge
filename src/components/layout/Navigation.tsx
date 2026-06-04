@@ -25,7 +25,7 @@ import {
 import { useState } from "react";
 import SearchCommand from "./SearchCommand";
 
-const items = [
+const items: { href: string; label: string; icon: typeof Gauge; tag?: string }[] = [
   { href: "/", label: "Overview", icon: Gauge },
   { href: "/learn", label: "Learn (Stocks 101)", icon: GraduationCap },
   { href: "/data", label: "Data", icon: Database },
@@ -38,11 +38,12 @@ const items = [
   { href: "/paper-trading", label: "Paper Trading", icon: WalletCards },
   { href: "/reports", label: "Reports", icon: FileText },
   { href: "/oss", label: "OSS & Maintainers", icon: ShieldCheck },
-  { href: "/my-watchlist", label: "My Watchlist", icon: Star },
-  { href: "/admin/cache", label: "Cache", icon: Server },
+  // Protected routes — tagged so it's clear they need a persistence backend.
+  { href: "/my-watchlist", label: "My Watchlist", icon: Star, tag: "local" },
+  { href: "/admin/cache", label: "Cache", icon: Server, tag: "admin" },
 ];
 
-export default function Navigation() {
+export default function Navigation({ persistenceAvailable = true }: { persistenceAvailable?: boolean }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -73,6 +74,11 @@ export default function Navigation() {
               >
                 <Icon className={`h-4 w-4 ${active ? "text-blue-300" : "text-ink-soft group-hover:text-blue-300"}`} />
                 <span>{item.label}</span>
+                {item.tag && (
+                  <span className="ml-auto rounded-md border border-line bg-white/[0.05] px-1.5 py-0.5 text-[9.5px] uppercase tracking-[0.14em] text-ink-soft">
+                    {item.tag}
+                  </span>
+                )}
               </Link>
             );
           })}
@@ -81,6 +87,11 @@ export default function Navigation() {
           <div className="rounded-2xl border border-cyan-300/15 bg-cyan-300/[0.045] p-3">
             <div className="text-[10px] uppercase tracking-[0.2em] text-cyan-100/60">Status</div>
             <div className="mt-1 text-[12.5px] leading-relaxed text-ink-muted">Public demo mode. No broker connection or live trading.</div>
+            {!persistenceAvailable && (
+              <div className="mt-2 text-[11.5px] leading-relaxed text-ink-soft">
+                Saved preferences and admin cache controls are disabled in public demo mode.
+              </div>
+            )}
           </div>
           <Link href="/admin/cache" className="flex h-11 w-full items-center justify-between rounded-xl border border-line bg-white/[0.035] px-3 text-[13px] text-ink-muted transition-colors hover:text-ink">
             <span className="inline-flex items-center gap-3"><Settings className="h-4 w-4" /> System</span>
@@ -139,6 +150,11 @@ export default function Navigation() {
                   <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className="flex h-11 items-center gap-3 rounded-lg px-3 text-[13px] text-ink-muted">
                     <Icon className="h-4 w-4" />
                     {item.label}
+                    {item.tag && (
+                      <span className="ml-auto rounded-md border border-line bg-white/[0.05] px-1.5 py-0.5 text-[9.5px] uppercase tracking-[0.14em] text-ink-soft">
+                        {item.tag}
+                      </span>
+                    )}
                   </Link>
                 );
               })}
