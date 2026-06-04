@@ -16,7 +16,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       </main>
       <footer className="border-t border-line lg:ml-[256px]">
         <div className="px-4 py-5 text-center text-[11.5px] leading-relaxed text-ink-soft md:px-6">
-          This platform is for research and simulated trading demonstration only. It does not constitute investment advice. Historical backtests do not represent future returns.
+          Research software only. No financial advice. No broker connection. No live trading.
         </div>
       </footer>
     </body>

@@ -10,7 +10,7 @@ FactorForge is an open-source AI-assisted quantitative research workbench for ex
 
 The project is designed as a reusable research toolkit: deterministic engines compute the numbers, provider metadata keeps data provenance visible, and optional LLM calls turn validated payloads into prose without overwriting computed metrics.
 
-> Research and simulated trading demonstration only. No broker connection, no live orders. Historical backtests do not represent future returns.
+> Research software only. No financial advice. No broker connection. No live trading.
 
 ---
 
@@ -235,9 +235,11 @@ Maintainer and contributor docs:
 | `POLYGON_API_KEY` | optional | Polygon.io aggregates as a second-tier real-data source (split + dividend adjusted). Composite provider tries it after Yahoo. |
 | `ALPHA_VANTAGE_API_KEY` | optional | Alpha Vantage daily as a third-tier real-data source. Free-tier endpoint is NOT corporate-action adjusted; the UI surfaces that honestly. |
 | `LOG_LEVEL` | optional | `debug` / `info` / `warn` / `error`. Default `info`. Logger emits JSON lines to stdout. |
-| `SESSION_PASSWORD` | required in prod | Iron-session signing key (≥32 chars random). The app boots with a dev default if unset — set this before deploying. |
+| `SESSION_PASSWORD` | required in prod | Iron-session signing key (≥32 chars random). Set this as a Vercel environment variable before making the demo public; never expose it client-side. |
 | `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | optional | Shared rate-limit store so auth throttling holds across multiple instances. Without it, throttling is per-process. Vercel-KV's `KV_REST_API_URL` / `KV_REST_API_TOKEN` are also accepted. |
 | `SITE_URL` | optional | Public origin used for absolute metadata / OpenGraph URLs. Defaults to `http://localhost:3000`. |
+| `MARKET_FETCH_CONCURRENCY` | optional | Caps concurrent market-data fetches. Defaults to `4`. Lower it if a host or provider throttles requests. |
+| `RISK_FREE_RATE` | optional | Annual risk-free rate used by metric helpers. Defaults to `0`. |
 
 Env is validated centrally in `src/lib/config/env.ts`. In production a missing/short `SESSION_PASSWORD` is a hard error (`assertProductionEnv` / `/api/health` → 503); optional keys that are unset become *warnings* and the corresponding feature degrades gracefully (LLM → template, providers → Yahoo-only).
 
@@ -257,6 +259,38 @@ docker run -p 3000:3000 -e SESSION_PASSWORD="$(openssl rand -hex 32)" factorforg
 - **`output: "standalone"`** (next.config.js) emits a self-contained server bundle, so the runtime image ships only what it needs. `better-sqlite3` is kept as an external server package so its native `.node` binding resolves at runtime instead of being mis-bundled.
 - **Security headers** are applied to every response in `next.config.js`: a tight `Content-Security-Policy` (with `report-uri` → `/api/csp-report`), `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Permissions-Policy`, and HSTS. `poweredByHeader` is disabled.
 - **`GET /api/health`** returns `ok` / `degraded` / `unhealthy` (503) with DB reachability, wired features, and env warnings — point a load balancer or `docker HEALTHCHECK` at it.
+
+### Deploy to Vercel
+
+FactorForge can be deployed as a public Vercel demo with the default build command:
+
+```bash
+npm run build
+```
+
+Set `SESSION_PASSWORD` in Vercel Project Settings → Environment Variables before making the deployment public. Use a random value of at least 32 characters. `SITE_URL` is optional but recommended for the public deployment URL.
+
+Optional keys can be left unset:
+
+- `DEEPSEEK_API_KEY` unset → AI memo surfaces use deterministic template prose.
+- `POLYGON_API_KEY` / `ALPHA_VANTAGE_API_KEY` unset → the app uses Yahoo Finance first, then deterministic fallback/demo data if every real-data provider fails.
+- `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` unset → auth throttling is per Vercel instance instead of shared across instances.
+
+Safe public demo behavior:
+
+- No brokerage integration is present.
+- No trading execution or order routing is present.
+- No market-data API key is required for the default demo path.
+- No LLM API key is required.
+- Fallback/demo market data is labeled when used.
+- LLM-generated prose cannot overwrite computed metrics; template fallback is used when the LLM key is missing or the call fails.
+
+Security notes:
+
+- Do not prefix secrets with `NEXT_PUBLIC_`; all supported secrets are server-side only.
+- Do not add brokerage credentials to Vercel because the app has no broker connector.
+- Keep `SESSION_PASSWORD`, provider keys, LLM keys, and Redis/KV tokens out of README snippets, screenshots, issues, logs, and commits.
+- Treat `/api/health` as an operational endpoint: it reports whether optional features are configured and whether production env validation passes.
 
 ---
 
@@ -346,4 +380,4 @@ The current roadmap is tracked in [ROADMAP.md](ROADMAP.md). Near-term maintainer
 
 ## Disclaimer
 
-This platform is for research and simulated trading demonstration only. No broker connection, no live orders. Historical backtests do not represent future returns.
+Research software only. No financial advice. No broker connection. No live trading.

@@ -97,7 +97,7 @@ export default async function HomePage() {
               <EvidencePill label="Backtested strategies" />
               <EvidencePill label="Radar-ranked candidates" />
               <EvidencePill label="Simulated paper observation" />
-              <EvidencePill label="Not investment advice" tone="amber" />
+              <EvidencePill label="No financial advice" tone="amber" />
             </div>
             <div className="mt-6 rounded-2xl border border-amber-300/18 bg-amber-300/[0.045] p-4">
               <div className="text-[11px] uppercase tracking-[0.18em] text-amber-100/70">What makes it portfolio-worthy</div>
