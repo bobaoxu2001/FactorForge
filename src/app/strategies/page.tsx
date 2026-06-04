@@ -2,6 +2,7 @@ import StrategyCard from "@/components/cards/StrategyCard";
 import EmptyState from "@/components/research/EmptyState";
 import PlainEnglish from "@/components/learn/PlainEnglish";
 import Term from "@/components/learn/Term";
+import MethodologyCallout from "@/components/research/MethodologyCallout";
 import { getResearchDataset } from "@/lib/research";
 
 export const revalidate = 60 * 60;
@@ -42,6 +43,15 @@ export default async function StrategiesPage({
         have done if you&rsquo;d followed it on real past prices — a <Term term="backtest">backtest</Term>. Green-tinted
         numbers are good, red are warning signs. Remember: doing well in the past is evidence, not a promise.
       </PlainEnglish>
+
+      <MethodologyCallout
+        items={[
+          "Signals are generated from completed daily bars and modeled with next-open execution.",
+          "Backtests include strategy-level slippage, per-trade fees, stops, trailing stops, and max-holding exits where defined.",
+          "No intraday fills, market impact, margin, shorts, options, or live order routing are modeled.",
+          "Strategy metrics come from the backtest engine and remain unchanged by memo text.",
+        ]}
+      />
 
       <form className="card flex flex-col gap-3 p-3 md:flex-row md:items-center" action="/strategies">
         <input type="hidden" name="status" value={status} />

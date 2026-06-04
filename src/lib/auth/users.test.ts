@@ -4,6 +4,7 @@ import path from "node:path";
 
 // Use a per-test database so writes don't pollute the dev cache.
 const TEST_DB = path.join(process.cwd(), ".cache", "factorforge-users-test.db");
+const BCRYPT_TEST_TIMEOUT_MS = 15000;
 
 describe("users + watchlist persistence", () => {
   beforeEach(() => {
@@ -31,7 +32,7 @@ describe("users + watchlist persistence", () => {
 
     // Wrong password throws invalid_credentials
     await expect(verifyCredentials(username, "wrong-password")).rejects.toThrow(AuthError);
-  });
+  }, BCRYPT_TEST_TIMEOUT_MS);
 
   it("rejects username collisions", async () => {
     const { createUser, AuthError } = await import("./users");
@@ -41,7 +42,7 @@ describe("users + watchlist persistence", () => {
       code: "username_taken",
     });
     await expect(createUser(username, "another-password")).rejects.toBeInstanceOf(AuthError);
-  });
+  }, BCRYPT_TEST_TIMEOUT_MS);
 
   it("rejects weak passwords", async () => {
     const { createUser } = await import("./users");
@@ -75,7 +76,7 @@ describe("users + watchlist persistence", () => {
     const username = `ok.user-name_${Math.random().toString(36).slice(2, 6)}`;
     const user = await createUser(username, "password123");
     expect(user.username).toBe(username.toLowerCase());
-  });
+  }, BCRYPT_TEST_TIMEOUT_MS);
 
   it("adds, lists, and removes watchlist symbols per user", async () => {
     const { createUser } = await import("./users");
@@ -105,7 +106,7 @@ describe("users + watchlist persistence", () => {
 
     removeSymbolFromWatchlist(user.id, "AAPL");
     expect(getWatchlistFor(user.id).map((row) => row.symbol)).toEqual(["MSFT"]);
-  });
+  }, BCRYPT_TEST_TIMEOUT_MS);
 
   it("user A cannot see user B's watchlist", async () => {
     const { createUser } = await import("./users");
@@ -120,5 +121,5 @@ describe("users + watchlist persistence", () => {
     expect(aList).not.toContain("TSLA");
     expect(bList).toContain("TSLA");
     expect(bList).not.toContain("NVDA");
-  });
+  }, BCRYPT_TEST_TIMEOUT_MS);
 });

@@ -17,7 +17,7 @@ export default async function CacheAdminPage() {
   // role system yet, so any authenticated user qualifies; tighten to an allowlist
   // if real multi-tenant separation is ever needed.
   const session = await getSession();
-  if (!session.userId) redirect("/sign-in");
+  if (!session.userId) redirect("/sign-in?next=/admin/cache&area=cache");
 
   const counters = getCacheCounters();
   const stats = getCacheStats();

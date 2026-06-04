@@ -4,6 +4,7 @@ import StatusBadge from "@/components/badges/StatusBadge";
 import EmptyState from "@/components/research/EmptyState";
 import PlainEnglish from "@/components/learn/PlainEnglish";
 import Term from "@/components/learn/Term";
+import MethodologyCallout from "@/components/research/MethodologyCallout";
 import { getResearchDataset } from "@/lib/research";
 
 export const revalidate = 60 * 60;
@@ -31,6 +32,15 @@ export default async function ConsensusPage() {
         logic — all land on the <strong>same stock at the same time</strong>, that agreement is a stronger, less
         style-dependent signal than any one strategy alone. This page shows those overlaps, strongest agreement first.
       </PlainEnglish>
+
+      <MethodologyCallout
+        items={[
+          "Consensus counts only symbols currently held by more than one strategy.",
+          "Agreement is ranked by strategy count, then by distinct strategy types, then by average radar score.",
+          "Multi-strategy agreement can reduce single-style dependence, but it does not guarantee future returns.",
+          "Single-strategy picks remain visible and are not relabeled as consensus.",
+        ]}
+      />
 
       <section className="card p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">

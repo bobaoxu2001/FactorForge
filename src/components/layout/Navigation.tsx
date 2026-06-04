@@ -14,15 +14,16 @@ import {
   Menu,
   Network,
   PieChart,
-  Search,
   Server,
   Settings,
+  ShieldCheck,
   Star,
   Target,
   WalletCards,
   X,
 } from "lucide-react";
 import { useState } from "react";
+import SearchCommand from "./SearchCommand";
 
 const items = [
   { href: "/", label: "Overview", icon: Gauge },
@@ -36,6 +37,7 @@ const items = [
   { href: "/ai-market", label: "AI Market", icon: BrainCircuit },
   { href: "/paper-trading", label: "Paper Trading", icon: WalletCards },
   { href: "/reports", label: "Reports", icon: FileText },
+  { href: "/oss", label: "OSS & Maintainers", icon: ShieldCheck },
   { href: "/my-watchlist", label: "My Watchlist", icon: Star },
   { href: "/admin/cache", label: "Cache", icon: Server },
 ];
@@ -78,7 +80,7 @@ export default function Navigation() {
         <div className="mt-4 shrink-0 space-y-3">
           <div className="rounded-2xl border border-cyan-300/15 bg-cyan-300/[0.045] p-3">
             <div className="text-[10px] uppercase tracking-[0.2em] text-cyan-100/60">Status</div>
-            <div className="mt-1 text-[12.5px] leading-relaxed text-ink-muted">Research-only workflow. No broker connection.</div>
+            <div className="mt-1 text-[12.5px] leading-relaxed text-ink-muted">Public demo mode. No broker connection or live trading.</div>
           </div>
           <Link href="/admin/cache" className="flex h-11 w-full items-center justify-between rounded-xl border border-line bg-white/[0.035] px-3 text-[13px] text-ink-muted transition-colors hover:text-ink">
             <span className="inline-flex items-center gap-3"><Settings className="h-4 w-4" /> System</span>
@@ -98,11 +100,7 @@ export default function Navigation() {
             <Menu className="h-4 w-4" />
           </button>
 
-          <div className="hidden min-w-[280px] max-w-2xl flex-1 items-center gap-2 rounded-xl border border-line bg-white/[0.04] px-3 py-2 text-[13px] text-ink-soft md:flex">
-            <Search className="h-4 w-4" />
-            <span>Search strategies, factors, symbols, research memos...</span>
-            <span className="ml-auto rounded border border-line px-1.5 py-0.5 text-[10px]">⌘ K</span>
-          </div>
+          <SearchCommand />
 
           <div className="ml-auto flex items-center gap-3">
             <div className="hidden rounded-lg border border-line bg-white/[0.035] px-3 py-2 text-[12px] text-ink-muted sm:block">

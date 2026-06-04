@@ -1,4 +1,5 @@
 import Navigation from "./Navigation";
+import PublicDemoNotice from "@/components/research/PublicDemoNotice";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
@@ -11,6 +12,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         Skip to content
       </a>
       <Navigation />
+      <div className="px-4 pt-4 md:px-6 lg:ml-[256px]">
+        <PublicDemoNotice />
+      </div>
       <main id="main-content" className="px-4 py-6 md:px-6 lg:ml-[256px]">
         {children}
       </main>

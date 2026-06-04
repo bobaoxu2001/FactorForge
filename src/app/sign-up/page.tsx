@@ -3,6 +3,10 @@ import { signUpAction } from "@/lib/auth/actions";
 
 export const dynamic = "force-dynamic";
 
-export default function SignUpPage() {
-  return <AuthForm mode="sign-up" action={signUpAction} />;
+export default function SignUpPage({
+  searchParams,
+}: {
+  searchParams?: { next?: string; area?: string };
+}) {
+  return <AuthForm mode="sign-up" action={signUpAction} nextPath={searchParams?.next} protectedArea={searchParams?.area} />;
 }

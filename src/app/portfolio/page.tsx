@@ -4,6 +4,7 @@ import MetricCard from "@/components/cards/MetricCard";
 import StatusBadge from "@/components/badges/StatusBadge";
 import PlainEnglish from "@/components/learn/PlainEnglish";
 import Term from "@/components/learn/Term";
+import MethodologyCallout from "@/components/research/MethodologyCallout";
 import { getResearchDataset } from "@/lib/research";
 import { concentrationLevel } from "@/lib/quant/signalConcentration";
 import { num, pct, pctPlain } from "@/lib/utils/format";
@@ -66,6 +67,15 @@ export default async function PortfolioPage() {
         <Term term="neff">effective bets</Term> number tells you how many genuinely independent bets the mix really
         amounts to — the higher, the safer.
       </PlainEnglish>
+
+      <MethodologyCallout
+        items={[
+          "Weights are proportional to radar score, with equal-weight fallback if scores are not usable.",
+          "Effective bets and correlation are computed from daily return series on the shared calendar.",
+          "Benchmark comparison uses SPY or the first available substitute on the same dates.",
+          "Portfolio results are historical research diagnostics and do not guarantee future P&L.",
+        ]}
+      />
 
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <MetricCard label="Total return" value={pct(portfolio.metrics.totalReturn)} tone="positive" termId="return" />

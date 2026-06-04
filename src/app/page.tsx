@@ -16,6 +16,7 @@ import ModuleCard from "@/components/cards/ModuleCard";
 import DataSourceStatus from "@/components/research/DataSourceStatus";
 import EmptyState from "@/components/research/EmptyState";
 import StatusBadge from "@/components/badges/StatusBadge";
+import MethodologyCallout from "@/components/research/MethodologyCallout";
 import { getResearchDataset } from "@/lib/research";
 import { sectorCount, sectorOf } from "@/data/watchlist";
 import { pct, pctPlain, num } from "@/lib/utils/format";
@@ -75,13 +76,16 @@ export default async function HomePage() {
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/[0.06] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-100/80">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 shadow-[0_0_14px_rgba(52,211,153,0.9)]" />
-              Portfolio-ready AI Quant Lab
+              Open-source AI-assisted quant research workbench
             </div>
             <h1 className="mt-4 max-w-4xl text-[40px] font-semibold leading-[0.98] tracking-[-0.045em] text-white md:text-[64px]">
-              Real market data into backtested strategy decisions.
+              Factor signals, backtests, portfolios, and research memos in one reusable lab.
             </h1>
             <p className="mt-5 max-w-2xl text-[15px] leading-7 text-ink-muted">
-              A research workflow prototype that fetches 3Y Yahoo Finance OHLCV, builds factor signals, runs cost-aware backtests, and decides whether a strategy earns radar observation.
+              FactorForge is an open-source AI-assisted quant research workbench for factor signals, cost-aware backtests, portfolio construction, risk diagnostics, paper observation, and research memo generation.
+            </p>
+            <p className="mt-3 max-w-2xl text-[13px] leading-relaxed text-ink-soft">
+              Built for researchers, maintainers, and contributors who need deterministic metrics, visible data provenance, safe public demo behavior, and reviewable workflows.
             </p>
             <Link
               href="/learn"
@@ -92,17 +96,17 @@ export default async function HomePage() {
               <span aria-hidden>→</span>
             </Link>
             <div className="mt-6 grid grid-cols-2 gap-2 text-[12px] text-ink-muted">
-              <EvidencePill label="Real Yahoo Finance data" tone="green" />
-              <EvidencePill label={`${universeSize} names · ${sectorBreadth} sectors`} />
-              <EvidencePill label="Backtested strategies" />
-              <EvidencePill label="Radar-ranked candidates" />
-              <EvidencePill label="Simulated paper observation" />
-              <EvidencePill label="No financial advice" tone="amber" />
+              <EvidencePill label="Open-source research workbench" tone="green" />
+              <EvidencePill label="Real or clearly labeled fallback data" />
+              <EvidencePill label="No broker connection" tone="amber" />
+              <EvidencePill label="No live trading" tone="amber" />
+              <EvidencePill label="CI + 155 tests" />
+              <EvidencePill label="Contributor-ready" tone="green" />
             </div>
             <div className="mt-6 rounded-2xl border border-amber-300/18 bg-amber-300/[0.045] p-4">
-              <div className="text-[11px] uppercase tracking-[0.18em] text-amber-100/70">What makes it portfolio-worthy</div>
+              <div className="text-[11px] uppercase tracking-[0.18em] text-amber-100/70">Why the demo is safe and maintainable</div>
               <p className="mt-2 text-[13px] leading-relaxed text-ink-muted">
-                No hardcoded returns. Metrics are calculated from OHLCV backtests. Fallback/demo data is explicitly labeled and never presented as live validation.
+                No hardcoded returns. Metrics are calculated from OHLCV backtests, optional keys degrade to labeled fallback/template mode, and maintainer docs cover CI, releases, security policy, issue triage, and PR review.
               </p>
             </div>
           </div>
@@ -139,6 +143,18 @@ export default async function HomePage() {
           </div>
         </section>
       </section>
+
+      <MethodologyCallout
+        title="Workbench guardrails"
+        items={[
+          "What it is: an OSS research workbench for inspecting factor and backtest evidence.",
+          "Who it is for: researchers, contributors, and maintainers reviewing quant logic and data provenance.",
+          "What it does: fetches daily OHLCV, computes factors, runs rule-based backtests, ranks candidates, builds portfolio diagnostics, and drafts memos.",
+          "Why it is safe: no broker connection, no live trading, and no financial-advice workflow.",
+          "Why it is maintainable: CI, tests, issue templates, release checklist, security policy, and maintainer backlog are documented.",
+          "Fallback policy: real data is preferred; fallback/demo data and template memos are labeled.",
+        ]}
+      />
 
       <section className="space-y-3">
         <SectionHeader title="6-Layer Research Architecture" label="Production workflow map" href="/reports" />

@@ -20,6 +20,14 @@ export interface WatchlistFormState {
 const AUTH_LIMIT = 5;
 const AUTH_WINDOW_MS = 5 * 60 * 1000;
 
+function safeInternalRedirect(value: FormDataEntryValue | null): string {
+  const raw = String(value ?? "").trim();
+  if (!raw || !raw.startsWith("/") || raw.startsWith("//") || raw.includes("://")) {
+    return "/my-watchlist";
+  }
+  return raw;
+}
+
 async function rateLimitMessage(action: string, username: string): Promise<string | null> {
   // Bucket by action + best-effort normalized username so a typo'd username
   // doesn't share a bucket with the real one but brute force on one is throttled.
@@ -37,6 +45,7 @@ async function rateLimitMessage(action: string, username: string): Promise<strin
 export async function signInAction(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
   const username = String(formData.get("username") ?? "");
   const password = String(formData.get("password") ?? "");
+  const next = safeInternalRedirect(formData.get("next"));
   const limited = await rateLimitMessage("signin", username);
   if (limited) return { error: limited };
   try {
@@ -49,12 +58,13 @@ export async function signInAction(_prev: AuthFormState, formData: FormData): Pr
     if (error instanceof AuthError) return { error: error.message };
     return { error: "Sign-in failed. Try again." };
   }
-  redirect("/my-watchlist");
+  redirect(next);
 }
 
 export async function signUpAction(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
   const username = String(formData.get("username") ?? "");
   const password = String(formData.get("password") ?? "");
+  const next = safeInternalRedirect(formData.get("next"));
   const limited = await rateLimitMessage("signup", username);
   if (limited) return { error: limited };
   try {
@@ -67,7 +77,7 @@ export async function signUpAction(_prev: AuthFormState, formData: FormData): Pr
     if (error instanceof AuthError) return { error: error.message };
     return { error: "Sign-up failed. Try again." };
   }
-  redirect("/my-watchlist");
+  redirect(next);
 }
 
 export async function signOutAction(): Promise<void> {
@@ -82,7 +92,7 @@ export async function addWatchlistSymbolAction(
 ): Promise<WatchlistFormState> {
   const session = await getSession();
   if (!session.userId) {
-    redirect("/sign-in");
+    redirect("/sign-in?next=/my-watchlist&area=watchlist");
   }
   const symbol = String(formData.get("symbol") ?? "");
   const result = addSymbolToWatchlist(session.userId!, symbol);

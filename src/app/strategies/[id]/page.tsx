@@ -10,6 +10,7 @@ import BacktestChecklist from "@/components/research/BacktestChecklist";
 import StrategySignalPanel from "@/components/research/StrategySignalPanel";
 import WalkForwardPanel from "@/components/research/WalkForwardPanel";
 import FactorAttributionPanel from "@/components/research/FactorAttributionPanel";
+import MethodologyCallout from "@/components/research/MethodologyCallout";
 import { evaluateWalkForward } from "@/lib/quant/walkForward";
 import { attributeFactors } from "@/lib/quant/factorAttribution";
 import { STRATEGY_CATALOG } from "@/data/strategyCatalog";
@@ -104,6 +105,15 @@ export default async function StrategyDetailPage({
       </section>
 
       <SymbolSwitcher strategyId={params.id} options={symbolOptions} selected={active.symbol} />
+
+      <MethodologyCallout
+        items={[
+          "Signals are produced from completed daily bars; entries fill at the next open with modeled costs.",
+          "Headline view defaults to the strongest symbol for this strategy, and the selection-bias notice documents that assumption.",
+          "No intraday fills, broker connection, live orders, shorts, options, or margin are modeled.",
+          "AI memo prose is generated from the deterministic backtest payload or a template fallback; metrics are engine-derived.",
+        ]}
+      />
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1.2fr_0.8fr]">
         <div className="card p-5">

@@ -5,6 +5,7 @@ import EmptyState from "@/components/research/EmptyState";
 import SignalConcentrationPanel from "@/components/research/SignalConcentrationPanel";
 import PlainEnglish from "@/components/learn/PlainEnglish";
 import Term from "@/components/learn/Term";
+import MethodologyCallout from "@/components/research/MethodologyCallout";
 import { getResearchDataset } from "@/lib/research";
 import { num, pct } from "@/lib/utils/format";
 
@@ -34,6 +35,15 @@ export default async function RadarPage() {
         <MetricCard label="Observing" value={String(radarCandidates.filter((item) => item.status === "continue observing").length)} />
         <MetricCard label="Rejected" value={String(radarCandidates.filter((item) => item.status === "rejected").length)} />
       </section>
+
+      <MethodologyCallout
+        items={[
+          "Scores combine return, Sharpe, drawdown, win rate, trade count, and data-provenance penalties.",
+          "Candidate thresholds are explicit: high score with bounded drawdown and enough trades can reach radar candidate status.",
+          "Hard rejection rules penalize severe drawdown, negative Sharpe, weak evidence, or poor data quality.",
+          "Radar promotion means worthy of simulated observation, not a trading recommendation.",
+        ]}
+      />
 
       <section className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
         {[

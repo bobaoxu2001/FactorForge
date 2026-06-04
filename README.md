@@ -3,14 +3,18 @@
 [![CI](https://github.com/bobaoxu2001/FactorForge/actions/workflows/ci.yml/badge.svg)](https://github.com/bobaoxu2001/FactorForge/actions/workflows/ci.yml)
 [![Next.js 14](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![Vitest](https://img.shields.io/badge/tests-145%20passing-22c55e?logo=vitest&logoColor=white)](#testing)
+[![Vitest](https://img.shields.io/badge/tests-155%20passing-22c55e?logo=vitest&logoColor=white)](#testing)
 [![Docker](https://img.shields.io/badge/Docker-standalone-2496ed?logo=docker&logoColor=white)](#deployment)
 
 FactorForge is an open-source AI-assisted quantitative research workbench for exploring factor signals, rule-based backtests, portfolio construction, risk diagnostics, and LLM-generated research memos over daily OHLCV data.
 
 The project is designed as a reusable research toolkit: deterministic engines compute the numbers, provider metadata keeps data provenance visible, and optional LLM calls turn validated payloads into prose without overwriting computed metrics.
 
+Live demo: [https://factor-forge-ashy.vercel.app/](https://factor-forge-ashy.vercel.app/)
+
 > Research software only. No financial advice. No broker connection. No live trading.
+
+Public demo mode is intentionally safe: market-data and LLM keys are optional, missing keys fall back to clearly labeled provider/template behavior, and account features are limited to saved research preferences/watchlists. FactorForge has no broker connector and no order execution path.
 
 ---
 
@@ -32,7 +36,8 @@ The project is designed as a reusable research toolkit: deterministic engines co
 | **Hardened HTTP + auth** | Strict Content-Security-Policy plus `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, and HSTS on every response; `poweredByHeader` off. Auth adds a 7-day session TTL, constant-time login (dummy-hash compare blocks username enumeration), and a bcrypt 72-byte password guard. |
 | **Deploy-ready** | Multi-stage `Dockerfile` building Next's `standalone` server as a non-root container with a `HEALTHCHECK`, plus centralized env validation that fails fast in production on a missing `SESSION_PASSWORD`. |
 | **Pluggable rate-limit store** | Auth throttling sits behind a `RateLimitStore` interface with two real backends: per-process in-memory (default) and a distributed Upstash/Vercel-KV adapter (atomic `INCR`+`PEXPIRE` over the REST API, no SDK) so the limit holds across a horizontally-scaled fleet. Selected by env, fail-open on infra blips, surfaced in `/api/health`; production warns when only the per-process store is wired. |
-| **CI and tests** | 145 vitest tests (engine + concentration gate + universe/sector breadth + rate-limit stores + glossary + `<Term>`/`<PlainEnglish>` + components + auth + env validation + composite-provider and DeepSeek-branch mocks) under jsdom; GitHub Actions runs lint + typecheck + test on every push and pull request targeting `main`. |
+| **CI and tests** | 155 vitest tests (engine + concentration gate + universe/sector breadth + rate-limit stores + glossary + `<Term>`/`<PlainEnglish>` + components + auth + env validation + composite-provider and DeepSeek-branch mocks) under jsdom; GitHub Actions runs lint + typecheck + test on every push and pull request targeting `main`. |
+| **Maintainer-facing app surface** | `/oss` documents why the project exists, who can contribute, good first issues, maintainer workflow, Codex/automation use cases, security-sensitive areas, release workflow, and current limitations inside the deployed app. |
 
 ---
 
@@ -117,6 +122,7 @@ src/
     paper-trading/         Simulated observation queue + risk budget + Daily Review
     ai-market/             Market regime memo
     reports/               Auto-generated research cards
+    oss/                   OSS maintainer and contribution workflow
     factors/, data/        Factor table and data provenance
   components/
     cards, badges, charts, layout, research
@@ -226,6 +232,9 @@ Maintainer and contributor docs:
 - [Changelog](CHANGELOG.md)
 - [Roadmap](ROADMAP.md)
 - [Release checklist](docs/release_checklist.md)
+- [Maintainer backlog](docs/maintainer_backlog/README.md)
+
+Inside the app, `/oss` provides the same contribution and maintainer story for visitors using the public demo.
 
 **Environment variables**
 
@@ -296,7 +305,7 @@ Security notes:
 
 ## Testing
 
-145 tests across 32 files under vitest + jsdom:
+155 tests across 39 files under vitest + jsdom:
 
 - **Engine** — backtest fees + execution semantics, indicators, radar verdict logic, paper-trading risk-budget transitions + N_eff slot cap, portfolio engine (Pearson, calendar intersection, score-weighted blend, phase-shifted decorrelation).
 - **Concentration** — `effectiveBets` / `concentrationLevel` math (monotonicity, bounds), the correlation gate demoting near-duplicate candidates, and the shared pairwise-correlation builder.

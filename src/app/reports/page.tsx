@@ -1,5 +1,6 @@
 import Link from "next/link";
 import StatusBadge from "@/components/badges/StatusBadge";
+import AiTransparencyNote from "@/components/research/AiTransparencyNote";
 import { generateStrategyExplanation } from "@/lib/ai/strategyExplainer";
 import { generateConcentrationNote } from "@/lib/ai/concentrationNote";
 import { getResearchDataset } from "@/lib/research";
@@ -32,6 +33,8 @@ export default async function ReportsPage() {
           Dataset generated {new Date(metadata.generatedAt).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}; backtests use next-open execution with modeled costs.
         </p>
       </header>
+
+      <AiTransparencyNote />
 
       {concentrationNote && signalConcentration && (
         <section className="card p-6">

@@ -3,6 +3,7 @@ import StatusBadge from "@/components/badges/StatusBadge";
 import MetricCard from "@/components/cards/MetricCard";
 import PlainEnglish from "@/components/learn/PlainEnglish";
 import Term from "@/components/learn/Term";
+import MethodologyCallout from "@/components/research/MethodologyCallout";
 import { getResearchDataset } from "@/lib/research";
 import { pearson } from "@/lib/quant/indicators";
 import { pct, pctPlain, num } from "@/lib/utils/format";
@@ -64,6 +65,17 @@ export default async function FactorsPage() {
         <MetricCard label="Avg 60d momentum" value={pct(avgMomentum)} tone={avgMomentum >= 0 ? "positive" : "negative"} />
         <MetricCard label="Avg 20d volatility" value={pctPlain(avgVol)} />
       </section>
+
+      <MethodologyCallout
+        items={[
+          "Momentum uses 20-day and 60-day close-to-close returns.",
+          "Volatility is annualized realized volatility from recent daily returns.",
+          "Trend uses SMA200 status as a long-horizon regime filter.",
+          "Liquidity/participation uses volume surge versus a 20-day baseline.",
+          "RSI14 is a bounded momentum/mean-reversion diagnostic, not a standalone recommendation.",
+          "Fallback/demo symbols remain labeled so factor values are not mistaken for live validation.",
+        ]}
+      />
 
       <section className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
         {factorGroups.map(({ title, detail, Icon }) => (

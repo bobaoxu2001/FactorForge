@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 
 export default async function MyWatchlistPage() {
   const session = await getSession();
-  if (!session.userId) redirect("/sign-in");
+  if (!session.userId) redirect("/sign-in?next=/my-watchlist&area=watchlist");
   const entries = getWatchlistFor(session.userId);
   const defaultSymbols = DEFAULT_SYMBOLS as readonly string[];
 

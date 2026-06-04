@@ -3,6 +3,7 @@ import MetricCard from "@/components/cards/MetricCard";
 import StatusBadge from "@/components/badges/StatusBadge";
 import PlainEnglish from "@/components/learn/PlainEnglish";
 import Term from "@/components/learn/Term";
+import MethodologyCallout from "@/components/research/MethodologyCallout";
 import { getResearchDataset } from "@/lib/research";
 
 export const revalidate = 60 * 60;
@@ -38,6 +39,15 @@ export default async function DataPage() {
       <div className="card p-4 text-[12.5px] leading-relaxed text-ink-muted">
         Dataset generated {new Date(metadata.generatedAt).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}; routes revalidate every {Math.round(metadata.revalidateSeconds / 60)} minutes.
       </div>
+
+      <MethodologyCallout
+        items={[
+          "Provider order is Yahoo Finance first, optional Polygon and Alpha Vantage after that, then deterministic fallback/demo data if all real providers fail.",
+          "The default date range is 3 years of daily OHLCV bars.",
+          "Adjusted close is used when Yahoo provides it; rows disclose whether the price basis is adjusted or raw/demo.",
+          "Fallback/demo rows are labeled in the status, price basis, and message columns.",
+        ]}
+      />
 
       <section className="grid grid-cols-1 gap-3 md:grid-cols-3">
         <DataCredCard icon={Database} title="Provider Transparency" detail="Yahoo Finance chart API remains visible in the UI, and all fallback/demo substitutions are disclosed." />

@@ -6,6 +6,7 @@ import EmptyState from "@/components/research/EmptyState";
 import DailyReviewPanel from "@/components/research/DailyReviewPanel";
 import PlainEnglish from "@/components/learn/PlainEnglish";
 import Term from "@/components/learn/Term";
+import MethodologyCallout from "@/components/research/MethodologyCallout";
 import { getResearchDataset } from "@/lib/research";
 import { pct, pctPlain, usd } from "@/lib/utils/format";
 
@@ -29,6 +30,16 @@ export default async function PaperTradingPage() {
         you can see how they&rsquo;d behave, with zero real money at risk and no broker connected. It&rsquo;s the safe
         rehearsal step before anyone would ever consider the real thing.
       </PlainEnglish>
+
+      <MethodologyCallout
+        items={[
+          "Simulated only: no broker connection, no order routing, and no real-money account state.",
+          "Only radar-approved strategies can enter paper observation.",
+          "Observation slots, exposure limits, drawdown checks, and concentration gates constrain the simulated account.",
+          "Daily Review summarizes deterministic observations; any LLM prose cannot change computed P&L or risk numbers.",
+          "No P&L guarantee is implied by paper observation.",
+        ]}
+      />
 
       <section className="card p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
