@@ -100,7 +100,7 @@ export default async function HomePage() {
               <EvidencePill label="Real or clearly labeled fallback data" />
               <EvidencePill label="No broker connection" tone="amber" />
               <EvidencePill label="No live trading" tone="amber" />
-              <EvidencePill label="CI + 155 tests" />
+              <EvidencePill label="CI + 167 tests" />
               <EvidencePill label="Contributor-ready" tone="green" />
             </div>
             <div className="mt-6 rounded-2xl border border-amber-300/18 bg-amber-300/[0.045] p-4">

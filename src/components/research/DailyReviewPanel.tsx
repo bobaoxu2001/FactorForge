@@ -9,7 +9,7 @@ interface Props {
 }
 
 /**
- * Post-market "盘后复盘 / Daily Review" panel. Renders the deterministic
+ * Post-market Daily Review panel. Renders the deterministic
  * end-of-session blotter (book P&L tally, weakest leg, same-batch concentration,
  * today's simulated tape) with the AI/template narrative on top. Every number
  * comes from {@link buildDailyReview}; the note only adds prose.
@@ -21,7 +21,7 @@ export default function DailyReviewPanel({ review, note }: Props) {
     <section className="card p-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">Daily Review · 盘后复盘</div>
+          <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">Daily Review</div>
           <h2 className="mt-1 text-[20px] font-semibold text-ink">Post-market auto-review</h2>
           <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-muted">
             An automatic end-of-session read of the simulated book: P&amp;L breadth, the weakest leg, how many

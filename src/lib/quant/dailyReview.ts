@@ -9,7 +9,7 @@ import type {
 /**
  * Post-market auto-review of the paper-observation book.
  *
- * This is the deterministic half of the "盘后复盘 / Daily Review" feature: it
+ * This is the deterministic half of the Daily Review feature: it
  * folds the exact observations the rest of the app renders into a desk-style
  * end-of-session blotter (book P&L tally, weakest leg, same-batch concentration,
  * today's tape) without inventing a single number. The narrative layer
@@ -106,8 +106,8 @@ function computeTape(
     return last?.type === "sell" && last.date === asOf;
   }).length;
   const skipped = radarCandidates.filter((c) => c.status === "continue observing").length;
-  // The concentration gate refusing a near-duplicate a slot is this app's "拒单":
-  // a would-be order the desk declined because it doubled an existing bet.
+  // The concentration gate refusing a near-duplicate a slot is this app's order
+  // rejection: a would-be order the desk declined because it doubled an existing bet.
   const rejected = radarCandidates.filter((c) => c.redundancy?.demoted).length;
   return { entries, exits, skipped, rejected };
 }
