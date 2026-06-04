@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Activity, ArrowUpRight, BarChart3, Clock3, Radio, ShieldCheck, Trophy, WalletCards } from "lucide-react";
 import EquityCurveChart from "@/components/charts/EquityCurveChart";
 import MetricCard from "@/components/cards/MetricCard";
 import StatusBadge from "@/components/badges/StatusBadge";
@@ -8,21 +9,66 @@ import PlainEnglish from "@/components/learn/PlainEnglish";
 import Term from "@/components/learn/Term";
 import MethodologyCallout from "@/components/research/MethodologyCallout";
 import { getResearchDataset } from "@/lib/research";
-import { pct, pctPlain, usd } from "@/lib/utils/format";
+import { pct, pctPlain, usd, num } from "@/lib/utils/format";
+import type { PaperObservation } from "@/types/strategy";
 
 export const revalidate = 60 * 60;
 
 export default async function PaperTradingPage() {
-  const { paperObservations, paperAccount, dailyReview, dailyReviewNote } = await getResearchDataset();
+  const { paperObservations, paperAccount, dailyReview, dailyReviewNote, radarCandidates, metadata } = await getResearchDataset();
+  const desk = buildDeskSnapshot(paperObservations, paperAccount.totalAllocatedCapital);
+  const shortlistCount = radarCandidates.filter((candidate) => candidate.status === "radar candidate" || candidate.status === "continue observing").length;
+  const promotedCount = paperObservations.length;
+  const shareLine = `${promotedCount} ${promotedCount === 1 ? "strategy" : "strategies"} live · ${desk.bookReturnLabel} simulated book return · ${pct(paperAccount.maxObservedDrawdown)} max observed drawdown · ${dailyReview.winners}W/${dailyReview.losers}L`;
+
   return (
     <div className="space-y-8">
-      <header>
-        <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">L5 Paper Trading</div>
-        <h1 className="mt-1 text-[28px] font-semibold text-ink">Paper Observation</h1>
-        <p className="mt-2 max-w-3xl text-[14px] leading-relaxed text-ink-muted">
-          This page is for simulated observation only. It does not connect to a broker or place real orders. Observed strategies must come from radar candidates.
-        </p>
-      </header>
+      <section className="hero-shell p-5 md:p-7">
+        <div className="relative grid gap-6 xl:grid-cols-[1.05fr_0.95fr] xl:items-stretch">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300/25 bg-emerald-300/[0.08] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-100">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 shadow-[0_0_14px_rgba(52,211,153,0.9)]" />
+              Live paper desk · simulation only
+            </div>
+            <h1 className="mt-4 max-w-4xl text-[36px] font-semibold leading-none tracking-[-0.04em] text-white md:text-[58px]">
+              Public track record for radar-promoted strategies.
+            </h1>
+            <p className="mt-4 max-w-3xl text-[14px] leading-7 text-ink-muted">
+              A desk-style view of the simulated strategy book: current holdings, promotion funnel, observed P&amp;L, drawdown pressure, and the post-market tape. No broker is connected and no real order is routed.
+            </p>
+            <div className="mt-5 grid grid-cols-1 gap-2 text-[12px] text-ink-muted sm:grid-cols-2">
+              <DeskPill icon={Radio} label={`${promotedCount}/${paperAccount.observationSlots}`} detail="live slots" tone="green" />
+              <DeskPill icon={ShieldCheck} label={paperAccount.riskBudgetStatus} detail="risk budget" tone="cyan" />
+              <DeskPill icon={WalletCards} label={usd(desk.bookValue)} detail="sim book value" tone="blue" />
+              <DeskPill icon={Clock3} label={dailyReview.asOf} detail="last review" tone="amber" />
+            </div>
+          </div>
+
+          <div className="hero-showcase p-5">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <div className="text-[11px] uppercase tracking-[0.18em] text-cyan-100/70">Share Snapshot</div>
+                <h2 className="mt-2 text-[22px] font-semibold tracking-tight text-white">Paper Strategy Desk</h2>
+              </div>
+              <StatusBadge status={paperAccount.riskBudgetStatus} />
+            </div>
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <SnapshotStat label="Book return" value={desk.bookReturnLabel} tone={desk.bookReturn >= 0 ? "positive" : "negative"} />
+              <SnapshotStat label="Unrealized P&L" value={usd(desk.bookPnl)} tone={desk.bookPnl >= 0 ? "positive" : "negative"} />
+              <SnapshotStat label="Active signals" value={String(paperAccount.activeObservations)} />
+              <SnapshotStat label="Exposure" value={pctPlain(paperAccount.exposurePct)} tone="accent" />
+            </div>
+            <div className="mt-4 rounded-2xl border border-cyan-300/18 bg-cyan-300/[0.055] p-4">
+              <div className="text-[10.5px] uppercase tracking-[0.16em] text-cyan-100/70">Public line</div>
+              <p className="mt-2 text-[13px] leading-relaxed text-ink">{shareLine}</p>
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <LeaderCard label="Top winner" observation={desk.topWinner} />
+              <LeaderCard label="Needs review" observation={desk.weakest} />
+            </div>
+          </div>
+        </div>
+      </section>
 
       <PlainEnglish>
         This is a simulated observation queue with <strong>pretend money</strong> — what traders call{" "}
@@ -41,25 +87,92 @@ export default async function PaperTradingPage() {
         ]}
       />
 
+      <section className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
+        <MetricCard label="Promoted" value={`${promotedCount}/${shortlistCount}`} hint="from radar shortlist" tone="accent" />
+        <MetricCard label="Live signals" value={String(paperAccount.activeObservations)} hint="active or holding" />
+        <MetricCard label="Book value" value={usd(desk.bookValue)} tone={desk.bookPnl >= 0 ? "positive" : "negative"} />
+        <MetricCard label="Book return" value={desk.bookReturnLabel} tone={desk.bookReturn >= 0 ? "positive" : "negative"} />
+        <MetricCard label="Winners" value={String(dailyReview.winners)} tone="positive" />
+        <MetricCard label="Losers" value={String(dailyReview.losers)} tone={dailyReview.losers > 0 ? "negative" : "default"} />
+        <MetricCard label="Max DD" value={pct(paperAccount.maxObservedDrawdown)} tone={paperAccount.maxObservedDrawdown < -0.2 ? "negative" : "default"} />
+        <MetricCard label="Real data" value={`${metadata.realDataCount}/${metadata.symbolCount}`} hint="provider-backed" />
+      </section>
+
+      <section className="card p-5">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">Promotion Board</div>
+            <h2 className="mt-1 text-[20px] font-semibold text-ink">Strategies currently visible on the desk</h2>
+            <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-muted">
+              Every visible strategy was promoted by the radar screen, then constrained by slot count, exposure, drawdown, and concentration rules before it reached the simulated book.
+            </p>
+          </div>
+          <Link href="/radar" className="inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-cyan-300/[0.07] px-3 py-1.5 text-[12px] text-cyan-100 transition hover:border-cyan-300/45 hover:bg-cyan-300/[0.12]">
+            Radar source
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+        <div className="mt-5 overflow-x-auto">
+          <table className="w-full min-w-[860px] text-[12.5px]">
+            <thead className="border-y border-line bg-white/[0.025] text-[10px] uppercase tracking-wider text-ink-soft">
+              <tr>
+                <th className="px-4 py-3 text-left">Desk rank</th>
+                <th className="px-4 py-3 text-left">Strategy</th>
+                <th className="px-4 py-3 text-left">Symbol</th>
+                <th className="px-4 py-3 text-right">Observed return</th>
+                <th className="px-4 py-3 text-right">Radar score</th>
+                <th className="px-4 py-3 text-left">State</th>
+                <th className="px-4 py-3 text-left">Latest signal</th>
+                <th className="px-4 py-3 text-left">Next check</th>
+              </tr>
+            </thead>
+            <tbody className="divide-soft">
+              {paperObservations.map((observation, index) => {
+                const result = observation.candidate.result;
+                return (
+                  <tr key={observation.id} className="table-row">
+                    <td className="px-4 py-3">
+                      <span className="num inline-flex h-7 w-7 items-center justify-center rounded-lg border border-cyan-300/20 bg-cyan-300/[0.08] text-cyan-100">
+                        {index + 1}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <Link href={`/strategies/${result.strategyId}`} className="font-medium text-white hover:text-blue-300">
+                        {result.strategyName}
+                      </Link>
+                      <div className="mt-0.5 text-[11px] text-ink-soft">{result.strategyId}</div>
+                    </td>
+                    <td className="px-4 py-3 font-medium text-ink">{result.symbol}</td>
+                    <td className={`num px-4 py-3 text-right ${observation.simulatedReturn >= 0 ? "text-emerald-300" : "text-rose-300"}`}>
+                      {pct(observation.simulatedReturn)}
+                    </td>
+                    <td className="num px-4 py-3 text-right text-ink">{observation.candidate.score}</td>
+                    <td className="px-4 py-3"><StatusBadge status={observation.status} /></td>
+                    <td className="max-w-[260px] truncate px-4 py-3 text-ink-muted">{observation.recentSignal}</td>
+                    <td className="px-4 py-3 text-ink-muted">{observation.nextCheck}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        {paperObservations.length === 0 && (
+          <div className="mt-5">
+            <EmptyState title="No promoted strategy is live yet." message="The radar has not found a candidate that passes every promotion and concentration gate." />
+          </div>
+        )}
+      </section>
+
       <section className="card p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">Simulated account controls</div>
-            <h2 className="mt-1 text-[20px] font-semibold text-ink">Observation Risk Budget</h2>
+            <h2 className="mt-1 text-[20px] font-semibold text-ink">Risk Budget</h2>
             <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-muted">
-              Paper observation is constrained by radar admission, fixed simulated position sizing, exposure limits, and explicit data-provenance labels.
+              The desk can only promote strategies that fit the paper account limits. That keeps the public track record tied to the same guardrails the research engine uses.
             </p>
           </div>
           <StatusBadge status={paperAccount.riskBudgetStatus} />
-        </div>
-
-        <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-6">
-          <MetricCard label="Sim account" value={usd(paperAccount.simulatedCapital)} />
-          <MetricCard label="Slots used" value={`${paperObservations.length}/${paperAccount.observationSlots}`} />
-          <MetricCard label="Active signals" value={String(paperAccount.activeObservations)} />
-          <MetricCard label="Exposure" value={pctPlain(paperAccount.exposurePct)} tone={paperAccount.exposurePct > 0.6 ? "negative" : "accent"} />
-          <MetricCard label="Max observed DD" value={pct(paperAccount.maxObservedDrawdown)} tone={paperAccount.maxObservedDrawdown < -0.2 ? "negative" : "default"} />
-          <MetricCard label="Avg score" value={String(paperAccount.averageRadarScore)} tone="positive" />
         </div>
 
         <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
@@ -123,6 +236,109 @@ export default async function PaperTradingPage() {
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function buildDeskSnapshot(observations: PaperObservation[], totalAllocatedCapital: number) {
+  const live = observations.filter((observation) => observation.status === "active" || observation.status === "holding");
+  const allocatedPerLive = live.length > 0 ? totalAllocatedCapital / live.length : 0;
+  const bookPnl = live.reduce((sum, observation) => sum + allocatedPerLive * observation.simulatedReturn, 0);
+  const base = totalAllocatedCapital > 0 ? totalAllocatedCapital : observations.length * 100_000;
+  const bookReturn = base > 0 ? bookPnl / base : 0;
+  const ranked = [...observations].sort((a, b) => b.simulatedReturn - a.simulatedReturn);
+  return {
+    bookPnl,
+    bookReturn,
+    bookReturnLabel: pct(bookReturn),
+    bookValue: 100_000 + bookPnl,
+    topWinner: ranked[0] ?? null,
+    weakest: ranked[ranked.length - 1] ?? null,
+  };
+}
+
+type DeskPillTone = "green" | "cyan" | "blue" | "amber";
+
+const deskPillTones: Record<DeskPillTone, string> = {
+  green: "border-emerald-300/22 bg-emerald-300/[0.065] text-emerald-100",
+  cyan: "border-cyan-300/22 bg-cyan-300/[0.065] text-cyan-100",
+  blue: "border-blue-300/22 bg-blue-300/[0.065] text-blue-100",
+  amber: "border-amber-300/22 bg-amber-300/[0.06] text-amber-100",
+};
+
+function DeskPill({
+  icon: Icon,
+  label,
+  detail,
+  tone,
+}: {
+  icon: typeof Activity;
+  label: string;
+  detail: string;
+  tone: DeskPillTone;
+}) {
+  return (
+    <div className={`flex min-h-[72px] items-center gap-3 rounded-2xl border p-3 ${deskPillTones[tone]}`}>
+      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/[0.055]">
+        <Icon className="h-4 w-4" />
+      </div>
+      <div className="min-w-0">
+        <div className="truncate text-[13px] font-semibold text-white">{label}</div>
+        <div className="mt-0.5 truncate text-[10.5px] uppercase tracking-[0.14em] opacity-70">{detail}</div>
+      </div>
+    </div>
+  );
+}
+
+function SnapshotStat({
+  label,
+  value,
+  tone = "default",
+}: {
+  label: string;
+  value: string;
+  tone?: "default" | "positive" | "negative" | "accent";
+}) {
+  const toneClass =
+    tone === "positive" ? "text-emerald-300" :
+    tone === "negative" ? "text-rose-300" :
+    tone === "accent" ? "text-cyan-200" : "text-white";
+  return (
+    <div className="rounded-2xl border border-line bg-white/[0.035] p-3">
+      <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-soft">{label}</div>
+      <div className={`num mt-2 text-[24px] font-semibold tracking-tight ${toneClass}`}>{value}</div>
+    </div>
+  );
+}
+
+function LeaderCard({ label, observation }: { label: string; observation: PaperObservation | null }) {
+  if (!observation) {
+    return (
+      <div className="rounded-2xl border border-line bg-white/[0.03] p-3">
+        <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-soft">{label}</div>
+        <div className="mt-2 text-[13px] text-ink-muted">Waiting for promotion</div>
+      </div>
+    );
+  }
+  const isWinner = observation.simulatedReturn >= 0;
+  const isReviewCard = label.toLowerCase().includes("review");
+  const Icon = isWinner && !isReviewCard ? Trophy : BarChart3;
+  return (
+    <div className="rounded-2xl border border-line bg-white/[0.03] p-3">
+      <div className="flex items-center justify-between gap-3">
+        <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-soft">{label}</div>
+        <Icon className={isWinner && !isReviewCard ? "h-4 w-4 text-emerald-300" : "h-4 w-4 text-amber-200"} />
+      </div>
+      <div className="mt-2 flex items-end justify-between gap-3">
+        <div className="min-w-0">
+          <div className="truncate text-[14px] font-semibold text-white">{observation.currentSymbol}</div>
+          <div className="mt-0.5 truncate text-[11px] text-ink-soft">{observation.candidate.result.strategyName}</div>
+        </div>
+        <div className={`num text-[18px] font-semibold ${isWinner ? "text-emerald-300" : "text-rose-300"}`}>
+          {pct(observation.simulatedReturn)}
+        </div>
+      </div>
+      <div className="mt-2 text-[11px] text-ink-soft">Sharpe {num(observation.candidate.result.metrics.sharpe)}</div>
     </div>
   );
 }
