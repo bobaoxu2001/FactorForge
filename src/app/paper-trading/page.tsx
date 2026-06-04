@@ -46,6 +46,13 @@ export default async function PaperTradingPage() {
               <DeskPill icon={WalletCards} label={usd(desk.bookValue)} detail="sim book value" tone="blue" />
               <DeskPill icon={Clock3} label={dailyReview.asOf} detail="last review" tone="amber" />
             </div>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <Link href="/track-record" className="inline-flex items-center gap-2 rounded-full border border-emerald-300/25 bg-emerald-300/[0.08] px-3.5 py-2 text-[12.5px] text-emerald-100 transition hover:border-emerald-300/45 hover:bg-emerald-300/[0.13]">
+                <Trophy className="h-3.5 w-3.5" />
+                Public track record
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
           </div>
 
           <div className="hero-showcase p-5">

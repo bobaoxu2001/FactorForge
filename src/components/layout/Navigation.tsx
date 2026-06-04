@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   Star,
   Target,
+  Trophy,
   WalletCards,
   X,
 } from "lucide-react";
@@ -36,6 +37,7 @@ const items: { href: string; label: string; icon: typeof Gauge; tag?: string }[]
   { href: "/portfolio", label: "Portfolio", icon: PieChart },
   { href: "/ai-market", label: "AI Market", icon: BrainCircuit },
   { href: "/paper-trading", label: "Paper Trading", icon: WalletCards },
+  { href: "/track-record", label: "Track Record", icon: Trophy },
   { href: "/reports", label: "Reports", icon: FileText },
   { href: "/oss", label: "OSS & Maintainers", icon: ShieldCheck },
   // Protected routes — tagged so it's clear they need a persistence backend.
