@@ -8,13 +8,14 @@ This project follows a human-maintained changelog. There is no automated release
 
 ### Added
 
+- Multi-strategy consensus (多策略共振): all 5 strategies run across the full 28-symbol universe, pivoted per symbol to surface names held by more than one independent strategy, ranked by strategy count then distinct strategy types. Lives at `/consensus`.
 - OSS maintainer docs: contributing guide, security policy, code of conduct, roadmap, release checklist, issue templates, PR template, and maintainer backlog.
 - README maintainer workflow and maintainer automation sections.
 
 ### Changed
 
 - README opening reframed FactorForge as an open-source AI-assisted quantitative research workbench.
-- README test count corrected to 145 passing tests.
+- README test count synced to 155 passing tests.
 
 ## 0.1.0
 

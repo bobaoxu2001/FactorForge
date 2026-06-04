@@ -285,6 +285,8 @@ Optional keys can be left unset:
 - `POLYGON_API_KEY` / `ALPHA_VANTAGE_API_KEY` unset → the app uses Yahoo Finance first, then deterministic fallback/demo data if every real-data provider fails.
 - `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` unset → auth throttling is per Vercel instance instead of shared across instances.
 
+On Vercel's stateless serverless filesystem `better-sqlite3` cannot open a persistent database, so `getDb()` returns `null` and the engine runs uncached. This is expected: `/api/health` reports `status: "degraded"` with `database: "down"` (HTTP 200, still serving) on the public demo. Watchlists and the backtest cache are unavailable in that mode, but the research pipeline still renders. A long-lived host (Docker, a VM, or a Vercel deployment with a mounted volume) reports `status: "ok"`.
+
 Safe public demo behavior:
 
 - No brokerage integration is present.
