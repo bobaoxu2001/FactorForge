@@ -6,7 +6,9 @@
 [![Vitest](https://img.shields.io/badge/tests-145%20passing-22c55e?logo=vitest&logoColor=white)](#testing)
 [![Docker](https://img.shields.io/badge/Docker-standalone-2496ed?logo=docker&logoColor=white)](#deployment)
 
-An AI quant research lab that turns daily OHLCV into factor signals, cost-aware backtests, score-weighted portfolios, and LLM-written research memos. Built as a portfolio piece for a full-stack + applied-ML role.
+FactorForge is an open-source AI-assisted quantitative research workbench for exploring factor signals, rule-based backtests, portfolio construction, risk diagnostics, and LLM-generated research memos over daily OHLCV data.
+
+The project is designed as a reusable research toolkit: deterministic engines compute the numbers, provider metadata keeps data provenance visible, and optional LLM calls turn validated payloads into prose without overwriting computed metrics.
 
 > Research and simulated trading demonstration only. No broker connection, no live orders. Historical backtests do not represent future returns.
 
@@ -30,7 +32,7 @@ An AI quant research lab that turns daily OHLCV into factor signals, cost-aware 
 | **Hardened HTTP + auth** | Strict Content-Security-Policy plus `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, and HSTS on every response; `poweredByHeader` off. Auth adds a 7-day session TTL, constant-time login (dummy-hash compare blocks username enumeration), and a bcrypt 72-byte password guard. |
 | **Deploy-ready** | Multi-stage `Dockerfile` building Next's `standalone` server as a non-root container with a `HEALTHCHECK`, plus centralized env validation that fails fast in production on a missing `SESSION_PASSWORD`. |
 | **Pluggable rate-limit store** | Auth throttling sits behind a `RateLimitStore` interface with two real backends: per-process in-memory (default) and a distributed Upstash/Vercel-KV adapter (atomic `INCR`+`PEXPIRE` over the REST API, no SDK) so the limit holds across a horizontally-scaled fleet. Selected by env, fail-open on infra blips, surfaced in `/api/health`; production warns when only the per-process store is wired. |
-| **CI and tests** | 131 vitest tests (engine + concentration gate + universe/sector breadth + rate-limit stores + glossary + `<Term>`/`<PlainEnglish>` + components + auth + env validation + composite-provider and DeepSeek-branch mocks) under jsdom; GitHub Actions runs lint + typecheck + test on every push. |
+| **CI and tests** | 145 vitest tests (engine + concentration gate + universe/sector breadth + rate-limit stores + glossary + `<Term>`/`<PlainEnglish>` + components + auth + env validation + composite-provider and DeepSeek-branch mocks) under jsdom; GitHub Actions runs lint + typecheck + test on every push and pull request targeting `main`. |
 
 ---
 
@@ -216,6 +218,15 @@ npm test
 npm run build
 ```
 
+Maintainer and contributor docs:
+
+- [Contributing guide](CONTRIBUTING.md)
+- [Security policy](SECURITY.md)
+- [Code of conduct](CODE_OF_CONDUCT.md)
+- [Changelog](CHANGELOG.md)
+- [Roadmap](ROADMAP.md)
+- [Release checklist](docs/release_checklist.md)
+
 **Environment variables**
 
 | Variable | Required? | What it does |
@@ -271,6 +282,47 @@ Run them locally with `npm test`. CI runs the same command on every push and PR;
 
 ---
 
+## Maintainer workflow
+
+**CI**
+
+GitHub Actions runs `npm ci`, `npm run lint`, `npm run typecheck`, and `npm test` on pushes and pull requests targeting `main`. The workflow intentionally avoids provider keys and broker integrations; provider failure paths should be covered with mocks and fixtures.
+
+**Tests**
+
+Use focused tests for changes in `src/lib/quant`, `src/lib/data/providers`, `src/lib/auth`, and `src/lib/ai`. Any change to backtest math, radar scoring, concentration gating, paper observations, provider fallback, auth/session handling, or LLM payload contracts should add or update tests before review.
+
+**Release process**
+
+Releases are manual. Update `CHANGELOG.md`, confirm the checklist in [docs/release_checklist.md](docs/release_checklist.md), run the local verification commands, and tag only after the release notes match the shipped code. This repo does not currently publish a package to npm.
+
+**PR review**
+
+Review pull requests for deterministic metric integrity first: numbers must come from code and fixtures, not copy or LLM text. Then check data provenance labels, UI fallback disclosure, tests, README/docs drift, and security-sensitive changes.
+
+**Issue triage**
+
+Use the issue templates to separate bugs, feature requests, and docs tasks. Ask for reproduction steps, route names, provider/fallback status, env context with secrets removed, and whether a fixture-based reproduction is possible.
+
+**Security-sensitive areas**
+
+Treat auth/session code, bcrypt password handling, iron-session cookie settings, rate limiting, SQLite persistence, provider credentials, LLM prompts/payloads, CSP headers, and `/api/csp-report` as security-sensitive. Do not paste secrets into issues, logs, examples, screenshots, or tests.
+
+---
+
+## Maintainer automation use cases
+
+Maintainers may use AI assistants for repetitive review and documentation work, but generated output should be checked against the code before merging.
+
+- **PR review checklists** — draft route/module-specific checks for data provenance, deterministic metrics, fallback labels, tests, and docs updates.
+- **Test generation for backtest edge cases** — propose cases for next-open execution, slippage/fees, stop exits, flat/long transitions, empty trades, and benchmark calendar alignment.
+- **Provider fallback testing** — generate mocked Yahoo/Polygon/Alpha Vantage failure cases and assertions that synthetic data remains clearly labeled.
+- **Auth/session/security review** — inspect changes around password validation, cookie settings, rate limits, env validation, CSP, and logging for accidental secret exposure.
+- **Changelog and release note drafting** — summarize merged changes from commits and PR descriptions, then verify against the diff before release.
+- **Issue triage and reproduction checklist generation** — turn user reports into minimal reproduction steps, expected/actual behavior, affected route/module, env context, and fixture needs.
+
+---
+
 ## Tech stack
 
 - **Next.js 14** App Router, all data fetching in server components
@@ -288,16 +340,10 @@ Run them locally with `npm test`. CI runs the same command on every push and PR;
 
 ## What I'd build next
 
-In rough ROI order:
-
-1. **Real broker integration** — Alpaca paper API for actual order flow on radar candidates (paper only, gated by `riskBudgetStatus`).
-2. **Cross-validated walk-forward** — N rolling train/test windows with averaged degradation metrics, not just one split.
-3. **Fama-French style real factor data** — replace the proxied momentum / low-vol baskets with imported daily factor returns.
-4. **Per-user dataset** — use the watchlist symbols to actually drive the engine for that user, not just label them.
-5. **Operational telemetry** — push the in-process counters to a Prometheus exporter so cache hit rates survive process restarts. (Rate limiting already moved to a shared Upstash/KV store via the `RateLimitStore` interface; the backtest cache is the natural next thing to migrate behind a similar store.)
+The current roadmap is tracked in [ROADMAP.md](ROADMAP.md). Near-term maintainer backlog notes live in [docs/maintainer_backlog](docs/maintainer_backlog/).
 
 ---
 
 ## Disclaimer
 
-This platform is for research and simulated trading demonstration only. It does not constitute investment advice. Historical backtests do not represent future returns.
+This platform is for research and simulated trading demonstration only. No broker connection, no live orders. Historical backtests do not represent future returns.
