@@ -72,6 +72,35 @@ describe("paper observation controls", () => {
     expect(observations[0].status).toBe("holding");
   });
 
+  it("uses local paper ledger return when a ledger snapshot exists", () => {
+    const c = candidate("radar candidate");
+    const observations = buildPaperObservations([c], 1, {
+      ledgerSnapshots: {
+        [`${c.result.strategyId}-${c.result.symbol}`]: {
+          source: "persistent",
+          positionId: `${c.result.strategyId}-${c.result.symbol}`,
+          status: "open",
+          promotedAt: Date.parse("2026-06-01T00:00:00.000Z"),
+          promotedAtIso: "2026-06-01T00:00:00.000Z",
+          entryDate: "2026-06-01",
+          entryPrice: 100,
+          currentDate: "2026-06-04",
+          currentPrice: 103,
+          shares: 200,
+          allocatedCapital: 20_000,
+          marketValue: 20_600,
+          unrealizedPnl: 600,
+          returnPct: 0.03,
+          daysLive: 3,
+          note: "test ledger",
+        },
+      },
+    });
+
+    expect(observations[0].simulatedReturn).toBe(0.03);
+    expect(observations[0].ledger?.source).toBe("persistent");
+  });
+
   it("summarizes account-level risk guardrails", () => {
     const observations = buildPaperObservations([
       candidate("radar candidate"),

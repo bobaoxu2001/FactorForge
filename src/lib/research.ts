@@ -6,7 +6,8 @@ import type { FactorSnapshot, HistoricalPriceResult } from "@/types/market";
 import { generateMarketSummary, type MarketSummary } from "@/lib/ai/marketSummary";
 import { getWatchlistPrices } from "@/lib/data/marketData";
 import { percentChange, realizedVolatility, rsi, sma, volumeMovingAverage } from "@/lib/quant/indicators";
-import { buildPaperAccountSummary, buildPaperObservations, MAX_OBSERVATION_SLOTS } from "@/lib/quant/paperTrading";
+import { buildPaperAccountSummary, buildPaperObservations, MAX_OBSERVATION_SLOTS, PAPER_POSITION_CAPITAL } from "@/lib/quant/paperTrading";
+import { syncPaperLedgerPositions } from "@/lib/persistence/paperLedger";
 import { buildDailyReview } from "@/lib/quant/dailyReview";
 import { generateDailyReviewNote, type DailyReviewNote } from "@/lib/ai/dailyReviewNote";
 import type { DailyReview } from "@/types/strategy";
@@ -47,9 +48,13 @@ export interface ResearchDataset {
   };
 }
 
-export async function getResearchDataset(): Promise<ResearchDataset> {
+export interface ResearchDatasetOptions {
+  paperLedger?: boolean;
+}
+
+export async function getResearchDataset(options: ResearchDatasetOptions = {}): Promise<ResearchDataset> {
   const pricesBySymbol = await getWatchlistPrices("3y");
-  return buildResearchDatasetFromPrices(pricesBySymbol);
+  return buildResearchDatasetFromPrices(pricesBySymbol, options);
 }
 
 /**
@@ -58,6 +63,7 @@ export async function getResearchDataset(): Promise<ResearchDataset> {
  */
 export async function buildResearchDatasetFromPrices(
   pricesBySymbol: Record<string, HistoricalPriceResult>,
+  options: ResearchDatasetOptions = {},
 ): Promise<ResearchDataset> {
   // Run every strategy across the whole universe once. The best run per strategy
   // feeds the existing showcase; the full grid feeds multi-strategy consensus.
@@ -115,7 +121,14 @@ export async function buildResearchDatasetFromPrices(
     ? `Observation slots capped at the effective number of independent bets (N_eff ${effectiveBets.toFixed(1)}) → ${slotCap} of ${MAX_OBSERVATION_SLOTS}.`
     : `Observation slots: ${slotCap} of ${MAX_OBSERVATION_SLOTS} hard cap.`;
 
-  const paperObservations = buildPaperObservations(radarCandidates, slotCap);
+  const paperLedgerSnapshots = options.paperLedger
+    ? syncPaperLedgerPositions(radarCandidates, slotCap, pricesBySymbol, {
+        allocatedCapital: PAPER_POSITION_CAPITAL,
+      })
+    : undefined;
+  const paperObservations = buildPaperObservations(radarCandidates, slotCap, {
+    ledgerSnapshots: paperLedgerSnapshots,
+  });
   const paperAccount = buildPaperAccountSummary(paperObservations, { maxSlots: slotCap, slotNote });
 
   // 5. Post-market auto-review of the simulated book. Deterministic blotter +

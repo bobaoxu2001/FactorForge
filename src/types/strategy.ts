@@ -28,6 +28,25 @@ export interface RadarCandidate {
   };
 }
 
+export interface PaperLedgerSnapshot {
+  source: "persistent" | "ephemeral" | "unavailable";
+  positionId: string;
+  status: "open" | "closed";
+  promotedAt: number;
+  promotedAtIso: string;
+  entryDate: string;
+  entryPrice: number;
+  currentDate: string;
+  currentPrice: number;
+  shares: number;
+  allocatedCapital: number;
+  marketValue: number;
+  unrealizedPnl: number;
+  returnPct: number;
+  daysLive: number;
+  note: string;
+}
+
 export interface PaperObservation {
   id: string;
   status: "waiting signal" | "active" | "holding" | "no signal";
@@ -37,6 +56,7 @@ export interface PaperObservation {
   currentSymbol: string;
   recentSignal: string;
   nextCheck: string;
+  ledger: PaperLedgerSnapshot | null;
 }
 
 export interface PaperAccountSummary {

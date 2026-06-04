@@ -40,6 +40,31 @@ CREATE TABLE IF NOT EXISTS watchlist_symbols (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_watchlist_user ON watchlist_symbols(user_id);
+
+CREATE TABLE IF NOT EXISTS paper_ledger_positions (
+  position_id       TEXT PRIMARY KEY,
+  strategy_id       TEXT NOT NULL,
+  symbol            TEXT NOT NULL,
+  strategy_name     TEXT NOT NULL,
+  status            TEXT NOT NULL,
+  promoted_at       INTEGER NOT NULL,
+  entry_date        TEXT NOT NULL,
+  entry_price       REAL NOT NULL,
+  current_date      TEXT NOT NULL,
+  current_price     REAL NOT NULL,
+  shares            REAL NOT NULL,
+  allocated_capital REAL NOT NULL,
+  radar_score       INTEGER NOT NULL,
+  last_signal_date  TEXT,
+  last_signal_type  TEXT,
+  data_provider     TEXT NOT NULL,
+  is_fallback       INTEGER NOT NULL,
+  created_at        INTEGER NOT NULL,
+  updated_at        INTEGER NOT NULL,
+  closed_at         INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_paper_ledger_status ON paper_ledger_positions(status);
+CREATE INDEX IF NOT EXISTS idx_paper_ledger_strategy_symbol ON paper_ledger_positions(strategy_id, symbol);
 `;
 
 function dbPath(): string {

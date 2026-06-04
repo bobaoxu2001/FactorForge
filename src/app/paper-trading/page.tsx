@@ -9,17 +9,21 @@ import PlainEnglish from "@/components/learn/PlainEnglish";
 import Term from "@/components/learn/Term";
 import MethodologyCallout from "@/components/research/MethodologyCallout";
 import { getResearchDataset } from "@/lib/research";
+import { fetchAlpacaPaperSnapshot, type AlpacaPaperSnapshot } from "@/lib/broker/alpacaPaper";
 import { pct, pctPlain, usd, num } from "@/lib/utils/format";
 import type { PaperObservation } from "@/types/strategy";
 
-export const revalidate = 60 * 60;
+export const dynamic = "force-dynamic";
 
 export default async function PaperTradingPage() {
-  const { paperObservations, paperAccount, dailyReview, dailyReviewNote, radarCandidates, metadata } = await getResearchDataset();
+  const [{ paperObservations, paperAccount, dailyReview, dailyReviewNote, radarCandidates, metadata }, alpacaPaper] = await Promise.all([
+    getResearchDataset({ paperLedger: true }),
+    fetchAlpacaPaperSnapshot(),
+  ]);
   const desk = buildDeskSnapshot(paperObservations, paperAccount.totalAllocatedCapital);
   const shortlistCount = radarCandidates.filter((candidate) => candidate.status === "radar candidate" || candidate.status === "continue observing").length;
   const promotedCount = paperObservations.length;
-  const shareLine = `${promotedCount} ${promotedCount === 1 ? "strategy" : "strategies"} live · ${desk.bookReturnLabel} simulated book return · ${pct(paperAccount.maxObservedDrawdown)} max observed drawdown · ${dailyReview.winners}W/${dailyReview.losers}L`;
+  const shareLine = `${promotedCount} ${promotedCount === 1 ? "strategy" : "strategies"} live · ${desk.bookReturnLabel} ledger-tracked return · ${pct(paperAccount.maxObservedDrawdown)} max observed drawdown · ${dailyReview.winners}W/${dailyReview.losers}L`;
 
   return (
     <div className="space-y-8">
@@ -53,7 +57,7 @@ export default async function PaperTradingPage() {
               <StatusBadge status={paperAccount.riskBudgetStatus} />
             </div>
             <div className="mt-5 grid grid-cols-2 gap-3">
-              <SnapshotStat label="Book return" value={desk.bookReturnLabel} tone={desk.bookReturn >= 0 ? "positive" : "negative"} />
+              <SnapshotStat label="Ledger return" value={desk.bookReturnLabel} tone={desk.bookReturn >= 0 ? "positive" : "negative"} />
               <SnapshotStat label="Unrealized P&L" value={usd(desk.bookPnl)} tone={desk.bookPnl >= 0 ? "positive" : "negative"} />
               <SnapshotStat label="Active signals" value={String(paperAccount.activeObservations)} />
               <SnapshotStat label="Exposure" value={pctPlain(paperAccount.exposurePct)} tone="accent" />
@@ -61,6 +65,9 @@ export default async function PaperTradingPage() {
             <div className="mt-4 rounded-2xl border border-cyan-300/18 bg-cyan-300/[0.055] p-4">
               <div className="text-[10.5px] uppercase tracking-[0.16em] text-cyan-100/70">Public line</div>
               <p className="mt-2 text-[13px] leading-relaxed text-ink">{shareLine}</p>
+              <p className="mt-2 text-[11.5px] leading-relaxed text-ink-soft">
+                Returns are measured from local ledger promotion price, not from the full historical backtest.
+              </p>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3">
               <LeaderCard label="Top winner" observation={desk.topWinner} />
@@ -91,12 +98,14 @@ export default async function PaperTradingPage() {
         <MetricCard label="Promoted" value={`${promotedCount}/${shortlistCount}`} hint="from radar shortlist" tone="accent" />
         <MetricCard label="Live signals" value={String(paperAccount.activeObservations)} hint="active or holding" />
         <MetricCard label="Book value" value={usd(desk.bookValue)} tone={desk.bookPnl >= 0 ? "positive" : "negative"} />
-        <MetricCard label="Book return" value={desk.bookReturnLabel} tone={desk.bookReturn >= 0 ? "positive" : "negative"} />
+        <MetricCard label="Ledger return" value={desk.bookReturnLabel} tone={desk.bookReturn >= 0 ? "positive" : "negative"} />
         <MetricCard label="Winners" value={String(dailyReview.winners)} tone="positive" />
         <MetricCard label="Losers" value={String(dailyReview.losers)} tone={dailyReview.losers > 0 ? "negative" : "default"} />
         <MetricCard label="Max DD" value={pct(paperAccount.maxObservedDrawdown)} tone={paperAccount.maxObservedDrawdown < -0.2 ? "negative" : "default"} />
         <MetricCard label="Real data" value={`${metadata.realDataCount}/${metadata.symbolCount}`} hint="provider-backed" />
       </section>
+
+      <BrokerSyncPanel snapshot={alpacaPaper} />
 
       <section className="card p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
@@ -104,7 +113,7 @@ export default async function PaperTradingPage() {
             <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">Promotion Board</div>
             <h2 className="mt-1 text-[20px] font-semibold text-ink">Strategies currently visible on the desk</h2>
             <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-muted">
-              Every visible strategy was promoted by the radar screen, then constrained by slot count, exposure, drawdown, and concentration rules before it reached the simulated book.
+              Every visible strategy was promoted by the radar screen, then constrained by slot count, exposure, drawdown, and concentration rules before it reached the simulated book. Ledger returns start at the local promotion price.
             </p>
           </div>
           <Link href="/radar" className="inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-cyan-300/[0.07] px-3 py-1.5 text-[12px] text-cyan-100 transition hover:border-cyan-300/45 hover:bg-cyan-300/[0.12]">
@@ -113,15 +122,18 @@ export default async function PaperTradingPage() {
           </Link>
         </div>
         <div className="mt-5 overflow-x-auto">
-          <table className="w-full min-w-[860px] text-[12.5px]">
+          <table className="w-full min-w-[1120px] text-[12.5px]">
             <thead className="border-y border-line bg-white/[0.025] text-[10px] uppercase tracking-wider text-ink-soft">
               <tr>
                 <th className="px-4 py-3 text-left">Desk rank</th>
                 <th className="px-4 py-3 text-left">Strategy</th>
                 <th className="px-4 py-3 text-left">Symbol</th>
-                <th className="px-4 py-3 text-right">Observed return</th>
+                <th className="px-4 py-3 text-right">Ledger return</th>
+                <th className="px-4 py-3 text-right">P&L</th>
+                <th className="px-4 py-3 text-left">Entry → Current</th>
                 <th className="px-4 py-3 text-right">Radar score</th>
                 <th className="px-4 py-3 text-left">State</th>
+                <th className="px-4 py-3 text-left">Ledger</th>
                 <th className="px-4 py-3 text-left">Latest signal</th>
                 <th className="px-4 py-3 text-left">Next check</th>
               </tr>
@@ -146,8 +158,24 @@ export default async function PaperTradingPage() {
                     <td className={`num px-4 py-3 text-right ${observation.simulatedReturn >= 0 ? "text-emerald-300" : "text-rose-300"}`}>
                       {pct(observation.simulatedReturn)}
                     </td>
+                    <td className={`num px-4 py-3 text-right ${ledgerPnl(observation) >= 0 ? "text-emerald-300" : "text-rose-300"}`}>
+                      {usd(ledgerPnl(observation))}
+                    </td>
+                    <td className="px-4 py-3 text-ink-muted">
+                      {observation.ledger ? (
+                        <span className="num">
+                          {observation.ledger.entryDate} {usd(observation.ledger.entryPrice)} → {observation.ledger.currentDate} {usd(observation.ledger.currentPrice)}
+                        </span>
+                      ) : (
+                        <span>Backtest estimate</span>
+                      )}
+                    </td>
                     <td className="num px-4 py-3 text-right text-ink">{observation.candidate.score}</td>
                     <td className="px-4 py-3"><StatusBadge status={observation.status} /></td>
+                    <td className="px-4 py-3">
+                      <StatusBadge status={observation.ledger ? ledgerStatusLabel(observation.ledger.source) : "backtest estimate"} />
+                      {observation.ledger && <div className="mt-1 text-[11px] text-ink-soft">{observation.ledger.daysLive} days live</div>}
+                    </td>
                     <td className="max-w-[260px] truncate px-4 py-3 text-ink-muted">{observation.recentSignal}</td>
                     <td className="px-4 py-3 text-ink-muted">{observation.nextCheck}</td>
                   </tr>
@@ -206,10 +234,11 @@ export default async function PaperTradingPage() {
 
               <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-5">
                 <MetricCard label="Sim capital" value={usd(observation.simulatedCapital)} />
-                <MetricCard label="Return" value={pct(observation.simulatedReturn)} tone="positive" />
+                <MetricCard label="Ledger return" value={pct(observation.simulatedReturn)} tone={observation.simulatedReturn >= 0 ? "positive" : "negative"} />
                 <MetricCard label="Score" value={String(observation.candidate.score)} tone="accent" />
                 <MetricCard label="Position" value={result.metrics.currentPosition} />
-                <MetricCard label="Trades" value={String(result.metrics.tradeCount)} />
+                <MetricCard label="Days live" value={String(observation.ledger?.daysLive ?? 0)} />
+                {observation.ledger && <MetricCard label="Ledger P&L" value={usd(observation.ledger.unrealizedPnl)} tone={observation.ledger.unrealizedPnl >= 0 ? "positive" : "negative"} />}
               </div>
 
               <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-[1.4fr_0.8fr]">
@@ -220,6 +249,14 @@ export default async function PaperTradingPage() {
                   <p className="mt-3 text-[12px] leading-relaxed text-ink-muted">
                     Observation uses next-open fills, {result.assumptions.slippageBps} bps slippage, and {usd(result.assumptions.feePerTrade)} per trade. No broker connection or real orders are active.
                   </p>
+                  {observation.ledger && (
+                    <div className="mt-4 rounded-2xl border border-line bg-white/[0.035] p-3 text-[12px] leading-relaxed text-ink-muted">
+                      <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-soft">Local paper ledger</div>
+                      <p className="mt-2">
+                        Promoted {observation.ledger.entryDate} at {usd(observation.ledger.entryPrice)}. Current mark is {usd(observation.ledger.currentPrice)} as of {observation.ledger.currentDate}; {observation.ledger.note}
+                      </p>
+                    </div>
+                  )}
                   <div className="mt-5 text-[11px] uppercase tracking-wider text-ink-soft">Recent trades</div>
                   <div className="mt-2 space-y-2">
                     {result.trades.slice(-4).map((trade) => (
@@ -240,10 +277,111 @@ export default async function PaperTradingPage() {
   );
 }
 
+function BrokerSyncPanel({ snapshot }: { snapshot: AlpacaPaperSnapshot }) {
+  const status =
+    snapshot.status === "connected" ? "alpaca paper connected" :
+    snapshot.status === "error" ? "alpaca sync error" : "alpaca paper disabled";
+  const matchedPositions = snapshot.positions.length;
+  return (
+    <section className="card p-5">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">Broker Paper Sync</div>
+          <h2 className="mt-1 text-[20px] font-semibold text-ink">Alpaca paper account mirror</h2>
+          <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-muted">
+            Read-only sync for Alpaca paper account, open positions, and recent orders. This desk still does not submit, cancel, or route orders.
+          </p>
+        </div>
+        <div className="text-right">
+          <StatusBadge status={status} />
+          <div className="mt-1 text-[11px] text-ink-soft">{snapshot.updatedAt.slice(0, 19).replace("T", " ")} UTC</div>
+        </div>
+      </div>
+
+      {snapshot.status !== "connected" ? (
+        <div className="mt-5 rounded-2xl border border-line bg-white/[0.035] p-4 text-[13px] leading-relaxed text-ink-muted">
+          {snapshot.message}
+          <div className="mt-2 text-[11.5px] text-ink-soft">
+            Configure `ALPACA_PAPER_API_KEY_ID` and `ALPACA_PAPER_API_SECRET` to enable paper sync. Base URL: {snapshot.baseUrl}
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-5">
+            <MetricCard label="Portfolio" value={usd(snapshot.account?.portfolioValue ?? 0)} tone="accent" />
+            <MetricCard label="Equity" value={usd(snapshot.account?.equity ?? 0)} />
+            <MetricCard label="Cash" value={usd(snapshot.account?.cash ?? 0)} />
+            <MetricCard label="Buying power" value={usd(snapshot.account?.buyingPower ?? 0)} />
+            <MetricCard label="Positions" value={String(matchedPositions)} hint={snapshot.account?.status ?? "paper"} />
+          </div>
+
+          <div className="mt-5 grid grid-cols-1 gap-4 xl:grid-cols-2">
+            <div className="overflow-x-auto rounded-2xl border border-line">
+              <div className="border-b border-line px-4 py-3 text-[11px] uppercase tracking-wider text-ink-soft">Open paper positions</div>
+              <table className="w-full min-w-[620px] text-[12.5px]">
+                <thead className="border-b border-line text-[10px] uppercase tracking-wider text-ink-soft">
+                  <tr>
+                    <th className="px-4 py-3 text-left">Symbol</th>
+                    <th className="px-4 py-3 text-right">Qty</th>
+                    <th className="px-4 py-3 text-right">Market value</th>
+                    <th className="px-4 py-3 text-right">Unrealized</th>
+                    <th className="px-4 py-3 text-left">Side</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-soft">
+                  {snapshot.positions.map((position) => (
+                    <tr key={position.symbol} className="table-row">
+                      <td className="px-4 py-3 font-medium text-white">{position.symbol}</td>
+                      <td className="num px-4 py-3 text-right">{num(position.qty, 4)}</td>
+                      <td className="num px-4 py-3 text-right">{usd(position.marketValue)}</td>
+                      <td className={`num px-4 py-3 text-right ${position.unrealizedPnl >= 0 ? "text-emerald-300" : "text-rose-300"}`}>
+                        {usd(position.unrealizedPnl)} · {pct(position.unrealizedPnlPct)}
+                      </td>
+                      <td className="px-4 py-3 text-ink-muted">{position.side}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {snapshot.positions.length === 0 && <div className="p-4 text-[12px] text-ink-muted">No open paper positions returned by Alpaca.</div>}
+            </div>
+
+            <div className="overflow-x-auto rounded-2xl border border-line">
+              <div className="border-b border-line px-4 py-3 text-[11px] uppercase tracking-wider text-ink-soft">Recent paper orders</div>
+              <table className="w-full min-w-[620px] text-[12.5px]">
+                <thead className="border-b border-line text-[10px] uppercase tracking-wider text-ink-soft">
+                  <tr>
+                    <th className="px-4 py-3 text-left">Symbol</th>
+                    <th className="px-4 py-3 text-left">Side</th>
+                    <th className="px-4 py-3 text-left">Type</th>
+                    <th className="px-4 py-3 text-right">Filled</th>
+                    <th className="px-4 py-3 text-left">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-soft">
+                  {snapshot.orders.map((order) => (
+                    <tr key={order.id || `${order.symbol}-${order.submittedAt}`} className="table-row">
+                      <td className="px-4 py-3 font-medium text-white">{order.symbol}</td>
+                      <td className="px-4 py-3 text-ink-muted">{order.side}</td>
+                      <td className="px-4 py-3 text-ink-muted">{order.type}</td>
+                      <td className="num px-4 py-3 text-right">{num(order.filledQty, 4)} / {num(order.qty, 4)}</td>
+                      <td className="px-4 py-3"><StatusBadge status={order.status} /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {snapshot.orders.length === 0 && <div className="p-4 text-[12px] text-ink-muted">No recent paper orders returned by Alpaca.</div>}
+            </div>
+          </div>
+        </>
+      )}
+    </section>
+  );
+}
+
 function buildDeskSnapshot(observations: PaperObservation[], totalAllocatedCapital: number) {
   const live = observations.filter((observation) => observation.status === "active" || observation.status === "holding");
   const allocatedPerLive = live.length > 0 ? totalAllocatedCapital / live.length : 0;
-  const bookPnl = live.reduce((sum, observation) => sum + allocatedPerLive * observation.simulatedReturn, 0);
+  const bookPnl = live.reduce((sum, observation) => sum + ledgerPnl(observation, allocatedPerLive), 0);
   const base = totalAllocatedCapital > 0 ? totalAllocatedCapital : observations.length * 100_000;
   const bookReturn = base > 0 ? bookPnl / base : 0;
   const ranked = [...observations].sort((a, b) => b.simulatedReturn - a.simulatedReturn);
@@ -255,6 +393,14 @@ function buildDeskSnapshot(observations: PaperObservation[], totalAllocatedCapit
     topWinner: ranked[0] ?? null,
     weakest: ranked[ranked.length - 1] ?? null,
   };
+}
+
+function ledgerPnl(observation: PaperObservation, fallbackCapital = 20_000): number {
+  return observation.ledger?.unrealizedPnl ?? fallbackCapital * observation.simulatedReturn;
+}
+
+function ledgerStatusLabel(source: NonNullable<PaperObservation["ledger"]>["source"]): string {
+  return source === "persistent" ? "ledger tracked" : source === "ephemeral" ? "new ledger" : "session estimate";
 }
 
 type DeskPillTone = "green" | "cyan" | "blue" | "amber";

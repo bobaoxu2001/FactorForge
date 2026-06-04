@@ -69,6 +69,7 @@ function observation(r: BacktestResult): PaperObservation {
     currentSymbol: r.symbol,
     recentSignal: "test",
     nextCheck: "2026-06-02 09:35 ET",
+    ledger: null,
   };
 }
 
