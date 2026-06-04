@@ -24,6 +24,8 @@ export interface EnvFeatures {
   sessionConfigured: boolean;
   /** A shared (multi-instance-safe) rate-limit store is configured. */
   distributedRateLimit: boolean;
+  /** Read-only Alpaca paper account/positions/orders sync configured. */
+  alpacaPaper: boolean;
 }
 
 export interface EnvValidation {
@@ -65,6 +67,8 @@ export function validateEnv(env: EnvLike = process.env): EnvValidation {
     (env.UPSTASH_REDIS_REST_URL ?? env.KV_REST_API_URL) &&
       (env.UPSTASH_REDIS_REST_TOKEN ?? env.KV_REST_API_TOKEN),
   );
+  const alpacaKey = Boolean(env.ALPACA_PAPER_API_KEY_ID);
+  const alpacaSecret = Boolean(env.ALPACA_PAPER_API_SECRET);
 
   const features: EnvFeatures = {
     llm: Boolean(env.DEEPSEEK_API_KEY),
@@ -72,6 +76,7 @@ export function validateEnv(env: EnvLike = process.env): EnvValidation {
     alphaVantage: Boolean(env.ALPHA_VANTAGE_API_KEY),
     sessionConfigured,
     distributedRateLimit,
+    alpacaPaper: alpacaKey && alpacaSecret,
   };
 
   if (!features.llm) {
@@ -79,6 +84,9 @@ export function validateEnv(env: EnvLike = process.env): EnvValidation {
   }
   if (!features.polygon && !features.alphaVantage) {
     warnings.push("No secondary data provider key — relying on Yahoo with synthetic fallback only.");
+  }
+  if (alpacaKey !== alpacaSecret) {
+    warnings.push("Alpaca paper sync is partially configured — set both ALPACA_PAPER_API_KEY_ID and ALPACA_PAPER_API_SECRET.");
   }
   // In production the per-process limiter is a real weakness: under multiple
   // instances an attacker gets N× the auth attempts. Warn (don't hard-fail —

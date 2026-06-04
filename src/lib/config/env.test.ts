@@ -31,8 +31,10 @@ describe("validateEnv", () => {
       DEEPSEEK_API_KEY: "k",
       POLYGON_API_KEY: "k",
       ALPHA_VANTAGE_API_KEY: "k",
+      ALPACA_PAPER_API_KEY_ID: "paper-key",
+      ALPACA_PAPER_API_SECRET: "paper-secret",
     });
-    expect(result.features).toMatchObject({ llm: true, polygon: true, alphaVantage: true });
+    expect(result.features).toMatchObject({ llm: true, polygon: true, alphaVantage: true, alpacaPaper: true });
     // No degraded-mode warnings when everything is wired.
     expect(result.warnings.join(" ")).not.toMatch(/DEEPSEEK_API_KEY/);
     expect(result.warnings.join(" ")).not.toMatch(/secondary data provider/);
@@ -83,6 +85,16 @@ describe("validateEnv", () => {
   it("warns when no secondary data provider key is present", () => {
     const result = validateEnv({ NODE_ENV: "development", SESSION_PASSWORD: longSecret });
     expect(result.warnings.join(" ")).toMatch(/secondary data provider/);
+  });
+
+  it("warns when Alpaca paper sync is only partially configured", () => {
+    const result = validateEnv({
+      NODE_ENV: "development",
+      SESSION_PASSWORD: longSecret,
+      ALPACA_PAPER_API_KEY_ID: "paper-key",
+    });
+    expect(result.features.alpacaPaper).toBe(false);
+    expect(result.warnings.join(" ")).toMatch(/Alpaca paper sync/);
   });
 });
 
