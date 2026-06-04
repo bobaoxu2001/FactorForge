@@ -3,7 +3,7 @@
 [![CI](https://github.com/bobaoxu2001/FactorForge/actions/workflows/ci.yml/badge.svg)](https://github.com/bobaoxu2001/FactorForge/actions/workflows/ci.yml)
 [![Next.js 14](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![Vitest](https://img.shields.io/badge/tests-155%20passing-22c55e?logo=vitest&logoColor=white)](#testing)
+[![Vitest](https://img.shields.io/badge/tests-167%20passing-22c55e?logo=vitest&logoColor=white)](#testing)
 [![Docker](https://img.shields.io/badge/Docker-standalone-2496ed?logo=docker&logoColor=white)](#deployment)
 
 FactorForge is an open-source AI-assisted quantitative research workbench for exploring factor signals, rule-based backtests, portfolio construction, risk diagnostics, and LLM-generated research memos over daily OHLCV data.
@@ -24,8 +24,8 @@ Public demo mode is intentionally safe: market-data and LLM keys are optional, m
 |---|---|
 | **Two audiences, one product** | The dashboards are built for quant researchers, but every major page (overview, strategies, radar, portfolio, paper-trading, factors, data) opens with an *"In plain English"* callout that says what you're looking at in one friendly sentence, a `/learn` ("Stocks 101") page explains all 27 terms, and an inline `<Term>` helper turns jargon across the app (Sharpe, drawdown, N_eff…) into hover/tap tooltips — all driven by a single glossary source of truth. Experts skim past the cyan strip and dotted underline; newcomers get oriented in place. No separate "beginner mode" to maintain. |
 | **Real LLM in the loop** | DeepSeek (`deepseek-chat`) writes the strategy memo, tape note, and post-market Daily Review from a deterministic payload. Numbers come from the engine; only prose is generated. Template fallback when the key is unset. |
-| **Post-market auto-review (盘后复盘)** | The paper-trading page closes each session with an automatic Daily Review: a desk-style blotter that folds the *same* observations the page already renders into a P&L tally (winners/losers), the weakest leg, same-batch concentration (how many admissions came from one scan), and today's tape (entries / exits / skipped signals / concentration-gate rejections). Every number is computed in `buildDailyReview`; the LLM only narrates it, and a ranked "needs a look before next session" list is derived deterministically. No broker, no real orders — every count is a simulated observation. |
-| **Multi-strategy consensus (多策略共振)** | The core read of the whole lab: all 5 structurally different strategies are run across the *entire* 28-symbol universe, then the strategy×symbol grid is pivoted per-symbol to surface which names more than one independent strategy is holding right now. Agreement is ranked first by how many strategies hold the name and then by how many distinct strategy *types* those are — a breakout + a mean-reversion confirming each other is worth more than two breakouts agreeing. This is independent confirmation made explicit: one strategy liking a name is a signal; four strategies across four styles holding it (e.g. CVX) is a far less style-dependent one. Single-strategy picks are shown separately and never dressed up as consensus. Lives at `/consensus`. |
+| **Post-market auto-review** | The paper-trading page closes each session with an automatic Daily Review: a desk-style blotter that folds the *same* observations the page already renders into a P&L tally (winners/losers), the weakest leg, same-batch concentration (how many admissions came from one scan), and today's tape (entries / exits / skipped signals / concentration-gate rejections). Every number is computed in `buildDailyReview`; the LLM only narrates it, and a ranked "needs a look before next session" list is derived deterministically. No broker, no real orders — every count is a simulated observation. |
+| **Multi-strategy consensus** | The core read of the whole lab: all 5 structurally different strategies are run across the *entire* 28-symbol universe, then the strategy×symbol grid is pivoted per-symbol to surface which names more than one independent strategy is holding right now. Agreement is ranked first by how many strategies hold the name and then by how many distinct strategy *types* those are — a breakout + a mean-reversion confirming each other is worth more than two breakouts agreeing. This is independent confirmation made explicit: one strategy liking a name is a signal; four strategies across four styles holding it (e.g. CVX) is a far less style-dependent one. Single-strategy picks are shown separately and never dressed up as consensus. Lives at `/consensus`. |
 | **Sector-diversified universe** | 28 real-data names spanning 11 GICS-style sectors (single-name equities + SPY/QQQ benchmarks), not a mega-cap tech monoculture. This is what makes the cross-sectional momentum / low-vol factors and the N_eff analysis statistically meaningful — a basket of "seven tech names" is one factor wearing seven hats. `UNIVERSE` is the single source of truth; a guard test locks the committed fixture to it so the two can't drift. |
 | **Multi-symbol portfolio engine** | Score-weighted blend of radar-eligible legs, calendar intersection, per-leg P&L attribution, and pairwise Pearson correlation. Not just N parallel backtests. |
 | **Walk-forward + factor attribution** | Each strategy detail page reports in-sample vs out-of-sample metrics on the same equity curve, plus an OLS regression against Market / Momentum / Low-vol with t-statistics. This helps inspect overfit risk and factor exposure without claiming investable alpha. |
@@ -36,7 +36,7 @@ Public demo mode is intentionally safe: market-data and LLM keys are optional, m
 | **Hardened HTTP + auth** | Strict Content-Security-Policy plus `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, and HSTS on every response; `poweredByHeader` off. Auth adds a 7-day session TTL, constant-time login (dummy-hash compare blocks username enumeration), and a bcrypt 72-byte password guard. |
 | **Deploy-ready** | Multi-stage `Dockerfile` building Next's `standalone` server as a non-root container with a `HEALTHCHECK`, plus centralized env validation that fails fast in production on a missing `SESSION_PASSWORD`. |
 | **Pluggable rate-limit store** | Auth throttling sits behind a `RateLimitStore` interface with two real backends: per-process in-memory (default) and a distributed Upstash/Vercel-KV adapter (atomic `INCR`+`PEXPIRE` over the REST API, no SDK) so the limit holds across a horizontally-scaled fleet. Selected by env, fail-open on infra blips, surfaced in `/api/health`; production warns when only the per-process store is wired. |
-| **CI and tests** | 155 vitest tests (engine + concentration gate + universe/sector breadth + rate-limit stores + glossary + `<Term>`/`<PlainEnglish>` + components + auth + env validation + composite-provider and DeepSeek-branch mocks) under jsdom; GitHub Actions runs lint + typecheck + test on every push and pull request targeting `main`. |
+| **CI and tests** | 167 vitest tests (engine + concentration gate + universe/sector breadth + rate-limit stores + glossary + `<Term>`/`<PlainEnglish>` + components + auth + env validation + composite-provider and DeepSeek-branch mocks) under jsdom; GitHub Actions runs lint + typecheck + test on every push and pull request targeting `main`. |
 | **Maintainer-facing app surface** | `/oss` documents why the project exists, who can contribute, good first issues, maintainer workflow, Codex/automation use cases, security-sensitive areas, release workflow, and current limitations inside the deployed app. |
 
 ---
@@ -74,13 +74,13 @@ flowchart TB
   end
 
   subgraph UI["Next.js App Router (src/app)"]
-    HOME[/]
-    STRAT[/strategies/:id]
-    RADAR[/radar]
-    PFOL[/portfolio]
-    PAPER[/paper-trading]
-    AIM[/ai-market]
-    REP[/reports]
+    HOME["/"]
+    STRAT["/strategies/:id"]
+    RADAR["/radar"]
+    PFOL["/portfolio"]
+    PAPER["/paper-trading"]
+    AIM["/ai-market"]
+    REP["/reports"]
   end
 
   YH --> NORM
@@ -319,7 +319,7 @@ Security notes:
 
 ## Testing
 
-155 tests across 39 files under vitest + jsdom:
+167 tests across 43 files under vitest + jsdom:
 
 - **Engine** — backtest fees + execution semantics, indicators, radar verdict logic, paper-trading risk-budget transitions + N_eff slot cap, portfolio engine (Pearson, calendar intersection, score-weighted blend, phase-shifted decorrelation).
 - **Concentration** — `effectiveBets` / `concentrationLevel` math (monotonicity, bounds), the correlation gate demoting near-duplicate candidates, and the shared pairwise-correlation builder.
