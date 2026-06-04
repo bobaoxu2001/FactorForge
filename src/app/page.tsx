@@ -10,6 +10,7 @@ import {
   Radar,
   ShieldAlert,
   Target,
+  Trophy,
   WalletCards,
 } from "lucide-react";
 import ModuleCard from "@/components/cards/ModuleCard";
@@ -33,6 +34,7 @@ const modules = [
   ["L3", "Strategy Radar", "Radar Screening", "Composite ranking, rejection rules, and paper-observation promotion logic.", "/radar", Radar],
   ["L4", "AI Market Intelligence", "Market Intelligence", "AI-style market memo generated from factor breadth and backtest evidence.", "/ai-market", BrainCircuit],
   ["L5", "Paper Observation", "Simulated Observation", "Research-only paper monitoring for radar-approved strategies. No live orders.", "/paper-trading", WalletCards],
+  ["L6", "Public Track Record", "Shareable Receipt", "Ledger-backed paper performance for outside viewers. Simulation only.", "/track-record", Trophy],
 ] as const;
 
 const engineStrip = [
@@ -100,7 +102,7 @@ export default async function HomePage() {
               <EvidencePill label="Real or clearly labeled fallback data" />
               <EvidencePill label="No broker connection" tone="amber" />
               <EvidencePill label="No live trading" tone="amber" />
-              <EvidencePill label="CI + 167 tests" />
+              <EvidencePill label="CI + 175 tests" />
               <EvidencePill label="Contributor-ready" tone="green" />
             </div>
             <div className="mt-6 rounded-2xl border border-amber-300/18 bg-amber-300/[0.045] p-4">
@@ -158,7 +160,7 @@ export default async function HomePage() {
 
       <section className="space-y-3">
         <SectionHeader title="6-Layer Research Architecture" label="Production workflow map" href="/reports" />
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-6">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-7">
           {modules.map(([layer, label, title, description, href, Icon], index) => (
             <div key={href} className="relative">
               <ModuleCard

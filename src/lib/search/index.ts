@@ -71,6 +71,13 @@ export const SEARCH_ITEMS: SearchItem[] = [
     keywords: ["paper", "simulated", "observation", "no broker", "no orders"],
   },
   {
+    title: "Track Record",
+    href: "/track-record",
+    category: "Route",
+    description: "Public paper ledger performance receipt for outside viewers.",
+    keywords: ["track record", "performance", "public", "share", "ledger", "paper", "receipt"],
+  },
+  {
     title: "Reports",
     href: "/reports",
     category: "Report",
