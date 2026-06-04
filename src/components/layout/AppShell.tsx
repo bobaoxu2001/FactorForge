@@ -1,7 +1,11 @@
 import Navigation from "./Navigation";
 import PublicDemoNotice from "@/components/research/PublicDemoNotice";
+import { isPersistenceAvailable } from "@/lib/persistence/db";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
+  // Server-evaluated: drives the sidebar's "disabled in public demo" hint so the
+  // protected routes (My Watchlist / Cache) are labeled honestly.
+  const persistenceAvailable = isPersistenceAvailable();
   return (
     <body className="lab-grid">
       {/* Keyboard/screen-reader users can jump past the nav straight to content. */}
@@ -11,7 +15,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       >
         Skip to content
       </a>
-      <Navigation />
+      <Navigation persistenceAvailable={persistenceAvailable} />
       <div className="px-4 pt-4 md:px-6 lg:ml-[256px]">
         <PublicDemoNotice />
       </div>

@@ -20,6 +20,17 @@ export interface WatchlistFormState {
 const AUTH_LIMIT = 5;
 const AUTH_WINDOW_MS = 5 * 60 * 1000;
 
+// User-facing copy for the no-database case. The sign-in/up pages render a full
+// DemoModeNotice instead of the form when persistence is down, so this is a
+// defensive fallback for any residual submit — never leak the raw engine string
+// ("Persistence layer unavailable") to the UI.
+const NO_PERSISTENCE_MESSAGE =
+  "Account features are disabled in this demo — saved watchlists and sign-in need a local or configured database.";
+
+function userFacingAuthError(error: AuthError): string {
+  return error.code === "db_unavailable" ? NO_PERSISTENCE_MESSAGE : error.message;
+}
+
 function safeInternalRedirect(value: FormDataEntryValue | null): string {
   const raw = String(value ?? "").trim();
   if (!raw || !raw.startsWith("/") || raw.startsWith("//") || raw.includes("://")) {
@@ -55,7 +66,7 @@ export async function signInAction(_prev: AuthFormState, formData: FormData): Pr
     session.username = user.username;
     await session.save();
   } catch (error) {
-    if (error instanceof AuthError) return { error: error.message };
+    if (error instanceof AuthError) return { error: userFacingAuthError(error) };
     return { error: "Sign-in failed. Try again." };
   }
   redirect(next);
@@ -74,7 +85,7 @@ export async function signUpAction(_prev: AuthFormState, formData: FormData): Pr
     session.username = user.username;
     await session.save();
   } catch (error) {
-    if (error instanceof AuthError) return { error: error.message };
+    if (error instanceof AuthError) return { error: userFacingAuthError(error) };
     return { error: "Sign-up failed. Try again." };
   }
   redirect(next);
@@ -97,8 +108,10 @@ export async function addWatchlistSymbolAction(
   const symbol = String(formData.get("symbol") ?? "");
   const result = addSymbolToWatchlist(session.userId!, symbol);
   if (!result.ok) {
-    // Surface the validation reason instead of silently dropping the input.
-    return { error: result.reason };
+    // Surface the validation reason instead of silently dropping the input, but
+    // never leak the raw persistence string to the UI.
+    const reason = result.reason === "Persistence layer unavailable" ? NO_PERSISTENCE_MESSAGE : result.reason;
+    return { error: reason };
   }
   revalidatePath("/my-watchlist");
   return { added: symbol.trim().toUpperCase() };

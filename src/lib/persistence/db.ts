@@ -71,6 +71,17 @@ export function getDb(): DatabaseInstance | null {
   }
 }
 
+/**
+ * True when the SQLite layer can be opened in this deployment. False on
+ * read-only/ephemeral hosts (e.g. Vercel's serverless filesystem) where the
+ * native binding can't open a writable database. Account creation, sign-in, and
+ * watchlists depend on this; the UI uses it to show a friendly demo-mode notice
+ * instead of a persistence error, and the research pages run uncached either way.
+ */
+export function isPersistenceAvailable(): boolean {
+  return getDb() !== null;
+}
+
 export function closeDb(): void {
   if (dbInstance) {
     dbInstance.close();

@@ -205,6 +205,18 @@ WAL journal mode is enabled. If the native binding fails to load (missing prebui
 
 ---
 
+## Public demo auth behavior
+
+Account features are optional and only exist to persist saved research preferences and watchlists. They depend on a writable persistence backend, which the public Vercel demo intentionally does not provide.
+
+- **Research pages are read-only and need no account.** Overview, Data, Factors, Strategies, Radar, Consensus, Portfolio, AI Market, Paper Trading, and Reports all work without signing in.
+- **Account creation / sign-in may be disabled.** When no persistence backend is configured (`isPersistenceAvailable()` is false — e.g. Vercel's stateless serverless filesystem can't open SQLite), the sign-up and sign-in routes render a friendly demo-mode notice instead of the credential form. The raw "Persistence layer unavailable" engine string is never shown to users; the action layer also maps it to safe copy on any residual submit path.
+- **Protected routes degrade with context.** My Watchlist and the admin Cache page redirect to sign-in carrying an `area`, and the sign-in route explains that the page needs saved-preference storage which is off in the public demo. The sidebar tags these routes (`local` / `admin`) and notes that saved preferences and admin cache controls are disabled in demo mode.
+- **Local SQLite enables the full experience.** Running locally (or on a long-lived host with a writable volume) opens `.cache/factorforge.db`, so account creation, sign-in, and per-user watchlists work normally.
+- **No broker connection, no live trading, no brokerage credentials** in any mode — accounts only store research preferences.
+
+---
+
 ## Run locally
 
 ```bash
