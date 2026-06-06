@@ -2,6 +2,7 @@ import Link from "next/link";
 import StatusBadge from "@/components/badges/StatusBadge";
 import PageHeader from "@/components/layout/PageHeader";
 import AiTransparencyNote from "@/components/research/AiTransparencyNote";
+import HotspotResearchBrief from "@/components/hotspots/HotspotResearchBrief";
 import { generateStrategyExplanation } from "@/lib/ai/strategyExplainer";
 import { generateConcentrationNote } from "@/lib/ai/concentrationNote";
 import { getResearchDataset } from "@/lib/research";
@@ -10,7 +11,7 @@ import { num, pct, pctPlain } from "@/lib/utils/format";
 export const revalidate = 60 * 60;
 
 export default async function ReportsPage() {
-  const { radarCandidates, signalConcentration, metadata } = await getResearchDataset();
+  const { radarCandidates, signalConcentration, metadata, hotspots } = await getResearchDataset();
   const demotedCount = radarCandidates.filter((c) => c.redundancy?.demoted).length;
   const [cards, concentrationNote] = await Promise.all([
     Promise.all(
@@ -63,6 +64,8 @@ export default async function ReportsPage() {
           </Link>
         </section>
       )}
+
+      <HotspotResearchBrief theme={hotspots.featured} />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {cards.map(({ candidate, explanation }) => {

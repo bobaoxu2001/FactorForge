@@ -107,7 +107,7 @@ describe("buildSignalConcentration", () => {
 function makeCandidate(id: string, symbol: string, rank: number, rets: number[]): RadarCandidate {
   return {
     rank, score: 85, status: "radar candidate", reasons: ["Composite score 85"],
-    nextAction: "Move into paper-observation queue",
+    nextAction: "Eligible for simulated observation review",
     result: makeResult(id, symbol, rets),
   };
 }

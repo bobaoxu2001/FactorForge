@@ -6,6 +6,7 @@ import MethodologyCallout from "@/components/research/MethodologyCallout";
 import Link from "next/link";
 import MarketRegimeBanner from "@/components/research/MarketRegimeBanner";
 import StressInsightGrid from "@/components/research/StressInsightGrid";
+import HotspotPreview from "@/components/hotspots/HotspotPreview";
 import { getResearchDataset } from "@/lib/research";
 import { buildPreviewStressReport, buildStressInsightCards } from "@/lib/quant/marketStress";
 import { pct, pctPlain, num } from "@/lib/utils/format";
@@ -63,6 +64,8 @@ export default async function AIMarketPage({ searchParams }: { searchParams?: { 
       )}
 
       <MarketRegimeBanner report={marketStress} />
+
+      <HotspotPreview theme={dataset.hotspots.featured} />
 
       <AiTransparencyNote />
 

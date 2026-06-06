@@ -52,8 +52,8 @@ export default async function PaperTradingPage() {
     };
   });
   const shortlistCount = radarCandidates.filter((candidate) => candidate.status === "radar candidate" || candidate.status === "continue observing").length;
-  const promotedCount = paperObservations.length;
-  const shareLine = `${promotedCount} ${promotedCount === 1 ? "strategy" : "strategies"} live · ${desk.bookReturnLabel} ledger-tracked return · ${pct(paperAccount.maxObservedDrawdown)} max observed drawdown · ${dailyReview.winners}W/${dailyReview.losers}L`;
+  const observedCount = paperObservations.length;
+  const shareLine = `${observedCount} ${observedCount === 1 ? "strategy" : "strategies"} observed · ${desk.bookReturnLabel} ledger-tracked return · ${pct(paperAccount.maxObservedDrawdown)} max observed drawdown · ${dailyReview.winners}W/${dailyReview.losers}L`;
 
   return (
     <div className="space-y-8">
@@ -65,13 +65,13 @@ export default async function PaperTradingPage() {
               Live paper desk · simulation only
             </div>
             <h1 className="mt-4 max-w-4xl text-[36px] font-semibold leading-none tracking-[-0.04em] text-white md:text-[58px]">
-              Public track record for radar-promoted strategies.
+              Public track record for radar-admitted strategies.
             </h1>
             <p className="mt-4 max-w-3xl text-[14px] leading-7 text-ink-muted">
-              A desk-style view of the simulated strategy book: current holdings, promotion funnel, observed P&amp;L, drawdown pressure, and the post-market tape. No broker is connected and no real order is routed.
+              A desk-style view of the simulated strategy book: current holdings, admission funnel, observed P&amp;L, drawdown pressure, and the post-market tape. No broker is connected and no real order is routed.
             </p>
             <div className="mt-5 grid grid-cols-1 gap-2 text-[12px] text-ink-muted sm:grid-cols-2">
-              <DeskPill icon={Radio} label={`${promotedCount}/${paperAccount.observationSlots}`} detail="live slots" tone="green" />
+              <DeskPill icon={Radio} label={`${observedCount}/${paperAccount.observationSlots}`} detail="live slots" tone="green" />
               <DeskPill icon={ShieldCheck} label={paperAccount.riskBudgetStatus} detail="risk budget" tone="cyan" />
               <DeskPill icon={WalletCards} label={usd(desk.bookValue)} detail="sim book value" tone="blue" />
               <DeskPill icon={Clock3} label={dailyReview.asOf} detail="last review" tone="amber" />
@@ -103,7 +103,7 @@ export default async function PaperTradingPage() {
               <div className="text-[10.5px] uppercase tracking-[0.16em] text-cyan-100/70">Public line</div>
               <p className="mt-2 text-[13px] leading-relaxed text-ink">{shareLine}</p>
               <p className="mt-2 text-[11.5px] leading-relaxed text-ink-soft">
-                Returns are measured from local ledger promotion price, not from the full historical backtest.
+                Returns are measured from local ledger observation price, not from the full historical backtest.
               </p>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3">
@@ -127,12 +127,12 @@ export default async function PaperTradingPage() {
           "Only radar-approved strategies can enter paper observation.",
           "Observation slots, exposure limits, drawdown checks, and concentration gates constrain the simulated account.",
           "Daily Review summarizes deterministic observations; any LLM prose cannot change computed P&L or risk numbers.",
-          "No P&L guarantee is implied by paper observation.",
+          "Paper observation does not imply future P&L.",
         ]}
       />
 
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
-        <MetricCard label="Promoted" value={`${promotedCount}/${shortlistCount}`} hint="from radar shortlist" tone="accent" />
+        <MetricCard label="Observed" value={`${observedCount}/${shortlistCount}`} hint="from radar shortlist" tone="accent" />
         <MetricCard label="Live signals" value={String(paperAccount.activeObservations)} hint="active or holding" />
         <MetricCard label="Book value" value={usd(desk.bookValue)} tone={desk.bookPnl >= 0 ? "positive" : "negative"} />
         <MetricCard label="Ledger return" value={desk.bookReturnLabel} tone={desk.bookReturn >= 0 ? "positive" : "negative"} />
@@ -149,10 +149,10 @@ export default async function PaperTradingPage() {
       <section className="card p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">Promotion Board</div>
+            <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">Observation Board</div>
             <h2 className="mt-1 text-[20px] font-semibold text-ink">Strategies currently visible on the desk</h2>
             <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-muted">
-              Every visible strategy was promoted by the radar screen, then constrained by slot count, exposure, drawdown, and concentration rules before it reached the simulated book. Ledger returns start at the local promotion price.
+              Every visible strategy cleared the radar screen, then was constrained by slot count, exposure, drawdown, and concentration rules before it reached the simulated book. Ledger returns start at the local observation price.
             </p>
           </div>
           <Link href="/radar" className="inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-cyan-300/[0.07] px-3 py-1.5 text-[12px] text-cyan-100 transition hover:border-cyan-300/45 hover:bg-cyan-300/[0.12]">
@@ -225,7 +225,7 @@ export default async function PaperTradingPage() {
         </div>
         {paperObservations.length === 0 && (
           <div className="mt-5">
-            <EmptyState title="No promoted strategy is live yet." message="The radar has not found a candidate that passes every promotion and concentration gate." />
+            <EmptyState title="No observed strategy is live yet." message="The radar has not found a candidate that passes every admission and concentration gate." />
           </div>
         )}
       </section>
@@ -236,7 +236,7 @@ export default async function PaperTradingPage() {
             <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">Simulated account controls</div>
             <h2 className="mt-1 text-[20px] font-semibold text-ink">Risk Budget</h2>
             <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-muted">
-              The desk can only promote strategies that fit the paper account limits. That keeps the public track record tied to the same guardrails the research engine uses.
+              The desk can only observe strategies that fit the paper account limits. That keeps the public track record tied to the same guardrails the research engine uses.
             </p>
           </div>
           <StatusBadge status={paperAccount.riskBudgetStatus} />
@@ -292,7 +292,7 @@ export default async function PaperTradingPage() {
                     <div className="mt-4 rounded-2xl border border-line bg-white/[0.035] p-3 text-[12px] leading-relaxed text-ink-muted">
                       <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-soft">Local paper ledger</div>
                       <p className="mt-2">
-                        Promoted {observation.ledger.entryDate} at {usd(observation.ledger.entryPrice)}. Current mark is {usd(observation.ledger.currentPrice)} as of {observation.ledger.currentDate}; {observation.ledger.note}
+                        Logged {observation.ledger.entryDate} at {usd(observation.ledger.entryPrice)}. Current mark is {usd(observation.ledger.currentPrice)} as of {observation.ledger.currentDate}; {observation.ledger.note}
                       </p>
                     </div>
                   )}
@@ -501,7 +501,7 @@ function LeaderCard({ label, observation }: { label: string; observation: PaperO
     return (
       <div className="rounded-2xl border border-line bg-white/[0.03] p-3">
         <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-soft">{label}</div>
-        <div className="mt-2 text-[13px] text-ink-muted">Waiting for promotion</div>
+        <div className="mt-2 text-[13px] text-ink-muted">Waiting for admission</div>
       </div>
     );
   }

@@ -266,7 +266,7 @@ export function applyConcentrationGate(
         redundancy: { correlatedWith: twinLabel, correlation: twinCorr, demoted: true },
         reasons: [
           ...candidate.reasons,
-          `Near-duplicate of ${twinLabel} (${(twinCorr * 100).toFixed(0)}% return correlation) — promote the stronger one instead`,
+          `Near-duplicate of ${twinLabel} (${(twinCorr * 100).toFixed(0)}% return correlation) — observe the stronger one instead`,
         ],
         nextAction: `Hold: redundant with ${twinLabel}. Diversify before promoting.`,
       });

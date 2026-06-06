@@ -24,6 +24,12 @@ interface YahooChartResponse {
 const isFiniteNumber = (value: unknown): value is number =>
   typeof value === "number" && Number.isFinite(value);
 
+function providerTimeoutMs(): number {
+  const raw = Number(process.env.MARKET_PROVIDER_TIMEOUT_MS);
+  if (Number.isFinite(raw) && raw >= 0) return Math.floor(raw);
+  return 2_000;
+}
+
 export async function fetchYahooHistoricalPrices(
   symbol: string,
   range: PriceRange,
@@ -35,9 +41,11 @@ export async function fetchYahooHistoricalPrices(
   // This provider throws on any failure rather than self-downgrading to synthetic
   // data. The composite layer owns the fallback decision so it can try the next
   // real-data tier (Polygon, Alpha Vantage) before giving up.
+  const timeoutMs = providerTimeoutMs();
   const response = await fetch(url, {
     headers: { "user-agent": "ai-stock-platform/0.1 research-mvp" },
     next: { revalidate: 60 * 60 },
+    signal: timeoutMs > 0 && typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(timeoutMs) : undefined,
   });
 
   if (!response.ok) {

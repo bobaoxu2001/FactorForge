@@ -40,7 +40,7 @@ export function buildRadar(results: BacktestResult[]): RadarCandidate[] {
         status,
         result,
         reasons,
-        nextAction: status === "radar candidate" ? "Move into paper-observation queue" : status === "continue observing" ? "Keep collecting signal and stability evidence" : "Do not promote to radar candidate",
+        nextAction: status === "radar candidate" ? "Eligible for simulated observation review" : status === "continue observing" ? "Keep collecting signal and stability evidence" : "Park outside the radar shortlist",
       };
     })
     .sort((a, b) => b.score - a.score)
@@ -56,6 +56,6 @@ function buildReasons(result: BacktestResult, score: number, status: RadarCandid
   if (result.metrics.maxDrawdown < -0.35) reasons.push("Max drawdown breaches rejection threshold");
   if (result.metrics.sharpe < 0) reasons.push("Sharpe is negative");
   if (result.dataStatus.isFallback) reasons.push("Result includes fallback/demo market data label");
-  if (status === "radar candidate") reasons.push("Meets paper-observation admission rules");
+  if (status === "radar candidate") reasons.push("Meets simulated-observation admission rules");
   return reasons;
 }

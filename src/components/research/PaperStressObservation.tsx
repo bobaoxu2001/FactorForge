@@ -42,7 +42,7 @@ export default function PaperStressObservation({
           <div className="section-label">Stress Observation</div>
           <h2 className="mt-1 text-[20px] font-semibold text-ink">Paper Observation During Market Stress</h2>
           <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-muted">
-            How promoted strategies behave through the current regime. Simulated observation only — no broker connection
+            How radar-admitted strategies behave through the current regime. Simulated observation only — no broker connection
             and no orders routed.
           </p>
         </div>
@@ -112,8 +112,8 @@ export default function PaperStressObservation({
         </div>
       ) : (
         <div className="mt-5 rounded-2xl border border-line bg-white/[0.025] p-4 text-[12.5px] leading-relaxed text-ink-muted">
-          No promoted strategy is live, so there is no simulated book to stress-test this session. The desk keeps waiting
-          for a radar candidate that clears every promotion gate.
+          No radar-admitted strategy is live, so there is no simulated book to stress-test this session. The desk keeps waiting
+          for a radar candidate that clears every admission gate.
         </div>
       )}
 

@@ -8,7 +8,7 @@ function candidate(overrides: Partial<RadarCandidate> = {}): RadarCandidate {
     score: 84,
     status: "radar candidate",
     reasons: ["test"],
-    nextAction: "Move into paper-observation queue",
+    nextAction: "Eligible for simulated observation review",
     result: {
       strategyId: "quality-breakout",
       strategyName: "Quality Breakout",

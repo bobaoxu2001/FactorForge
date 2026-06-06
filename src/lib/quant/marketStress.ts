@@ -651,14 +651,14 @@ export function buildSelloffMemo(
     title: "AI Research Memo: Market Selloff Review",
     source: "deterministic",
     marketContext: `${report.headline} Composite stress score is ${report.stressScore}/100 (${report.regime}). ${report.interpretation}`,
-    factorBehavior: `Breadth is ${report.breadthState} (${report.aboveTrend}/${report.symbolCount} above SMA200), momentum is ${report.momentumState} at ${(report.avgMomentum20d * 100).toFixed(1)}% avg 20-day, and volatility is ${report.volatilityState} (${(report.avgVolatility20d * 100).toFixed(0)}% annualized). ${report.regime === "risk-off" ? "Today's selloff increases the importance of drawdown control and benchmark-relative resilience." : "Factor signals are not flashing broad stress, but drawdown discipline still governs promotion."}`,
+    factorBehavior: `Breadth is ${report.breadthState} (${report.aboveTrend}/${report.symbolCount} above SMA200), momentum is ${report.momentumState} at ${(report.avgMomentum20d * 100).toFixed(1)}% avg 20-day, and volatility is ${report.volatilityState} (${(report.avgVolatility20d * 100).toFixed(0)}% annualized). ${report.regime === "risk-off" ? "Today's selloff increases the importance of drawdown control and benchmark-relative resilience." : "Factor signals are not flashing broad stress, but drawdown discipline still governs observation admission."}`,
     strategyRisk: `${resilient} of ${diag.length} screened strategies read as resilient and ${underStress} as under stress. Strategies with positive historical returns but high downside sensitivity should be moved from "candidate" to "watch" until volatility normalizes.`,
     radarImpact: `Stress-adjusted scoring repriced ${reranked} of ${diag.length} strategies versus their base score, penalizing high drawdown and downside volatility while rewarding benchmark-relative resilience and smoother equity. ${candidateCount} strategies still clear the radar-candidate gate.`,
     paperObservation: context.activeObservations > 0
-      ? `${context.activeObservations} simulated observation${context.activeObservations === 1 ? "" : "s"} remain live. Observation continues under stress so the desk can study how promoted rules behave through the drawdown — no orders are routed.`
+      ? `${context.activeObservations} simulated observation${context.activeObservations === 1 ? "" : "s"} remain live. Observation continues under stress so the desk can study how admitted rules behave through the drawdown — no orders are routed.`
       : "No strategy is currently live in paper observation, so there is no simulated book to stress-test this session.",
     nextExperiments: [
-      "Re-run the radar shortlist with the stress-adjusted score as the primary sort key and compare promotions.",
+      "Re-run the radar shortlist with the stress-adjusted score as the primary sort key and compare observation admissions.",
       "Measure each candidate's worst 5-day return and benchmark-relative drawdown against the current regime.",
       "Stress-test stop placement against overnight gaps rather than intraday fills.",
       report.regime === "risk-off"
@@ -703,7 +703,7 @@ export function buildPaperStressObservation(
 
   const notes: string[] = [];
   if (observations.length === 0) {
-    notes.push("No promoted strategy is live, so there is no simulated book to stress this session.");
+    notes.push("No radar-admitted strategy is live, so there is no simulated book to stress this session.");
   } else {
     notes.push(`${active.length} of ${observations.length} observation${observations.length === 1 ? "" : "s"} are actively holding through the current regime.`);
     notes.push(`${resilientCount} read as resilient and ${underStressCount} as under stress under stress-adjusted diagnostics.`);

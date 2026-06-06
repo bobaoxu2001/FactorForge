@@ -60,7 +60,7 @@ export function buildPublicTrackRecord(input: {
   const ledgerReturnPct = totalAllocatedCapital > 0 ? unrealizedPnl / totalAllocatedCapital : 0;
   const oldestEntryDate = minDate(rows.map((row) => row.entryDate));
   const latestMarkDate = maxDate(rows.map((row) => row.currentDate));
-  const shareLine = `${promotedCount} ${promotedCount === 1 ? "strategy" : "strategies"} tracked since promotion · ${formatSignedPct(ledgerReturnPct)} ledger return · ${ledgerTrackedCount}/${promotedCount || 0} ledger-backed · ${input.dailyReview.winners}W/${input.dailyReview.losers}L`;
+  const shareLine = `${promotedCount} ${promotedCount === 1 ? "strategy" : "strategies"} tracked since radar admission · ${formatSignedPct(ledgerReturnPct)} ledger return · ${ledgerTrackedCount}/${promotedCount || 0} ledger-backed · ${input.dailyReview.winners}W/${input.dailyReview.losers}L`;
 
   return {
     asOf: input.dailyReview.asOf,

@@ -76,7 +76,7 @@ export default async function FactorsPage() {
           "Volatility is annualized realized volatility from recent daily returns.",
           "Trend uses SMA200 status as a long-horizon regime filter.",
           "Liquidity/participation uses volume surge versus a 20-day baseline.",
-          "RSI14 is a bounded momentum/mean-reversion diagnostic, not a standalone recommendation.",
+          "RSI14 is a bounded momentum/mean-reversion diagnostic, not a standalone trading instruction.",
           "Fallback/demo symbols remain labeled so factor values are not mistaken for live validation.",
         ]}
       />

@@ -19,6 +19,7 @@ import EmptyState from "@/components/research/EmptyState";
 import StatusBadge from "@/components/badges/StatusBadge";
 import MethodologyCallout from "@/components/research/MethodologyCallout";
 import MarketRegimeBanner from "@/components/research/MarketRegimeBanner";
+import HotspotsSummaryCard from "@/components/hotspots/HotspotsSummaryCard";
 import StressInsightGrid from "@/components/research/StressInsightGrid";
 import SelloffMemoBlock from "@/components/research/SelloffMemoBlock";
 import { getResearchDataset } from "@/lib/research";
@@ -34,7 +35,7 @@ const modules = [
   ["L0", "Data Layer", "Real Market Data", "Yahoo Finance OHLCV, adjusted-close metadata, and explicit fallback provenance.", "/data", Database],
   ["L1", "Factor Layer", "Factor Discovery", "Momentum, volatility, trend, liquidity, and regime signals across the watchlist.", "/factors", Network],
   ["L2", "Strategy & Backtest", "AI Strategy Generation", "Rule logic, next-open execution assumptions, metrics, drawdown, and trades.", "/strategies", LineChart],
-  ["L3", "Strategy Radar", "Radar Screening", "Composite ranking, rejection rules, and paper-observation promotion logic.", "/radar", Radar],
+  ["L3", "Strategy Radar", "Radar Screening", "Composite ranking, rejection rules, and research gates for simulated observation.", "/radar", Radar],
   ["L4", "AI Market Intelligence", "Market Intelligence", "AI-style market memo generated from factor breadth and backtest evidence.", "/ai-market", BrainCircuit],
   ["L5", "Paper Observation", "Simulated Observation", "Research-only paper monitoring for radar-approved strategies. No live orders.", "/paper-trading", WalletCards],
   ["L6", "Public Track Record", "Shareable Receipt", "Ledger-backed paper performance for outside viewers. Simulation only.", "/track-record", Trophy],
@@ -129,26 +130,28 @@ export default async function HomePage() {
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_0.86fr]">
         <MarketPerformancePanel movers={marketMovers} />
-        <section className="card p-4">
-          <SectionHeader title="How This Works" label="Compact evidence pipeline for visitors" href="/reports" compact />
-          <div className="mt-1 grid grid-cols-1 gap-3 md:grid-cols-2">
-            {["1. Fetch real OHLCV", "2. Build factors", "3. Generate signals", "4. Run backtest", "5. Score radar", "6. Observe in paper"].map((step, index) => (
-              <div key={step} className="rounded-xl border border-line bg-white/[0.035] p-3">
-                <div className="text-[12px] font-semibold text-white">{step}</div>
-                <p className="mt-1 text-[11.5px] leading-relaxed text-ink-muted">
-                  {[
-                    "Yahoo Finance daily bars with provider and fallback metadata.",
-                    "Momentum, volatility, volume, RSI, and trend breadth snapshots.",
-                    "Rule-based VCP, ATR breakout, pullback, EMA continuation, and rotation logic.",
-                    "Next-open fills, fees, slippage, stops, drawdown, and trade logs.",
-                    "Annualized return, Sharpe, drawdown, win rate, sample size, and risk penalties.",
-                    "Only radar-approved strategies enter simulated observation; no real orders.",
-                  ][index]}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
+        <HotspotsSummaryCard report={dataset.hotspots} />
+      </section>
+
+      <section className="card p-4">
+        <SectionHeader title="How This Works" label="Compact evidence pipeline for visitors" href="/reports" compact />
+        <div className="mt-1 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {["1. Fetch real OHLCV", "2. Build factors", "3. Generate signals", "4. Run backtest", "5. Score radar", "6. Observe in paper"].map((step, index) => (
+            <div key={step} className="rounded-xl border border-line bg-white/[0.035] p-3">
+              <div className="text-[12px] font-semibold text-white">{step}</div>
+              <p className="mt-1 text-[11.5px] leading-relaxed text-ink-muted">
+                {[
+                  "Yahoo Finance daily bars with provider and fallback metadata.",
+                  "Momentum, volatility, volume, RSI, and trend breadth snapshots.",
+                  "Rule-based VCP, ATR breakout, pullback, EMA continuation, and rotation logic.",
+                  "Next-open fills, fees, slippage, stops, drawdown, and trade logs.",
+                  "Annualized return, Sharpe, drawdown, win rate, sample size, and risk penalties.",
+                  "Only radar-approved strategies enter simulated observation; no real orders.",
+                ][index]}
+              </p>
+            </div>
+          ))}
+        </div>
       </section>
 
       <MethodologyCallout
@@ -476,7 +479,7 @@ function LiveResearchCase({ candidate, fallbackCount }: { candidate: RadarCandid
       </div>
 
       <div className="relative mt-4 rounded-2xl border border-emerald-300/20 bg-emerald-300/[0.06] p-3 text-[12px] leading-relaxed text-emerald-50/85">
-        Decision output: {candidate.nextAction}. This is simulated research evidence only, not a trading recommendation.
+        Research gate: {candidate.nextAction}. This is simulated research evidence only, not an instruction to trade.
       </div>
     </div>
   );
@@ -597,29 +600,33 @@ function MarketPerformancePanel({ movers }: { movers: MarketMover[] }) {
         <HeroStat label="Universe" value={String(movers.length)} detail={`${sectorsCovered} sectors · single-name + ETF benchmarks`} />
         <HeroStat label="Fallback" value={String(fallbackCount)} detail="always disclosed" />
       </div>
-      <div className="mt-5 grid grid-cols-[56px_1fr_88px_76px_76px] gap-3 border-y border-line py-2 text-[10px] uppercase tracking-wider text-ink-soft">
-        <span>Symbol</span>
-        <span>5D relative move</span>
-        <span>Sector</span>
-        <span className="text-right">1D</span>
-        <span className="text-right">5D</span>
-      </div>
-      <div className="mt-3 space-y-2">
-        {topMovers.map((item) => {
-          const width = `${Math.max(4, (Math.abs(item.fiveDay) / maxAbs) * 100)}%`;
-          const positive = item.fiveDay >= 0;
-          return (
-            <div key={item.symbol} className="grid grid-cols-[56px_1fr_88px_76px_76px] items-center gap-3 text-[12px]">
-              <div className="font-semibold text-white">{item.symbol}</div>
-              <div className="h-2.5 rounded-full bg-white/[0.06]">
-                <div className={`h-2.5 rounded-full ${positive ? "bg-emerald-300" : "bg-rose-300"}`} style={{ width }} />
-              </div>
-              <div className="truncate text-[11px] text-ink-soft">{sectorOf(item.symbol) ?? "—"}</div>
-              <div className={`num text-right ${item.oneDay >= 0 ? "text-emerald-300" : "text-rose-300"}`}>{pct(item.oneDay)}</div>
-              <div className={`num text-right ${positive ? "text-emerald-300" : "text-rose-300"}`}>{pct(item.fiveDay)}</div>
-            </div>
-          );
-        })}
+      <div className="mt-5 overflow-x-auto pb-1">
+        <div className="min-w-[520px]">
+          <div className="grid grid-cols-[56px_1fr_88px_76px_76px] gap-3 border-y border-line py-2 text-[10px] uppercase tracking-wider text-ink-soft">
+            <span>Symbol</span>
+            <span>5D relative move</span>
+            <span>Sector</span>
+            <span className="text-right">1D</span>
+            <span className="text-right">5D</span>
+          </div>
+          <div className="mt-3 space-y-2">
+            {topMovers.map((item) => {
+              const width = `${Math.max(4, (Math.abs(item.fiveDay) / maxAbs) * 100)}%`;
+              const positive = item.fiveDay >= 0;
+              return (
+                <div key={item.symbol} className="grid grid-cols-[56px_1fr_88px_76px_76px] items-center gap-3 text-[12px]">
+                  <div className="font-semibold text-white">{item.symbol}</div>
+                  <div className="h-2.5 rounded-full bg-white/[0.06]">
+                    <div className={`h-2.5 rounded-full ${positive ? "bg-emerald-300" : "bg-rose-300"}`} style={{ width }} />
+                  </div>
+                  <div className="truncate text-[11px] text-ink-soft">{sectorOf(item.symbol) ?? "—"}</div>
+                  <div className={`num text-right ${item.oneDay >= 0 ? "text-emerald-300" : "text-rose-300"}`}>{pct(item.oneDay)}</div>
+                  <div className={`num text-right ${positive ? "text-emerald-300" : "text-rose-300"}`}>{pct(item.fiveDay)}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
       {movers.length > topMovers.length && (
         <div className="mt-3 text-[11px] text-ink-soft">

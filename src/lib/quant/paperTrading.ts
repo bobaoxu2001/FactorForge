@@ -88,7 +88,7 @@ export function buildPaperAccountSummary(
       `Total simulated exposure target stays below ${(MAX_TOTAL_EXPOSURE * 100).toFixed(0)}%.`,
       options.slotNote ??
         `Observation slots: ${observationSlots} of ${MAX_OBSERVATION_SLOTS} hard cap.`,
-      "Fallback/demo market data remains labeled and is not promoted as live evidence.",
+      "Fallback/demo market data remains labeled and is not treated as live evidence.",
     ],
   };
 }

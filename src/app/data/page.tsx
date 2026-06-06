@@ -46,6 +46,7 @@ export default async function DataPage() {
       <MethodologyCallout
         items={[
           "Provider order is Yahoo Finance first, optional Polygon and Alpha Vantage after that, then deterministic fallback/demo data if all real providers fail.",
+          "For demo responsiveness, the app can use a committed real Yahoo snapshot when live providers miss the short page-load budget; snapshot rows still disclose provider, coverage, and message.",
           "The default date range is 3 years of daily OHLCV bars.",
           "Adjusted close is used when Yahoo provides it; rows disclose whether the price basis is adjusted or raw/demo.",
           "Fallback/demo rows are labeled in the status, price basis, and message columns.",

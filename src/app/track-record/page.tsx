@@ -32,7 +32,7 @@ export default async function TrackRecordPage() {
               A shareable receipt for simulated strategy performance.
             </h1>
             <p className="mt-4 max-w-3xl text-[14px] leading-7 text-ink-muted">
-              This page is built for outside viewers: strategy-by-strategy paper ledger results, promotion dates, current marks, and guardrails. It is not a broker statement, not financial advice, and not a live-trading workflow.
+              This page is built for outside viewers: strategy-by-strategy paper ledger results, observation dates, current marks, and guardrails. It is not a broker statement, not financial advice, and not a live-trading workflow.
             </p>
             <div className="mt-5 grid grid-cols-1 gap-2 text-[12px] text-ink-muted sm:grid-cols-3">
               <ProofPill icon={BadgeCheck} label={`${record.ledgerTrackedCount}/${record.promotedCount || 0}`} detail="ledger-backed" />
@@ -45,7 +45,7 @@ export default async function TrackRecordPage() {
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </Link>
               <Link href="/radar" className="inline-flex items-center gap-2 rounded-full border border-line bg-white/[0.04] px-3.5 py-2 text-[12.5px] text-ink-muted transition hover:text-ink">
-                View promotion rules
+                View admission rules
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </Link>
             </div>
@@ -76,7 +76,7 @@ export default async function TrackRecordPage() {
       </section>
 
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
-        <MetricCard label="Tracked" value={String(record.promotedCount)} hint="radar promoted" tone="accent" />
+        <MetricCard label="Tracked" value={String(record.promotedCount)} hint="radar admitted" tone="accent" />
         <MetricCard label="Live" value={String(record.liveCount)} hint="active or holding" />
         <MetricCard label="Ledger return" value={pct(record.ledgerReturnPct)} tone={record.ledgerReturnPct >= 0 ? "positive" : "negative"} />
         <MetricCard label="Unrealized P&L" value={usd(record.unrealizedPnl)} tone={record.unrealizedPnl >= 0 ? "positive" : "negative"} />
@@ -157,7 +157,7 @@ export default async function TrackRecordPage() {
 
         {record.rows.length === 0 && (
           <div className="p-5">
-            <EmptyState title="No public paper record yet" message="The radar has not promoted a strategy into the paper ledger." />
+            <EmptyState title="No public paper record yet" message="The radar has not admitted a strategy into the paper ledger." />
           </div>
         )}
       </section>
@@ -176,7 +176,7 @@ export default async function TrackRecordPage() {
           <div className="mt-5 space-y-3">
             {[
               ["Source", `${record.ledgerTrackedCount} rows use the local paper ledger; ${dataset.metadata.realDataCount}/${dataset.metadata.symbolCount} symbols use provider-backed market data.`],
-              ["Scope", "This page summarizes paper observation after promotion. Full historical backtests remain on each strategy page."],
+              ["Scope", "This page summarizes paper observation after radar admission. Full historical backtests remain on each strategy page."],
               ["Broker", "Alpaca paper sync, when configured, is a read-only mirror on the full desk page. Public track record does not expose broker account identifiers."],
             ].map(([label, value]) => (
               <div key={label} className="rounded-2xl border border-line bg-white/[0.035] p-3">

@@ -13,7 +13,9 @@ import WalkForwardPanel from "@/components/research/WalkForwardPanel";
 import FactorAttributionPanel from "@/components/research/FactorAttributionPanel";
 import MethodologyCallout from "@/components/research/MethodologyCallout";
 import StressDiagnosticsPanel from "@/components/research/StressDiagnosticsPanel";
+import StrategyIntelPanel from "@/components/research/StrategyIntelPanel";
 import SelloffMemoBlock from "@/components/research/SelloffMemoBlock";
+import { buildStrategyIntel } from "@/lib/quant/strategyIntel";
 import { evaluateWalkForward } from "@/lib/quant/walkForward";
 import { attributeFactors } from "@/lib/quant/factorAttribution";
 import { scoreBacktest } from "@/lib/quant/radar";
@@ -68,6 +70,13 @@ export default async function StrategyDetailPage({
   // Stress diagnostics for the currently-viewed symbol (recomputed because the
   // user can switch off the showcase pick). Base score uses the same radar scorer.
   const stressDiagnostics = buildStrategyStressDiagnostics(result, dataset.marketStress, scoreBacktest(result));
+  const radarCandidate = dataset.radarCandidates.find((c) => c.result.strategyId === result.strategyId);
+  const strategyIntel = buildStrategyIntel({
+    result,
+    diagnostics: stressDiagnostics,
+    regime: { regime: dataset.marketStress.regime, stressScore: dataset.marketStress.stressScore },
+    status: radarCandidate?.status,
+  });
 
   const symbolOptions = runs.map((r) => ({
     symbol: r.symbol,
@@ -171,10 +180,12 @@ export default async function StrategyDetailPage({
       </section>
 
       <p className="-mt-3 text-[11.5px] leading-relaxed text-ink-soft">
-        Benchmark and excess are measured against buy-and-hold of {result.symbol} over the same window. A long-only,
-        risk-managed rule that trades infrequently is expected to trail a strong buy-and-hold tape — the goal here is
+        Benchmark and excess are measured against a passive hold of {result.symbol} over the same window. A long-only,
+        risk-managed rule that trades infrequently is expected to trail a strong benchmark tape — the goal here is
         risk-adjusted behavior (Sharpe, drawdown), not beating the index.
       </p>
+
+      <StrategyIntelPanel intel={strategyIntel} />
 
       <section className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         <div className="lg:col-span-2"><EquityCurveChart data={result.equityCurve} /></div>
@@ -211,7 +222,7 @@ export default async function StrategyDetailPage({
         <ResearchPanel icon={ListChecks} title="Rule Logic" items={[
           "Generate signals only from completed daily bars.",
           "Fill entries at the next bar open with modeled slippage and fees.",
-          "Exit via stop loss, trailing stop, holding-period expiry, or strategy sell condition.",
+          "Exit via stop loss, trailing stop, holding-period expiry, or the strategy's predefined exit rule.",
         ]} />
         <ResearchPanel icon={ShieldAlert} title="Risk Flags" items={result.riskFlags.length > 0 ? result.riskFlags : ["No major model risk flag is triggered, but validation is still required."]} />
         <ResearchPanel icon={FlaskConical} title="Suggested Next Experiments" items={explanation.suggestedExperiments} />

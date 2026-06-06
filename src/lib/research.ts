@@ -29,6 +29,8 @@ import {
   type StrategyStressDiagnostics,
   type StressInsightCard,
 } from "@/lib/quant/marketStress";
+import { buildHotspotReport } from "@/lib/agents/hotspotAgent";
+import type { HotspotAgentReport } from "@/lib/agents/types";
 import { createLogger } from "@/lib/observability/logger";
 
 const log = createLogger("research");
@@ -55,6 +57,7 @@ export interface ResearchDataset {
   stressDiagnostics: Record<string, StrategyStressDiagnostics>;
   factorStress: FactorStressGroup[];
   selloffMemo: SelloffMemo;
+  hotspots: HotspotAgentReport;
   metadata: {
     generatedAt: string;
     revalidateSeconds: number;
@@ -69,9 +72,64 @@ export interface ResearchDatasetOptions {
   paperLedger?: boolean;
 }
 
+interface CachedResearchDataset {
+  expiresAt: number;
+  promise: Promise<ResearchDataset>;
+}
+
+const DATASET_CACHE_MAX_AGE_MS = 5 * 60 * 1000;
+const datasetCacheKey = "__factorforgeResearchDatasetCache";
+const globalDatasetCache = globalThis as typeof globalThis & {
+  __factorforgeResearchDatasetCache?: Map<string, CachedResearchDataset>;
+};
+const datasetCache = globalDatasetCache[datasetCacheKey] ?? new Map<string, CachedResearchDataset>();
+globalDatasetCache[datasetCacheKey] = datasetCache;
+
 export async function getResearchDataset(options: ResearchDatasetOptions = {}): Promise<ResearchDataset> {
-  const pricesBySymbol = await getWatchlistPrices("3y");
-  return buildResearchDatasetFromPrices(pricesBySymbol, options);
+  const cacheKey = options.paperLedger ? "3y::paper-ledger" : "3y::default";
+  const now = Date.now();
+  const cached = datasetCache.get(cacheKey);
+  if (cached && cached.expiresAt > now) return cached.promise;
+
+  const promise = options.paperLedger
+    ? getResearchDataset().then((dataset) => applyPaperLedger(dataset))
+    : getWatchlistPrices("3y").then((pricesBySymbol) => buildResearchDatasetFromPrices(pricesBySymbol, options));
+  datasetCache.set(cacheKey, { expiresAt: now + DATASET_CACHE_MAX_AGE_MS, promise });
+
+  try {
+    return await promise;
+  } catch (error) {
+    datasetCache.delete(cacheKey);
+    throw error;
+  }
+}
+
+async function applyPaperLedger(dataset: ResearchDataset): Promise<ResearchDataset> {
+  const effectiveBets = dataset.signalConcentration?.effectiveStrategies ?? MAX_OBSERVATION_SLOTS;
+  const slotCap = Math.max(1, Math.min(MAX_OBSERVATION_SLOTS, Math.floor(effectiveBets)));
+  const paperLedgerSnapshots = syncPaperLedgerPositions(dataset.radarCandidates, slotCap, dataset.pricesBySymbol, {
+    allocatedCapital: PAPER_POSITION_CAPITAL,
+  });
+  const paperObservations = buildPaperObservations(dataset.radarCandidates, slotCap, {
+    ledgerSnapshots: paperLedgerSnapshots,
+  });
+  const slotNote = dataset.signalConcentration
+    ? `Observation slots capped at the effective number of independent bets (N_eff ${effectiveBets.toFixed(1)}) → ${slotCap} of ${MAX_OBSERVATION_SLOTS}.`
+    : `Observation slots: ${slotCap} of ${MAX_OBSERVATION_SLOTS} hard cap.`;
+  const paperAccount = buildPaperAccountSummary(paperObservations, {
+    maxSlots: slotCap,
+    slotNote,
+  });
+  const dailyReview = buildDailyReview(paperObservations, paperAccount, dataset.radarCandidates);
+  const dailyReviewNote = await generateDailyReviewNote(dailyReview);
+
+  return {
+    ...dataset,
+    paperObservations,
+    paperAccount,
+    dailyReview,
+    dailyReviewNote,
+  };
 }
 
 /**
@@ -115,7 +173,7 @@ export async function buildResearchDatasetFromPrices(
 
   // 2. Measure concentration over the strategies that actually matter for
   //    capital allocation — radar candidates + continue-observing — so it
-  //    answers "are the ones we'd promote actually diversified?".
+  //    answers "are the observation candidates actually diversified?".
   const concentrationInputs = rawCandidates
     .filter((c) => c.status === "radar candidate" || c.status === "continue observing")
     .map((c) => c.result);
@@ -170,6 +228,16 @@ export async function buildResearchDatasetFromPrices(
     activeObservations: paperObservations.filter((o) => o.status === "active" || o.status === "holding").length,
   });
 
+  // 7. Market-hotspots research agent — deterministic theme/catalyst/scenario
+  //    layer built on the same factor, regime, and radar evidence. No live news.
+  const generatedAt = new Date().toISOString();
+  const hotspots = buildHotspotReport({
+    factors,
+    regime: { regime: marketStress.regime, stressScore: marketStress.stressScore },
+    radarCandidates,
+    generatedAt,
+  });
+
   const priceResults = Object.values(pricesBySymbol);
   return {
     pricesBySymbol,
@@ -191,8 +259,9 @@ export async function buildResearchDatasetFromPrices(
     stressDiagnostics,
     factorStress,
     selloffMemo,
+    hotspots,
     metadata: {
-      generatedAt: new Date().toISOString(),
+      generatedAt,
       revalidateSeconds: RESEARCH_REVALIDATE_SECONDS,
       realDataCount: priceResults.filter((result) => !result.isFallback).length,
       fallbackCount: priceResults.filter((result) => result.isFallback).length,

@@ -64,7 +64,7 @@ export default async function PortfolioPage() {
         The catch it checks for: if the pieces all move
         together (high <Term term="correlation">correlation</Term>), you&rsquo;re not really diversified. The{" "}
         <Term term="neff">effective bets</Term> number estimates how many independent risk exposures the mix really
-        amounts to — higher is more diversified, but still not a guarantee of lower loss.
+        amounts to — higher is more diversified, but it still does not imply lower loss.
       </PlainEnglish>
 
       <MethodologyCallout
@@ -72,7 +72,7 @@ export default async function PortfolioPage() {
           "Weights are proportional to radar score, with equal-weight fallback if scores are not usable.",
           "Effective bets and correlation are computed from daily return series on the shared calendar.",
           "Benchmark comparison uses SPY or the first available substitute on the same dates.",
-          "Portfolio results are historical research diagnostics and do not guarantee future P&L.",
+          "Portfolio results are historical research diagnostics and do not imply future P&L.",
         ]}
       />
 

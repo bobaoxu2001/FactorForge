@@ -50,8 +50,8 @@ export default function SelloffMemoBlock({ memo }: { memo: SelloffMemo }) {
       </div>
 
       <p className="mt-4 text-[11px] leading-relaxed text-ink-soft">
-        Generated from deterministic engine metrics (regime, breadth, volatility, drawdown, radar scoring). No buy/sell
-        recommendations. Historical backtests do not represent future returns. Research only — not investment advice.
+        Generated from deterministic engine metrics (regime, breadth, volatility, drawdown, radar scoring). No order
+        instructions. Historical backtests do not represent future returns. Research only — not investment advice.
       </p>
     </section>
   );

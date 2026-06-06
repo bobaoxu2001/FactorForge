@@ -34,7 +34,7 @@ export default async function ConsensusPage() {
         items={[
           "Consensus counts only symbols currently held by more than one strategy.",
           "Agreement is ranked by strategy count, then by distinct strategy types, then by average radar score.",
-          "Multi-strategy agreement can reduce single-style dependence, but it does not guarantee future returns.",
+          "Multi-strategy agreement can reduce single-style dependence, but it does not imply future returns.",
           "Single-strategy picks remain visible and are not relabeled as consensus.",
         ]}
       />

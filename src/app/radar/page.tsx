@@ -53,7 +53,7 @@ export default async function RadarPage() {
           "Candidate thresholds are explicit: high score with bounded drawdown and enough trades can reach radar candidate status.",
           "Hard rejection rules penalize severe drawdown, negative Sharpe, weak evidence, or poor data quality.",
           "Stress-adjusted score is a regime-aware re-weighting for research only; the base score and admission rules are unchanged.",
-          "Radar promotion means worthy of simulated observation, not a trading recommendation.",
+          "Radar gates mean worthy of simulated observation review, not an instruction to trade.",
         ]}
       />
 
@@ -63,7 +63,7 @@ export default async function RadarPage() {
           "score >= 70: continue observing",
           "maxDrawdown < -35% or Sharpe < 0: rejected",
           "Signals are generated from completed bars and filled at next open with modeled costs",
-          "Paper Trading can only use strategies promoted from radar candidates",
+          "Paper Trading can only observe strategies admitted by radar candidates",
         ].map((rule, index) => (
           <div key={rule} className="card p-4">
             <div className="text-[11px] uppercase tracking-wider text-ink-soft">Rule {index + 1}</div>
@@ -74,7 +74,7 @@ export default async function RadarPage() {
 
       <section>
         <div className="mb-3 text-[11px] uppercase tracking-[0.16em] text-ink-soft">
-          Concentration gate — promote diversification, not duplicates
+          Concentration gate — prefer diversification, not duplicates
         </div>
         <SignalConcentrationPanel report={signalConcentration} />
       </section>

@@ -56,7 +56,7 @@ function candidate(status: RadarCandidate["status"], overrides: Partial<Backtest
     status,
     result,
     reasons: ["test"],
-    nextAction: "Move into paper-observation queue",
+    nextAction: "Eligible for simulated observation review",
   };
 }
 

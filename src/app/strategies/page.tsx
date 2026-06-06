@@ -1,6 +1,7 @@
 import StrategyCard from "@/components/cards/StrategyCard";
 import PageHeader from "@/components/layout/PageHeader";
 import EmptyState from "@/components/research/EmptyState";
+import { buildStrategyIntel } from "@/lib/quant/strategyIntel";
 import PlainEnglish from "@/components/learn/PlainEnglish";
 import Term from "@/components/learn/Term";
 import MethodologyCallout from "@/components/research/MethodologyCallout";
@@ -15,10 +16,19 @@ export default async function StrategiesPage({
   searchParams?: { status?: string; symbol?: string; q?: string };
 }) {
   const { radarCandidates, marketStress, stressDiagnostics } = await getResearchDataset();
+  const enrichedCandidates = radarCandidates.map((candidate) => ({
+    candidate,
+    intel: buildStrategyIntel({
+      result: candidate.result,
+      diagnostics: stressDiagnostics[candidate.result.strategyId],
+      regime: { regime: marketStress.regime, stressScore: marketStress.stressScore },
+      status: candidate.status,
+    }),
+  }));
   const status = searchParams?.status ?? "all";
   const symbol = searchParams?.symbol ?? "all";
   const query = (searchParams?.q ?? "").trim().toLowerCase();
-  const filtered = radarCandidates.filter((candidate) => {
+  const filtered = enrichedCandidates.filter(({ candidate }) => {
     const statusMatch = status === "all" || candidate.status === status;
     const symbolMatch = symbol === "all" || candidate.result.symbol === symbol;
     const queryMatch =
@@ -42,9 +52,11 @@ export default async function StrategiesPage({
 
       <StressSummaryStrip candidates={radarCandidates} diagnostics={stressDiagnostics} />
 
+      <StrategyQualityBoard items={enrichedCandidates} regimeLabel={marketStress.regimeLabel} />
+
       <PlainEnglish>
-        A <Term term="strategy">strategy</Term> is a fixed set of buy/sell rules. Each card below shows how one would
-        have done if you&rsquo;d followed it on real past prices — a <Term term="backtest">backtest</Term>. Green-tinted
+        A <Term term="strategy">strategy</Term> is a fixed research rule for entering, exiting, and sizing a simulated position.
+        Each card below shows how the rule behaved on real past prices — a <Term term="backtest">backtest</Term>. Green-tinted
         numbers are good, red are warning signs. Remember: doing well in the past is evidence, not a promise.
       </PlainEnglish>
 
@@ -85,19 +97,84 @@ export default async function StrategiesPage({
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {filtered.map((candidate) => (
+        {filtered.map(({ candidate, intel }) => (
           <StrategyCard
             key={candidate.result.strategyId}
             result={candidate.result}
             score={candidate.score}
             status={candidate.status}
             diagnostics={stressDiagnostics[candidate.result.strategyId]}
+            intel={intel}
           />
         ))}
       </div>
       {filtered.length === 0 && (
         <EmptyState title="No matching strategies" message="Adjust the status or symbol filter. All strategy results come from the current data and backtest pipeline." />
       )}
+    </div>
+  );
+}
+
+function StrategyQualityBoard({
+  items,
+  regimeLabel,
+}: {
+  items: Array<{
+    candidate: Awaited<ReturnType<typeof getResearchDataset>>["radarCandidates"][number];
+    intel: ReturnType<typeof buildStrategyIntel>;
+  }>;
+  regimeLabel: string;
+}) {
+  const avg = (values: number[]) => values.length ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length) : 0;
+  const avgQuality = avg(items.map(({ candidate }) => candidate.score));
+  const avgRegimeFit = avg(items.map(({ intel }) => intel.regimeFit.score));
+  const avgCatalyst = avg(items.map(({ intel }) => intel.catalystSensitivity.score));
+  const observationEligible = items.filter(({ intel }) => intel.researchGate.kind === "observe").length;
+  const top = items.slice(0, 3);
+  return (
+    <section className="card relative overflow-hidden p-5 panel-glow">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <div className="section-label">Strategy Quality Matrix</div>
+          <p className="mt-1.5 max-w-3xl text-[12.5px] leading-relaxed text-ink-muted">
+            Each model is scored across quality, risk, factor exposure, regime fit, and catalyst sensitivity before it can enter simulated observation.
+          </p>
+        </div>
+        <span className="chip border-line bg-white/[0.04] text-ink-soft">{regimeLabel}</span>
+      </div>
+      <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <MatrixStat label="Avg quality" value={`${avgQuality}/100`} />
+        <MatrixStat label="Avg regime fit" value={`${avgRegimeFit}/100`} />
+        <MatrixStat label="Catalyst sensitivity" value={`${avgCatalyst}/100`} />
+        <MatrixStat label="Observation eligible" value={`${observationEligible}/${items.length}`} />
+      </div>
+      <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-3">
+        {top.map(({ candidate, intel }) => (
+          <div key={candidate.result.strategyId} className="rounded-2xl border border-line bg-white/[0.025] p-3">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="text-[12.5px] font-semibold text-white">{candidate.result.strategyName}</div>
+                <div className="mt-0.5 text-[11px] text-ink-soft">{candidate.result.symbol} · {candidate.status}</div>
+              </div>
+              <div className="num text-[18px] font-semibold text-cyan-100">{candidate.score}</div>
+            </div>
+            <div className="mt-3 grid grid-cols-3 gap-2 text-[10px] uppercase tracking-[0.1em] text-ink-soft">
+              <span>Risk {intel.downsideRiskPriority.score}</span>
+              <span>Regime {intel.regimeFit.score}</span>
+              <span>Factor {intel.factorExposure[0]?.tilt ?? "n/a"}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function MatrixStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="stat-tile !p-3.5">
+      <div className="text-[9.5px] font-semibold uppercase tracking-[0.12em] text-ink-soft">{label}</div>
+      <div className="num mt-1.5 text-[20px] font-semibold text-white">{value}</div>
     </div>
   );
 }

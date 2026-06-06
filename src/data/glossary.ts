@@ -164,7 +164,7 @@ export const GLOSSARY: GlossaryEntry[] = [
     category: "Strategy",
     level: "starter",
     plain: "A dry run of a trading rule on past data to see how it would have done — no real money involved.",
-    why: "It's evidence, not a promise: doing well in the past does not guarantee the future.",
+    why: "It's evidence, not a promise: doing well in the past does not imply the future.",
   },
   {
     id: "strategy",
