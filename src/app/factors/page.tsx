@@ -4,6 +4,7 @@ import MetricCard from "@/components/cards/MetricCard";
 import PlainEnglish from "@/components/learn/PlainEnglish";
 import Term from "@/components/learn/Term";
 import MethodologyCallout from "@/components/research/MethodologyCallout";
+import FactorStressBreakdown from "@/components/research/FactorStressBreakdown";
 import { getResearchDataset } from "@/lib/research";
 import { pearson } from "@/lib/quant/indicators";
 import { pct, pctPlain, num } from "@/lib/utils/format";
@@ -16,7 +17,7 @@ function regimeLabel(corr: number): string {
 }
 
 export default async function FactorsPage() {
-  const { factors, factorReturns } = await getResearchDataset();
+  const { factors, factorReturns, factorStress, marketStress } = await getResearchDataset();
 
   // Real pairwise correlations between the daily factor-return series
   // (Market / Momentum / Low-vol) — the same series the attribution OLS uses.
@@ -87,6 +88,22 @@ export default async function FactorsPage() {
             <p className="mt-2 text-[12.5px] leading-relaxed text-ink-muted">{detail}</p>
           </div>
         ))}
+      </section>
+
+      <section>
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="text-[18px] font-semibold text-white">Factor Breakdown Under Stress</h2>
+            <p className="mt-0.5 text-[12px] text-ink-soft">
+              Per-group condition, direction, stress impact, and an AI-style read under the current{" "}
+              <span className="text-ink">{marketStress.regime}</span> regime (stress score {marketStress.stressScore}/100). Research only.
+            </p>
+          </div>
+          <StatusBadge status={marketStress.regime === "risk-off" ? "under stress" : marketStress.regime === "neutral" ? "mixed regime" : "risk-on"} />
+        </div>
+        <div className="mt-4">
+          <FactorStressBreakdown groups={factorStress} />
+        </div>
       </section>
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_0.8fr]">

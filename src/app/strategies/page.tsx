@@ -3,6 +3,7 @@ import EmptyState from "@/components/research/EmptyState";
 import PlainEnglish from "@/components/learn/PlainEnglish";
 import Term from "@/components/learn/Term";
 import MethodologyCallout from "@/components/research/MethodologyCallout";
+import MarketRegimeBanner from "@/components/research/MarketRegimeBanner";
 import { getResearchDataset } from "@/lib/research";
 
 export const revalidate = 60 * 60;
@@ -12,7 +13,7 @@ export default async function StrategiesPage({
 }: {
   searchParams?: { status?: string; symbol?: string; q?: string };
 }) {
-  const { radarCandidates } = await getResearchDataset();
+  const { radarCandidates, marketStress, stressDiagnostics } = await getResearchDataset();
   const status = searchParams?.status ?? "all";
   const symbol = searchParams?.symbol ?? "all";
   const query = (searchParams?.q ?? "").trim().toLowerCase();
@@ -37,6 +38,10 @@ export default async function StrategiesPage({
           Each card is produced from real market data or explicitly labeled fallback data, strategy rules, long-only backtests, and calculated metrics.
         </p>
       </header>
+
+      <MarketRegimeBanner report={marketStress} />
+
+      <StressSummaryStrip candidates={radarCandidates} diagnostics={stressDiagnostics} />
 
       <PlainEnglish>
         A <Term term="strategy">strategy</Term> is a fixed set of buy/sell rules. Each card below shows how one would
@@ -82,12 +87,54 @@ export default async function StrategiesPage({
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {filtered.map((candidate) => (
-          <StrategyCard key={candidate.result.strategyId} result={candidate.result} score={candidate.score} status={candidate.status} />
+          <StrategyCard
+            key={candidate.result.strategyId}
+            result={candidate.result}
+            score={candidate.score}
+            status={candidate.status}
+            diagnostics={stressDiagnostics[candidate.result.strategyId]}
+          />
         ))}
       </div>
       {filtered.length === 0 && (
         <EmptyState title="No matching strategies" message="Adjust the status or symbol filter. All strategy results come from the current data and backtest pipeline." />
       )}
     </div>
+  );
+}
+
+function StressSummaryStrip({
+  candidates,
+  diagnostics,
+}: {
+  candidates: Awaited<ReturnType<typeof getResearchDataset>>["radarCandidates"];
+  diagnostics: Awaited<ReturnType<typeof getResearchDataset>>["stressDiagnostics"];
+}) {
+  const diags = candidates.map((c) => diagnostics[c.result.strategyId]).filter(Boolean);
+  const resilient = diags.filter((d) => d.status === "stable").length;
+  const watch = diags.filter((d) => d.status === "watch").length;
+  const underStress = diags.filter((d) => d.status === "under stress").length;
+  const paperReady = diags.filter((d) => d.paperSuitable).length;
+  const cells: Array<[string, number, string]> = [
+    ["Resilient", resilient, "text-emerald-300"],
+    ["Watch", watch, "text-amber-300"],
+    ["Under stress", underStress, "text-rose-300"],
+    ["Paper-suitable", paperReady, "text-cyan-200"],
+  ];
+  return (
+    <section className="card p-4">
+      <div className="flex items-center justify-between">
+        <div className="panel-title">Stress Diagnostics Summary</div>
+        <span className="text-[11px] text-ink-soft">Stable / Watch / Under Stress, classified under the current regime</span>
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
+        {cells.map(([label, value, cls]) => (
+          <div key={label} className="rounded-xl border border-line bg-white/[0.025] p-3">
+            <div className={`num text-[22px] font-semibold ${cls}`}>{value}</div>
+            <div className="mt-1 text-[10px] uppercase tracking-[0.16em] text-ink-soft">{label}</div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }

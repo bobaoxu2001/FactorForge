@@ -18,6 +18,9 @@ import DataSourceStatus from "@/components/research/DataSourceStatus";
 import EmptyState from "@/components/research/EmptyState";
 import StatusBadge from "@/components/badges/StatusBadge";
 import MethodologyCallout from "@/components/research/MethodologyCallout";
+import MarketRegimeBanner from "@/components/research/MarketRegimeBanner";
+import StressInsightGrid from "@/components/research/StressInsightGrid";
+import SelloffMemoBlock from "@/components/research/SelloffMemoBlock";
 import { getResearchDataset } from "@/lib/research";
 import { sectorCount, sectorOf } from "@/data/watchlist";
 import { pct, pctPlain, num } from "@/lib/utils/format";
@@ -121,6 +124,8 @@ export default async function HomePage() {
           <HeroStat label="Paper watch" value={String(dataset.paperObservations.length)} detail="simulation only" />
         </div>
       </section>
+
+      <MarketRegimeBanner report={dataset.marketStress} />
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_0.86fr]">
         <MarketPerformancePanel movers={marketMovers} />
@@ -322,6 +327,15 @@ export default async function HomePage() {
           )}
         </div>
       </section>
+
+      <section className="card p-4">
+        <SectionHeader title="AI Market Insight — Stress Lens" label="Regime-aware research cards derived from live factor and backtest evidence" href="/ai-market" />
+        <div className="mt-2 px-0">
+          <StressInsightGrid cards={dataset.stressInsights} />
+        </div>
+      </section>
+
+      <SelloffMemoBlock memo={dataset.selloffMemo} />
 
       <section className="card p-4">
         <SectionHeader title="AI Market Insight" label="AI-style research summary from factor and backtest evidence" href="/ai-market" />
