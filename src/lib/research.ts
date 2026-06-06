@@ -17,6 +17,18 @@ import { chooseWeights, runPortfolioBacktest, type PortfolioBacktest } from "@/l
 import { buildFactorReturns, type FactorReturnsRow } from "@/lib/quant/factorAttribution";
 import { applyConcentrationGate, buildSignalConcentration, type SignalConcentrationReport } from "@/lib/quant/signalConcentration";
 import { buildSignalConsensus, type SignalConsensusReport, type StrategyScan } from "@/lib/quant/signalConsensus";
+import {
+  buildFactorStressBreakdown,
+  buildMarketStressReport,
+  buildSelloffMemo,
+  buildStressDiagnosticsByStrategy,
+  buildStressInsightCards,
+  type FactorStressGroup,
+  type MarketStressReport,
+  type SelloffMemo,
+  type StrategyStressDiagnostics,
+  type StressInsightCard,
+} from "@/lib/quant/marketStress";
 import { createLogger } from "@/lib/observability/logger";
 
 const log = createLogger("research");
@@ -38,6 +50,11 @@ export interface ResearchDataset {
   factorBenchmarkSymbol: string;
   signalConcentration: SignalConcentrationReport | null;
   signalConsensus: SignalConsensusReport;
+  marketStress: MarketStressReport;
+  stressInsights: StressInsightCard[];
+  stressDiagnostics: Record<string, StrategyStressDiagnostics>;
+  factorStress: FactorStressGroup[];
+  selloffMemo: SelloffMemo;
   metadata: {
     generatedAt: string;
     revalidateSeconds: number;
@@ -139,6 +156,20 @@ export async function buildResearchDatasetFromPrices(
 
   const marketSummary = await generateMarketSummary(factors);
   const portfolio = buildPortfolio(radarCandidates, pricesBySymbol);
+
+  // 6. Market-stress / selloff regime read, layered on top of the same factor,
+  //    price, and backtest evidence. Deterministic regime classification + stress-
+  //    adjusted diagnostics so every page can interpret results under stress.
+  const marketStress = buildMarketStressReport(pricesBySymbol, factors);
+  const stressInsights = buildStressInsightCards(marketStress);
+  const stressDiagnostics = buildStressDiagnosticsByStrategy(radarCandidates, marketStress);
+  const factorStress = buildFactorStressBreakdown(marketStress, factors);
+  const selloffMemo = buildSelloffMemo(marketStress, {
+    radarCandidates,
+    diagnostics: stressDiagnostics,
+    activeObservations: paperObservations.filter((o) => o.status === "active" || o.status === "holding").length,
+  });
+
   const priceResults = Object.values(pricesBySymbol);
   return {
     pricesBySymbol,
@@ -155,6 +186,11 @@ export async function buildResearchDatasetFromPrices(
     factorBenchmarkSymbol,
     signalConcentration,
     signalConsensus,
+    marketStress,
+    stressInsights,
+    stressDiagnostics,
+    factorStress,
+    selloffMemo,
     metadata: {
       generatedAt: new Date().toISOString(),
       revalidateSeconds: RESEARCH_REVALIDATE_SECONDS,

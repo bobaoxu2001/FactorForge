@@ -11,8 +11,12 @@ import StrategySignalPanel from "@/components/research/StrategySignalPanel";
 import WalkForwardPanel from "@/components/research/WalkForwardPanel";
 import FactorAttributionPanel from "@/components/research/FactorAttributionPanel";
 import MethodologyCallout from "@/components/research/MethodologyCallout";
+import StressDiagnosticsPanel from "@/components/research/StressDiagnosticsPanel";
+import SelloffMemoBlock from "@/components/research/SelloffMemoBlock";
 import { evaluateWalkForward } from "@/lib/quant/walkForward";
 import { attributeFactors } from "@/lib/quant/factorAttribution";
+import { scoreBacktest } from "@/lib/quant/radar";
+import { buildStrategyStressDiagnostics } from "@/lib/quant/marketStress";
 import { STRATEGY_CATALOG } from "@/data/strategyCatalog";
 import { generateStrategyExplanation } from "@/lib/ai/strategyExplainer";
 import { getResearchDataset, runStrategyAcrossSymbols } from "@/lib/research";
@@ -60,6 +64,9 @@ export default async function StrategyDetailPage({
   const explanation = await generateStrategyExplanation(result);
   const walkForward = evaluateWalkForward(result);
   const factorAttribution = attributeFactors(result.equityCurve, dataset.factorReturns, dataset.factorBenchmarkSymbol);
+  // Stress diagnostics for the currently-viewed symbol (recomputed because the
+  // user can switch off the showcase pick). Base score uses the same radar scorer.
+  const stressDiagnostics = buildStrategyStressDiagnostics(result, dataset.marketStress, scoreBacktest(result));
 
   const symbolOptions = runs.map((r) => ({
     symbol: r.symbol,
@@ -180,6 +187,8 @@ export default async function StrategyDetailPage({
         </div>
       </section>
 
+      <StressDiagnosticsPanel diagnostics={stressDiagnostics} report={dataset.marketStress} />
+
       <section className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <DrawdownChart data={result.equityCurve} />
         <BacktestChecklist result={result} />
@@ -192,6 +201,8 @@ export default async function StrategyDetailPage({
       <section>
         <FactorAttributionPanel attribution={factorAttribution} />
       </section>
+
+      <SelloffMemoBlock memo={dataset.selloffMemo} />
 
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <ResearchPanel icon={ListChecks} title="Rule Logic" items={[

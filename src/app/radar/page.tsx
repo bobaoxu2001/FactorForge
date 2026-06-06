@@ -12,7 +12,7 @@ import { num, pct } from "@/lib/utils/format";
 export const revalidate = 60 * 60;
 
 export default async function RadarPage() {
-  const { radarCandidates, signalConcentration } = await getResearchDataset();
+  const { radarCandidates, signalConcentration, stressDiagnostics, marketStress } = await getResearchDataset();
   return (
     <div className="space-y-8">
       <header>
@@ -36,11 +36,26 @@ export default async function RadarPage() {
         <MetricCard label="Rejected" value={String(radarCandidates.filter((item) => item.status === "rejected").length)} />
       </section>
 
+      <section className="rounded-2xl border border-amber-300/25 bg-amber-300/[0.05] p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="text-[11px] uppercase tracking-[0.16em] text-amber-100/75">Stress-adjusted ranking active</div>
+            <p className="mt-1 max-w-3xl text-[12.5px] leading-relaxed text-ink-muted">
+              Under the current <span className="text-ink">{marketStress.regime}</span> regime (stress score {marketStress.stressScore}/100), each
+              candidate also carries a <span className="text-ink">stress-adjusted score</span> that penalizes high drawdown and downside
+              volatility, and rewards benchmark-relative resilience, smoother equity, and higher data quality. The base score is unchanged.
+            </p>
+          </div>
+          <StatusBadge status={marketStress.regime === "risk-off" ? "under stress" : marketStress.regime === "neutral" ? "mixed regime" : "risk-on"} />
+        </div>
+      </section>
+
       <MethodologyCallout
         items={[
           "Scores combine return, Sharpe, drawdown, win rate, trade count, and data-provenance penalties.",
           "Candidate thresholds are explicit: high score with bounded drawdown and enough trades can reach radar candidate status.",
           "Hard rejection rules penalize severe drawdown, negative Sharpe, weak evidence, or poor data quality.",
+          "Stress-adjusted score is a regime-aware re-weighting for research only; the base score and admission rules are unchanged.",
           "Radar promotion means worthy of simulated observation, not a trading recommendation.",
         ]}
       />
@@ -91,10 +106,24 @@ export default async function RadarPage() {
               <p className="mt-1 text-[12.5px] text-ink-muted">{candidate.result.symbol} · {candidate.nextAction}</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <Small label="Score" value={String(candidate.score)} />
-              <Small label="Sharpe" value={num(candidate.result.metrics.sharpe)} />
-              <Small label="Annual" value={pct(candidate.result.metrics.annualizedReturn)} />
-              <Small label="Max DD" value={pct(candidate.result.metrics.maxDrawdown)} />
+              {(() => {
+                const diag = stressDiagnostics[candidate.result.strategyId];
+                const adjusted = diag?.stressAdjustedScore;
+                return (
+                  <>
+                    <Small label="Base score" value={String(candidate.score)} />
+                    <Small
+                      label="Stress-adj"
+                      value={adjusted !== undefined ? String(adjusted) : "—"}
+                      tone={adjusted !== undefined ? (adjusted < candidate.score ? "down" : "up") : "default"}
+                    />
+                    <Small label="Annual" value={pct(candidate.result.metrics.annualizedReturn)} />
+                    <Small label="Max DD" value={pct(candidate.result.metrics.maxDrawdown)} tone="down" />
+                    <Small label="Current DD" value={diag ? pct(diag.currentDrawdown) : "—"} tone={diag && diag.currentDrawdown < -0.05 ? "down" : "default"} />
+                    <Small label="Sharpe" value={num(candidate.result.metrics.sharpe)} />
+                  </>
+                );
+              })()}
             </div>
             <ul className="space-y-1.5">
               {candidate.reasons.map((reason) => (
@@ -110,11 +139,12 @@ export default async function RadarPage() {
   );
 }
 
-function Small({ label, value }: { label: string; value: string }) {
+function Small({ label, value, tone = "default" }: { label: string; value: string; tone?: "default" | "up" | "down" }) {
+  const cls = tone === "up" ? "text-emerald-300" : tone === "down" ? "text-rose-300" : "text-ink";
   return (
     <div>
       <div className="text-[10px] uppercase tracking-wider text-ink-soft">{label}</div>
-      <div className="num mt-0.5 text-[15px] font-semibold text-ink">{value}</div>
+      <div className={`num mt-0.5 text-[15px] font-semibold ${cls}`}>{value}</div>
     </div>
   );
 }

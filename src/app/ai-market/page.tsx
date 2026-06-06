@@ -2,13 +2,24 @@ import MarketInsightCard from "@/components/cards/MarketInsightCard";
 import StatusBadge from "@/components/badges/StatusBadge";
 import AiTransparencyNote from "@/components/research/AiTransparencyNote";
 import MethodologyCallout from "@/components/research/MethodologyCallout";
+import Link from "next/link";
+import MarketRegimeBanner from "@/components/research/MarketRegimeBanner";
+import StressInsightGrid from "@/components/research/StressInsightGrid";
 import { getResearchDataset } from "@/lib/research";
+import { buildPreviewStressReport, buildStressInsightCards } from "@/lib/quant/marketStress";
 import { pct, pctPlain, num } from "@/lib/utils/format";
 
 export const revalidate = 60 * 60;
 
-export default async function AIMarketPage() {
-  const { factors, marketSummary, metadata } = await getResearchDataset();
+export default async function AIMarketPage({ searchParams }: { searchParams?: { demo?: string } }) {
+  const dataset = await getResearchDataset();
+  const { factors, marketSummary, metadata } = dataset;
+  // Clearly-labeled illustrative stress preview. Live by default; ?demo=stress
+  // swaps in a representative risk-off regime (badged as non-live) so reviewers
+  // can see the selloff surfaces when the real tape is calm.
+  const previewMode = searchParams?.demo === "stress";
+  const marketStress = previewMode ? buildPreviewStressReport(dataset.marketStress) : dataset.marketStress;
+  const stressInsights = previewMode ? buildStressInsightCards(marketStress) : dataset.stressInsights;
   const above = factors.filter((factor) => factor.aboveSma200).length;
   const avgMom20 = factors.reduce((sum, factor) => sum + (factor.momentum20d ?? 0), 0) / Math.max(factors.length, 1);
   const avgVol = factors.reduce((sum, factor) => sum + (factor.volatility20d ?? 0), 0) / Math.max(factors.length, 1);
@@ -40,7 +51,27 @@ export default async function AIMarketPage() {
         </p>
       </header>
 
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="inline-flex rounded-full border border-line bg-white/[0.03] p-0.5 text-[11px]">
+          <Link href="/ai-market" className={`rounded-full px-3 py-1.5 transition ${!previewMode ? "bg-white/[0.08] text-white" : "text-ink-soft hover:text-ink"}`}>Live regime</Link>
+          <Link href="/ai-market?demo=stress" className={`rounded-full px-3 py-1.5 transition ${previewMode ? "bg-amber-400/15 text-amber-100" : "text-ink-soft hover:text-ink"}`}>Stress preview</Link>
+        </div>
+        {previewMode && (
+          <span className="text-[11px] text-amber-100/80">Illustrative stressed regime — not live market data. Switch back to “Live regime” for the real tape.</span>
+        )}
+      </div>
+
+      <MarketRegimeBanner report={marketStress} />
+
       <AiTransparencyNote />
+
+      <section>
+        <div className="mb-3">
+          <div className="panel-title">Market Intelligence — Selloff Conditions</div>
+          <p className="mt-0.5 text-[11px] text-ink-soft">Regime-aware insight cards with confidence, data quality, and a suggested research action. Research only.</p>
+        </div>
+        <StressInsightGrid cards={stressInsights} />
+      </section>
 
       <MethodologyCallout
         items={[

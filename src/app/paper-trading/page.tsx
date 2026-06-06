@@ -8,7 +8,9 @@ import DailyReviewPanel from "@/components/research/DailyReviewPanel";
 import PlainEnglish from "@/components/learn/PlainEnglish";
 import Term from "@/components/learn/Term";
 import MethodologyCallout from "@/components/research/MethodologyCallout";
+import PaperStressObservation, { type PaperStressRow } from "@/components/research/PaperStressObservation";
 import { getResearchDataset } from "@/lib/research";
+import { buildPaperStressObservation, buildStrategyStressDiagnostics } from "@/lib/quant/marketStress";
 import { fetchAlpacaPaperSnapshot, type AlpacaPaperSnapshot } from "@/lib/broker/alpacaPaper";
 import { pct, pctPlain, usd, num } from "@/lib/utils/format";
 import type { PaperObservation } from "@/types/strategy";
@@ -16,11 +18,39 @@ import type { PaperObservation } from "@/types/strategy";
 export const dynamic = "force-dynamic";
 
 export default async function PaperTradingPage() {
-  const [{ paperObservations, paperAccount, dailyReview, dailyReviewNote, radarCandidates, metadata }, alpacaPaper] = await Promise.all([
+  const [{ paperObservations, paperAccount, dailyReview, dailyReviewNote, radarCandidates, metadata, marketStress }, alpacaPaper] = await Promise.all([
     getResearchDataset({ paperLedger: true }),
     fetchAlpacaPaperSnapshot(),
   ]);
   const desk = buildDeskSnapshot(paperObservations, paperAccount.totalAllocatedCapital);
+  const paperStress = buildPaperStressObservation(
+    marketStress,
+    paperObservations.map((o) => ({
+      simulatedReturn: o.simulatedReturn,
+      status: o.status,
+      result: o.candidate.result,
+      score: o.candidate.score,
+    })),
+  );
+  const paperStressRows: PaperStressRow[] = paperObservations.map((o) => {
+    const d = buildStrategyStressDiagnostics(o.candidate.result, marketStress, o.candidate.score);
+    const curve = o.candidate.result.equityCurve;
+    const last = curve.at(-1)?.equity;
+    const prev = curve.at(-2)?.equity;
+    const todayReturn = prev && prev > 0 && last ? last / prev - 1 : 0;
+    const badge = d.status === "stable" ? "Resilient" : d.status === "watch" ? "Watch" : "Under Stress";
+    return {
+      id: o.id,
+      strategyName: o.candidate.result.strategyName,
+      symbol: o.currentSymbol,
+      observationStatus: o.status,
+      stressStatusBadge: badge,
+      todayReturn,
+      currentDrawdown: d.currentDrawdown,
+      benchmarkRelative: d.benchmarkRelativeDrawdown,
+      note: d.paperSuitable ? "Suitable for continued observation" : "Review drawdown before reading strength",
+    };
+  });
   const shortlistCount = radarCandidates.filter((candidate) => candidate.status === "radar candidate" || candidate.status === "continue observing").length;
   const promotedCount = paperObservations.length;
   const shareLine = `${promotedCount} ${promotedCount === 1 ? "strategy" : "strategies"} live · ${desk.bookReturnLabel} ledger-tracked return · ${pct(paperAccount.maxObservedDrawdown)} max observed drawdown · ${dailyReview.winners}W/${dailyReview.losers}L`;
@@ -111,6 +141,8 @@ export default async function PaperTradingPage() {
         <MetricCard label="Max DD" value={pct(paperAccount.maxObservedDrawdown)} tone={paperAccount.maxObservedDrawdown < -0.2 ? "negative" : "default"} />
         <MetricCard label="Real data" value={`${metadata.realDataCount}/${metadata.symbolCount}`} hint="provider-backed" />
       </section>
+
+      <PaperStressObservation data={paperStress} rows={paperStressRows} />
 
       <BrokerSyncPanel snapshot={alpacaPaper} />
 
