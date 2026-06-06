@@ -12,7 +12,9 @@ const csp = [
   "default-src 'self'",
   "base-uri 'self'",
   "form-action 'self'",
-  "frame-ancestors 'none'",
+  // Dev preview tooling renders the app inside an iframe; allow framing locally
+  // only. Production stays locked to 'none'.
+  isDev ? "frame-ancestors 'self'" : "frame-ancestors 'none'",
   "object-src 'none'",
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
@@ -26,7 +28,8 @@ const csp = [
 
 const securityHeaders = [
   { key: "Content-Security-Policy", value: csp },
-  { key: "X-Frame-Options", value: "DENY" },
+  // SAMEORIGIN in dev so preview tooling can frame the app; DENY in production.
+  { key: "X-Frame-Options", value: isDev ? "SAMEORIGIN" : "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), browsing-topics=()" },

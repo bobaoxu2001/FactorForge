@@ -1,6 +1,7 @@
 import { BrainCircuit, Database, LineChart, Network, Target } from "lucide-react";
 import StatusBadge from "@/components/badges/StatusBadge";
 import MetricCard from "@/components/cards/MetricCard";
+import PageHeader from "@/components/layout/PageHeader";
 import PlainEnglish from "@/components/learn/PlainEnglish";
 import Term from "@/components/learn/Term";
 import MethodologyCallout from "@/components/research/MethodologyCallout";
@@ -45,13 +46,15 @@ export default async function FactorsPage() {
 
   return (
     <div className="space-y-8">
-      <header>
-        <div className="section-label">L1 Factors</div>
-        <h1 className="mt-2 text-[32px] font-semibold tracking-tight text-ink">Factor Discovery Console</h1>
-        <p className="mt-2 max-w-3xl text-[14px] leading-relaxed text-ink-muted">
-          FactorForge converts daily <Term term="ohlcv">OHLCV</Term> into interpretable momentum, volatility, trend, and liquidity evidence. Fallback symbols remain visible and explicitly labeled.
-        </p>
-      </header>
+      <PageHeader
+        eyebrow="L1 Factors"
+        title="Factor Discovery Console"
+        subtitle={
+          <>
+            FactorForge converts daily <Term term="ohlcv">OHLCV</Term> into interpretable momentum, volatility, trend, and liquidity evidence. Fallback symbols remain visible and explicitly labeled.
+          </>
+        }
+      />
 
       <PlainEnglish>
         A <Term term="factor">factor</Term> is just a recurring trait that helps explain why stocks move — like

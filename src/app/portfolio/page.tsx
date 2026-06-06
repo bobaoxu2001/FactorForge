@@ -2,6 +2,7 @@ import PortfolioCurveChart from "@/components/charts/PortfolioCurveChart";
 import CorrelationMatrix from "@/components/research/CorrelationMatrix";
 import MetricCard from "@/components/cards/MetricCard";
 import StatusBadge from "@/components/badges/StatusBadge";
+import PageHeader from "@/components/layout/PageHeader";
 import PlainEnglish from "@/components/learn/PlainEnglish";
 import Term from "@/components/learn/Term";
 import MethodologyCallout from "@/components/research/MethodologyCallout";
@@ -17,13 +18,11 @@ export default async function PortfolioPage() {
   if (!portfolio) {
     return (
       <div className="space-y-6">
-        <header>
-          <div className="section-label">L5 Portfolio</div>
-          <h1 className="mt-2 text-[32px] font-semibold tracking-tight text-ink">Multi-Symbol Portfolio Backtest</h1>
-          <p className="mt-2 max-w-3xl text-[14px] leading-relaxed text-ink-muted">
-            Not enough eligible legs to assemble a portfolio. At least two radar-candidate (or strong continue-observing) results are required.
-          </p>
-        </header>
+        <PageHeader
+          eyebrow="L5 Portfolio"
+          title="Multi-Symbol Portfolio Backtest"
+          subtitle="Not enough eligible legs to assemble a portfolio. At least two radar-candidate (or strong continue-observing) results are required."
+        />
         <div className="card p-6 text-[13px] text-ink-muted">
           Current radar pool: {radarCandidates.length} strategies; {radarCandidates.filter((c) => c.status === "radar candidate").length} marked as candidates.
         </div>
@@ -46,19 +45,19 @@ export default async function PortfolioPage() {
 
   return (
     <div className="space-y-8">
-      <header>
-        <div className="section-label">L5 Portfolio</div>
-        <h1 className="mt-2 text-[32px] font-semibold tracking-tight text-ink">Multi-Symbol Portfolio Backtest</h1>
-        <p className="mt-2 max-w-3xl text-[14px] leading-relaxed text-ink-muted">
-          Score-weighted blend of the top radar-eligible strategy/symbol pairs. Legs share a calendar via date intersection and are combined in $1-unit returns space, then scaled to the initial capital.
-        </p>
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+      <div>
+        <PageHeader
+          eyebrow="L5 Portfolio"
+          title="Multi-Symbol Portfolio Backtest"
+          subtitle="Score-weighted blend of the top radar-eligible strategy/symbol pairs. Legs share a calendar via date intersection and are combined in $1-unit returns space, then scaled to the initial capital."
+        />
+        <div className="mt-4 flex flex-wrap items-center gap-2">
           <StatusBadge status={portfolio.weightScheme} />
           <StatusBadge status={portfolio.rebalance} />
           <StatusBadge status={`benchmark ${portfolio.benchmarkSymbol}`} />
           <span className="text-[12px] text-ink-soft">{dataNote}</span>
         </div>
-      </header>
+      </div>
 
       <PlainEnglish>
         Instead of studying one strategy in isolation, this combines a few radar-qualified legs into a single research mix.

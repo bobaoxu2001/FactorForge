@@ -1,6 +1,7 @@
 import Link from "next/link";
 import MetricCard from "@/components/cards/MetricCard";
 import StatusBadge from "@/components/badges/StatusBadge";
+import PageHeader from "@/components/layout/PageHeader";
 import EmptyState from "@/components/research/EmptyState";
 import PlainEnglish from "@/components/learn/PlainEnglish";
 import Term from "@/components/learn/Term";
@@ -17,15 +18,11 @@ export default async function ConsensusPage() {
 
   return (
     <div className="space-y-8">
-      <header>
-        <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">L4 Multi-Strategy Consensus</div>
-        <h1 className="mt-1 text-[28px] font-semibold text-ink">Signal Resonance</h1>
-        <p className="mt-2 max-w-3xl text-[14px] leading-relaxed text-ink-muted">
-          The platform runs {strategyCount} structurally different strategies across {symbolsScanned} symbols. This page
-          pivots that grid to one question: which names is more than one independent strategy holding right now? No
-          broker, no live orders — this is a research overlay.
-        </p>
-      </header>
+      <PageHeader
+        eyebrow="L4 Multi-Strategy Consensus"
+        title="Signal Resonance"
+        subtitle={`The platform runs ${strategyCount} structurally different strategies across ${symbolsScanned} symbols. This page pivots that grid to one question: which names is more than one independent strategy holding right now? No broker, no live orders — this is a research overlay.`}
+      />
 
       <PlainEnglish>
         Different trading strategies look for different things. When several of them — built on totally different
