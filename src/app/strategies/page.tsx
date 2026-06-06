@@ -1,4 +1,5 @@
 import StrategyCard from "@/components/cards/StrategyCard";
+import PageHeader from "@/components/layout/PageHeader";
 import EmptyState from "@/components/research/EmptyState";
 import PlainEnglish from "@/components/learn/PlainEnglish";
 import Term from "@/components/learn/Term";
@@ -31,13 +32,11 @@ export default async function StrategiesPage({
 
   return (
     <div className="space-y-8">
-      <header>
-        <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">L2 Strategies</div>
-        <h1 className="mt-1 text-[28px] font-semibold text-ink">Strategy Backtest List</h1>
-        <p className="mt-2 max-w-3xl text-[14px] leading-relaxed text-ink-muted">
-          Each card is produced from real market data or explicitly labeled fallback data, strategy rules, long-only backtests, and calculated metrics.
-        </p>
-      </header>
+      <PageHeader
+        eyebrow="L2 Strategies"
+        title="Strategy Backtest List"
+        subtitle="Each card is produced from real market data or explicitly labeled fallback data, strategy rules, long-only backtests, and calculated metrics."
+      />
 
       <MarketRegimeBanner report={marketStress} />
 

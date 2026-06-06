@@ -1,6 +1,6 @@
 import Link from "next/link";
-import MetricCard from "@/components/cards/MetricCard";
 import StatusBadge from "@/components/badges/StatusBadge";
+import PageHeader from "@/components/layout/PageHeader";
 import EmptyState from "@/components/research/EmptyState";
 import SignalConcentrationPanel from "@/components/research/SignalConcentrationPanel";
 import PlainEnglish from "@/components/learn/PlainEnglish";
@@ -15,13 +15,15 @@ export default async function RadarPage() {
   const { radarCandidates, signalConcentration, stressDiagnostics, marketStress } = await getResearchDataset();
   return (
     <div className="space-y-8">
-      <header>
-        <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">L3 Radar</div>
-        <h1 className="mt-1 text-[28px] font-semibold text-ink">Strategy Radar Screening</h1>
-        <p className="mt-2 max-w-3xl text-[14px] leading-relaxed text-ink-muted">
-          Scoring rules live in code: <Term term="annualized">annualized return</Term>, <Term term="sharpe">Sharpe</Term>, <Term term="drawdown">drawdown</Term>, <Term term="winrate">win rate</Term>, trade count, data provenance, and cost-aware <Term term="backtest">backtest</Term> assumptions determine candidate status.
-        </p>
-      </header>
+      <PageHeader
+        eyebrow="L3 Radar"
+        title="Strategy Radar Screening"
+        subtitle={
+          <>
+            Scoring rules live in code: <Term term="annualized">annualized return</Term>, <Term term="sharpe">Sharpe</Term>, <Term term="drawdown">drawdown</Term>, <Term term="winrate">win rate</Term>, trade count, data provenance, and cost-aware <Term term="backtest">backtest</Term> assumptions determine candidate status.
+          </>
+        }
+      />
 
       <PlainEnglish>
         Think of this as a talent scout for trading strategies. Each strategy is graded on how much it made,
@@ -29,12 +31,7 @@ export default async function RadarPage() {
         &ldquo;candidates&rdquo; worth watching; the risky ones get rejected. Nothing here trades real money.
       </PlainEnglish>
 
-      <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <MetricCard label="Total" value={String(radarCandidates.length)} />
-        <MetricCard label="Candidates" value={String(radarCandidates.filter((item) => item.status === "radar candidate").length)} tone="accent" />
-        <MetricCard label="Observing" value={String(radarCandidates.filter((item) => item.status === "continue observing").length)} />
-        <MetricCard label="Rejected" value={String(radarCandidates.filter((item) => item.status === "rejected").length)} />
-      </section>
+      <RadarFunnel candidates={radarCandidates} />
 
       <section className="rounded-2xl border border-amber-300/25 bg-amber-300/[0.05] p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -136,6 +133,63 @@ export default async function RadarPage() {
         )}
       </section>
     </div>
+  );
+}
+
+/**
+ * Screening funnel — visualizes how the full backtest set narrows down to
+ * radar candidates. Each stage is a strict subset of the one above it, so the
+ * bars genuinely funnel inward instead of being four unrelated counters.
+ */
+function RadarFunnel({ candidates }: { candidates: Array<{ status: string }> }) {
+  const total = candidates.length;
+  const candidateCount = candidates.filter((c) => c.status === "radar candidate").length;
+  const observingCount = candidates.filter((c) => c.status === "continue observing").length;
+  const rejectedCount = candidates.filter((c) => c.status === "rejected").length;
+  const passedGate = candidateCount + observingCount;
+  const pct100 = (n: number) => (total > 0 ? Math.round((n / total) * 100) : 0);
+
+  const stages = [
+    { label: "Screened", sub: "Backtests scored", count: total, color: "from-slate-300/70 to-slate-400/40", text: "text-ink" },
+    { label: "Passed gate", sub: "Candidate or observing", count: passedGate, color: "from-blue-400/80 to-cyan-400/50", text: "text-blue-100" },
+    { label: "Radar candidates", sub: "Cleared for paper observation", count: candidateCount, color: "from-cyan-400 to-emerald-400/70", text: "text-cyan-100" },
+  ];
+
+  return (
+    <section className="card relative overflow-hidden p-6 panel-glow">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <div className="section-label">Screening funnel</div>
+          <p className="mt-1.5 text-[12.5px] leading-relaxed text-ink-muted">
+            Every backtest enters at the top; only candidates that clear the score, drawdown, and trade-count gates reach the bottom.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 rounded-full border border-rose-300/25 bg-rose-300/[0.06] px-3 py-1.5">
+          <span className="num text-[15px] font-semibold text-rose-200">{rejectedCount}</span>
+          <span className="text-[10.5px] font-medium uppercase tracking-[0.12em] text-rose-200/80">rejected</span>
+        </div>
+      </div>
+
+      <div className="mt-5 space-y-3">
+        {stages.map((stage) => (
+          <div key={stage.label} className="grid grid-cols-[160px_1fr_56px] items-center gap-4">
+            <div className="min-w-0">
+              <div className={`text-[13px] font-semibold ${stage.text}`}>{stage.label}</div>
+              <div className="text-[10.5px] text-ink-soft">{stage.sub}</div>
+            </div>
+            <div className="h-7 overflow-hidden rounded-lg bg-white/[0.04]">
+              <div
+                className={`flex h-full items-center justify-end rounded-lg bg-gradient-to-r px-2.5 ${stage.color} transition-all duration-500`}
+                style={{ width: `${Math.max(8, pct100(stage.count))}%` }}
+              >
+                <span className="num text-[12px] font-semibold text-[#04121f]">{pct100(stage.count)}%</span>
+              </div>
+            </div>
+            <div className="num text-right text-[20px] font-semibold text-white">{stage.count}</div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 

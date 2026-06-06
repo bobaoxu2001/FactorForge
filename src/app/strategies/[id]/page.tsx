@@ -5,6 +5,7 @@ import DrawdownChart from "@/components/charts/DrawdownChart";
 import EquityCurveChart from "@/components/charts/EquityCurveChart";
 import MetricCard from "@/components/cards/MetricCard";
 import StatusBadge from "@/components/badges/StatusBadge";
+import PageHeader from "@/components/layout/PageHeader";
 import DataSourceStatus from "@/components/research/DataSourceStatus";
 import BacktestChecklist from "@/components/research/BacktestChecklist";
 import StrategySignalPanel from "@/components/research/StrategySignalPanel";
@@ -78,13 +79,15 @@ export default async function StrategyDetailPage({
 
   return (
     <div className="space-y-8">
-      <Link href="/strategies" className="text-[12px] text-ink-muted hover:text-ink">← Back to strategies</Link>
-      <header>
-        <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">{result.type} · {result.symbol}</div>
-        <h1 className="mt-2 text-[30px] font-semibold text-ink">{result.strategyName}</h1>
-        <p className="mt-2 max-w-3xl text-[14px] leading-relaxed text-ink-muted">{result.description}</p>
+      <Link href="/strategies" className="inline-flex text-[12px] text-ink-muted transition-colors hover:text-ink">← Back to strategies</Link>
+      <div>
+        <PageHeader
+          eyebrow={`${result.type} · ${result.symbol}`}
+          title={result.strategyName}
+          subtitle={result.description}
+        />
         <div className="mt-4"><DataSourceStatus result={result.dataStatus} /></div>
-      </header>
+      </div>
 
       <PlainEnglish>
         In plain terms, this is {STRATEGY_TYPE_PLAIN[result.type] ?? "a rules-based strategy that buys and sells on fixed signals."}{" "}

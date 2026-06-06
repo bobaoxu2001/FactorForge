@@ -632,21 +632,28 @@ function MarketPerformancePanel({ movers }: { movers: MarketMover[] }) {
 }
 
 function MiniCurve({ data, wide = false }: { data: EquityPoint[]; wide?: boolean }) {
-  const sampled = data.filter((_, index) => index % Math.max(1, Math.floor(data.length / 18)) === 0 || index === data.length - 1);
+  const sampled = data.filter((_, index) => index % Math.max(1, Math.floor(data.length / 24)) === 0 || index === data.length - 1);
   const values = sampled.map((point) => point.equity);
   const min = Math.min(...values);
   const max = Math.max(...values);
   const range = max - min || 1;
-  const points = values.map((value, index) => {
+  const coords = values.map((value, index) => {
     const x = (index / Math.max(values.length - 1, 1)) * 100;
     const y = 34 - ((value - min) / range) * 28;
-    return `${x},${y}`;
-  }).join(" ");
+    return [x, y] as const;
+  });
+  const points = coords.map(([x, y]) => `${x},${y}`).join(" ");
+  const up = (values[values.length - 1] ?? 0) >= (values[0] ?? 0);
+  const stroke = up ? "#34d399" : "#fb7185";
+  const fill = up ? "rgba(52,211,153,0.16)" : "rgba(251,113,133,0.14)";
+  const lastY = coords[coords.length - 1]?.[1] ?? 34;
 
   return (
-    <svg viewBox="0 0 100 40" className={wide ? "h-16 w-full" : "h-10 w-24"}>
-      <polyline points={points} fill="none" stroke="#22d3ee" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-      <line x1="0" x2="100" y1="34" y2="34" stroke="rgba(120,149,184,0.18)" />
+    <svg viewBox="0 0 100 40" preserveAspectRatio="none" className={wide ? "h-16 w-full" : "h-10 w-24"}>
+      <polygon points={`0,36 ${points} 100,36`} fill={fill} />
+      <polyline points={points} fill="none" stroke={stroke} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+      <line x1="0" x2="100" y1="36" y2="36" stroke="rgba(120,149,184,0.16)" />
+      <circle cx="100" cy={lastY} r="2.4" fill={stroke} />
     </svg>
   );
 }
