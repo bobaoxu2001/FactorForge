@@ -4,6 +4,7 @@ import {
   BrainCircuit,
   CheckCircle2,
   Database,
+  Flame,
   GraduationCap,
   LineChart,
   Network,
@@ -83,17 +84,48 @@ export default async function HomePage() {
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/[0.06] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-100/80">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 shadow-[0_0_14px_rgba(52,211,153,0.9)]" />
-              Open-source AI-assisted quant research workbench
+              Open-source · AI Quant Research Lab
             </div>
             <h1 className="mt-4 max-w-4xl text-[40px] font-semibold leading-[0.98] tracking-[-0.045em] text-white md:text-[64px]">
-              Factor signals, backtests, portfolios, and research memos in one reusable lab.
+              Factor discovery, backtests, and market-stress research in one AI quant lab.
             </h1>
             <p className="mt-5 max-w-2xl text-[15px] leading-7 text-ink-muted">
-              FactorForge is an open-source AI-assisted quant research workbench for factor signals, cost-aware backtests, portfolio construction, risk diagnostics, paper observation, and research memo generation.
+              FactorForge is an AI-powered stock strategy research platform for factor discovery, cost-aware backtesting, market-stress analysis, hotspot monitoring, and simulated model-portfolio observation — with every number computed from real OHLCV and clearly labeled when it falls back.
             </p>
             <p className="mt-3 max-w-2xl text-[13px] leading-relaxed text-ink-soft">
-              Built for researchers, maintainers, and contributors who need deterministic metrics, visible data provenance, safe public demo behavior, and reviewable workflows.
+              Research only. No broker connection, no live trading, no investment advice — a transparent lab for inspecting quant evidence, not a trading account.
             </p>
+            <div className="mt-5 flex flex-wrap items-center gap-2.5">
+              <Link
+                href="/portfolio"
+                className="group inline-flex items-center gap-2 rounded-full border border-emerald-300/40 bg-gradient-to-r from-cyan-400/20 to-emerald-400/20 px-4 py-2 text-[13px] font-semibold text-white shadow-[0_0_22px_rgba(34,211,238,0.18)] transition-colors hover:border-emerald-300/70 hover:from-cyan-400/30 hover:to-emerald-400/30"
+              >
+                <Trophy className="h-4 w-4 text-emerald-200" />
+                Model Portfolio Since May
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+              <Link
+                href="/ai-market?demo=stress"
+                className="inline-flex items-center gap-2 rounded-full border border-line bg-white/[0.04] px-3.5 py-2 text-[12.5px] text-ink-muted transition-colors hover:border-amber-300/45 hover:text-amber-100"
+              >
+                <ShieldAlert className="h-3.5 w-3.5 text-amber-200/80" />
+                Market Stress Mode
+              </Link>
+              <Link
+                href="/hotspots"
+                className="inline-flex items-center gap-2 rounded-full border border-line bg-white/[0.04] px-3.5 py-2 text-[12.5px] text-ink-muted transition-colors hover:border-cyan-300/45 hover:text-cyan-100"
+              >
+                <Flame className="h-3.5 w-3.5 text-cyan-200/80" />
+                Market Hotspots
+              </Link>
+              <Link
+                href="/strategies"
+                className="inline-flex items-center gap-2 rounded-full border border-line bg-white/[0.04] px-3.5 py-2 text-[12.5px] text-ink-muted transition-colors hover:border-blue-300/45 hover:text-blue-100"
+              >
+                <LineChart className="h-3.5 w-3.5 text-blue-200/80" />
+                Strategy Research
+              </Link>
+            </div>
             <Link
               href="/learn"
               className="mt-4 inline-flex items-center gap-2 rounded-full border border-cyan-300/30 bg-cyan-300/[0.07] px-3.5 py-1.5 text-[12.5px] text-cyan-100 transition-colors hover:border-cyan-300/55 hover:bg-cyan-300/[0.12]"
@@ -133,7 +165,7 @@ export default async function HomePage() {
         data={dataset.modelPortfolio}
         eyebrow="Since May · Simulated"
         title="Model Portfolio Performance Since May"
-        framing="A deterministic, equal-weighted blend of the platform's top-ranked research strategies, normalized on the start date and compared with SPY/QQQ. Simulated research portfolio only — not a real-money account."
+        framing="A deterministic, equal-weighted blend of the platform's top-ranked research strategies, normalized on the start date and compared with SPY/QQQ. Simulated research portfolio only — not a real-money trading account, and historical performance does not indicate future results."
       />
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_0.86fr]">
