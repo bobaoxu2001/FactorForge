@@ -3,6 +3,7 @@ import StatusBadge from "@/components/badges/StatusBadge";
 import PageHeader from "@/components/layout/PageHeader";
 import AiTransparencyNote from "@/components/research/AiTransparencyNote";
 import HotspotResearchBrief from "@/components/hotspots/HotspotResearchBrief";
+import ModelPortfolioCard from "@/components/research/ModelPortfolioCard";
 import { generateStrategyExplanation } from "@/lib/ai/strategyExplainer";
 import { generateConcentrationNote } from "@/lib/ai/concentrationNote";
 import { getResearchDataset } from "@/lib/research";
@@ -11,7 +12,7 @@ import { num, pct, pctPlain } from "@/lib/utils/format";
 export const revalidate = 60 * 60;
 
 export default async function ReportsPage() {
-  const { radarCandidates, signalConcentration, metadata, hotspots } = await getResearchDataset();
+  const { radarCandidates, signalConcentration, metadata, hotspots, modelPortfolio } = await getResearchDataset();
   const demotedCount = radarCandidates.filter((c) => c.redundancy?.demoted).length;
   const [cards, concentrationNote] = await Promise.all([
     Promise.all(
@@ -41,6 +42,14 @@ export default async function ReportsPage() {
       />
 
       <AiTransparencyNote />
+
+      <ModelPortfolioCard
+        data={modelPortfolio}
+        eyebrow="Since May · Simulated"
+        title="Since May Model Portfolio Report"
+        framing="A deterministic, equal-weighted blend of the platform's top-ranked research strategies since May 1, compared with SPY/QQQ. Reported as a simulated research portfolio — not a real-money account."
+        variant="report"
+      />
 
       {concentrationNote && signalConcentration && (
         <section className="card p-6">

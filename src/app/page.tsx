@@ -19,6 +19,7 @@ import EmptyState from "@/components/research/EmptyState";
 import StatusBadge from "@/components/badges/StatusBadge";
 import MethodologyCallout from "@/components/research/MethodologyCallout";
 import MarketRegimeBanner from "@/components/research/MarketRegimeBanner";
+import ModelPortfolioCard from "@/components/research/ModelPortfolioCard";
 import HotspotsSummaryCard from "@/components/hotspots/HotspotsSummaryCard";
 import StressInsightGrid from "@/components/research/StressInsightGrid";
 import SelloffMemoBlock from "@/components/research/SelloffMemoBlock";
@@ -127,6 +128,13 @@ export default async function HomePage() {
       </section>
 
       <MarketRegimeBanner report={dataset.marketStress} />
+
+      <ModelPortfolioCard
+        data={dataset.modelPortfolio}
+        eyebrow="Since May · Simulated"
+        title="Model Portfolio Performance Since May"
+        framing="A deterministic, equal-weighted blend of the platform's top-ranked research strategies, normalized on the start date and compared with SPY/QQQ. Simulated research portfolio only — not a real-money account."
+      />
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_0.86fr]">
         <MarketPerformancePanel movers={marketMovers} />

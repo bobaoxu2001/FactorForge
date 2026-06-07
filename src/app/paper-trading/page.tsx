@@ -9,6 +9,7 @@ import PlainEnglish from "@/components/learn/PlainEnglish";
 import Term from "@/components/learn/Term";
 import MethodologyCallout from "@/components/research/MethodologyCallout";
 import PaperStressObservation, { type PaperStressRow } from "@/components/research/PaperStressObservation";
+import ModelPortfolioCard from "@/components/research/ModelPortfolioCard";
 import { getResearchDataset } from "@/lib/research";
 import { buildPaperStressObservation, buildStrategyStressDiagnostics } from "@/lib/quant/marketStress";
 import { fetchAlpacaPaperSnapshot, type AlpacaPaperSnapshot } from "@/lib/broker/alpacaPaper";
@@ -18,7 +19,7 @@ import type { PaperObservation } from "@/types/strategy";
 export const dynamic = "force-dynamic";
 
 export default async function PaperTradingPage() {
-  const [{ paperObservations, paperAccount, dailyReview, dailyReviewNote, radarCandidates, metadata, marketStress }, alpacaPaper] = await Promise.all([
+  const [{ paperObservations, paperAccount, dailyReview, dailyReviewNote, radarCandidates, metadata, marketStress, modelPortfolio }, alpacaPaper] = await Promise.all([
     getResearchDataset({ paperLedger: true }),
     fetchAlpacaPaperSnapshot(),
   ]);
@@ -141,6 +142,13 @@ export default async function PaperTradingPage() {
         <MetricCard label="Max DD" value={pct(paperAccount.maxObservedDrawdown)} tone={paperAccount.maxObservedDrawdown < -0.2 ? "negative" : "default"} />
         <MetricCard label="Real data" value={`${metadata.realDataCount}/${metadata.symbolCount}`} hint="provider-backed" />
       </section>
+
+      <ModelPortfolioCard
+        data={modelPortfolio}
+        eyebrow="Since May · Simulated"
+        title="Simulated Observation Since May"
+        framing="Research portfolio tracking of the top-ranked strategy basket from May 1 onward. This mirrors how the desk observes performance over time — it is a simulated research portfolio, not a live trading account, and no orders are routed."
+      />
 
       <PaperStressObservation data={paperStress} rows={paperStressRows} />
 

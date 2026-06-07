@@ -13,6 +13,7 @@ import { generateDailyReviewNote, type DailyReviewNote } from "@/lib/ai/dailyRev
 import type { DailyReview } from "@/types/strategy";
 import { buildRadar } from "@/lib/quant/radar";
 import { chooseBenchmark, runStrategyOnMarketCached } from "@/lib/quant/strategies";
+import { buildModelPortfolioPerformance, type ModelPortfolioPerformance } from "@/lib/quant/modelPortfolio";
 import { chooseWeights, runPortfolioBacktest, type PortfolioBacktest } from "@/lib/quant/portfolio";
 import { buildFactorReturns, type FactorReturnsRow } from "@/lib/quant/factorAttribution";
 import { applyConcentrationGate, buildSignalConcentration, type SignalConcentrationReport } from "@/lib/quant/signalConcentration";
@@ -47,6 +48,7 @@ export interface ResearchDataset {
   dailyReview: DailyReview;
   dailyReviewNote: DailyReviewNote | null;
   marketSummary: MarketSummary;
+  modelPortfolio: ModelPortfolioPerformance;
   portfolio: PortfolioBacktest | null;
   factorReturns: FactorReturnsRow[];
   factorBenchmarkSymbol: string;
@@ -231,6 +233,17 @@ export async function buildResearchDatasetFromPrices(
   // 7. Market-hotspots research agent — deterministic theme/catalyst/scenario
   //    layer built on the same factor, regime, and radar evidence. No live news.
   const generatedAt = new Date().toISOString();
+
+  // 8. "Since May" simulated model portfolio — a deterministic, equal-weighted
+  //    blend of the top-ranked strategy equity curves from May 1 onward, compared
+  //    to SPY/QQQ. Research-only; never a real-money or guaranteed-return claim.
+  const modelPortfolio = buildModelPortfolioPerformance({
+    radarCandidates,
+    strategyResults,
+    pricesBySymbol,
+    generatedAt,
+  });
+
   const hotspots = buildHotspotReport({
     factors,
     regime: { regime: marketStress.regime, stressScore: marketStress.stressScore },
@@ -249,6 +262,7 @@ export async function buildResearchDatasetFromPrices(
     dailyReview,
     dailyReviewNote,
     marketSummary,
+    modelPortfolio,
     portfolio,
     factorReturns,
     factorBenchmarkSymbol,
