@@ -6,6 +6,7 @@ import PlainEnglish from "@/components/learn/PlainEnglish";
 import Term from "@/components/learn/Term";
 import MethodologyCallout from "@/components/research/MethodologyCallout";
 import MarketRegimeBanner from "@/components/research/MarketRegimeBanner";
+import ModelPortfolioCard from "@/components/research/ModelPortfolioCard";
 import { getResearchDataset } from "@/lib/research";
 
 export const revalidate = 60 * 60;
@@ -15,7 +16,7 @@ export default async function StrategiesPage({
 }: {
   searchParams?: { status?: string; symbol?: string; q?: string };
 }) {
-  const { radarCandidates, marketStress, stressDiagnostics } = await getResearchDataset();
+  const { radarCandidates, marketStress, stressDiagnostics, modelPortfolio } = await getResearchDataset();
   const enrichedCandidates = radarCandidates.map((candidate) => ({
     candidate,
     intel: buildStrategyIntel({
@@ -49,6 +50,13 @@ export default async function StrategiesPage({
       />
 
       <MarketRegimeBanner report={marketStress} />
+
+      <ModelPortfolioCard
+        data={modelPortfolio}
+        eyebrow="Since May · Simulated"
+        title="Strategy Basket Since May"
+        variant="compact"
+      />
 
       <StressSummaryStrip candidates={radarCandidates} diagnostics={stressDiagnostics} />
 
