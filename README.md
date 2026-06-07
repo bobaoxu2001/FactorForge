@@ -1,20 +1,47 @@
 # FactorForge
 
+> **AI Quant Research Lab** — factor discovery, backtesting, market-stress analysis, hotspot monitoring, and a simulated model portfolio, all in one open-source workbench.
+
 [![CI](https://github.com/bobaoxu2001/FactorForge/actions/workflows/ci.yml/badge.svg)](https://github.com/bobaoxu2001/FactorForge/actions/workflows/ci.yml)
 [![Next.js 14](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![Vitest](https://img.shields.io/badge/tests-167%20passing-22c55e?logo=vitest&logoColor=white)](#testing)
+[![Vitest](https://img.shields.io/badge/tests-passing-22c55e?logo=vitest&logoColor=white)](#testing)
 [![Docker](https://img.shields.io/badge/Docker-standalone-2496ed?logo=docker&logoColor=white)](#deployment)
 
-FactorForge is an open-source AI-assisted quantitative research workbench for exploring factor signals, rule-based backtests, portfolio construction, risk diagnostics, and LLM-generated research memos over daily OHLCV data.
+**🔗 Live demo: [factor-forge-ashy.vercel.app](https://factor-forge-ashy.vercel.app/)**
 
-The project is designed as a reusable research toolkit: deterministic engines compute the numbers, provider metadata keeps data provenance visible, and optional LLM calls turn validated payloads into prose without overwriting computed metrics.
+FactorForge is an AI-powered stock strategy research platform for factor discovery, cost-aware backtesting, market-stress analysis, hotspot monitoring, and simulated model-portfolio observation over daily OHLCV data.
 
-Live demo: [https://factor-forge-ashy.vercel.app/](https://factor-forge-ashy.vercel.app/)
+It is designed as a reusable research toolkit: deterministic engines compute the numbers, provider metadata keeps data provenance visible, and optional LLM calls turn validated payloads into prose without overwriting computed metrics.
 
-> Research software only. No financial advice. No broker connection. No live trading.
+> Research software only. For educational and research use — **not investment advice**. The model portfolio is a **simulated research portfolio**, not a real-money trading account, and **historical performance does not indicate future results**. No broker connection. No live trading.
 
 Public demo mode is intentionally safe: market-data and LLM keys are optional, missing keys fall back to clearly labeled provider/template behavior, and account features are limited to saved research preferences/watchlists. FactorForge has no broker connector and no order execution path.
+
+---
+
+## Key features
+
+| Module | What it does |
+|---|---|
+| **Model Portfolio Performance Since May** | A deterministic, equal-weighted blend of the top-ranked research strategies, normalized on the start date and benchmarked against SPY/QQQ. Simulated research portfolio only — not a real-money account. |
+| **Market Stress Mode** | A selloff/stress research view (`/ai-market?demo=stress`) that diagnoses market regime, breadth deterioration, and drawdown pressure with a stress-aware research memo. |
+| **Market Hotspots & Scenario Research** | Configured catalyst intelligence (`/hotspots`) — coverage-weighted hotspot signals and scenario forecasts across themes, with private labeling for pre-IPO names. |
+| **Strategy Research Lab** | Five structurally different rule-based strategies with cost-aware backtests, in-sample/out-of-sample splits, factor-attribution regressions, and LLM strategy memos. |
+| **Radar Screening** | Composite scoring, rejection rules, and a concentration gate (`N_eff`) that demotes near-duplicate candidates before they reach observation. |
+| **Paper Observation** | Research-only simulated monitoring of radar-approved strategies, with a post-market Daily Review. No live orders. |
+| **Reports** | Auto-generated research cards summarizing factor breadth, backtest evidence, and portfolio diagnostics for outside viewers. |
+
+---
+
+## Screenshots
+
+> _Add screenshots / a short demo GIF here for the public README._ Suggested captures: the homepage hero, the **Model Portfolio Since May** card, **Market Stress Mode** (`/ai-market?demo=stress`), and **Market Hotspots** (`/hotspots`). The social preview image lives at [`src/app/opengraph-image.png`](src/app/opengraph-image.png).
+
+<!-- ![Homepage](docs/screenshots/home.png) -->
+<!-- ![Model Portfolio Since May](docs/screenshots/model-portfolio.png) -->
+<!-- ![Market Stress Mode](docs/screenshots/stress.png) -->
+<!-- ![Market Hotspots](docs/screenshots/hotspots.png) -->
 
 ---
 
@@ -401,6 +428,20 @@ The current roadmap is tracked in [ROADMAP.md](ROADMAP.md). Near-term maintainer
 
 ---
 
+## Data transparency
+
+- **Real data first.** Prices come from a composite provider fan-out (Yahoo → Polygon → Alpha Vantage → deterministic synthetic fallback). Every result carries provider metadata, and the UI labels which tier answered.
+- **No hidden numbers.** All metrics (returns, Sharpe, drawdown, `N_eff`) are computed from OHLCV by deterministic engines — never hardcoded.
+- **LLM narrates, never invents.** DeepSeek writes prose from a validated payload; computed numbers are not overwritten. Without a key, the app falls back to clearly labeled templates.
+
+## Current limitations
+
+- **Hotspots are configured catalyst intelligence, not a live news API.** Themes and scenarios are curated and coverage-weighted, not streamed from a real-time news feed.
+- **Provider fetches may fall back.** Yahoo/other provider calls can rate-limit or fail; when they do, the app degrades to a labeled fallback tier rather than failing the page.
+- **The model portfolio is a simulated research portfolio, not a live trading account.** It is a deterministic, normalized blend for research illustration only — no orders are ever placed.
+
+---
+
 ## Disclaimer
 
-Research software only. No financial advice. No broker connection. No live trading.
+Research software only — for educational and research use, **not investment advice**. The model portfolio is a **simulated research portfolio**, not a real-money trading account, and **historical performance does not indicate future results**. No broker connection. No live trading.
