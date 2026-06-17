@@ -71,6 +71,13 @@ export const SEARCH_ITEMS: SearchItem[] = [
     keywords: ["paper", "simulated", "observation", "no broker", "no orders"],
   },
   {
+    title: "Trade Simulator",
+    href: "/simulator",
+    category: "Route",
+    description: "Interactive paper-trading desk: virtual cash, buy/sell at real prices, live return. No broker.",
+    keywords: ["simulator", "simulate", "paper trade", "buy", "sell", "virtual", "practice", "game", "return", "portfolio", "炒股", "模拟"],
+  },
+  {
     title: "Track Record",
     href: "/track-record",
     category: "Route",

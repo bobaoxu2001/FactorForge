@@ -8,14 +8,20 @@ This project follows a human-maintained changelog. There is no automated release
 
 ### Added
 
+- Interactive trade simulator (`/simulator`): start with $100k virtual cash, buy/sell any universe name at its latest close, and watch holdings, weights, and total return update live. Deterministic, unit-tested portfolio math (`src/lib/sim/portfolioSim.ts`); state persists in the browser, so it needs no login and works on the public demo. Simulation only — no broker, no real orders.
 - Multi-strategy consensus: all 5 strategies run across the full 28-symbol universe, pivoted per symbol to surface names held by more than one independent strategy, ranked by strategy count then distinct strategy types. Lives at `/consensus`.
 - OSS maintainer docs: contributing guide, security policy, code of conduct, roadmap, release checklist, issue templates, PR template, and maintainer backlog.
 - README maintainer workflow and maintainer automation sections.
 
+### Security
+
+- Auth throttling now buckets per-IP in addition to per-username, capping a username-spray from a single host that would otherwise stay under each account's limit. Fails open when the client IP is unknown (e.g. local dev with no upstream proxy).
+
 ### Changed
 
 - README opening reframed FactorForge as an open-source AI-assisted quantitative research workbench.
-- README test count synced to 167 passing tests across 43 files.
+- README test count synced to 205 passing tests across 51 files.
+- Fixed subject-verb agreement in the `/consensus` page subtitle.
 
 ### Demo safety
 

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   Bell,
   BrainCircuit,
+  CandlestickChart,
   Database,
   FileText,
   Gauge,
@@ -39,6 +40,7 @@ const items: { href: string; label: string; icon: typeof Gauge; tag?: string }[]
   { href: "/ai-market", label: "AI Market", icon: BrainCircuit },
   { href: "/hotspots", label: "Market Hotspots", icon: Flame },
   { href: "/paper-trading", label: "Paper Trading", icon: WalletCards },
+  { href: "/simulator", label: "Trade Simulator", icon: CandlestickChart },
   { href: "/track-record", label: "Track Record", icon: Trophy },
   { href: "/reports", label: "Reports", icon: FileText },
   { href: "/oss", label: "OSS & Maintainers", icon: ShieldCheck },

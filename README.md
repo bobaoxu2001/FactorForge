@@ -30,6 +30,7 @@ Public demo mode is intentionally safe: market-data and LLM keys are optional, m
 | **Strategy Research Lab** | Five structurally different rule-based strategies with cost-aware backtests, in-sample/out-of-sample splits, factor-attribution regressions, and LLM strategy memos. |
 | **Radar Screening** | Composite scoring, rejection rules, and a concentration gate (`N_eff`) that demotes near-duplicate candidates before they reach observation. |
 | **Paper Observation** | Research-only simulated monitoring of radar-approved strategies, with a post-market Daily Review. No live orders. |
+| **Trade Simulator** | An interactive paper-trading desk (`/simulator`) — start with $100k of virtual cash, buy/sell any universe name at its latest close, and watch holdings, weights, and total return update live. State persists in the browser (no login, works on the public demo). Deterministic, unit-tested portfolio math; simulation only, no broker. |
 | **Reports** | Auto-generated research cards summarizing factor breadth, backtest evidence, and portfolio diagnostics for outside viewers. |
 
 ---
@@ -60,10 +61,10 @@ Public demo mode is intentionally safe: market-data and LLM keys are optional, m
 | **Provider fan-out** | Composite real-data path: Yahoo → Polygon → Alpha Vantage → synthetic fallback. Each tier's failure reason is structured-logged; the UI labels which provider answered. |
 | **Persisted compute + multi-user** | SQLite stores fingerprint-keyed backtest cache (6h TTL), bcrypt-hashed users, and per-user watchlists. Iron-session cookies gate the protected routes. |
 | **Observability** | JSON-line structured logger, `/admin/cache` page (live hit rate, per-strategy row counts, oldest/newest entries), a `/api/health` liveness/readiness probe, and a `/api/csp-report` sink that logs CSP violations into the same JSON stream. |
-| **Hardened HTTP + auth** | Strict Content-Security-Policy plus `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, and HSTS on every response; `poweredByHeader` off. Auth adds a 7-day session TTL, constant-time login (dummy-hash compare blocks username enumeration), and a bcrypt 72-byte password guard. |
+| **Hardened HTTP + auth** | Strict Content-Security-Policy plus `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, and HSTS on every response; `poweredByHeader` off. Auth adds a 7-day session TTL, constant-time login (dummy-hash compare blocks username enumeration), a bcrypt 72-byte password guard, and credential throttling bucketed both per-username and per-IP (so a username-spray from one host is capped, not just brute force on a single account). |
 | **Deploy-ready** | Multi-stage `Dockerfile` building Next's `standalone` server as a non-root container with a `HEALTHCHECK`, plus centralized env validation that fails fast in production on a missing `SESSION_PASSWORD`. |
 | **Pluggable rate-limit store** | Auth throttling sits behind a `RateLimitStore` interface with two real backends: per-process in-memory (default) and a distributed Upstash/Vercel-KV adapter (atomic `INCR`+`PEXPIRE` over the REST API, no SDK) so the limit holds across a horizontally-scaled fleet. Selected by env, fail-open on infra blips, surfaced in `/api/health`; production warns when only the per-process store is wired. |
-| **CI and tests** | 167 vitest tests (engine + concentration gate + universe/sector breadth + rate-limit stores + glossary + `<Term>`/`<PlainEnglish>` + components + auth + env validation + composite-provider and DeepSeek-branch mocks) under jsdom; GitHub Actions runs lint + typecheck + test on every push and pull request targeting `main`. |
+| **CI and tests** | 219 vitest tests (engine + concentration gate + universe/sector breadth + rate-limit stores + glossary + `<Term>`/`<PlainEnglish>` + components + auth + env validation + composite-provider and DeepSeek-branch mocks) under jsdom; GitHub Actions runs lint + typecheck + test on every push and pull request targeting `main`. |
 | **Maintainer-facing app surface** | `/oss` documents why the project exists, who can contribute, good first issues, maintainer workflow, Codex/automation use cases, security-sensitive areas, release workflow, and current limitations inside the deployed app. |
 
 ---
@@ -346,7 +347,7 @@ Security notes:
 
 ## Testing
 
-167 tests across 43 files under vitest + jsdom:
+219 tests across 52 files under vitest + jsdom:
 
 - **Engine** — backtest fees + execution semantics, indicators, radar verdict logic, paper-trading risk-budget transitions + N_eff slot cap, portfolio engine (Pearson, calendar intersection, score-weighted blend, phase-shifted decorrelation).
 - **Concentration** — `effectiveBets` / `concentrationLevel` math (monotonicity, bounds), the correlation gate demoting near-duplicate candidates, and the shared pairwise-correlation builder.
