@@ -21,7 +21,7 @@ export default async function ConsensusPage() {
       <PageHeader
         eyebrow="L4 Multi-Strategy Consensus"
         title="Signal Resonance"
-        subtitle={`The platform runs ${strategyCount} structurally different strategies across ${symbolsScanned} symbols. This page pivots that grid to one question: which names is more than one independent strategy holding right now? No broker, no live orders — this is a research overlay.`}
+        subtitle={`The platform runs ${strategyCount} structurally different strategies across ${symbolsScanned} symbols. This page pivots that grid to one question: which names are held by more than one independent strategy right now? No broker, no live orders — this is a research overlay.`}
       />
 
       <PlainEnglish>

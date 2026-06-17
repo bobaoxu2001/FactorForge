@@ -2,8 +2,10 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { getSession } from "./session";
 import { AuthError, createUser, verifyCredentials, normalizeUsername } from "./users";
+import { clientIpFromHeaders } from "./clientIp";
 import { checkRateLimit } from "@/lib/ratelimit";
 import { addSymbolToWatchlist, removeSymbolFromWatchlist } from "@/lib/persistence/watchlist";
 
@@ -19,6 +21,11 @@ export interface WatchlistFormState {
 // 5 credential attempts per username per 5 minutes.
 const AUTH_LIMIT = 5;
 const AUTH_WINDOW_MS = 5 * 60 * 1000;
+// Per-IP ceiling across *all* usernames in the same window. The per-username
+// limit alone doesn't stop a spray that tries one attempt against many
+// usernames from one host; this caps the total. Tune up if a deployment sits
+// behind a large shared NAT. Best-effort — fails open when the IP is unknown.
+const AUTH_IP_LIMIT = 30;
 
 // User-facing copy for the no-database case. The sign-in/up pages render a full
 // DemoModeNotice instead of the form when persistence is down, so this is a
@@ -39,6 +46,15 @@ function safeInternalRedirect(value: FormDataEntryValue | null): string {
   return raw;
 }
 
+function currentClientIp(): string | null {
+  try {
+    const h = headers();
+    return clientIpFromHeaders(h.get("x-forwarded-for"), h.get("x-real-ip"));
+  } catch {
+    return null;
+  }
+}
+
 async function rateLimitMessage(action: string, username: string): Promise<string | null> {
   // Bucket by action + best-effort normalized username so a typo'd username
   // doesn't share a bucket with the real one but brute force on one is throttled.
@@ -48,9 +64,18 @@ async function rateLimitMessage(action: string, username: string): Promise<strin
   } catch {
     key = `${action}:${username.trim().toLowerCase()}`;
   }
-  const result = await checkRateLimit(key, AUTH_LIMIT, AUTH_WINDOW_MS);
-  if (result.allowed) return null;
-  return `Too many attempts. Try again in ${result.retryAfterSeconds}s.`;
+  const byUser = await checkRateLimit(key, AUTH_LIMIT, AUTH_WINDOW_MS);
+  if (!byUser.allowed) return `Too many attempts. Try again in ${byUser.retryAfterSeconds}s.`;
+
+  // Per-IP ceiling across all usernames, so a username-spray that stays under
+  // the per-username cap is still bounded. Skip (fail open) when the IP is
+  // unknown rather than collapse every client into one shared bucket.
+  const ip = currentClientIp();
+  if (ip) {
+    const byIp = await checkRateLimit(`${action}:ip:${ip}`, AUTH_IP_LIMIT, AUTH_WINDOW_MS);
+    if (!byIp.allowed) return `Too many attempts. Try again in ${byIp.retryAfterSeconds}s.`;
+  }
+  return null;
 }
 
 export async function signInAction(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
