@@ -16,7 +16,7 @@ It is designed as a reusable research toolkit: deterministic engines compute the
 
 > Research software only. For educational and research use — **not investment advice**. The model portfolio is a **simulated research portfolio**, not a real-money trading account, and **historical performance does not indicate future results**. No broker connection. No live trading.
 
-Public demo mode is intentionally safe: market-data and LLM keys are optional, missing keys fall back to clearly labeled provider/template behavior, and account features are limited to saved research preferences/watchlists. FactorForge has no broker connector and no order execution path.
+Public demo mode is intentionally safe: market-data and LLM keys are optional, missing keys fall back to clearly labeled provider/template behavior, and account features are limited to saved research preferences/watchlists. The only broker touchpoint is an optional **read-only** Alpaca *paper* mirror (GET requests for account/positions/orders) — FactorForge has no order-submission path and never routes a live order.
 
 ---
 
@@ -29,20 +29,33 @@ Public demo mode is intentionally safe: market-data and LLM keys are optional, m
 | **Market Hotspots & Scenario Research** | Configured catalyst intelligence (`/hotspots`) — coverage-weighted hotspot signals and scenario forecasts across themes, with private labeling for pre-IPO names. |
 | **Strategy Research Lab** | Five structurally different rule-based strategies with cost-aware backtests, in-sample/out-of-sample splits, factor-attribution regressions, and LLM strategy memos. |
 | **Radar Screening** | Composite scoring, rejection rules, and a concentration gate (`N_eff`) that demotes near-duplicate candidates before they reach observation. |
-| **Paper Observation** | Research-only simulated monitoring of radar-approved strategies, with a post-market Daily Review. No live orders. |
+| **Paper Observation** | Research-only simulated monitoring of radar-approved strategies, with a post-market Daily Review. No live orders. Optionally mirrors a **read-only Alpaca paper account** (account, positions, recent orders) when paper API keys are set — GET requests only, no order-submission path. |
+| **Public Track Record** | A shareable, outside-viewer "receipt" (`/track-record`) of the simulated paper ledger: strategy-by-strategy results, observation dates, current marks, and guardrails. Not a broker statement, not advice, not live trading. |
 | **Trade Simulator** | An interactive paper-trading desk (`/simulator`) — start with $100k of virtual cash, buy/sell any universe name at its latest close, and watch holdings, weights, and total return update live. State persists in the browser (no login, works on the public demo). Deterministic, unit-tested portfolio math; simulation only, no broker. |
 | **Reports** | Auto-generated research cards summarizing factor breadth, backtest evidence, and portfolio diagnostics for outside viewers. |
 
 ---
 
-## Screenshots
+## Screenshots & demo
 
-> _Add screenshots / a short demo GIF here for the public README._ Suggested captures: the homepage hero, the **Model Portfolio Since May** card, **Market Stress Mode** (`/ai-market?demo=stress`), and **Market Hotspots** (`/hotspots`). The social preview image lives at [`src/app/opengraph-image.png`](src/app/opengraph-image.png).
+> **Maintainer note:** this section is wired but the image files are not committed yet — drop captures into `docs/screenshots/` and uncomment the lines below. Keeping the placeholders here so the layout is ready and reviewers know what to expect. The fastest path is the **[live demo](https://factor-forge-ashy.vercel.app/)**; the social preview image lives at [`src/app/opengraph-image.png`](src/app/opengraph-image.png).
+
+Suggested captures (one of each is enough to tell the story for a recruiter):
+
+1. **Homepage hero** (`/`) — the safety/evidence pills and the "Model Portfolio Since May" proof card.
+2. **Market Stress Mode** (`/ai-market?demo=stress`) — regime + breadth + drawdown stress memo.
+3. **Market Hotspots** (`/hotspots`) — coverage-weighted catalyst signals and scenario research.
+4. **Multi-strategy Consensus** (`/consensus`) — names ≥2 independent strategies hold right now.
+5. **Trade Simulator** (`/simulator`) — the browser-state $100k paper-trading sandbox.
+6. **Public Track Record** (`/track-record`) — the shareable simulated-ledger receipt.
+7. *(optional)* a short 20–30s GIF walking from the homepage through a strategy detail page.
 
 <!-- ![Homepage](docs/screenshots/home.png) -->
-<!-- ![Model Portfolio Since May](docs/screenshots/model-portfolio.png) -->
 <!-- ![Market Stress Mode](docs/screenshots/stress.png) -->
 <!-- ![Market Hotspots](docs/screenshots/hotspots.png) -->
+<!-- ![Multi-strategy Consensus](docs/screenshots/consensus.png) -->
+<!-- ![Trade Simulator](docs/screenshots/simulator.png) -->
+<!-- ![Public Track Record](docs/screenshots/track-record.png) -->
 
 ---
 
@@ -64,7 +77,7 @@ Public demo mode is intentionally safe: market-data and LLM keys are optional, m
 | **Hardened HTTP + auth** | Strict Content-Security-Policy plus `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, and HSTS on every response; `poweredByHeader` off. Auth adds a 7-day session TTL, constant-time login (dummy-hash compare blocks username enumeration), a bcrypt 72-byte password guard, and credential throttling bucketed both per-username and per-IP (so a username-spray from one host is capped, not just brute force on a single account). |
 | **Deploy-ready** | Multi-stage `Dockerfile` building Next's `standalone` server as a non-root container with a `HEALTHCHECK`, plus centralized env validation that fails fast in production on a missing `SESSION_PASSWORD`. |
 | **Pluggable rate-limit store** | Auth throttling sits behind a `RateLimitStore` interface with two real backends: per-process in-memory (default) and a distributed Upstash/Vercel-KV adapter (atomic `INCR`+`PEXPIRE` over the REST API, no SDK) so the limit holds across a horizontally-scaled fleet. Selected by env, fail-open on infra blips, surfaced in `/api/health`; production warns when only the per-process store is wired. |
-| **CI and tests** | 219 vitest tests (engine + concentration gate + universe/sector breadth + rate-limit stores + glossary + `<Term>`/`<PlainEnglish>` + components + auth + env validation + composite-provider and DeepSeek-branch mocks) under jsdom; GitHub Actions runs lint + typecheck + test on every push and pull request targeting `main`. |
+| **CI and tests** | 229 vitest tests (engine + concentration gate + universe/sector breadth + rate-limit stores + glossary + `<Term>`/`<PlainEnglish>` + components + auth + env validation + composite-provider, DeepSeek-branch, and read-only Alpaca paper-sync mocks) under jsdom; GitHub Actions runs lint + typecheck + test on every push and pull request targeting `main`. |
 | **Maintainer-facing app surface** | `/oss` documents why the project exists, who can contribute, good first issues, maintainer workflow, Codex/automation use cases, security-sensitive areas, release workflow, and current limitations inside the deployed app. |
 
 ---
@@ -101,13 +114,21 @@ flowchart TB
     CN[Concentration note<br/>diversification memo]
   end
 
+  subgraph BROKER["Optional Broker Mirror (src/lib/broker)"]
+    ALP[Alpaca paper sync<br/>read-only GET<br/>account / positions / orders]
+  end
+
   subgraph UI["Next.js App Router (src/app)"]
     HOME["/"]
     STRAT["/strategies/:id"]
     RADAR["/radar"]
+    CONS["/consensus"]
     PFOL["/portfolio"]
     PAPER["/paper-trading"]
     AIM["/ai-market"]
+    HOT["/hotspots"]
+    SIM["/simulator"]
+    TRK["/track-record"]
     REP["/reports"]
   end
 
@@ -130,6 +151,7 @@ flowchart TB
   EXP --> UI
   MS --> UI
   CN --> UI
+  ALP -.read-only mirror.-> PAPER
 ```
 
 The page-level data flow is consolidated in `src/lib/research.ts → getResearchDataset()`, which is the single entry point all routes call.
@@ -148,7 +170,11 @@ src/
     consensus/             Multi-strategy resonance (which names ≥2 strategies hold)
     portfolio/             Multi-symbol blended backtest + correlation
     paper-trading/         Simulated observation queue + risk budget + Daily Review
-    ai-market/             Market regime memo
+                           (+ optional read-only Alpaca paper mirror panel)
+    track-record/          Shareable public paper ledger receipt for outside viewers
+    ai-market/             Market regime memo (+ ?demo=stress selloff view)
+    hotspots/              Coverage-weighted catalyst intelligence + scenario research
+    simulator/             Interactive browser-state paper-trading sandbox
     reports/               Auto-generated research cards
     oss/                   OSS maintainer and contribution workflow
     factors/, data/        Factor table and data provenance
@@ -158,7 +184,10 @@ src/
     data/                  Market data facade + Yahoo provider + fallback
     quant/                 indicators, strategies, backtest, metrics,
                            radar, signal concentration (N_eff + gate),
-                           paper trading, portfolio
+                           paper trading, portfolio, consensus,
+                           public track record
+    sim/                   Deterministic browser-sandbox portfolio math
+    broker/                Read-only Alpaca paper account/positions/orders sync
     persistence/           SQLite client + backtest cache
     ai/                    DeepSeek client + strategy explainer +
                            market summary + concentration note
@@ -237,7 +266,7 @@ WAL journal mode is enabled. If the native binding fails to load (missing prebui
 
 Account features are optional and only exist to persist saved research preferences and watchlists. They depend on a writable persistence backend, which the public Vercel demo intentionally does not provide.
 
-- **Research pages are read-only and need no account.** Overview, Data, Factors, Strategies, Radar, Consensus, Portfolio, AI Market, Paper Trading, and Reports all work without signing in.
+- **Research pages are read-only and need no account.** Overview, Data, Factors, Strategies, Radar, Consensus, Portfolio, Paper Trading, Track Record, AI Market, Hotspots, Simulator, and Reports all work without signing in.
 - **Account creation / sign-in may be disabled.** When no persistence backend is configured (`isPersistenceAvailable()` is false — e.g. Vercel's stateless serverless filesystem can't open SQLite), the sign-up and sign-in routes render a friendly demo-mode notice instead of the credential form. The raw "Persistence layer unavailable" engine string is never shown to users; the action layer also maps it to safe copy on any residual submit path.
 - **Protected routes degrade with context.** My Watchlist and the admin Cache page redirect to sign-in carrying an `area`, and the sign-in route explains that the page needs saved-preference storage which is off in the public demo. The sidebar tags these routes (`local` / `admin`) and notes that saved preferences and admin cache controls are disabled in demo mode.
 - **Local SQLite enables the full experience.** Running locally (or on a long-lived host with a writable volume) opens `.cache/factorforge.db`, so account creation, sign-in, and per-user watchlists work normally.
@@ -283,6 +312,7 @@ Inside the app, `/oss` provides the same contribution and maintainer story for v
 | `DEEPSEEK_API_KEY` | optional | Enables LLM-written strategy memo, market tape note, and post-market Daily Review. Without it the platform uses the deterministic template and labels the source as `template memo`. |
 | `POLYGON_API_KEY` | optional | Polygon.io aggregates as a second-tier real-data source (split + dividend adjusted). Composite provider tries it after Yahoo. |
 | `ALPHA_VANTAGE_API_KEY` | optional | Alpha Vantage daily as a third-tier real-data source. Free-tier endpoint is NOT corporate-action adjusted; the UI surfaces that honestly. |
+| `ALPACA_PAPER_API_KEY_ID` / `ALPACA_PAPER_API_SECRET` / `ALPACA_PAPER_BASE_URL` | optional | Enables the **read-only** Alpaca *paper* mirror on `/paper-trading` (account, positions, recent orders). The client issues GET requests only — there is no order-submission path. Unset → the panel reports `disabled`. Defaults to `https://paper-api.alpaca.markets`. Both key + secret must be set together, or env validation warns. |
 | `LOG_LEVEL` | optional | `debug` / `info` / `warn` / `error`. Default `info`. Logger emits JSON lines to stdout. |
 | `SESSION_PASSWORD` | required in prod | Iron-session signing key (≥32 chars random). Set this as a Vercel environment variable before making the demo public; never expose it client-side. |
 | `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | optional | Shared rate-limit store so auth throttling holds across multiple instances. Without it, throttling is per-process. Vercel-KV's `KV_REST_API_URL` / `KV_REST_API_TOKEN` are also accepted. |
@@ -329,7 +359,7 @@ On Vercel's stateless serverless filesystem `better-sqlite3` cannot open a persi
 
 Safe public demo behavior:
 
-- No brokerage integration is present.
+- The only optional brokerage touchpoint is a read-only Alpaca *paper* mirror (GET-only); it is off by default and submits no orders.
 - No trading execution or order routing is present.
 - No market-data API key is required for the default demo path.
 - No LLM API key is required.
@@ -347,7 +377,7 @@ Security notes:
 
 ## Testing
 
-219 tests across 52 files under vitest + jsdom:
+229 tests across 52 files under vitest + jsdom:
 
 - **Engine** — backtest fees + execution semantics, indicators, radar verdict logic, paper-trading risk-budget transitions + N_eff slot cap, portfolio engine (Pearson, calendar intersection, score-weighted blend, phase-shifted decorrelation).
 - **Concentration** — `effectiveBets` / `concentrationLevel` math (monotonicity, bounds), the correlation gate demoting near-duplicate candidates, and the shared pairwise-correlation builder.
@@ -358,6 +388,7 @@ Security notes:
 - **Components** — StatusBadge (including the `idle` state introduced when fixing the zero-observation risk-budget bug), MetricCard tone classes, CorrelationMatrix rendering + empty state.
 - **Learn / glossary** — definition integrity (unique ids, no jargon creep, alias-collision guard), case-insensitive `lookupTerm`, the `<Term>` component (default + custom label, click-to-reveal explanation, alias resolution, graceful fallback for unknown terms), and the `<PlainEnglish>` page callout (default + custom title, composes with inline `<Term>`).
 - **Data providers** — Yahoo and fallback adapters.
+- **Broker mirror** — the read-only Alpaca paper sync over a mocked `fetch`: disabled-when-unconfigured, the GET-only account/positions/orders happy path, order-limit clamping (never emits `limit=NaN`, bounded to Alpaca's 1–50 window), and the error-snapshot path when Alpaca rejects.
 - **Auth** — bcrypt round-trip, username-collision + validation rules, the bcrypt 72-byte password guard, and per-user watchlist isolation.
 - **Rate-limit stores** — in-memory fixed-window determinism, plus the Upstash adapter over a mocked `fetch`: allow/block paths, retry-after from TTL, and fail-open on both unreachable and non-2xx responses.
 - **Env validation** — production fail-fast on a missing session secret, dev warnings, feature-flag detection from optional keys, and the distributed rate-limit detection + prod warning.
@@ -417,6 +448,7 @@ Maintainers may use AI assistants for repetitive review and documentation work, 
 - **better-sqlite3** for the backtest cache + users + watchlists (WAL)
 - **bcryptjs + iron-session** for auth (hashed passwords, signed cookies, 7-day TTL)
 - **DeepSeek** (`deepseek-chat`) via OpenAI-compatible JSON mode
+- **Alpaca paper API** (optional, **read-only** GET mirror — no order submission)
 - **Vitest** + **Testing Library** + **jsdom**
 - **Docker** multi-stage build of the Next.js `standalone` server (non-root + `HEALTHCHECK`)
 - **GitHub Actions** for lint / typecheck / test on push
