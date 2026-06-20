@@ -3,6 +3,7 @@ import {
   buy,
   sell,
   snapshot,
+  summarizePositions,
   createInitialState,
   DEFAULT_STARTING_CAPITAL,
   type SimState,
@@ -119,5 +120,71 @@ describe("portfolioSim — snapshot", () => {
     state = expectOk(buy(state, "MSFT", 10, 300, 2)); // $3,000
     const snap = snapshot(state, { AAPL: 100, MSFT: 300 });
     expect(snap.positions.map((p) => p.symbol)).toEqual(["MSFT", "AAPL"]);
+  });
+});
+
+describe("portfolioSim — summarizePositions", () => {
+  it("splits winners and losers by unrealized P&L (>=0 is a winner)", () => {
+    let state = expectOk(buy(fresh(100_000), "AAPL", 10, 100, 1)); // up
+    state = expectOk(buy(state, "MSFT", 10, 300, 2)); // down
+    const snap = snapshot(state, { AAPL: 130, MSFT: 250 });
+    const summary = summarizePositions(snap);
+    expect(summary.count).toBe(2);
+    expect(summary.winners).toBe(1); // AAPL +30%
+    expect(summary.losers).toBe(1); // MSFT -16.7%
+  });
+
+  it("counts a flat (zero unrealized) position as a winner, not a loser", () => {
+    const state = expectOk(buy(fresh(100_000), "AAPL", 10, 100, 1));
+    const snap = snapshot(state, { AAPL: 100 }); // exactly cost basis
+    const summary = summarizePositions(snap);
+    expect(summary.winners).toBe(1);
+    expect(summary.losers).toBe(0);
+  });
+
+  it("identifies the largest position by market value for topWeight / topSymbol", () => {
+    let state = expectOk(buy(fresh(100_000), "AAPL", 10, 100, 1)); // $1,000 at mark
+    state = expectOk(buy(state, "MSFT", 10, 300, 2)); // $3,000 at mark
+    const snap = snapshot(state, { AAPL: 100, MSFT: 300 });
+    const summary = summarizePositions(snap);
+    // MSFT is the biggest book name by market value.
+    expect(summary.topSymbol).toBe("MSFT");
+    const msft = snap.positions.find((p) => p.symbol === "MSFT")!;
+    expect(summary.topWeight).toBeCloseTo(msft.weight, 10);
+    expect(summary.topWeight).toBeCloseTo(3_000 / snap.totalValue, 10);
+  });
+
+  it("picks best / worst position by unrealized %, independent of position size", () => {
+    // Small position with the biggest % gain, large position with a small loss.
+    let state = expectOk(buy(fresh(100_000), "AAPL", 1, 100, 1)); // tiny book
+    state = expectOk(buy(state, "MSFT", 100, 300, 2)); // large book
+    const snap = snapshot(state, { AAPL: 200, MSFT: 290 }); // AAPL +100%, MSFT ~-3.3%
+    const summary = summarizePositions(snap);
+    expect(summary.bestPosition?.symbol).toBe("AAPL");
+    expect(summary.bestPosition?.unrealizedPct).toBeCloseTo(1, 10);
+    expect(summary.worstPosition?.symbol).toBe("MSFT");
+    expect(summary.worstPosition?.unrealizedPct).toBeLessThan(0);
+  });
+
+  it("reports investedWeight as the equity share of total account value", () => {
+    const state = expectOk(buy(fresh(10_000), "AAPL", 10, 100, 1)); // $1,000 invested, $9,000 cash
+    const snap = snapshot(state, { AAPL: 100 });
+    const summary = summarizePositions(snap);
+    expect(summary.investedWeight).toBeCloseTo(1_000 / 10_000, 10);
+  });
+
+  it("returns all-zero / null fields for an empty (all-cash) book", () => {
+    const snap = snapshot(fresh(10_000), {});
+    const summary = summarizePositions(snap);
+    expect(summary).toEqual({
+      count: 0,
+      winners: 0,
+      losers: 0,
+      topWeight: 0,
+      topSymbol: null,
+      bestPosition: null,
+      worstPosition: null,
+      investedWeight: 0,
+    });
   });
 });
