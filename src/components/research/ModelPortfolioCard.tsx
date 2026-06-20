@@ -4,9 +4,21 @@ import ModelPortfolioChart from "@/components/charts/ModelPortfolioChart";
 import {
   buildModelPortfolioHeadline,
   formatLongDate,
+  type ModelPortfolioConstituent,
   type ModelPortfolioPerformance,
 } from "@/lib/quant/modelPortfolio";
 import { pct, pctPlain, num } from "@/lib/utils/format";
+
+/**
+ * Width (4–100%) for a constituent's contribution bar, scaled by the largest
+ * absolute return in the blend so a +2% leg and a +40% leg read proportionally.
+ * Pure/deterministic — magnitude only; the sign drives the colour upstream.
+ */
+function contributionBarWidth(returnSinceStart: number, constituents: ModelPortfolioConstituent[]): number {
+  const maxAbs = constituents.reduce((max, constituent) => Math.max(max, Math.abs(constituent.returnSinceStart)), 0);
+  if (maxAbs === 0) return 4;
+  return Math.max(4, Math.min(100, (Math.abs(returnSinceStart) / maxAbs) * 100));
+}
 
 type Variant = "feature" | "compact" | "report";
 
@@ -144,6 +156,42 @@ export default function ModelPortfolioCard({
           <MetricCard label="Latest data date" value={data.endDate} hint={data.dataQuality.isFallback ? "fallback labeled" : "real market data"} />
         </div>
       </div>
+
+      {data.constituents.length > 0 && (
+        <div className="mt-4 rounded-2xl border border-line bg-white/[0.025] p-3.5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-soft">
+              Constituent contribution · since {data.startDate}
+            </div>
+            <div className="text-[11px] text-ink-soft">{data.strategyCount} equal-weighted · normalized to 1.00</div>
+          </div>
+          <div className="mt-3 space-y-2">
+            {[...data.constituents]
+              .sort((a, b) => b.returnSinceStart - a.returnSinceStart)
+              .map((constituent) => (
+                <div key={`${constituent.strategyId}-${constituent.symbol}`} className="flex items-center gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-[12.5px] font-medium text-ink">{constituent.strategyName}</div>
+                    <div className="text-[10.5px] text-ink-soft">{constituent.symbol}</div>
+                  </div>
+                  <div className="h-1.5 w-24 shrink-0 overflow-hidden rounded-full bg-white/[0.06] sm:w-32">
+                    <div
+                      className={`h-full rounded-full ${constituent.returnSinceStart >= 0 ? "bg-gradient-to-r from-emerald-400 to-cyan-400" : "bg-gradient-to-r from-rose-400 to-amber-300"}`}
+                      style={{ width: `${contributionBarWidth(constituent.returnSinceStart, data.constituents)}%` }}
+                    />
+                  </div>
+                  <div className={`num w-16 shrink-0 text-right text-[12.5px] font-semibold ${constituent.returnSinceStart >= 0 ? "text-emerald-300" : "text-rose-300"}`}>
+                    {pct(constituent.returnSinceStart)}
+                  </div>
+                </div>
+              ))}
+          </div>
+          <p className="mt-3 text-[11px] leading-relaxed text-ink-soft">
+            Each leg&rsquo;s own return over the same window. The blended portfolio return above is the equal-weight average
+            of these legs — individual contributions are not a real-money allocation.
+          </p>
+        </div>
+      )}
 
       <div className="mt-4 rounded-2xl border border-line bg-white/[0.025] p-3.5">
         <div className="flex flex-wrap items-center justify-between gap-2">

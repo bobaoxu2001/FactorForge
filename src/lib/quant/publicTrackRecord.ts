@@ -18,6 +18,12 @@ export interface PublicTrackRecordRow {
   returnPct: number;
   radarScore: number;
   maxDrawdown: number;
+  /** Backtest win rate (0–1) for this strategy/symbol — engine-computed in metrics. */
+  winRate: number;
+  /** Backtest Sharpe for this strategy/symbol. */
+  sharpe: number;
+  /** Backtest trade count behind the metrics — the evidence sample size. */
+  tradeCount: number;
   recentSignal: string;
   nextCheck: string;
 }
@@ -38,6 +44,12 @@ export interface PublicTrackRecord {
   exposurePct: number;
   maxObservedDrawdown: number;
   averageRadarScore: number;
+  /** Mean backtest win rate (0–1) across tracked rows — evidence-weighted depth. */
+  averageWinRate: number;
+  /** Mean backtest Sharpe across tracked rows. */
+  averageSharpe: number;
+  /** Total backtested trades behind the tracked book — total evidence sample. */
+  totalBacktestTrades: number;
   oldestEntryDate: string | null;
   latestMarkDate: string | null;
   rows: PublicTrackRecordRow[];
@@ -58,6 +70,9 @@ export function buildPublicTrackRecord(input: {
   const totalMarketValue = rows.reduce((sum, row) => sum + row.marketValue, 0);
   const unrealizedPnl = rows.reduce((sum, row) => sum + row.unrealizedPnl, 0);
   const ledgerReturnPct = totalAllocatedCapital > 0 ? unrealizedPnl / totalAllocatedCapital : 0;
+  const averageWinRate = mean(rows.map((row) => row.winRate));
+  const averageSharpe = mean(rows.map((row) => row.sharpe));
+  const totalBacktestTrades = rows.reduce((sum, row) => sum + row.tradeCount, 0);
   const oldestEntryDate = minDate(rows.map((row) => row.entryDate));
   const latestMarkDate = maxDate(rows.map((row) => row.currentDate));
   const shareLine = `${promotedCount} ${promotedCount === 1 ? "strategy" : "strategies"} tracked since radar admission · ${formatSignedPct(ledgerReturnPct)} ledger return · ${ledgerTrackedCount}/${promotedCount || 0} ledger-backed · ${input.dailyReview.winners}W/${input.dailyReview.losers}L`;
@@ -78,6 +93,9 @@ export function buildPublicTrackRecord(input: {
     exposurePct: input.account.exposurePct,
     maxObservedDrawdown: input.account.maxObservedDrawdown,
     averageRadarScore: input.account.averageRadarScore,
+    averageWinRate,
+    averageSharpe,
+    totalBacktestTrades,
     oldestEntryDate,
     latestMarkDate,
     rows: rows.map((row, index) => ({ ...row, rank: index + 1 })),
@@ -115,9 +133,17 @@ function toRow(observation: PaperObservation): PublicTrackRecordRow {
     returnPct: ledger?.returnPct ?? observation.simulatedReturn,
     radarScore: observation.candidate.score,
     maxDrawdown: result.metrics.maxDrawdown,
+    winRate: result.metrics.winRate,
+    sharpe: result.metrics.sharpe,
+    tradeCount: result.metrics.tradeCount,
     recentSignal: observation.recentSignal,
     nextCheck: observation.nextCheck,
   };
+}
+
+/** Arithmetic mean of a numeric series; 0 for an empty series. Pure/deterministic. */
+function mean(values: number[]): number {
+  return values.length > 0 ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
 }
 
 function ledgerStatusLabel(source: NonNullable<PaperObservation["ledger"]>["source"]): string {

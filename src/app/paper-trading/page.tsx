@@ -288,6 +288,17 @@ export default async function PaperTradingPage() {
                 {observation.ledger && <MetricCard label="Ledger P&L" value={usd(observation.ledger.unrealizedPnl)} tone={observation.ledger.unrealizedPnl >= 0 ? "positive" : "negative"} />}
               </div>
 
+              <div className="mt-3">
+                <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-soft">Backtest evidence behind the signal</div>
+                <div className="mt-2 grid grid-cols-2 gap-3 md:grid-cols-5">
+                  <MetricCard label="Win rate" value={pctPlain(result.metrics.winRate)} hint="backtest" />
+                  <MetricCard label="Sharpe" value={num(result.metrics.sharpe)} tone={result.metrics.sharpe >= 1 ? "positive" : "default"} hint="risk-adjusted" />
+                  <MetricCard label="Profit factor" value={num(result.metrics.profitFactor)} tone={result.metrics.profitFactor >= 1 ? "positive" : "negative"} />
+                  <MetricCard label="Trades" value={String(result.metrics.tradeCount)} hint="evidence sample" />
+                  <MetricCard label="Avg hold" value={`${num(result.metrics.averageHoldingDays, 0)}d`} hint="days per trade" />
+                </div>
+              </div>
+
               <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-[1.4fr_0.8fr]">
                 <EquityCurveChart data={result.equityCurve} />
                 <div className="card p-5">
