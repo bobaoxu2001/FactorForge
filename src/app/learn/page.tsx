@@ -109,7 +109,7 @@ export default function LearnPage() {
           </Link>
         </div>
         <p className="mt-4 text-[11.5px] leading-relaxed text-ink-soft">
-          Reminder: this platform is a research and learning demo only — no broker connection, no real orders, and past
+          Reminder: this platform is a research and learning demo only — no live order execution, no real orders, and past
           backtests do not imply future results.
         </p>
       </section>

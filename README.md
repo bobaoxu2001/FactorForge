@@ -14,7 +14,7 @@ FactorForge is an AI-powered stock strategy research platform for factor discove
 
 It is designed as a reusable research toolkit: deterministic engines compute the numbers, provider metadata keeps data provenance visible, and optional LLM calls turn validated payloads into prose without overwriting computed metrics.
 
-> Research software only. For educational and research use — **not investment advice**. The model portfolio is a **simulated research portfolio**, not a real-money trading account, and **historical performance does not indicate future results**. No broker connection. No live trading.
+> Research software only. For educational and research use — **not investment advice**. The model portfolio is a **simulated research portfolio**, not a real-money trading account, and **historical performance does not indicate future results**. No live order execution. No live trading.
 
 Public demo mode is intentionally safe: market-data and LLM keys are optional, missing keys fall back to clearly labeled provider/template behavior, and account features are limited to saved research preferences/watchlists. The only broker touchpoint is an optional **read-only** Alpaca *paper* mirror (GET requests for account/positions/orders) — FactorForge has no order-submission path and never routes a live order.
 
@@ -270,7 +270,7 @@ Account features are optional and only exist to persist saved research preferenc
 - **Account creation / sign-in may be disabled.** When no persistence backend is configured (`isPersistenceAvailable()` is false — e.g. Vercel's stateless serverless filesystem can't open SQLite), the sign-up and sign-in routes render a friendly demo-mode notice instead of the credential form. The raw "Persistence layer unavailable" engine string is never shown to users; the action layer also maps it to safe copy on any residual submit path.
 - **Protected routes degrade with context.** My Watchlist and the admin Cache page redirect to sign-in carrying an `area`, and the sign-in route explains that the page needs saved-preference storage which is off in the public demo. The sidebar tags these routes (`local` / `admin`) and notes that saved preferences and admin cache controls are disabled in demo mode.
 - **Local SQLite enables the full experience.** Running locally (or on a long-lived host with a writable volume) opens `.cache/factorforge.db`, so account creation, sign-in, and per-user watchlists work normally.
-- **No broker connection, no live trading, no brokerage credentials** in any mode — accounts only store research preferences.
+- **No live order execution, no live trading, and no brokerage credentials stored in user accounts** — accounts only store research preferences; the optional read-only Alpaca paper mirror uses server-side paper API keys, never account credentials, and never places orders.
 
 ---
 
@@ -477,4 +477,4 @@ The current roadmap is tracked in [ROADMAP.md](ROADMAP.md). Near-term maintainer
 
 ## Disclaimer
 
-Research software only — for educational and research use, **not investment advice**. The model portfolio is a **simulated research portfolio**, not a real-money trading account, and **historical performance does not indicate future results**. No broker connection. No live trading.
+Research software only — for educational and research use, **not investment advice**. The model portfolio is a **simulated research portfolio**, not a real-money trading account, and **historical performance does not indicate future results**. No live order execution. No live trading.

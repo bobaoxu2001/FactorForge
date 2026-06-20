@@ -30,7 +30,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <p className="mt-1.5 text-[11.5px] leading-relaxed text-ink-soft">
             Research software only — for educational and research use, not investment advice. The model portfolio is a
             simulated research portfolio, not a real-money trading account, and historical performance does not indicate
-            future results. No broker connection and no live trading.
+            future results. No live order execution and no live trading.
           </p>
         </div>
       </footer>

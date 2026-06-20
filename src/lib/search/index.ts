@@ -67,7 +67,7 @@ export const SEARCH_ITEMS: SearchItem[] = [
     title: "Paper Trading",
     href: "/paper-trading",
     category: "Route",
-    description: "Simulated observation only; no broker connection or live trading.",
+    description: "Simulated observation only; no live order execution or live trading.",
     keywords: ["paper", "simulated", "observation", "no broker", "no orders"],
   },
   {

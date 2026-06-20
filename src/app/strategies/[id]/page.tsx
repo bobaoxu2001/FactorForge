@@ -129,7 +129,7 @@ export default async function StrategyDetailPage({
         items={[
           "Signals are produced from completed daily bars; entries fill at the next open with modeled costs.",
           "Headline view defaults to the strongest symbol for this strategy, and the selection-bias notice documents that assumption.",
-          "No intraday fills, broker connection, live orders, shorts, options, or margin are modeled.",
+          "No intraday fills, live order execution, shorts, options, or margin are modeled.",
           "AI memo prose is generated from the deterministic backtest payload or a template fallback; metrics are engine-derived.",
         ]}
       />

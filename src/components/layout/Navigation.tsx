@@ -113,7 +113,7 @@ export default function Navigation({ persistenceAvailable = true }: { persistenc
         <div className="mt-4 shrink-0 space-y-3">
           <div className="rounded-2xl border border-cyan-300/15 bg-cyan-300/[0.045] p-3">
             <div className="text-[10px] uppercase tracking-[0.2em] text-cyan-100/60">Status</div>
-            <div className="mt-1 text-[12.5px] leading-relaxed text-ink-muted">Public demo mode. No broker connection or live trading.</div>
+            <div className="mt-1 text-[12.5px] leading-relaxed text-ink-muted">Public demo mode — places no trades, no live order execution. Optional read-only Alpaca paper mirror for local paper-account sync.</div>
             {!persistenceAvailable && (
               <div className="mt-2 text-[11.5px] leading-relaxed text-ink-soft">
                 Saved preferences and admin cache controls are disabled in public demo mode.

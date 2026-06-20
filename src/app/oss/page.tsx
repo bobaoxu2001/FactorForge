@@ -38,7 +38,7 @@ export default function OssPage() {
       </header>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <SignalCard icon={ShieldCheck} title="Safe demo" detail="No broker connection, no live trading, no required market-data or LLM key." />
+        <SignalCard icon={ShieldCheck} title="Safe demo" detail="No live order execution, no live trading, no required market-data or LLM key. Optional read-only Alpaca paper mirror for local paper-account sync." />
         <SignalCard icon={ListChecks} title="Reviewable engines" detail="Numbers come from code paths covered by tests; prose is labeled as template or LLM." />
         <SignalCard icon={GitPullRequest} title="Contributor path" detail="Issue templates, PR checklist, contributing guide, roadmap, and maintainer backlog." />
         <SignalCard icon={Milestone} title="Release hygiene" detail="Manual release checklist, changelog expectations, and CI gates before tagging." />

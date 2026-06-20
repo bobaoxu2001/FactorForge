@@ -124,7 +124,7 @@ export default async function PaperTradingPage() {
 
       <MethodologyCallout
         items={[
-          "Simulated only: no broker connection, no order routing, and no real-money account state.",
+          "Simulated only: no live order execution, no order routing, and no real-money account state. An optional read-only Alpaca paper mirror can sync a local paper account, but never places orders.",
           "Only radar-approved strategies can enter paper observation.",
           "Observation slots, exposure limits, drawdown checks, and concentration gates constrain the simulated account.",
           "Daily Review summarizes deterministic observations; any LLM prose cannot change computed P&L or risk numbers.",
@@ -305,7 +305,7 @@ export default async function PaperTradingPage() {
                   <div className="text-[11px] uppercase tracking-wider text-ink-soft">Recent signal</div>
                   <p className="mt-2 text-[14px] leading-relaxed text-ink">{observation.recentSignal}</p>
                   <p className="mt-3 text-[12px] leading-relaxed text-ink-muted">
-                    Observation uses next-open fills, {result.assumptions.slippageBps} bps slippage, and {usd(result.assumptions.feePerTrade)} per trade. No broker connection or real orders are active.
+                    Observation uses next-open fills, {result.assumptions.slippageBps} bps slippage, and {usd(result.assumptions.feePerTrade)} per trade. No live order execution or real orders are active.
                   </p>
                   {observation.ledger && (
                     <div className="mt-4 rounded-2xl border border-line bg-white/[0.035] p-3 text-[12px] leading-relaxed text-ink-muted">
