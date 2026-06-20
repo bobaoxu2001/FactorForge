@@ -10,7 +10,7 @@ describe("DemoModeNotice", () => {
     expect(screen.getByText(/Account creation is disabled in the public demo/i)).toBeInTheDocument();
     expect(screen.getByText(/require a local or configured database deployment/i)).toBeInTheDocument();
     expect(screen.getByText(/explore all public research pages without signing in/i)).toBeInTheDocument();
-    expect(screen.getByText(/does not connect to brokers, place trades/i)).toBeInTheDocument();
+    expect(screen.getByText(/do not authorize live trading/i)).toBeInTheDocument();
     // The raw engine string must never reach the user.
     expect(screen.queryByText(/Persistence layer unavailable/i)).toBeNull();
   });

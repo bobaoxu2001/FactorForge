@@ -18,7 +18,7 @@ export default function ProtectedRouteExplainer({ area }: { area?: string }) {
       <div className="mt-3 space-y-2 text-[13px] leading-relaxed text-ink-muted">
         <p>This area is optional and requires local/demo account setup.</p>
         <p>The public demo keeps {label} protected. You can explore all research pages without signing in.</p>
-        <p>Accounts here are only for saved research preferences. FactorForge does not connect to brokers or place trades.</p>
+        <p>Accounts here are only for saved research preferences — they do not authorize live trading, and the public demo places no trades.</p>
       </div>
       <div className="mt-4 flex flex-wrap gap-2">
         {PUBLIC_LINKS.map(([label, href]) => (
