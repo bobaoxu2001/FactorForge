@@ -62,6 +62,25 @@ export interface SimSnapshot {
   positions: PositionSnapshot[];
 }
 
+export interface SimPositionSummary {
+  /** Number of open positions. */
+  count: number;
+  /** Positions with unrealized P&L >= 0. */
+  winners: number;
+  /** Positions with unrealized P&L < 0. */
+  losers: number;
+  /** Largest single-position weight (0–1) — a simple concentration read. */
+  topWeight: number;
+  /** Symbol of the largest position by market value, or null when flat. */
+  topSymbol: string | null;
+  /** Best open position by unrealized %, or null when flat. */
+  bestPosition: PositionSnapshot | null;
+  /** Worst open position by unrealized %, or null when flat. */
+  worstPosition: PositionSnapshot | null;
+  /** Share of total account value held in equities vs cash (0–1). */
+  investedWeight: number;
+}
+
 export type TradeOutcome = { ok: true; state: SimState } | { ok: false; reason: string };
 
 export const DEFAULT_STARTING_CAPITAL = 100_000;
@@ -192,5 +211,38 @@ export function snapshot(state: SimState, latestPrices: Record<string, number>):
     unrealizedPnl,
     realizedPnl: state.realizedPnl,
     positions,
+  };
+}
+
+/**
+ * Deterministic position-level analytics for an already-marked snapshot:
+ * winners/losers, single-name concentration, best/worst position, and the
+ * invested-vs-cash split. Pure — derives everything from the snapshot the desk
+ * already renders, never from a new data source.
+ */
+export function summarizePositions(snap: SimSnapshot): SimPositionSummary {
+  const positions = snap.positions;
+  const winners = positions.filter((position) => position.unrealizedPnl >= 0).length;
+  const top = positions.reduce<PositionSnapshot | null>(
+    (best, position) => (best === null || position.marketValue > best.marketValue ? position : best),
+    null,
+  );
+  const bestPosition = positions.reduce<PositionSnapshot | null>(
+    (best, position) => (best === null || position.unrealizedPct > best.unrealizedPct ? position : best),
+    null,
+  );
+  const worstPosition = positions.reduce<PositionSnapshot | null>(
+    (worst, position) => (worst === null || position.unrealizedPct < worst.unrealizedPct ? position : worst),
+    null,
+  );
+  return {
+    count: positions.length,
+    winners,
+    losers: positions.length - winners,
+    topWeight: top?.weight ?? 0,
+    topSymbol: top?.symbol ?? null,
+    bestPosition,
+    worstPosition,
+    investedWeight: snap.totalValue > 0 ? snap.investedValue / snap.totalValue : 0,
   };
 }
