@@ -84,6 +84,48 @@ describe("fetchAlpacaPaperSnapshot", () => {
     expect(fetchImpl.mock.calls.map((call) => call[0])).toContain("https://paper-api.alpaca.markets/v2/orders?status=all&limit=5&direction=desc");
   });
 
+  it("clamps the order limit and never emits limit=NaN for a non-finite request", async () => {
+    const fetchImpl = vi.fn(async (url: string) => {
+      if (url.endsWith("/v2/account")) return jsonResponse({ status: "ACTIVE" });
+      if (url.endsWith("/v2/positions")) return jsonResponse([]);
+      return jsonResponse([]);
+    });
+
+    await fetchAlpacaPaperSnapshot({
+      env: {
+        ALPACA_PAPER_API_KEY_ID: "paper-key",
+        ALPACA_PAPER_API_SECRET: "paper-secret",
+      },
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+      // A non-finite value used to flow straight into the query string.
+      orderLimit: Number.NaN,
+    });
+
+    const ordersUrl = fetchImpl.mock.calls.map((call) => call[0] as string).find((url) => url.includes("/v2/orders"))!;
+    expect(ordersUrl).not.toMatch(/limit=NaN/);
+    expect(ordersUrl).toContain("limit=20"); // safe default
+  });
+
+  it("clamps an out-of-range order limit into Alpaca's 1–50 window", async () => {
+    const fetchImpl = vi.fn(async (url: string) => {
+      if (url.endsWith("/v2/account")) return jsonResponse({ status: "ACTIVE" });
+      if (url.endsWith("/v2/positions")) return jsonResponse([]);
+      return jsonResponse([]);
+    });
+
+    await fetchAlpacaPaperSnapshot({
+      env: {
+        ALPACA_PAPER_API_KEY_ID: "paper-key",
+        ALPACA_PAPER_API_SECRET: "paper-secret",
+      },
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+      orderLimit: 9_999,
+    });
+
+    const ordersUrl = fetchImpl.mock.calls.map((call) => call[0] as string).find((url) => url.includes("/v2/orders"))!;
+    expect(ordersUrl).toContain("limit=50");
+  });
+
   it("returns an error snapshot when Alpaca rejects the request", async () => {
     const fetchImpl = vi.fn(async () => jsonResponse({ message: "nope" }, 401));
     const snapshot = await fetchAlpacaPaperSnapshot({
