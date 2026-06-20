@@ -95,7 +95,7 @@ export default async function HomePage() {
               FactorForge is an AI-powered stock strategy research platform for factor discovery, cost-aware backtesting, market-stress analysis, hotspot monitoring, and simulated model-portfolio observation — with every number computed from real OHLCV and clearly labeled when it falls back.
             </p>
             <p className="mt-3 max-w-2xl text-[13px] leading-relaxed text-ink-soft">
-              Research only. No broker connection, no live trading, no investment advice — a transparent lab for inspecting quant evidence, not a trading account.
+              Research only. No order execution, no live trading, no investment advice — a transparent lab for inspecting quant evidence, not a trading account.
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-2.5">
               <Link
@@ -139,7 +139,7 @@ export default async function HomePage() {
             <div className="mt-6 grid grid-cols-2 gap-2 text-[12px] text-ink-muted">
               <EvidencePill label="Open-source research workbench" tone="green" />
               <EvidencePill label="Real or clearly labeled fallback data" />
-              <EvidencePill label="No broker connection" tone="amber" />
+              <EvidencePill label="No order execution" tone="amber" />
               <EvidencePill label="No live trading" tone="amber" />
               <EvidencePill label="CI + 229 tests" />
               <EvidencePill label="Contributor-ready" tone="green" />
@@ -240,7 +240,7 @@ export default async function HomePage() {
           "What it is: an OSS research workbench for inspecting factor and backtest evidence.",
           "Who it is for: researchers, contributors, and maintainers reviewing quant logic and data provenance.",
           "What it does: fetches daily OHLCV, computes factors, runs rule-based backtests, ranks candidates, builds portfolio diagnostics, and drafts memos.",
-          "Why it is safe: no broker connection, no live trading, and no financial-advice workflow.",
+          "Why it is safe: no order execution, no live trading, and no financial-advice workflow.",
           "Why it is maintainable: CI, tests, issue templates, release checklist, security policy, and maintainer backlog are documented.",
           "Fallback policy: real data is preferred; fallback/demo data and template memos are labeled.",
         ]}
