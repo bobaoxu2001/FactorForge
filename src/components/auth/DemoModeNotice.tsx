@@ -22,7 +22,7 @@ const COPY: Record<
     lines: [
       "Saved watchlists and preferences require a local or configured database deployment.",
       "You can still explore all public research pages without signing in.",
-      "FactorForge does not connect to brokers, place trades, or store brokerage credentials.",
+      "Accounts do not authorize live trading, and the public demo places no trades — the optional Alpaca paper mirror uses server-side keys, not your account.",
     ],
     links: [
       { label: "Continue exploring public demo", href: "/", primary: true },
@@ -35,7 +35,7 @@ const COPY: Record<
     lines: [
       "Accounts are only for saved research preferences and watchlists in local or configured deployments.",
       "You can still use Overview, Data, Factors, Strategies, Radar, Consensus, Portfolio, AI Market, Paper Trading, and Reports without signing in.",
-      "FactorForge does not connect to brokers, place trades, or store brokerage credentials.",
+      "Accounts do not authorize live trading, and the public demo places no trades — the optional Alpaca paper mirror uses server-side keys, not your account.",
     ],
     links: [
       { label: "Continue exploring public demo", href: "/", primary: true },

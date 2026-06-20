@@ -37,10 +37,20 @@ export default function ScenarioTable({ scenario, basketLabel = "proxy basket" }
           );
         })}
       </div>
-      <p className="mt-2.5 text-[11px] leading-relaxed text-ink-soft">
-        Estimated impact ranges apply to the {basketLabel}, not to any single name or private company. Weighted expected
-        impact ≈ <span className="num text-ink-muted">{pct(scenario.expectedImpact)}</span>. Research-only — not a price
-        prediction.
+      <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-ink-soft">
+        <span>
+          Weighted expected impact ≈ <span className="num text-ink-muted">{pct(scenario.expectedImpact)}</span>
+        </span>
+        <span>
+          Confidence <span className="num text-ink-muted">{scenario.confidence}/100</span>
+        </span>
+        <span>
+          Catalyst sensitivity <span className="num text-ink-muted">{scenario.catalystSensitivity}/100</span>
+        </span>
+      </div>
+      <p className="mt-1.5 text-[11px] leading-relaxed text-ink-soft">
+        Estimated impact ranges apply to the {basketLabel}, not to any single name or private company. Research-only — not a
+        price prediction.
       </p>
     </div>
   );

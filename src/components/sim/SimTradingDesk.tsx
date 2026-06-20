@@ -7,6 +7,7 @@ import {
   buy,
   sell,
   snapshot,
+  summarizePositions,
   createInitialState,
   DEFAULT_STARTING_CAPITAL,
   type SimState,
@@ -94,6 +95,7 @@ export default function SimTradingDesk({ quotes, asOf, anyFallback }: Props) {
   const quoteFor = useMemo(() => new Map(quotes.map((q) => [q.symbol, q])), [quotes]);
 
   const snap = useMemo(() => snapshot(data.state, latestPrices), [data.state, latestPrices]);
+  const bookSummary = useMemo(() => summarizePositions(snap), [snap]);
 
   function commit(next: SimState, ts: number) {
     const value = snapshot(next, latestPrices).totalValue;
@@ -195,6 +197,35 @@ export default function SimTradingDesk({ quotes, asOf, anyFallback }: Props) {
         <MetricCard label="Invested" value={usd(snap.investedValue)} hint={`${snap.positions.length} position${snap.positions.length === 1 ? "" : "s"}`} />
         <MetricCard label="Realized P&L" value={usd(snap.realizedPnl)} tone={snap.realizedPnl >= 0 ? "positive" : "negative"} hint={`Unrealized ${usd(snap.unrealizedPnl)}`} />
       </div>
+
+      {/* Book analytics — derived from the snapshot, only meaningful once you hold something */}
+      {bookSummary.count > 0 && (
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <MetricCard
+            label="Open winners"
+            value={`${bookSummary.winners} / ${bookSummary.count}`}
+            tone={bookSummary.winners >= bookSummary.losers ? "positive" : "negative"}
+            hint={`${bookSummary.losers} down`}
+          />
+          <MetricCard
+            label="Top concentration"
+            value={`${(bookSummary.topWeight * 100).toFixed(1)}%`}
+            hint={bookSummary.topSymbol ? `${bookSummary.topSymbol} largest` : undefined}
+            tone={bookSummary.topWeight > 0.4 ? "negative" : "default"}
+          />
+          <MetricCard
+            label="Best position"
+            value={bookSummary.bestPosition ? pct(bookSummary.bestPosition.unrealizedPct) : "—"}
+            tone="positive"
+            hint={bookSummary.bestPosition?.symbol}
+          />
+          <MetricCard
+            label="Invested"
+            value={`${(bookSummary.investedWeight * 100).toFixed(0)}%`}
+            hint={`${(100 - bookSummary.investedWeight * 100).toFixed(0)}% cash`}
+          />
+        </div>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
         {/* Holdings */}

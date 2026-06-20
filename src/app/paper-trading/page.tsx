@@ -124,7 +124,7 @@ export default async function PaperTradingPage() {
 
       <MethodologyCallout
         items={[
-          "Simulated only: no broker connection, no order routing, and no real-money account state.",
+          "Simulated only: no live order execution, no order routing, and no real-money account state. An optional read-only Alpaca paper mirror can sync a local paper account, but never places orders.",
           "Only radar-approved strategies can enter paper observation.",
           "Observation slots, exposure limits, drawdown checks, and concentration gates constrain the simulated account.",
           "Daily Review summarizes deterministic observations; any LLM prose cannot change computed P&L or risk numbers.",
@@ -288,13 +288,24 @@ export default async function PaperTradingPage() {
                 {observation.ledger && <MetricCard label="Ledger P&L" value={usd(observation.ledger.unrealizedPnl)} tone={observation.ledger.unrealizedPnl >= 0 ? "positive" : "negative"} />}
               </div>
 
+              <div className="mt-3">
+                <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-soft">Backtest evidence behind the signal</div>
+                <div className="mt-2 grid grid-cols-2 gap-3 md:grid-cols-5">
+                  <MetricCard label="Win rate" value={pctPlain(result.metrics.winRate)} hint="backtest" />
+                  <MetricCard label="Sharpe" value={num(result.metrics.sharpe)} tone={result.metrics.sharpe >= 1 ? "positive" : "default"} hint="risk-adjusted" />
+                  <MetricCard label="Profit factor" value={num(result.metrics.profitFactor)} tone={result.metrics.profitFactor >= 1 ? "positive" : "negative"} />
+                  <MetricCard label="Trades" value={String(result.metrics.tradeCount)} hint="evidence sample" />
+                  <MetricCard label="Avg hold" value={`${num(result.metrics.averageHoldingDays, 0)}d`} hint="days per trade" />
+                </div>
+              </div>
+
               <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-[1.4fr_0.8fr]">
                 <EquityCurveChart data={result.equityCurve} />
                 <div className="card p-5">
                   <div className="text-[11px] uppercase tracking-wider text-ink-soft">Recent signal</div>
                   <p className="mt-2 text-[14px] leading-relaxed text-ink">{observation.recentSignal}</p>
                   <p className="mt-3 text-[12px] leading-relaxed text-ink-muted">
-                    Observation uses next-open fills, {result.assumptions.slippageBps} bps slippage, and {usd(result.assumptions.feePerTrade)} per trade. No broker connection or real orders are active.
+                    Observation uses next-open fills, {result.assumptions.slippageBps} bps slippage, and {usd(result.assumptions.feePerTrade)} per trade. No live order execution or real orders are active.
                   </p>
                   {observation.ledger && (
                     <div className="mt-4 rounded-2xl border border-line bg-white/[0.035] p-3 text-[12px] leading-relaxed text-ink-muted">

@@ -38,7 +38,7 @@ export default function OssPage() {
       </header>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <SignalCard icon={ShieldCheck} title="Safe demo" detail="No broker connection, no live trading, no required market-data or LLM key." />
+        <SignalCard icon={ShieldCheck} title="Safe demo" detail="No live order execution, no live trading, no required market-data or LLM key. Optional read-only Alpaca paper mirror for local paper-account sync." />
         <SignalCard icon={ListChecks} title="Reviewable engines" detail="Numbers come from code paths covered by tests; prose is labeled as template or LLM." />
         <SignalCard icon={GitPullRequest} title="Contributor path" detail="Issue templates, PR checklist, contributing guide, roadmap, and maintainer backlog." />
         <SignalCard icon={Milestone} title="Release hygiene" detail="Manual release checklist, changelog expectations, and CI gates before tagging." />
@@ -76,10 +76,10 @@ export default function OssPage() {
       <MethodologyCallout
         title="Security and safety boundaries"
         items={[
-          "No brokerage credentials should be added because the app has no broker connector.",
-          "No live trading, order routing, real-money account state, or financial-advice workflow is in scope.",
-          "Security-sensitive reviews cover auth/session handling, bcrypt validation, rate limits, CSP, provider keys, LLM payloads, and secret logging.",
-          "Optional provider and LLM keys must stay server-side; do not prefix them with NEXT_PUBLIC_.",
+          "No brokerage credentials should be added for trading: the only broker touchpoint is an optional read-only Alpaca paper mirror (GET-only account/positions/orders), and there is no order-submission path.",
+          "No order routing, real-money account state, or financial-advice workflow is in scope.",
+          "Security-sensitive reviews cover auth/session handling, bcrypt validation, rate limits, CSP, provider keys, the Alpaca paper credentials, LLM payloads, and secret logging.",
+          "Optional provider, broker, and LLM keys must stay server-side; do not prefix them with NEXT_PUBLIC_.",
           "Public demo account features are limited to saved research preferences and watchlists.",
           "Fallback/demo data and template memos must remain labeled wherever they appear.",
         ]}

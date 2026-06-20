@@ -3,11 +3,13 @@ import {
   ArrowRight,
   BrainCircuit,
   CheckCircle2,
+  Compass,
   Database,
   Flame,
   GraduationCap,
   LineChart,
   Network,
+  PieChart,
   Radar,
   ShieldAlert,
   Target,
@@ -93,7 +95,7 @@ export default async function HomePage() {
               FactorForge is an AI-powered stock strategy research platform for factor discovery, cost-aware backtesting, market-stress analysis, hotspot monitoring, and simulated model-portfolio observation — with every number computed from real OHLCV and clearly labeled when it falls back.
             </p>
             <p className="mt-3 max-w-2xl text-[13px] leading-relaxed text-ink-soft">
-              Research only. No broker connection, no live trading, no investment advice — a transparent lab for inspecting quant evidence, not a trading account.
+              Research only. No order execution, no live trading, no investment advice — a transparent lab for inspecting quant evidence, not a trading account.
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-2.5">
               <Link
@@ -137,9 +139,9 @@ export default async function HomePage() {
             <div className="mt-6 grid grid-cols-2 gap-2 text-[12px] text-ink-muted">
               <EvidencePill label="Open-source research workbench" tone="green" />
               <EvidencePill label="Real or clearly labeled fallback data" />
-              <EvidencePill label="No broker connection" tone="amber" />
+              <EvidencePill label="No order execution" tone="amber" />
               <EvidencePill label="No live trading" tone="amber" />
-              <EvidencePill label="CI + 175 tests" />
+              <EvidencePill label="CI + 229 tests" />
               <EvidencePill label="Contributor-ready" tone="green" />
             </div>
             <div className="mt-6 rounded-2xl border border-amber-300/18 bg-amber-300/[0.045] p-4">
@@ -156,6 +158,44 @@ export default async function HomePage() {
           <HeroStat label="Independent bets" value={conc ? `~${conc.effectiveStrategies.toFixed(1)}` : "—"} detail={conc ? `of ${conc.strategyCount} screened` : "mega-cap + ETFs"} />
           <HeroStat label="Radar candidates" value={String(radarCandidateCount)} detail="rule-screened" />
           <HeroStat label="Paper watch" value={String(dataset.paperObservations.length)} detail="simulation only" />
+        </div>
+      </section>
+
+      <section className="card p-4">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <div className="section-label inline-flex items-center gap-2">
+              <Compass className="h-3.5 w-3.5" />
+              Start here
+            </div>
+            <p className="mt-1.5 text-[12.5px] text-ink-soft">First time on FactorForge? Pick a thread — each surface flows into the next.</p>
+          </div>
+          <Link href="/learn" className="text-[12px] text-cyan-300 hover:text-cyan-200">New to stocks? Stocks 101 ›</Link>
+        </div>
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {([
+            ["See the receipts", "Model portfolio vs SPY/QQQ since May — simulated, deterministic, fully labeled.", "/track-record", Trophy],
+            ["Inspect a strategy", "Open a backtest end to end: signals, next-open fills, costs, drawdown, and trades.", "/strategies", LineChart],
+            ["Read the market", "AI-style memo and hotspot signals built from live factor breadth, not vibes.", "/ai-market", BrainCircuit],
+            ["Build a portfolio", "Combine ranked strategies and watch diversification and concentration diagnostics.", "/portfolio", PieChart],
+          ] as const).map(([title, copy, href, Icon]) => (
+            <Link
+              key={href}
+              href={href}
+              className="card card-hover group flex flex-col p-4"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="grid h-9 w-9 place-items-center rounded-xl border border-cyan-300/20 bg-cyan-300/[0.06]">
+                  <Icon className="h-4 w-4 text-cyan-200" />
+                </div>
+                <div className="text-[13.5px] font-semibold text-white">{title}</div>
+              </div>
+              <p className="mt-3 text-[12.5px] leading-relaxed text-ink-muted">{copy}</p>
+              <span className="mt-3 inline-flex items-center gap-1 text-[12px] text-blue-300 transition-transform group-hover:translate-x-0.5">
+                Explore <ArrowRight className="h-3.5 w-3.5" />
+              </span>
+            </Link>
+          ))}
         </div>
       </section>
 
@@ -200,7 +240,7 @@ export default async function HomePage() {
           "What it is: an OSS research workbench for inspecting factor and backtest evidence.",
           "Who it is for: researchers, contributors, and maintainers reviewing quant logic and data provenance.",
           "What it does: fetches daily OHLCV, computes factors, runs rule-based backtests, ranks candidates, builds portfolio diagnostics, and drafts memos.",
-          "Why it is safe: no broker connection, no live trading, and no financial-advice workflow.",
+          "Why it is safe: no order execution, no live trading, and no financial-advice workflow.",
           "Why it is maintainable: CI, tests, issue templates, release checklist, security policy, and maintainer backlog are documented.",
           "Fallback policy: real data is preferred; fallback/demo data and template memos are labeled.",
         ]}
@@ -289,7 +329,7 @@ export default async function HomePage() {
               </tbody>
             </table>
           </div>
-          {top.length === 0 && <div className="p-4"><EmptyState title="No strategy results yet" message="Backtests will appear after the data pipeline returns usable OHLCV data." /></div>}
+          {top.length === 0 && <div className="p-4"><EmptyState title="No strategy results yet" message="Ranked backtests appear here as soon as the data pipeline returns usable OHLCV history." hint="Nothing is hidden — this panel only fills in once real or labeled-fallback data is available." action={{ href: "/data", label: "Check data sources" }} /></div>}
         </div>
 
         <div className="card p-4 xl:col-span-3">
@@ -366,7 +406,7 @@ export default async function HomePage() {
               </div>
             </div>
           ) : (
-            <EmptyState title="Strategy is online and waiting" message="No radar candidate has been admitted into paper observation yet." />
+            <EmptyState title="Paper desk is online and waiting" message="No radar candidate has cleared every admission and concentration gate yet, so nothing is in simulated observation." hint="By design — paper observation only accepts radar-approved strategies and never injects fake results." action={{ href: "/radar", label: "See the radar funnel" }} />
           )}
         </div>
       </section>
@@ -454,7 +494,7 @@ function LiveResearchCase({ candidate, fallbackCount }: { candidate: RadarCandid
   if (!candidate) {
     return (
       <div className="rounded-3xl border border-blue-300/20 bg-blue-300/[0.045] p-5">
-        <EmptyState title="No radar evidence yet" message="Strategy evidence appears after the research pipeline has usable OHLCV data." />
+        <EmptyState title="No radar evidence yet" message="A live research case — symbol, signals, backtest, and verdict — renders here as soon as the pipeline has usable OHLCV data." action={{ href: "/data", label: "Check data sources" }} />
       </div>
     );
   }

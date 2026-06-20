@@ -159,6 +159,67 @@ describe("buildPublicTrackRecord", () => {
     expect(record.shareLine).toContain("+4.0% ledger return");
   });
 
+  it("aggregates backtest evidence: mean win rate, mean Sharpe, total trades", () => {
+    const record = buildPublicTrackRecord({
+      observations: [
+        // winRate 0.55, sharpe 1.1, tradeCount 8 (from the base fixture)
+        observation(),
+        observation({
+          id: "defensive-pullback-CAT",
+          candidate: candidate({
+            result: {
+              ...candidate().result,
+              strategyId: "defensive-pullback",
+              strategyName: "Defensive Pullback",
+              symbol: "CAT",
+              metrics: { ...candidate().result.metrics, winRate: 0.45, sharpe: 0.9, tradeCount: 12 },
+            },
+          }),
+          ledger: { ...observation().ledger!, positionId: "defensive-pullback-CAT", returnPct: -0.04 },
+        }),
+      ],
+      account,
+      dailyReview,
+      generatedAt: "2026-06-04T12:00:00.000Z",
+    });
+
+    // Aggregates equal the mean / sum of the per-row metrics.
+    expect(record.averageWinRate).toBeCloseTo((0.55 + 0.45) / 2, 10); // 0.5
+    expect(record.averageSharpe).toBeCloseTo((1.1 + 0.9) / 2, 10); // 1.0
+    expect(record.totalBacktestTrades).toBe(8 + 12); // 20
+
+    // Per-row metrics are surfaced verbatim from the engine metrics.
+    const aapl = record.rows.find((row) => row.symbol === "AAPL")!;
+    const cat = record.rows.find((row) => row.symbol === "CAT")!;
+    expect(aapl).toMatchObject({ winRate: 0.55, sharpe: 1.1, tradeCount: 8 });
+    expect(cat).toMatchObject({ winRate: 0.45, sharpe: 0.9, tradeCount: 12 });
+
+    // The aggregates are exactly the mean/sum of the surfaced row metrics.
+    const rowWinRates = record.rows.map((row) => row.winRate);
+    const rowSharpes = record.rows.map((row) => row.sharpe);
+    expect(record.averageWinRate).toBeCloseTo(rowWinRates.reduce((a, b) => a + b, 0) / record.rows.length, 10);
+    expect(record.averageSharpe).toBeCloseTo(rowSharpes.reduce((a, b) => a + b, 0) / record.rows.length, 10);
+    expect(record.totalBacktestTrades).toBe(record.rows.reduce((sum, row) => sum + row.tradeCount, 0));
+  });
+
+  it("yields zeroed aggregates for an empty book (no divide-by-zero)", () => {
+    const record = buildPublicTrackRecord({
+      observations: [],
+      account,
+      dailyReview,
+      generatedAt: "2026-06-04T12:00:00.000Z",
+    });
+
+    expect(record.promotedCount).toBe(0);
+    expect(record.rows).toHaveLength(0);
+    expect(record.averageWinRate).toBe(0);
+    expect(record.averageSharpe).toBe(0);
+    expect(record.totalBacktestTrades).toBe(0);
+    // ledgerReturnPct must also stay finite when there is no allocated capital.
+    expect(record.ledgerReturnPct).toBe(0);
+    expect(Number.isFinite(record.ledgerReturnPct)).toBe(true);
+  });
+
   it("keeps public disclosures explicit", () => {
     const record = buildPublicTrackRecord({
       observations: [observation()],

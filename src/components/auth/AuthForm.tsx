@@ -45,7 +45,7 @@ export default function AuthForm({ mode, action, nextPath, protectedArea }: Prop
           <div className="section-label">{copy.title}</div>
           <p className="mt-3 text-[13px] leading-relaxed text-ink-muted">{copy.subtitle}</p>
           <p className="mt-2 text-[12.5px] leading-relaxed text-ink-soft">
-            Accounts here are only for saved research preferences. FactorForge does not connect to brokers or place trades.
+            Accounts here are only for saved research preferences — they do not authorize live trading, and the public demo places no trades.
           </p>
 
           <form action={formAction} className="mt-6 space-y-4">

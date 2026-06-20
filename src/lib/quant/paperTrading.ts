@@ -83,7 +83,7 @@ export function buildPaperAccountSummary(
     riskBudgetStatus,
     guardrails: [
       "Only radar candidates can enter paper observation.",
-      "No broker connection, live order routing, or execution automation is enabled.",
+      "No live order execution, order routing, or execution automation is enabled.",
       `Each active signal is capped at ${(PAPER_POSITION_FRACTION * 100).toFixed(0)}% simulated capital.`,
       `Total simulated exposure target stays below ${(MAX_TOTAL_EXPOSURE * 100).toFixed(0)}%.`,
       options.slotNote ??

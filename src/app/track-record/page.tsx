@@ -6,7 +6,7 @@ import EmptyState from "@/components/research/EmptyState";
 import MethodologyCallout from "@/components/research/MethodologyCallout";
 import { getResearchDataset } from "@/lib/research";
 import { buildPublicTrackRecord } from "@/lib/quant/publicTrackRecord";
-import { num, pct, usd } from "@/lib/utils/format";
+import { num, pct, pctPlain, usd } from "@/lib/utils/format";
 
 export const dynamic = "force-dynamic";
 
@@ -86,6 +86,13 @@ export default async function TrackRecordPage() {
         <MetricCard label="W/L" value={`${record.winners}/${record.losers}`} hint="current book" />
       </section>
 
+      <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <MetricCard label="Avg win rate" value={pctPlain(record.averageWinRate)} hint="across backtests" />
+        <MetricCard label="Avg Sharpe" value={num(record.averageSharpe)} hint="risk-adjusted" tone={record.averageSharpe >= 1 ? "positive" : "default"} />
+        <MetricCard label="Backtest trades" value={String(record.totalBacktestTrades)} hint="total evidence sample" />
+        <MetricCard label="Avg score" value={num(record.averageRadarScore, 0)} hint="radar admission" tone="accent" />
+      </section>
+
       <MethodologyCallout title="Public record contract" items={record.disclosureItems} />
 
       <section className="card overflow-hidden">
@@ -147,6 +154,9 @@ export default async function TrackRecordPage() {
                   <td className="px-4 py-3">
                     <StatusBadge status={row.ledgerSource} />
                     <div className="mt-1 text-[11px] text-ink-soft">Radar {row.radarScore} · DD {pct(row.maxDrawdown)}</div>
+                    <div className="mt-0.5 text-[11px] text-ink-soft">
+                      Win {pctPlain(row.winRate)} · Sharpe {num(row.sharpe)} · {row.tradeCount} trades
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-ink-muted">{row.nextCheck}</td>
                 </tr>

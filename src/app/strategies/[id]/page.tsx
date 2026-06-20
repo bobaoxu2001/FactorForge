@@ -129,7 +129,7 @@ export default async function StrategyDetailPage({
         items={[
           "Signals are produced from completed daily bars; entries fill at the next open with modeled costs.",
           "Headline view defaults to the strongest symbol for this strategy, and the selection-bias notice documents that assumption.",
-          "No intraday fills, broker connection, live orders, shorts, options, or margin are modeled.",
+          "No intraday fills, live order execution, shorts, options, or margin are modeled.",
           "AI memo prose is generated from the deterministic backtest payload or a template fallback; metrics are engine-derived.",
         ]}
       />
@@ -177,6 +177,8 @@ export default async function StrategyDetailPage({
         <MetricCard label="Sharpe" value={num(result.metrics.sharpe)} termId="sharpe" />
         <MetricCard label="Win rate" value={pctPlain(result.metrics.winRate)} termId="winrate" />
         <MetricCard label="Trades" value={String(result.metrics.tradeCount)} />
+        <MetricCard label="Profit factor" value={num(result.metrics.profitFactor)} tone={result.metrics.profitFactor >= 1 ? "positive" : "negative"} />
+        <MetricCard label="Avg holding" value={`${num(result.metrics.averageHoldingDays, 0)}d`} />
       </section>
 
       <p className="-mt-3 text-[11.5px] leading-relaxed text-ink-soft">
@@ -248,6 +250,7 @@ export default async function StrategyDetailPage({
             <tr>
               <th className="px-4 py-3 text-left">Entry</th>
               <th className="px-4 py-3 text-left">Exit</th>
+              <th className="px-4 py-3 text-right">Hold</th>
               <th className="px-4 py-3 text-right">Return</th>
               <th className="px-4 py-3 text-right">P/L</th>
               <th className="px-4 py-3 text-right">Fees</th>
@@ -259,6 +262,7 @@ export default async function StrategyDetailPage({
               <tr key={`${trade.entryDate}-${trade.exitDate}`}>
                 <td className="px-4 py-3">{trade.entryDate}</td>
                 <td className="px-4 py-3">{trade.exitDate}</td>
+                <td className="num px-4 py-3 text-right text-ink-muted">{num(trade.holdingDays, 0)}d</td>
                 <td className="num px-4 py-3 text-right">{pct(trade.returnPct)}</td>
                 <td className="num px-4 py-3 text-right">{usd(trade.pnl)}</td>
                 <td className="num px-4 py-3 text-right">{usd(trade.fees)}</td>

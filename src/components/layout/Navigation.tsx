@@ -28,25 +28,54 @@ import {
 import { useState } from "react";
 import SearchCommand from "./SearchCommand";
 
-const items: { href: string; label: string; icon: typeof Gauge; tag?: string }[] = [
+type NavItem = { href: string; label: string; icon: typeof Gauge; tag?: string };
+type NavSection = { label: string; items: NavItem[] };
+
+// Grouped so the 17 surfaces read as one coherent product rather than a flat
+// demo list. Every existing route and tag is preserved — only the visual
+// structure changed. "Start here" stays ungrouped at the top.
+const startItems: NavItem[] = [
   { href: "/", label: "Overview", icon: Gauge },
   { href: "/learn", label: "Learn (Stocks 101)", icon: GraduationCap },
-  { href: "/data", label: "Data", icon: Database },
-  { href: "/factors", label: "Factors", icon: Network },
-  { href: "/strategies", label: "Strategies", icon: LineChart },
-  { href: "/radar", label: "Radar", icon: Target },
-  { href: "/consensus", label: "Consensus", icon: Layers },
-  { href: "/portfolio", label: "Portfolio", icon: PieChart },
-  { href: "/ai-market", label: "AI Market", icon: BrainCircuit },
-  { href: "/hotspots", label: "Market Hotspots", icon: Flame },
-  { href: "/paper-trading", label: "Paper Trading", icon: WalletCards },
-  { href: "/simulator", label: "Trade Simulator", icon: CandlestickChart },
-  { href: "/track-record", label: "Track Record", icon: Trophy },
-  { href: "/reports", label: "Reports", icon: FileText },
-  { href: "/oss", label: "OSS & Maintainers", icon: ShieldCheck },
-  // Protected routes — tagged so it's clear they need a persistence backend.
-  { href: "/my-watchlist", label: "My Watchlist", icon: Star, tag: "local" },
-  { href: "/admin/cache", label: "Cache", icon: Server, tag: "admin" },
+];
+
+const sections: NavSection[] = [
+  {
+    label: "Research",
+    items: [
+      { href: "/data", label: "Data", icon: Database },
+      { href: "/factors", label: "Factors", icon: Network },
+      { href: "/strategies", label: "Strategies", icon: LineChart },
+      { href: "/radar", label: "Radar", icon: Target },
+      { href: "/consensus", label: "Consensus", icon: Layers },
+      { href: "/portfolio", label: "Portfolio", icon: PieChart },
+    ],
+  },
+  {
+    label: "Intelligence",
+    items: [
+      { href: "/ai-market", label: "AI Market", icon: BrainCircuit },
+      { href: "/hotspots", label: "Market Hotspots", icon: Flame },
+    ],
+  },
+  {
+    label: "Simulation",
+    items: [
+      { href: "/paper-trading", label: "Paper Trading", icon: WalletCards },
+      { href: "/simulator", label: "Trade Simulator", icon: CandlestickChart },
+      { href: "/track-record", label: "Track Record", icon: Trophy },
+    ],
+  },
+  {
+    label: "Project",
+    items: [
+      { href: "/reports", label: "Reports", icon: FileText },
+      { href: "/oss", label: "OSS & Maintainers", icon: ShieldCheck },
+      // Protected routes — tagged so it's clear they need a persistence backend.
+      { href: "/my-watchlist", label: "My Watchlist", icon: Star, tag: "local" },
+      { href: "/admin/cache", label: "Cache", icon: Server, tag: "admin" },
+    ],
+  },
 ];
 
 export default function Navigation({ persistenceAvailable = true }: { persistenceAvailable?: boolean }) {
@@ -65,34 +94,26 @@ export default function Navigation({ persistenceAvailable = true }: { persistenc
           </div>
         </div>
         <nav className="mt-6 min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-1">
-          {items.map((item) => {
-            const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`group flex h-11 items-center gap-3 rounded-xl border px-3 text-[13px] transition-all ${
-                  active
-                    ? "border-blue-400/45 bg-blue-400/12 text-white shadow-[inset_3px_0_0_rgba(34,211,238,0.92)]"
-                    : "border-transparent text-ink-muted hover:border-line hover:bg-white/[0.045] hover:text-white"
-                }`}
-              >
-                <Icon className={`h-4 w-4 ${active ? "text-blue-300" : "text-ink-soft group-hover:text-blue-300"}`} />
-                <span>{item.label}</span>
-                {item.tag && (
-                  <span className="ml-auto rounded-md border border-line bg-white/[0.05] px-1.5 py-0.5 text-[9.5px] uppercase tracking-[0.14em] text-ink-soft">
-                    {item.tag}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
+          {startItems.map((item) => (
+            <DesktopNavLink key={item.href} item={item} pathname={pathname} />
+          ))}
+          {sections.map((section) => (
+            <div key={section.label} className="pt-3">
+              <div className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-ink-soft/80">
+                {section.label}
+              </div>
+              <div className="space-y-1.5">
+                {section.items.map((item) => (
+                  <DesktopNavLink key={item.href} item={item} pathname={pathname} />
+                ))}
+              </div>
+            </div>
+          ))}
         </nav>
         <div className="mt-4 shrink-0 space-y-3">
           <div className="rounded-2xl border border-cyan-300/15 bg-cyan-300/[0.045] p-3">
             <div className="text-[10px] uppercase tracking-[0.2em] text-cyan-100/60">Status</div>
-            <div className="mt-1 text-[12.5px] leading-relaxed text-ink-muted">Public demo mode. No broker connection or live trading.</div>
+            <div className="mt-1 text-[12.5px] leading-relaxed text-ink-muted">Public demo mode — places no trades, no live order execution. Optional read-only Alpaca paper mirror for local paper-account sync.</div>
             {!persistenceAvailable && (
               <div className="mt-2 text-[11.5px] leading-relaxed text-ink-soft">
                 Saved preferences and admin cache controls are disabled in public demo mode.
@@ -150,25 +171,64 @@ export default function Navigation({ persistenceAvailable = true }: { persistenc
               </button>
             </div>
             <nav className="mt-8 space-y-1.5">
-              {items.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className="flex h-11 items-center gap-3 rounded-lg px-3 text-[13px] text-ink-muted">
-                    <Icon className="h-4 w-4" />
-                    {item.label}
-                    {item.tag && (
-                      <span className="ml-auto rounded-md border border-line bg-white/[0.05] px-1.5 py-0.5 text-[9.5px] uppercase tracking-[0.14em] text-ink-soft">
-                        {item.tag}
-                      </span>
-                    )}
-                  </Link>
-                );
-              })}
+              {startItems.map((item) => (
+                <MobileNavLink key={item.href} item={item} onNavigate={() => setOpen(false)} />
+              ))}
+              {sections.map((section) => (
+                <div key={section.label} className="pt-3">
+                  <div className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-ink-soft/80">
+                    {section.label}
+                  </div>
+                  <div className="space-y-1.5">
+                    {section.items.map((item) => (
+                      <MobileNavLink key={item.href} item={item} onNavigate={() => setOpen(false)} />
+                    ))}
+                  </div>
+                </div>
+              ))}
             </nav>
           </div>
         </div>
       )}
     </>
+  );
+}
+
+function DesktopNavLink({ item, pathname }: { item: NavItem; pathname: string }) {
+  const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+  const Icon = item.icon;
+  return (
+    <Link
+      href={item.href}
+      className={`group flex h-11 items-center gap-3 rounded-xl border px-3 text-[13px] transition-all ${
+        active
+          ? "border-blue-400/45 bg-blue-400/12 text-white shadow-[inset_3px_0_0_rgba(34,211,238,0.92)]"
+          : "border-transparent text-ink-muted hover:border-line hover:bg-white/[0.045] hover:text-white"
+      }`}
+    >
+      <Icon className={`h-4 w-4 ${active ? "text-blue-300" : "text-ink-soft group-hover:text-blue-300"}`} />
+      <span>{item.label}</span>
+      {item.tag && (
+        <span className="ml-auto rounded-md border border-line bg-white/[0.05] px-1.5 py-0.5 text-[9.5px] uppercase tracking-[0.14em] text-ink-soft">
+          {item.tag}
+        </span>
+      )}
+    </Link>
+  );
+}
+
+function MobileNavLink({ item, onNavigate }: { item: NavItem; onNavigate: () => void }) {
+  const Icon = item.icon;
+  return (
+    <Link href={item.href} onClick={onNavigate} className="flex h-11 items-center gap-3 rounded-lg px-3 text-[13px] text-ink-muted">
+      <Icon className="h-4 w-4" />
+      {item.label}
+      {item.tag && (
+        <span className="ml-auto rounded-md border border-line bg-white/[0.05] px-1.5 py-0.5 text-[9.5px] uppercase tracking-[0.14em] text-ink-soft">
+          {item.tag}
+        </span>
+      )}
+    </Link>
   );
 }
 

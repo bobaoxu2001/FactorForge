@@ -82,7 +82,7 @@ export async function fetchAlpacaPaperSnapshot(
   };
 
   try {
-    const orderLimit = Math.max(1, Math.min(50, Math.floor(options.orderLimit ?? 20)));
+    const orderLimit = clampOrderLimit(options.orderLimit);
     const [accountRaw, positionsRaw, ordersRaw] = await Promise.all([
       fetchJson<AlpacaAccountResponse>(fetcher, `${baseUrl}/v2/account`, headers),
       fetchJson<AlpacaPositionResponse[]>(fetcher, `${baseUrl}/v2/positions`, headers),
@@ -127,6 +127,15 @@ async function fetchJson<T>(fetcher: FetchLike, url: string, headers: Record<str
     throw new Error(`HTTP ${response.status}`);
   }
   return (await response.json()) as T;
+}
+
+// Clamp the requested order count to Alpaca's supported window. A non-finite
+// caller value (NaN/Infinity) must not leak into the query string as
+// `limit=NaN`, which Alpaca would reject — fall back to the default instead.
+function clampOrderLimit(requested: number | undefined): number {
+  const value = Number(requested);
+  if (!Number.isFinite(value)) return 20;
+  return Math.max(1, Math.min(50, Math.floor(value)));
 }
 
 function sanitizeBaseUrl(raw: string | undefined): string {
