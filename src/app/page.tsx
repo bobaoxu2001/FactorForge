@@ -3,11 +3,13 @@ import {
   ArrowRight,
   BrainCircuit,
   CheckCircle2,
+  Compass,
   Database,
   Flame,
   GraduationCap,
   LineChart,
   Network,
+  PieChart,
   Radar,
   ShieldAlert,
   Target,
@@ -159,6 +161,44 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <section className="card p-4">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <div className="section-label inline-flex items-center gap-2">
+              <Compass className="h-3.5 w-3.5" />
+              Start here
+            </div>
+            <p className="mt-1.5 text-[12.5px] text-ink-soft">First time on FactorForge? Pick a thread — each surface flows into the next.</p>
+          </div>
+          <Link href="/learn" className="text-[12px] text-cyan-300 hover:text-cyan-200">New to stocks? Stocks 101 ›</Link>
+        </div>
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {([
+            ["See the receipts", "Model portfolio vs SPY/QQQ since May — simulated, deterministic, fully labeled.", "/track-record", Trophy],
+            ["Inspect a strategy", "Open a backtest end to end: signals, next-open fills, costs, drawdown, and trades.", "/strategies", LineChart],
+            ["Read the market", "AI-style memo and hotspot signals built from live factor breadth, not vibes.", "/ai-market", BrainCircuit],
+            ["Build a portfolio", "Combine ranked strategies and watch diversification and concentration diagnostics.", "/portfolio", PieChart],
+          ] as const).map(([title, copy, href, Icon]) => (
+            <Link
+              key={href}
+              href={href}
+              className="card card-hover group flex flex-col p-4"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="grid h-9 w-9 place-items-center rounded-xl border border-cyan-300/20 bg-cyan-300/[0.06]">
+                  <Icon className="h-4 w-4 text-cyan-200" />
+                </div>
+                <div className="text-[13.5px] font-semibold text-white">{title}</div>
+              </div>
+              <p className="mt-3 text-[12.5px] leading-relaxed text-ink-muted">{copy}</p>
+              <span className="mt-3 inline-flex items-center gap-1 text-[12px] text-blue-300 transition-transform group-hover:translate-x-0.5">
+                Explore <ArrowRight className="h-3.5 w-3.5" />
+              </span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       <MarketRegimeBanner report={dataset.marketStress} />
 
       <ModelPortfolioCard
@@ -289,7 +329,7 @@ export default async function HomePage() {
               </tbody>
             </table>
           </div>
-          {top.length === 0 && <div className="p-4"><EmptyState title="No strategy results yet" message="Backtests will appear after the data pipeline returns usable OHLCV data." /></div>}
+          {top.length === 0 && <div className="p-4"><EmptyState title="No strategy results yet" message="Ranked backtests appear here as soon as the data pipeline returns usable OHLCV history." hint="Nothing is hidden — this panel only fills in once real or labeled-fallback data is available." action={{ href: "/data", label: "Check data sources" }} /></div>}
         </div>
 
         <div className="card p-4 xl:col-span-3">
@@ -366,7 +406,7 @@ export default async function HomePage() {
               </div>
             </div>
           ) : (
-            <EmptyState title="Strategy is online and waiting" message="No radar candidate has been admitted into paper observation yet." />
+            <EmptyState title="Paper desk is online and waiting" message="No radar candidate has cleared every admission and concentration gate yet, so nothing is in simulated observation." hint="By design — paper observation only accepts radar-approved strategies and never injects fake results." action={{ href: "/radar", label: "See the radar funnel" }} />
           )}
         </div>
       </section>
@@ -454,7 +494,7 @@ function LiveResearchCase({ candidate, fallbackCount }: { candidate: RadarCandid
   if (!candidate) {
     return (
       <div className="rounded-3xl border border-blue-300/20 bg-blue-300/[0.045] p-5">
-        <EmptyState title="No radar evidence yet" message="Strategy evidence appears after the research pipeline has usable OHLCV data." />
+        <EmptyState title="No radar evidence yet" message="A live research case — symbol, signals, backtest, and verdict — renders here as soon as the pipeline has usable OHLCV data." action={{ href: "/data", label: "Check data sources" }} />
       </div>
     );
   }
