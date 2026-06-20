@@ -31,5 +31,5 @@ This roadmap is intentionally scoped to known project directions. It does not im
 
 ## Deferred
 
-- Broker or paper-broker integrations are deferred until risk gates, audit logs, and simulation boundaries are documented clearly.
+- A **read-only** Alpaca paper mirror (GET-only account/positions/orders) ships behind optional keys. Any *write* path — order submission, even to a paper account — stays deferred until risk gates, audit logs, and simulation boundaries are documented clearly.
 - Package publishing is deferred; the repo is currently operated as an application/workbench, not an npm library.
