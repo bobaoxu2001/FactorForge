@@ -8,6 +8,7 @@ This project follows a human-maintained changelog. There is no automated release
 
 ### Added
 
+- Realized trading stats on the trade simulator (`/simulator`): once a trade is closed, the desk surfaces win rate, profit factor, per-trade expectancy, and average win/loss (with best/worst closed trade) alongside the existing open-book analytics. Pure, unit-tested math derived from the trade log (`summarizeTrades` in `src/lib/sim/portfolioSim.ts`); adds an `expectancy` glossary entry so the new metric explains itself inline and on `/learn`.
 - Interactive trade simulator (`/simulator`): start with $100k virtual cash, buy/sell any universe name at its latest close, and watch holdings, weights, and total return update live. Deterministic, unit-tested portfolio math (`src/lib/sim/portfolioSim.ts`); state persists in the browser, so it needs no login and works on the public demo. Simulation only — no broker, no real orders.
 - Multi-strategy consensus: all 5 strategies run across the full 28-symbol universe, pivoted per symbol to surface names held by more than one independent strategy, ranked by strategy count then distinct strategy types. Lives at `/consensus`.
 - Public track record (`/track-record`): a shareable, outside-viewer receipt of the simulated paper ledger — strategy-by-strategy results, observation dates, current marks, and guardrails. Not a broker statement, not advice.

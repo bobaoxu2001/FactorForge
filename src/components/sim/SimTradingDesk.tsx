@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import MetricCard from "@/components/cards/MetricCard";
-import { num, pct, usd } from "@/lib/utils/format";
+import { num, pct, pctPlain, usd } from "@/lib/utils/format";
 import {
   buy,
   sell,
   snapshot,
   summarizePositions,
+  summarizeTrades,
   createInitialState,
   DEFAULT_STARTING_CAPITAL,
   type SimState,
@@ -96,6 +97,7 @@ export default function SimTradingDesk({ quotes, asOf, anyFallback }: Props) {
 
   const snap = useMemo(() => snapshot(data.state, latestPrices), [data.state, latestPrices]);
   const bookSummary = useMemo(() => summarizePositions(snap), [snap]);
+  const tradeSummary = useMemo(() => summarizeTrades(data.state), [data.state]);
 
   function commit(next: SimState, ts: number) {
     const value = snapshot(next, latestPrices).totalValue;
@@ -224,6 +226,62 @@ export default function SimTradingDesk({ quotes, asOf, anyFallback }: Props) {
             value={`${(bookSummary.investedWeight * 100).toFixed(0)}%`}
             hint={`${(100 - bookSummary.investedWeight * 100).toFixed(0)}% cash`}
           />
+        </div>
+      )}
+
+      {/* Realized trading stats — decision quality on closed trades, distinct
+          from the open-book analytics above. Appears once a trade is closed. */}
+      {tradeSummary.closedTrades > 0 && (
+        <div className="space-y-2">
+          <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">
+            Realized trading stats · {tradeSummary.closedTrades} closed trade{tradeSummary.closedTrades === 1 ? "" : "s"}
+          </div>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <MetricCard
+              label="Win rate"
+              termId="winrate"
+              value={pctPlain(tradeSummary.winRate)}
+              tone={tradeSummary.winRate >= 0.5 ? "positive" : "default"}
+              hint={`${tradeSummary.wins}W · ${tradeSummary.losses}L`}
+            />
+            <MetricCard
+              label="Profit factor"
+              termId="profitfactor"
+              value={
+                tradeSummary.profitFactor !== null
+                  ? num(tradeSummary.profitFactor, 2)
+                  : tradeSummary.grossProfit > 0
+                    ? "∞"
+                    : "—"
+              }
+              tone={
+                tradeSummary.profitFactor === null
+                  ? tradeSummary.grossProfit > 0
+                    ? "positive"
+                    : "default"
+                  : tradeSummary.profitFactor >= 1
+                    ? "positive"
+                    : "negative"
+              }
+              hint={`${usd(tradeSummary.grossProfit)} won · ${usd(tradeSummary.grossLoss)} lost`}
+            />
+            <MetricCard
+              label="Expectancy / trade"
+              termId="expectancy"
+              value={usd(tradeSummary.expectancy)}
+              tone={tradeSummary.expectancy >= 0 ? "positive" : "negative"}
+              hint="Avg realized per closed trade"
+            />
+            <MetricCard
+              label="Avg win / loss"
+              value={`${usd(tradeSummary.avgWin)} / ${usd(tradeSummary.avgLoss)}`}
+              hint={
+                tradeSummary.bestTrade && tradeSummary.worstTrade
+                  ? `Best ${usd(tradeSummary.bestTrade.realized)} ${tradeSummary.bestTrade.symbol} · Worst ${usd(tradeSummary.worstTrade.realized)} ${tradeSummary.worstTrade.symbol}`
+                  : undefined
+              }
+            />
+          </div>
         </div>
       )}
 

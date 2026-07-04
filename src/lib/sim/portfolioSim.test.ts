@@ -4,6 +4,7 @@ import {
   sell,
   snapshot,
   summarizePositions,
+  summarizeTrades,
   createInitialState,
   DEFAULT_STARTING_CAPITAL,
   type SimState,
@@ -186,5 +187,93 @@ describe("portfolioSim — summarizePositions", () => {
       worstPosition: null,
       investedWeight: 0,
     });
+  });
+});
+
+describe("portfolioSim — summarizeTrades", () => {
+  it("returns an empty summary before any trade is closed", () => {
+    // Open positions but no sells yet — nothing realized to summarize.
+    const state = expectOk(buy(fresh(100_000), "AAPL", 10, 100, 1));
+    expect(summarizeTrades(state)).toEqual({
+      closedTrades: 0,
+      wins: 0,
+      losses: 0,
+      winRate: 0,
+      avgWin: 0,
+      avgLoss: 0,
+      grossProfit: 0,
+      grossLoss: 0,
+      profitFactor: null,
+      expectancy: 0,
+      bestTrade: null,
+      worstTrade: null,
+    });
+  });
+
+  it("counts wins, losses, and win rate across closed trades", () => {
+    let state = expectOk(buy(fresh(100_000), "AAPL", 10, 100, 1));
+    state = expectOk(sell(state, "AAPL", 10, 150, 2)); // +500 win
+    state = expectOk(buy(state, "MSFT", 10, 300, 3));
+    state = expectOk(sell(state, "MSFT", 10, 280, 4)); // -200 loss
+    const summary = summarizeTrades(state);
+    expect(summary.closedTrades).toBe(2);
+    expect(summary.wins).toBe(1);
+    expect(summary.losses).toBe(1);
+    expect(summary.winRate).toBeCloseTo(0.5, 10);
+  });
+
+  it("computes gross profit/loss, averages, and profit factor", () => {
+    let state = expectOk(buy(fresh(100_000), "AAPL", 10, 100, 1));
+    state = expectOk(sell(state, "AAPL", 10, 160, 2)); // +600
+    state = expectOk(buy(state, "MSFT", 10, 100, 3));
+    state = expectOk(sell(state, "MSFT", 10, 80, 4)); // -200
+    const summary = summarizeTrades(state);
+    expect(summary.grossProfit).toBe(600);
+    expect(summary.grossLoss).toBe(200); // stored as a positive magnitude
+    expect(summary.avgWin).toBe(600);
+    expect(summary.avgLoss).toBe(200);
+    expect(summary.profitFactor).toBeCloseTo(3, 10); // 600 / 200
+    expect(summary.expectancy).toBeCloseTo(200, 10); // (600 - 200) / 2
+  });
+
+  it("reports profitFactor null when there are no losing trades", () => {
+    let state = expectOk(buy(fresh(100_000), "AAPL", 10, 100, 1));
+    state = expectOk(sell(state, "AAPL", 10, 150, 2)); // only a win
+    const summary = summarizeTrades(state);
+    expect(summary.losses).toBe(0);
+    expect(summary.grossLoss).toBe(0);
+    expect(summary.profitFactor).toBeNull();
+  });
+
+  it("does not count a scratch (break-even) sell as a win or a loss", () => {
+    let state = expectOk(buy(fresh(100_000), "AAPL", 10, 100, 1));
+    state = expectOk(sell(state, "AAPL", 10, 100, 2)); // realized exactly 0
+    const summary = summarizeTrades(state);
+    expect(summary.closedTrades).toBe(1);
+    expect(summary.wins).toBe(0);
+    expect(summary.losses).toBe(0);
+    expect(summary.winRate).toBe(0);
+  });
+
+  it("identifies the best and worst closed trade by realized P&L", () => {
+    let state = expectOk(buy(fresh(100_000), "AAPL", 10, 100, 1));
+    state = expectOk(sell(state, "AAPL", 10, 200, 2)); // +1000 best
+    state = expectOk(buy(state, "MSFT", 10, 100, 3));
+    state = expectOk(sell(state, "MSFT", 10, 55, 4)); // -450 worst
+    state = expectOk(buy(state, "NVDA", 10, 100, 5));
+    state = expectOk(sell(state, "NVDA", 10, 120, 6)); // +200
+    const summary = summarizeTrades(state);
+    expect(summary.bestTrade).toMatchObject({ symbol: "AAPL", realized: 1_000 });
+    expect(summary.worstTrade).toMatchObject({ symbol: "MSFT", realized: -450 });
+  });
+
+  it("expectancy over all closed trades matches total realized P&L / count", () => {
+    let state = expectOk(buy(fresh(100_000), "AAPL", 10, 100, 1));
+    state = expectOk(sell(state, "AAPL", 4, 150, 2)); // +200
+    state = expectOk(sell(state, "AAPL", 6, 90, 3)); // -60
+    const summary = summarizeTrades(state);
+    // Two partial sells of the same name are two closed trades.
+    expect(summary.closedTrades).toBe(2);
+    expect(summary.expectancy).toBeCloseTo(state.realizedPnl / 2, 10);
   });
 });

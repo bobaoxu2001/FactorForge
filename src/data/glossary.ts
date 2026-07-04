@@ -155,6 +155,16 @@ export const GLOSSARY: GlossaryEntry[] = [
     plain: "Total money made on winning trades divided by total money lost on losing ones.",
     why: "Above 1 means the wins outweigh the losses. The bigger, the better.",
   },
+  {
+    id: "expectancy",
+    term: "Expectancy",
+    aliases: ["expectancy", "per-trade expectancy", "average trade"],
+    category: "Returns & Risk",
+    level: "intermediate",
+    plain: "The average profit or loss you can expect from a single closed trade.",
+    why: "It rolls win rate and win/loss size into one number — a positive expectancy means the approach makes money on average, even if plenty of individual trades lose.",
+    example: "Ten closed trades that netted +$500 total have an expectancy of +$50 per trade.",
+  },
 
   // ---- Strategy -----------------------------------------------------------
   {
