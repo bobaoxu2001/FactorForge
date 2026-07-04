@@ -9,9 +9,11 @@ import {
   snapshot,
   summarizePositions,
   summarizeTrades,
+  summarizeSectorExposure,
   createInitialState,
   DEFAULT_STARTING_CAPITAL,
   type SimState,
+  type SectorExposure,
 } from "@/lib/sim/portfolioSim";
 
 export interface SimQuote {
@@ -98,6 +100,10 @@ export default function SimTradingDesk({ quotes, asOf, anyFallback }: Props) {
   const snap = useMemo(() => snapshot(data.state, latestPrices), [data.state, latestPrices]);
   const bookSummary = useMemo(() => summarizePositions(snap), [snap]);
   const tradeSummary = useMemo(() => summarizeTrades(data.state), [data.state]);
+  const sectorExposure = useMemo(
+    () => summarizeSectorExposure(snap, (sym) => quoteFor.get(sym)?.sector),
+    [snap, quoteFor],
+  );
 
   function commit(next: SimState, ts: number) {
     const value = snapshot(next, latestPrices).totalValue;
@@ -285,6 +291,10 @@ export default function SimTradingDesk({ quotes, asOf, anyFallback }: Props) {
         </div>
       )}
 
+      {/* Sector exposure — a single-name desk can still be one concentrated
+          bet; this shows the invested book grouped by sector. */}
+      {sectorExposure.length > 0 && <SectorExposureCard exposure={sectorExposure} />}
+
       <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
         {/* Holdings */}
         <div className="card p-5">
@@ -463,6 +473,50 @@ export default function SimTradingDesk({ quotes, asOf, anyFallback }: Props) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// On-brand, visually distinct palette; the sorted exposure assigns colors by
+// rank so the largest sector is always the first hue.
+const SECTOR_COLORS = ["#60a5fa", "#34d399", "#fbbf24", "#f472b6", "#a78bfa", "#22d3ee", "#fb7185", "#a3e635"];
+const OTHER_COLOR = "#94a3b8";
+const colorForRank = (index: number) => SECTOR_COLORS[index] ?? OTHER_COLOR;
+
+function SectorExposureCard({ exposure }: { exposure: SectorExposure[] }) {
+  const top = exposure[0];
+  return (
+    <div className="card p-5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-[15px] font-semibold text-ink">Sector exposure</h2>
+        <span className="text-[11.5px] text-ink-soft">
+          {exposure.length === 1
+            ? "Single sector — fully concentrated"
+            : `${top.sector} largest at ${(top.weight * 100).toFixed(0)}% of the book`}
+        </span>
+      </div>
+
+      {/* Segmented allocation bar — each slice is a sector's share of invested value. */}
+      <div className="mt-4 flex h-3 w-full overflow-hidden rounded-full bg-white/[0.04]" role="img" aria-label="Invested value by sector">
+        {exposure.map((e, i) => (
+          <div
+            key={e.sector}
+            style={{ width: `${e.weight * 100}%`, backgroundColor: colorForRank(i) }}
+            title={`${e.sector} — ${(e.weight * 100).toFixed(1)}%`}
+          />
+        ))}
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2">
+        {exposure.map((e, i) => (
+          <div key={e.sector} className="flex items-center gap-2 text-[12px]">
+            <span className="h-2.5 w-2.5 shrink-0 rounded-sm" style={{ backgroundColor: colorForRank(i) }} />
+            <span className="text-ink">{e.sector}</span>
+            <span className="num text-ink-muted">{(e.weight * 100).toFixed(1)}%</span>
+            <span className="num text-ink-soft">({usd(e.marketValue)})</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

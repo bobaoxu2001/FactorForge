@@ -5,6 +5,7 @@ import {
   snapshot,
   summarizePositions,
   summarizeTrades,
+  summarizeSectorExposure,
   createInitialState,
   DEFAULT_STARTING_CAPITAL,
   type SimState,
@@ -275,5 +276,43 @@ describe("portfolioSim — summarizeTrades", () => {
     // Two partial sells of the same name are two closed trades.
     expect(summary.closedTrades).toBe(2);
     expect(summary.expectancy).toBeCloseTo(state.realizedPnl / 2, 10);
+  });
+});
+
+describe("portfolioSim — summarizeSectorExposure", () => {
+  const sectors: Record<string, string> = { AAPL: "Technology", MSFT: "Technology", XOM: "Energy" };
+  const sectorOf = (s: string) => sectors[s];
+
+  it("returns nothing for an all-cash book", () => {
+    expect(summarizeSectorExposure(snapshot(fresh(10_000), {}), sectorOf)).toEqual([]);
+  });
+
+  it("collapses multiple names in one sector into a single weighted bucket", () => {
+    let state = expectOk(buy(fresh(100_000), "AAPL", 10, 100, 1)); // $1,000 Tech
+    state = expectOk(buy(state, "MSFT", 10, 300, 2)); // $3,000 Tech
+    state = expectOk(buy(state, "XOM", 10, 100, 3)); // $1,000 Energy
+    const snap = snapshot(state, { AAPL: 100, MSFT: 300, XOM: 100 });
+    const exposure = summarizeSectorExposure(snap, sectorOf);
+    expect(exposure.map((e) => e.sector)).toEqual(["Technology", "Energy"]);
+    // Tech = 4000 / 5000 invested, Energy = 1000 / 5000
+    expect(exposure[0]).toMatchObject({ sector: "Technology", marketValue: 4_000 });
+    expect(exposure[0].weight).toBeCloseTo(0.8, 10);
+    expect(exposure[1].weight).toBeCloseTo(0.2, 10);
+  });
+
+  it("sector weights sum to 1 (share of invested value, cash excluded)", () => {
+    let state = expectOk(buy(fresh(100_000), "AAPL", 10, 100, 1));
+    state = expectOk(buy(state, "XOM", 5, 200, 2));
+    const snap = snapshot(state, { AAPL: 120, XOM: 210 });
+    const exposure = summarizeSectorExposure(snap, sectorOf);
+    const totalWeight = exposure.reduce((sum, e) => sum + e.weight, 0);
+    expect(totalWeight).toBeCloseTo(1, 10);
+  });
+
+  it("buckets an unknown sector under 'Other'", () => {
+    const state = expectOk(buy(fresh(100_000), "ZZZ", 10, 50, 1));
+    const snap = snapshot(state, { ZZZ: 50 });
+    const exposure = summarizeSectorExposure(snap, sectorOf);
+    expect(exposure).toEqual([{ sector: "Other", marketValue: 500, weight: 1 }]);
   });
 });

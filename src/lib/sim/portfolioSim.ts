@@ -111,6 +111,14 @@ export interface SimTradeSummary {
   worstTrade: SimTrade | null;
 }
 
+export interface SectorExposure {
+  sector: string;
+  /** Dollar market value held in this sector. */
+  marketValue: number;
+  /** Share of the *invested* book (0–1); sectors sum to 1 when anything is held. */
+  weight: number;
+}
+
 export type TradeOutcome = { ok: true; state: SimState } | { ok: false; reason: string };
 
 export const DEFAULT_STARTING_CAPITAL = 100_000;
@@ -321,4 +329,30 @@ export function summarizeTrades(state: SimState): SimTradeSummary {
     bestTrade,
     worstTrade,
   };
+}
+
+/**
+ * Group the invested book by sector so a single-name desk still shows its real
+ * concentration risk (five different names in one sector is one bet, not five).
+ * Weights are a share of *invested* value — they sum to 1 whenever anything is
+ * held — so cash doesn't dilute the read. Symbols whose sector is unknown fall
+ * into "Other". Sorted largest sector first; empty for an all-cash book.
+ */
+export function summarizeSectorExposure(
+  snap: SimSnapshot,
+  sectorOf: (symbol: string) => string | undefined,
+): SectorExposure[] {
+  if (snap.investedValue <= 0) return [];
+  const bySector = new Map<string, number>();
+  for (const position of snap.positions) {
+    const sector = sectorOf(position.symbol)?.trim() || "Other";
+    bySector.set(sector, (bySector.get(sector) ?? 0) + position.marketValue);
+  }
+  return [...bySector.entries()]
+    .map(([sector, marketValue]) => ({
+      sector,
+      marketValue,
+      weight: marketValue / snap.investedValue,
+    }))
+    .sort((a, b) => b.marketValue - a.marketValue);
 }
