@@ -1,8 +1,15 @@
+import type { Metadata } from "next";
 import PageHeader from "@/components/layout/PageHeader";
 import PlainEnglish from "@/components/learn/PlainEnglish";
 import SimTradingDesk, { type SimQuote } from "@/components/sim/SimTradingDesk";
 import { UNIVERSE } from "@/data/watchlist";
 import { getWatchlistPrices } from "@/lib/data/marketData";
+
+export const metadata: Metadata = {
+  title: "Trade Simulator",
+  description:
+    "Interactive paper-trading desk: $100k of virtual cash, fills at the latest close, live return and risk analytics. Simulation only — no broker, no real orders.",
+};
 
 // Prices are fetched per request so the desk always fills at the freshest close.
 export const dynamic = "force-dynamic";

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BrainCircuit, FlaskConical, ListChecks, ShieldAlert } from "lucide-react";
@@ -39,6 +40,15 @@ export const revalidate = 60 * 60;
 
 export function generateStaticParams() {
   return STRATEGY_CATALOG.map((strategy) => ({ id: strategy.id }));
+}
+
+export function generateMetadata({ params }: { params: { id: string } }): Metadata {
+  const definition = STRATEGY_CATALOG.find((s) => s.id === params.id);
+  if (!definition) return {};
+  return {
+    title: definition.name,
+    description: definition.description,
+  };
 }
 
 export default async function StrategyDetailPage({

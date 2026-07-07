@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Activity, BrainCircuit, Database, Radar, ShieldCheck, Sparkles, TrendingUp } from "lucide-react";
 import CatalystMonitorCard from "@/components/hotspots/CatalystMonitorCard";
 import HotspotThemeCard from "@/components/hotspots/HotspotThemeCard";
@@ -9,6 +10,12 @@ import { getResearchDataset } from "@/lib/research";
 import { formatImpact } from "@/lib/agents/scenarioForecast";
 
 export const revalidate = 60 * 60;
+
+export const metadata: Metadata = {
+  title: "Market Hotspots",
+  description:
+    "Coverage-weighted catalyst intelligence and scenario research across market themes, with private labeling for pre-IPO names. Research only — not investment advice.",
+};
 
 export default async function HotspotsPage() {
   const { hotspots } = await getResearchDataset();

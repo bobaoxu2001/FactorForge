@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { BrainCircuit, Database, LineChart, Network, Target } from "lucide-react";
 import StatusBadge from "@/components/badges/StatusBadge";
 import MetricCard from "@/components/cards/MetricCard";
@@ -11,6 +12,12 @@ import { pearson } from "@/lib/quant/indicators";
 import { pct, pctPlain, num } from "@/lib/utils/format";
 
 export const revalidate = 60 * 60;
+
+export const metadata: Metadata = {
+  title: "Factor Discovery",
+  description:
+    "Momentum, volatility, trend, and liquidity factors computed across the research universe, with factor-return correlations.",
+};
 
 function regimeLabel(corr: number): string {
   const a = Math.abs(corr);

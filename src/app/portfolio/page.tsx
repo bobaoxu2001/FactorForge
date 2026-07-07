@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import PortfolioCurveChart from "@/components/charts/PortfolioCurveChart";
 import CorrelationMatrix from "@/components/research/CorrelationMatrix";
 import MetricCard from "@/components/cards/MetricCard";
@@ -11,6 +12,12 @@ import { concentrationLevel } from "@/lib/quant/signalConcentration";
 import { num, pct, pctPlain } from "@/lib/utils/format";
 
 export const revalidate = 60 * 60;
+
+export const metadata: Metadata = {
+  title: "Model Portfolio",
+  description:
+    "Score-weighted model portfolio construction with benchmark comparison and effective-bets diagnostics. Simulated research portfolio — not a real-money account.",
+};
 
 export default async function PortfolioPage() {
   const { portfolio, radarCandidates, metadata } = await getResearchDataset();

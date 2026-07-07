@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import StrategyCard from "@/components/cards/StrategyCard";
 import PageHeader from "@/components/layout/PageHeader";
 import EmptyState from "@/components/research/EmptyState";
@@ -10,6 +11,12 @@ import ModelPortfolioCard from "@/components/research/ModelPortfolioCard";
 import { getResearchDataset } from "@/lib/research";
 
 export const revalidate = 60 * 60;
+
+export const metadata: Metadata = {
+  title: "Strategy Research Lab",
+  description:
+    "Five structurally different rule-based strategies with cost-aware, next-open backtests and in-sample/out-of-sample splits.",
+};
 
 export default async function StrategiesPage({
   searchParams,

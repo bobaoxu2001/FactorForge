@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { CheckCircle2, Database, ShieldAlert } from "lucide-react";
 import MetricCard from "@/components/cards/MetricCard";
 import StatusBadge from "@/components/badges/StatusBadge";
@@ -8,6 +9,12 @@ import MethodologyCallout from "@/components/research/MethodologyCallout";
 import { getResearchDataset } from "@/lib/research";
 
 export const revalidate = 60 * 60;
+
+export const metadata: Metadata = {
+  title: "Data Layer",
+  description:
+    "Provider provenance, fallback policy, and adjusted-close metadata for every symbol the platform loads.",
+};
 
 export default async function DataPage() {
   const { pricesBySymbol, metadata } = await getResearchDataset();

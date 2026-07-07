@@ -377,7 +377,7 @@ Security notes:
 
 ## Testing
 
-229 tests across 52 files under vitest + jsdom:
+247 tests across 52 files under vitest + jsdom:
 
 - **Engine** — backtest fees + execution semantics, indicators, radar verdict logic, paper-trading risk-budget transitions + N_eff slot cap, portfolio engine (Pearson, calendar intersection, score-weighted blend, phase-shifted decorrelation).
 - **Concentration** — `effectiveBets` / `concentrationLevel` math (monotonicity, bounds), the correlation gate demoting near-duplicate candidates, and the shared pairwise-correlation builder.
@@ -392,6 +392,8 @@ Security notes:
 - **Auth** — bcrypt round-trip, username-collision + validation rules, the bcrypt 72-byte password guard, and per-user watchlist isolation.
 - **Rate-limit stores** — in-memory fixed-window determinism, plus the Upstash adapter over a mocked `fetch`: allow/block paths, retry-after from TTL, and fail-open on both unreachable and non-2xx responses.
 - **Env validation** — production fail-fast on a missing session secret, dev warnings, feature-flag detection from optional keys, and the distributed rate-limit detection + prod warning.
+- **Trade simulator engine** — pure portfolio math for the browser desk: buy/sell validation and immutability, cost-basis averaging, realized P&L on partial sells, snapshot marking with price-gap degradation, open-book analytics (winners/losers, concentration, invested weight), realized trading stats (win rate, profit factor, expectancy, best/worst closed trade, scratch-trade handling), and sector-exposure grouping (weights sum to 1, unknown-sector bucket).
+- **Search index** — ⌘K relevance scoring plus drift guards asserting every universe symbol, catalog strategy, and glossary entry stays searchable, key routes are indexed, and hrefs are unique.
 - **Pipeline snapshot** — the full factors → backtests → radar → portfolio → concentration run against the committed real-data fixture, built once and shared across invariant checks.
 
 Run them locally with `npm test`. CI runs the same command on every push and PR; see [`.github/workflows/ci.yml`](.github/workflows/ci.yml).

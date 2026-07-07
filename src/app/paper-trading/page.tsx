@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Activity, ArrowUpRight, BarChart3, Clock3, Radio, ShieldCheck, Trophy, WalletCards } from "lucide-react";
 import EquityCurveChart from "@/components/charts/EquityCurveChart";
@@ -17,6 +18,12 @@ import { pct, pctPlain, usd, num } from "@/lib/utils/format";
 import type { PaperObservation } from "@/types/strategy";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Paper Observation",
+  description:
+    "Research-only simulated monitoring of radar-approved strategies with a post-market daily review. No live orders, no live trading.",
+};
 
 export default async function PaperTradingPage() {
   const [{ paperObservations, paperAccount, dailyReview, dailyReviewNote, radarCandidates, metadata, marketStress, modelPortfolio }, alpacaPaper] = await Promise.all([

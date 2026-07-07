@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import MarketInsightCard from "@/components/cards/MarketInsightCard";
 import StatusBadge from "@/components/badges/StatusBadge";
 import PageHeader from "@/components/layout/PageHeader";
@@ -12,6 +13,12 @@ import { buildPreviewStressReport, buildStressInsightCards } from "@/lib/quant/m
 import { pct, pctPlain, num } from "@/lib/utils/format";
 
 export const revalidate = 60 * 60;
+
+export const metadata: Metadata = {
+  title: "AI Market Intelligence",
+  description:
+    "A market memo generated from deterministic factor payloads — regime, breadth, and drawdown pressure, with a stress research mode.",
+};
 
 export default async function AIMarketPage({ searchParams }: { searchParams?: { demo?: string } }) {
   const dataset = await getResearchDataset();

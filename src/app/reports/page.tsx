@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import StatusBadge from "@/components/badges/StatusBadge";
 import PageHeader from "@/components/layout/PageHeader";
@@ -10,6 +11,12 @@ import { getResearchDataset } from "@/lib/research";
 import { num, pct, pctPlain } from "@/lib/utils/format";
 
 export const revalidate = 60 * 60;
+
+export const metadata: Metadata = {
+  title: "Reports",
+  description:
+    "Auto-generated research cards summarizing factor breadth, backtest evidence, and portfolio diagnostics.",
+};
 
 export default async function ReportsPage() {
   const { radarCandidates, signalConcentration, metadata, hotspots, modelPortfolio } = await getResearchDataset();

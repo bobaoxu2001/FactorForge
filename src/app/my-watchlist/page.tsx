@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import StatusBadge from "@/components/badges/StatusBadge";
@@ -8,6 +9,12 @@ import { getWatchlistFor } from "@/lib/persistence/watchlist";
 import { DEFAULT_SYMBOLS } from "@/data/watchlist";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "My Watchlist",
+  description:
+    "Saved research preferences and watchlist. Sign-in required; accounts store research preferences only.",
+};
 
 export default async function MyWatchlistPage() {
   const session = await getSession();

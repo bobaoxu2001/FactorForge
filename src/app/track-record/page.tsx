@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight, BadgeCheck, CalendarDays, ClipboardList, Eye, ShieldCheck, Trophy, type LucideIcon } from "lucide-react";
 import MetricCard from "@/components/cards/MetricCard";
@@ -9,6 +10,12 @@ import { buildPublicTrackRecord } from "@/lib/quant/publicTrackRecord";
 import { num, pct, pctPlain, usd } from "@/lib/utils/format";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Public Track Record",
+  description:
+    "A shareable receipt of the simulated paper ledger: strategy-by-strategy results, observation dates, current marks, and guardrails. Not a broker statement, not advice, no live trading.",
+};
 
 export default async function TrackRecordPage() {
   const dataset = await getResearchDataset({ paperLedger: true });

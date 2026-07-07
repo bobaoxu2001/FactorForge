@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import MetricCard from "@/components/cards/MetricCard";
 import StatusBadge from "@/components/badges/StatusBadge";
@@ -9,6 +10,12 @@ import MethodologyCallout from "@/components/research/MethodologyCallout";
 import { getResearchDataset } from "@/lib/research";
 
 export const revalidate = 60 * 60;
+
+export const metadata: Metadata = {
+  title: "Multi-Strategy Consensus",
+  description:
+    "Which names are held by more than one independent strategy right now — cross-strategy agreement as a research overlay. No broker, no live orders.",
+};
 
 export default async function ConsensusPage() {
   const { signalConsensus } = await getResearchDataset();
