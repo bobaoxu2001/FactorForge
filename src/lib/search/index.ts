@@ -1,3 +1,7 @@
+import { GLOSSARY } from "@/data/glossary";
+import { STRATEGY_CATALOG } from "@/data/strategyCatalog";
+import { UNIVERSE } from "@/data/watchlist";
+
 export interface SearchItem {
   title: string;
   href: string;
@@ -6,13 +10,27 @@ export interface SearchItem {
   keywords: string[];
 }
 
-export const SEARCH_ITEMS: SearchItem[] = [
+/**
+ * Curated route entries. Everything data-shaped (symbols, strategy detail
+ * pages, glossary terms) is derived below from its single source of truth —
+ * UNIVERSE, STRATEGY_CATALOG, GLOSSARY — so adding a symbol or a glossary
+ * entry makes it searchable automatically instead of silently drifting out
+ * of ⌘K. A guard test asserts the derived sections stay complete.
+ */
+const ROUTE_ITEMS: SearchItem[] = [
   {
     title: "Overview",
     href: "/",
     category: "Route",
     description: "Open-source AI-assisted quant research workbench overview.",
     keywords: ["home", "overview", "workbench", "demo", "safety", "maintainable"],
+  },
+  {
+    title: "Learn (Stocks 101)",
+    href: "/learn",
+    category: "Route",
+    description: "Plain-English guide to every quant term the platform uses.",
+    keywords: ["learn", "stocks 101", "glossary", "beginner", "education", "plain english"],
   },
   {
     title: "Data",
@@ -61,7 +79,14 @@ export const SEARCH_ITEMS: SearchItem[] = [
     href: "/ai-market",
     category: "Report",
     description: "Template or LLM market memo from deterministic factor payloads.",
-    keywords: ["llm", "template memo", "deepseek", "market memo", "prose"],
+    keywords: ["llm", "template memo", "deepseek", "market memo", "prose", "stress"],
+  },
+  {
+    title: "Market Hotspots",
+    href: "/hotspots",
+    category: "Route",
+    description: "Coverage-weighted catalyst intelligence and scenario research across themes.",
+    keywords: ["hotspots", "catalyst", "scenario", "theme", "news", "spacex", "pre-ipo"],
   },
   {
     title: "Paper Trading",
@@ -112,62 +137,54 @@ export const SEARCH_ITEMS: SearchItem[] = [
     description: "Protected cache diagnostics for backtest persistence and hit rates.",
     keywords: ["cache", "admin", "sqlite", "diagnostics", "protected"],
   },
-  {
-    title: "Quality Momentum Breakout",
-    href: "/strategies/vcp-tight-breakout",
-    category: "Strategy",
-    description: "VCP-style breakout strategy details and memo.",
-    keywords: ["vcp", "breakout", "nvda", "quality momentum"],
-  },
-  {
-    title: "ATR Channel Expansion",
-    href: "/strategies/keltner-atr-breakout",
-    category: "Strategy",
-    description: "Keltner/ATR breakout strategy details and memo.",
-    keywords: ["atr", "keltner", "breakout", "msft"],
-  },
-  {
-    title: "Defensive Trend Pullback",
-    href: "/strategies/sma200-rsi-pullback",
-    category: "Strategy",
-    description: "SMA200 + RSI pullback strategy details and memo.",
-    keywords: ["sma200", "rsi", "pullback", "aapl"],
-  },
-  {
-    title: "EMA Continuation Signal",
-    href: "/strategies/ema-trend-pullback",
-    category: "Strategy",
-    description: "EMA trend pullback strategy details and memo.",
-    keywords: ["ema", "trend", "pullback", "amzn"],
-  },
-  {
-    title: "Low-Volatility Rotation",
-    href: "/strategies/lowvol-rotation-proxy",
-    category: "Strategy",
-    description: "Low-volatility rotation proxy strategy details and memo.",
-    keywords: ["low vol", "rotation", "spy", "low-volatility"],
-  },
-  ...["AAPL", "MSFT", "NVDA", "GOOGL", "META", "AMZN", "TSLA", "SPY", "QQQ", "CVX"].map((symbol) => ({
-    title: symbol,
-    href: `/strategies?symbol=${symbol}`,
-    category: "Symbol" as const,
-    description: `Filter strategy results for ${symbol}.`,
-    keywords: [symbol.toLowerCase(), "symbol", "ticker", "watchlist"],
-  })),
-  {
-    title: "Sharpe ratio",
-    href: "/learn#sharpe",
-    category: "Glossary",
-    description: "Plain-English glossary entry for risk-adjusted return.",
-    keywords: ["sharpe", "risk adjusted", "glossary"],
-  },
-  {
-    title: "Drawdown",
-    href: "/learn#drawdown",
-    category: "Glossary",
-    description: "Plain-English glossary entry for peak-to-trough loss.",
-    keywords: ["drawdown", "loss", "risk", "glossary"],
-  },
+];
+
+/** One entry per strategy detail page, straight from the catalog. */
+const STRATEGY_ITEMS: SearchItem[] = STRATEGY_CATALOG.map((definition) => ({
+  title: definition.name,
+  href: `/strategies/${definition.id}`,
+  category: "Strategy" as const,
+  description: definition.description,
+  keywords: [definition.id, definition.type, definition.defaultSymbol.toLowerCase(), "strategy", "backtest"],
+}));
+
+/** Every universe constituent — searchable by ticker, company name, or sector. */
+const SYMBOL_ITEMS: SearchItem[] = UNIVERSE.map((constituent) => ({
+  title: constituent.symbol,
+  href: `/strategies?symbol=${constituent.symbol}`,
+  category: "Symbol" as const,
+  description: `${constituent.name} — filter strategy results for ${constituent.symbol}.`,
+  keywords: [
+    constituent.symbol.toLowerCase(),
+    constituent.name.toLowerCase(),
+    constituent.sector.toLowerCase(),
+    constituent.kind,
+    "symbol",
+    "ticker",
+    "watchlist",
+  ],
+}));
+
+/** Every glossary term — deep-links to its anchor on /learn. */
+const GLOSSARY_ITEMS: SearchItem[] = GLOSSARY.map((entry) => ({
+  title: entry.term,
+  href: `/learn#${entry.id}`,
+  category: "Glossary" as const,
+  description: entry.plain,
+  keywords: [
+    entry.id,
+    ...(entry.aliases ?? []).map((alias) => alias.toLowerCase()),
+    entry.category.toLowerCase(),
+    "glossary",
+    "learn",
+  ],
+}));
+
+export const SEARCH_ITEMS: SearchItem[] = [
+  ...ROUTE_ITEMS,
+  ...STRATEGY_ITEMS,
+  ...SYMBOL_ITEMS,
+  ...GLOSSARY_ITEMS,
 ];
 
 export function searchItems(query: string, limit = 8): SearchItem[] {
