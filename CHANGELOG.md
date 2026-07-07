@@ -27,6 +27,7 @@ This project follows a human-maintained changelog. There is no automated release
 
 ### Changed
 
+- Glossary deep-links now highlight their target: landing on `/learn#<id>` (from ⌘K search or an inline term link) lights up the matching card with a cyan border + glow via a `:target` rule, so the eye finds the definition instantly among ~30 cards.
 - README opening reframed FactorForge as an open-source AI-assisted quantitative research workbench.
 - Fixed subject-verb agreement in the `/consensus` page subtitle.
 - Multi-agent polish pass: navigation grouping and "in plain English" UX refinements, added trading/risk metric depth, a reliability guard with broader test coverage (test suite 219 → 229 across 52 files), and a documentation reconciliation — README/CHANGELOG/ROADMAP and the in-app `/oss` page now reflect the current route set (`/hotspots`, `/simulator`, `/track-record`, `/consensus`) and the read-only Alpaca paper mirror, with stale test counts corrected throughout.

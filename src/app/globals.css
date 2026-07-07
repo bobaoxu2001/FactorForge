@@ -168,3 +168,10 @@ html, body {
   pointer-events: none;
   background: radial-gradient(circle, rgba(34, 211, 238, 0.10), transparent 70%);
 }
+
+/* Glossary deep-link highlight: ⌘K search and inline <Term> links land on
+   /learn#<id>; light up the targeted card so the eye finds it instantly. */
+article:target {
+  border-color: rgba(34, 211, 238, 0.55);
+  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.35), 0 0 28px rgba(34, 211, 238, 0.12);
+}
