@@ -1,10 +1,8 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import AppShell from "@/components/layout/AppShell";
+import { SITE_URL } from "@/lib/config/site";
 
-// Public origin for absolute metadata/OpenGraph URLs. Defaults to the live
-// deployment so social cards resolve correctly even when SITE_URL is unset.
-const SITE_URL = process.env.SITE_URL ?? "https://factor-forge-ashy.vercel.app";
 const TITLE = "FactorForge — AI Quant Research Lab";
 const DESCRIPTION =
   "AI-powered stock strategy research platform for factor discovery, backtesting, market stress analysis, hotspot monitoring, and simulated model-portfolio observation. Research only — not investment advice.";

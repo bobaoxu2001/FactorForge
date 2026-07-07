@@ -377,7 +377,7 @@ Security notes:
 
 ## Testing
 
-247 tests across 52 files under vitest + jsdom:
+252 tests across 53 files under vitest + jsdom:
 
 - **Engine** — backtest fees + execution semantics, indicators, radar verdict logic, paper-trading risk-budget transitions + N_eff slot cap, portfolio engine (Pearson, calendar intersection, score-weighted blend, phase-shifted decorrelation).
 - **Concentration** — `effectiveBets` / `concentrationLevel` math (monotonicity, bounds), the correlation gate demoting near-duplicate candidates, and the shared pairwise-correlation builder.
@@ -394,6 +394,7 @@ Security notes:
 - **Env validation** — production fail-fast on a missing session secret, dev warnings, feature-flag detection from optional keys, and the distributed rate-limit detection + prod warning.
 - **Trade simulator engine** — pure portfolio math for the browser desk: buy/sell validation and immutability, cost-basis averaging, realized P&L on partial sells, snapshot marking with price-gap degradation, open-book analytics (winners/losers, concentration, invested weight), realized trading stats (win rate, profit factor, expectancy, best/worst closed trade, scratch-trade handling), and sector-exposure grouping (weights sum to 1, unknown-sector bucket).
 - **Search index** — ⌘K relevance scoring plus drift guards asserting every universe symbol, catalog strategy, and glossary entry stays searchable, key routes are indexed, and hrefs are unique.
+- **Sitemap** — every public route and catalog-derived strategy page is listed, protected surfaces never leak in, urls are unique on one origin, and the sitemap covers everything the ⌘K search links to.
 - **Pipeline snapshot** — the full factors → backtests → radar → portfolio → concentration run against the committed real-data fixture, built once and shared across invariant checks.
 
 Run them locally with `npm test`. CI runs the same command on every push and PR; see [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
