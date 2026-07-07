@@ -13,9 +13,9 @@ concurrency:
 
 jobs:
   verify:
-    name: Lint · Typecheck · Test
+    name: Lint · Typecheck · Test · Build
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -37,3 +37,10 @@ jobs:
 
       - name: Test
         run: npm test
+
+      # Catch build-only breaks (metadata, static generation, route conflicts)
+      # in CI instead of at deploy time. Runs without provider keys on purpose:
+      # the build must succeed on labeled fallback data alone, same as a
+      # keyless clone.
+      - name: Build
+        run: npm run build

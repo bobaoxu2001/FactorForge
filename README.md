@@ -405,7 +405,7 @@ Run them locally with `npm test`. CI runs the same command on every push and PR;
 
 **CI**
 
-GitHub Actions runs `npm ci`, `npm run lint`, `npm run typecheck`, and `npm test` on pushes and pull requests targeting `main`. The workflow intentionally avoids provider keys and broker integrations; provider failure paths should be covered with mocks and fixtures.
+GitHub Actions runs `npm ci`, `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build` on pushes and pull requests targeting `main` — so build-only breaks (metadata, static generation, route conflicts) fail in CI instead of at deploy time. The workflow intentionally avoids provider keys and broker integrations; provider failure paths should be covered with mocks and fixtures.
 
 **Tests**
 
