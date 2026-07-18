@@ -377,7 +377,7 @@ Security notes:
 
 ## Testing
 
-252 tests across 53 files under vitest + jsdom:
+271 tests across 56 files under vitest + jsdom:
 
 - **Engine** — backtest fees + execution semantics, indicators, radar verdict logic, paper-trading risk-budget transitions + N_eff slot cap, portfolio engine (Pearson, calendar intersection, score-weighted blend, phase-shifted decorrelation).
 - **Concentration** — `effectiveBets` / `concentrationLevel` math (monotonicity, bounds), the correlation gate demoting near-duplicate candidates, and the shared pairwise-correlation builder.
@@ -387,7 +387,7 @@ Security notes:
 - **Multi-strategy consensus** — `buildSignalConsensus` counting only currently-held symbols, ranking resonance ahead of single-strategy picks, the distinct-strategy-type tie-break, leg averaging + best-first ordering, and honest verdicts for the nothing-held and no-confirmation cases.
 - **Components** — StatusBadge (including the `idle` state introduced when fixing the zero-observation risk-budget bug), MetricCard tone classes, CorrelationMatrix rendering + empty state.
 - **Learn / glossary** — definition integrity (unique ids, no jargon creep, alias-collision guard), case-insensitive `lookupTerm`, the `<Term>` component (default + custom label, click-to-reveal explanation, alias resolution, graceful fallback for unknown terms), and the `<PlainEnglish>` page callout (default + custom title, composes with inline `<Term>`).
-- **Data providers** — Yahoo and fallback adapters.
+- **Data providers** — Yahoo, Polygon, and Alpha Vantage adapters over a mocked `fetch` (parsing, honest adjusted/unadjusted labeling, range cutoffs, non-finite row dropping, quota/error payloads, missing-key and too-few-bars throws), the fallback adapter, the composite fan-out cascade (provider priority, missing-key skips, synthetic fallback only after every real tier is exhausted), and the watchlist fan-out (mixed-provider universes, partial-universe fallback labeling, cache retry after a failed fetch, the `MARKET_FETCH_CONCURRENCY` cap, and the snapshot wait-budget path).
 - **Broker mirror** — the read-only Alpaca paper sync over a mocked `fetch`: disabled-when-unconfigured, the GET-only account/positions/orders happy path, order-limit clamping (never emits `limit=NaN`, bounded to Alpaca's 1–50 window), and the error-snapshot path when Alpaca rejects.
 - **Auth** — bcrypt round-trip, username-collision + validation rules, the bcrypt 72-byte password guard, and per-user watchlist isolation.
 - **Rate-limit stores** — in-memory fixed-window determinism, plus the Upstash adapter over a mocked `fetch`: allow/block paths, retry-after from TTL, and fail-open on both unreachable and non-2xx responses.

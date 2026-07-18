@@ -4,11 +4,9 @@ This roadmap is intentionally scoped to known project directions. It does not im
 
 ## Near term
 
-- Reduce repeated live-provider work during static builds by memoizing or restructuring `getResearchDataset` calls.
-- Improve visual honesty for negative performance metrics so losses and gains use the correct tone everywhere.
-- Expand provider fallback tests for mixed-provider and partial-universe scenarios.
-- Add maintainer notes for fixture refresh review and snapshot drift.
 - Keep README and route/module maps synchronized as features move.
+
+Recently completed (see git history for details): `getResearchDataset` build-time memoization; sign-aware gain/loss tones (`signedTone` / `signedText` in `src/lib/utils/format.ts`) so losses never render in the gain color; watchlist fan-out tests for mixed-provider and partial-universe scenarios; deterministic Polygon and Alpha Vantage parser tests; fixture refresh maintainer notes in `docs/fixture_refresh.md`.
 
 ## Research engine
 
@@ -20,8 +18,6 @@ This roadmap is intentionally scoped to known project directions. It does not im
 ## Data and providers
 
 - Improve provider observability with per-provider hit/failure summaries that do not expose credentials.
-- Add deterministic tests for Yahoo, Polygon, Alpha Vantage, and fallback transitions.
-- Document fixture refresh criteria and expected review steps.
 
 ## Maintainer operations
 

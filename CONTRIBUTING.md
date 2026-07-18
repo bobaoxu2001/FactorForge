@@ -40,7 +40,7 @@ npm test
 npm run build
 ```
 
-Use `npm run fixture:refresh` only when intentionally updating the committed market-data fixture. Review fixture diffs carefully because they affect snapshot-style research invariants.
+Use `npm run fixture:refresh` only when intentionally updating the committed market-data fixture. Review fixture diffs carefully because they affect snapshot-style research invariants — see [docs/fixture_refresh.md](docs/fixture_refresh.md) for the refresh criteria and review steps.
 
 ## Testing expectations
 
