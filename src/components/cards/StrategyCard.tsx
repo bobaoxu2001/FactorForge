@@ -5,7 +5,7 @@ import type { StrategyIntel } from "@/lib/quant/strategyIntel";
 import MetricCard from "./MetricCard";
 import StatusBadge from "@/components/badges/StatusBadge";
 import StressBadge from "@/components/badges/StressBadge";
-import { pct, num } from "@/lib/utils/format";
+import { pct, num, signedTone } from "@/lib/utils/format";
 
 const GATE_STYLE: Record<StrategyIntel["researchGate"]["kind"], string> = {
   observe: "border-emerald-400/35 bg-emerald-500/12 text-emerald-200",
@@ -46,7 +46,7 @@ export default function StrategyCard({
         )}
       </div>
       <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <MetricCard label="Annual" value={pct(result.metrics.annualizedReturn)} tone="positive" />
+        <MetricCard label="Annual" value={pct(result.metrics.annualizedReturn)} tone={signedTone(result.metrics.annualizedReturn)} />
         <MetricCard label="Max DD" value={pct(result.metrics.maxDrawdown)} tone="negative" />
         {diagnostics
           ? <MetricCard label="Current DD" value={pct(diagnostics.currentDrawdown)} tone={diagnostics.currentDrawdown < -0.05 ? "negative" : "default"} />

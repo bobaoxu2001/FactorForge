@@ -25,3 +25,13 @@ export const compact = (value: number) =>
   isFiniteNumber(value)
     ? Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(value)
     : DASH;
+
+// Sign-aware tones for performance metrics. A metric that can be negative must
+// never hardcode the gain color — route it through one of these so losses always
+// render in the loss tone.
+
+export const signedTone = (value: number): "default" | "positive" | "negative" =>
+  isFiniteNumber(value) ? (value >= 0 ? "positive" : "negative") : "default";
+
+export const signedText = (value: number) =>
+  isFiniteNumber(value) ? (value >= 0 ? "text-emerald-300" : "text-rose-300") : "text-ink";

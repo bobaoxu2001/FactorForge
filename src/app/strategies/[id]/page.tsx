@@ -26,7 +26,7 @@ import { generateStrategyExplanation } from "@/lib/ai/strategyExplainer";
 import { getResearchDataset, runStrategyAcrossSymbols } from "@/lib/research";
 import SymbolSwitcher from "@/components/research/SymbolSwitcher";
 import PlainEnglish from "@/components/learn/PlainEnglish";
-import { num, pct, pctPlain, usd } from "@/lib/utils/format";
+import { num, pct, pctPlain, signedTone, usd } from "@/lib/utils/format";
 
 // One-line, jargon-free description of what each strategy family is trying to do.
 const STRATEGY_TYPE_PLAIN: Record<string, string> = {
@@ -179,10 +179,10 @@ export default async function StrategyDetailPage({
       </section>
 
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <MetricCard label="Total return" value={pct(result.metrics.totalReturn)} tone="positive" termId="return" />
-        <MetricCard label="Annualized" value={pct(result.metrics.annualizedReturn)} tone="positive" termId="annualized" />
+        <MetricCard label="Total return" value={pct(result.metrics.totalReturn)} tone={signedTone(result.metrics.totalReturn)} termId="return" />
+        <MetricCard label="Annualized" value={pct(result.metrics.annualizedReturn)} tone={signedTone(result.metrics.annualizedReturn)} termId="annualized" />
         <MetricCard label="Benchmark" value={pct(result.metrics.benchmarkReturn)} termId="benchmark" />
-        <MetricCard label="Excess" value={pct(result.metrics.excessReturn)} tone="accent" />
+        <MetricCard label="Excess" value={pct(result.metrics.excessReturn)} tone={signedTone(result.metrics.excessReturn)} />
         <MetricCard label="Max drawdown" value={pct(result.metrics.maxDrawdown)} termId="drawdown" />
         <MetricCard label="Sharpe" value={num(result.metrics.sharpe)} termId="sharpe" />
         <MetricCard label="Win rate" value={pctPlain(result.metrics.winRate)} termId="winrate" />

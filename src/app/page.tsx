@@ -28,7 +28,7 @@ import StressInsightGrid from "@/components/research/StressInsightGrid";
 import SelloffMemoBlock from "@/components/research/SelloffMemoBlock";
 import { getResearchDataset } from "@/lib/research";
 import { sectorCount, sectorOf } from "@/data/watchlist";
-import { pct, pctPlain, num } from "@/lib/utils/format";
+import { pct, pctPlain, num, signedText, signedTone } from "@/lib/utils/format";
 import type { EquityPoint } from "@/types/backtest";
 import type { HistoricalPriceResult } from "@/types/market";
 import type { RadarCandidate } from "@/types/strategy";
@@ -318,7 +318,7 @@ export default async function HomePage() {
                       </Link>
                       <div className="mt-0.5 text-[11px] text-ink-soft">{candidate.result.symbol}</div>
                     </td>
-                    <td className="num px-4 py-3 text-right text-emerald-300">{pct(candidate.result.metrics.annualizedReturn)}</td>
+                    <td className={`num px-4 py-3 text-right ${signedText(candidate.result.metrics.annualizedReturn)}`}>{pct(candidate.result.metrics.annualizedReturn)}</td>
                     <td className="num px-4 py-3 text-right text-rose-300">{pct(candidate.result.metrics.maxDrawdown)}</td>
                     <td className="num px-4 py-3 text-right text-ink">{num(candidate.result.metrics.sharpe)}</td>
                     <td className="num px-4 py-3 text-right text-ink">{candidate.score}</td>
@@ -539,7 +539,7 @@ function LiveResearchCase({ candidate, fallbackCount }: { candidate: RadarCandid
       </div>
 
       <div className="relative mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <CaseMetric label="Annualized" value={pct(result.metrics.annualizedReturn)} tone="positive" />
+        <CaseMetric label="Annualized" value={pct(result.metrics.annualizedReturn)} tone={signedTone(result.metrics.annualizedReturn)} />
         <CaseMetric label="Sharpe" value={num(result.metrics.sharpe)} />
         <CaseMetric label="Max DD" value={pct(result.metrics.maxDrawdown)} tone="negative" />
         <CaseMetric label="Win rate" value={pctPlain(result.metrics.winRate)} />

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import MetricCard from "@/components/cards/MetricCard";
-import { num, pct, pctPlain, usd } from "@/lib/utils/format";
+import { num, pct, pctPlain, signedTone, usd } from "@/lib/utils/format";
 import {
   buy,
   sell,
@@ -224,7 +224,7 @@ export default function SimTradingDesk({ quotes, asOf, anyFallback }: Props) {
           <MetricCard
             label="Best position"
             value={bookSummary.bestPosition ? pct(bookSummary.bestPosition.unrealizedPct) : "—"}
-            tone="positive"
+            tone={bookSummary.bestPosition ? signedTone(bookSummary.bestPosition.unrealizedPct) : "default"}
             hint={bookSummary.bestPosition?.symbol}
           />
           <MetricCard

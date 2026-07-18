@@ -9,7 +9,7 @@ import Term from "@/components/learn/Term";
 import MethodologyCallout from "@/components/research/MethodologyCallout";
 import { getResearchDataset } from "@/lib/research";
 import { concentrationLevel } from "@/lib/quant/signalConcentration";
-import { num, pct, pctPlain } from "@/lib/utils/format";
+import { num, pct, pctPlain, signedTone } from "@/lib/utils/format";
 
 export const revalidate = 60 * 60;
 
@@ -84,8 +84,8 @@ export default async function PortfolioPage() {
       />
 
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <MetricCard label="Total return" value={pct(portfolio.metrics.totalReturn)} tone="positive" termId="return" />
-        <MetricCard label="Annualized" value={pct(portfolio.metrics.annualizedReturn)} tone="positive" termId="annualized" />
+        <MetricCard label="Total return" value={pct(portfolio.metrics.totalReturn)} tone={signedTone(portfolio.metrics.totalReturn)} termId="return" />
+        <MetricCard label="Annualized" value={pct(portfolio.metrics.annualizedReturn)} tone={signedTone(portfolio.metrics.annualizedReturn)} termId="annualized" />
         <MetricCard label={`vs ${portfolio.benchmarkSymbol}`} value={pct(portfolio.metrics.excessReturn)} tone="accent" termId="benchmark" />
         <MetricCard label="Sharpe" value={num(portfolio.metrics.sharpe)} termId="sharpe" />
         <MetricCard label="Volatility" value={pctPlain(portfolio.metrics.volatility)} termId="volatility" />
