@@ -18,6 +18,7 @@ export const PUBLIC_ROUTES = [
   "/consensus",
   "/portfolio",
   "/ai-market",
+  "/picks",
   "/hotspots",
   "/paper-trading",
   "/simulator",

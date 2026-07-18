@@ -19,6 +19,7 @@ import {
   Server,
   Settings,
   ShieldCheck,
+  Sparkles,
   Star,
   Target,
   Trophy,
@@ -55,6 +56,7 @@ const sections: NavSection[] = [
     label: "Intelligence",
     items: [
       { href: "/ai-market", label: "AI Market", icon: BrainCircuit },
+      { href: "/picks", label: "AI Stock Picks", icon: Sparkles },
       { href: "/hotspots", label: "Market Hotspots", icon: Flame },
     ],
   },

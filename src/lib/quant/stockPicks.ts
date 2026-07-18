@@ -1,0 +1,329 @@
+import type { FactorSnapshot } from "@/types/market";
+import type { StressTone } from "@/lib/quant/marketStress";
+import type { SignalConsensusReport } from "@/lib/quant/signalConsensus";
+import { constituentOf, type Sector } from "@/data/watchlist";
+
+/**
+ * Cross-sectional stock selection — "which universe names look most promising
+ * right now, and why". Same contract as every other engine in the lab:
+ *
+ *  - Every score is deterministic and computed here, from the same factor
+ *    snapshots, consensus grid, and stress regime the rest of the platform
+ *    already shows. The optional LLM layer (stockPickNote) writes prose ON TOP
+ *    of this report and never changes a number.
+ *  - The universe is OHLCV-only, so this is TECHNICAL evidence: momentum,
+ *    trend, volatility, volume, and multi-strategy confirmation. There is no
+ *    fundamental data (earnings, valuation multiples) — the report says so
+ *    instead of pretending. "Potential" here means cross-sectional technical
+ *    strength, not intrinsic value.
+ *  - Benchmarks (SPY/QQQ) are excluded: an index ETF is a measuring stick,
+ *    not a pick.
+ */
+
+export type PickTier = "prime watch" | "constructive" | "monitor";
+
+export type PickComponentKey =
+  | "momentum"
+  | "trend"
+  | "stability"
+  | "overheat"
+  | "volume"
+  | "evidence";
+
+export interface PickComponent {
+  key: PickComponentKey;
+  label: string;
+  /** 0–100, cross-sectional where applicable. */
+  score: number;
+  /** Regime-dependent weight; all six weights sum to 1. */
+  weight: number;
+  /** Plain-English one-liner of what the score is based on. */
+  detail: string;
+}
+
+export interface StockPick {
+  symbol: string;
+  name: string;
+  sector: Sector;
+  rank: number;
+  /** Weighted blend of the six components, 0–100. */
+  compositeScore: number;
+  tier: PickTier;
+  components: PickComponent[];
+  /** How many independent strategies currently hold this name. */
+  heldByStrategies: number;
+  strategyTypes: string[];
+  isFallbackData: boolean;
+  caveats: string[];
+}
+
+export interface StockPickReport {
+  asOf: string;
+  regime: StressTone;
+  /** Why the weights look the way they do under this regime. */
+  regimeNote: string;
+  weights: Record<PickComponentKey, number>;
+  /** Ranked picks, best first. Stocks only — never benchmark ETFs. */
+  picks: StockPick[];
+  coverage: {
+    scanned: number;
+    scored: number;
+    excluded: number;
+    realData: number;
+    fallbackData: number;
+  };
+  verdict: string;
+  methodology: string[];
+}
+
+export interface StockPickInputs {
+  factors: FactorSnapshot[];
+  consensus: SignalConsensusReport;
+  regime: { regime: StressTone; stressScore: number };
+  generatedAt: string;
+}
+
+const clamp = (value: number, min = 0, max = 100) => Math.min(max, Math.max(min, value));
+
+/**
+ * Regime-adaptive weights. In a stable tape, cross-sectional momentum carries
+ * the most information; under stress, low realized volatility and independent
+ * strategy confirmation matter more than chasing what ran. Each row sums to 1.
+ */
+const REGIME_WEIGHTS: Record<StressTone, Record<PickComponentKey, number>> = {
+  stable: { momentum: 0.3, trend: 0.2, stability: 0.1, overheat: 0.1, volume: 0.1, evidence: 0.2 },
+  caution: { momentum: 0.22, trend: 0.2, stability: 0.18, overheat: 0.12, volume: 0.08, evidence: 0.2 },
+  stress: { momentum: 0.12, trend: 0.18, stability: 0.3, overheat: 0.12, volume: 0.08, evidence: 0.2 },
+};
+
+const REGIME_NOTES: Record<StressTone, string> = {
+  stable: "Stable regime — momentum and trend carry the most weight; strength is rewarded.",
+  caution: "Caution regime — weights shift toward realized stability while momentum still counts.",
+  stress: "Stress regime — low volatility is weighted heaviest; chasing recent winners is de-emphasized.",
+};
+
+/**
+ * Percentile rank (0–100) of `value` within `values` (average rank for ties).
+ * A single-element universe scores 50 — no cross-section, no information.
+ */
+export function percentileRank(value: number, values: number[]): number {
+  if (values.length <= 1) return 50;
+  let below = 0;
+  let equal = 0;
+  for (const other of values) {
+    if (other < value) below += 1;
+    else if (other === value) equal += 1;
+  }
+  return ((below + (equal - 1) / 2) / (values.length - 1)) * 100;
+}
+
+interface ScoredSnapshot {
+  snapshot: FactorSnapshot;
+  momentum20d: number;
+  momentum60d: number;
+  volatility20d: number;
+  rsi14: number;
+}
+
+export function buildStockPicks(inputs: StockPickInputs): StockPickReport {
+  const { factors, consensus, regime, generatedAt } = inputs;
+  const weights = REGIME_WEIGHTS[regime.regime];
+
+  // Only single-name stocks with a complete factor row enter the cross-section.
+  const stockSnapshots = factors.filter((f) => constituentOf(f.symbol)?.kind === "stock");
+  const scored: ScoredSnapshot[] = stockSnapshots
+    .filter(
+      (f) =>
+        f.momentum20d !== null && f.momentum60d !== null && f.volatility20d !== null && f.rsi14 !== null,
+    )
+    .map((f) => ({
+      snapshot: f,
+      momentum20d: f.momentum20d as number,
+      momentum60d: f.momentum60d as number,
+      volatility20d: f.volatility20d as number,
+      rsi14: f.rsi14 as number,
+    }));
+
+  const mom60s = scored.map((s) => s.momentum60d);
+  const vols = scored.map((s) => s.volatility20d);
+  const consensusBySymbol = new Map(consensus.picks.map((pick) => [pick.symbol, pick]));
+
+  const picks = scored
+    .map((s) => buildPick(s, { weights, mom60s, vols, consensusBySymbol }))
+    .sort((a, b) => b.compositeScore - a.compositeScore)
+    .map((pick, index) => ({ ...pick, rank: index + 1 }));
+
+  const fallbackCount = scored.filter((s) => s.snapshot.isFallback).length;
+
+  return {
+    asOf: generatedAt,
+    regime: regime.regime,
+    regimeNote: REGIME_NOTES[regime.regime],
+    weights,
+    picks,
+    coverage: {
+      scanned: stockSnapshots.length,
+      scored: scored.length,
+      excluded: stockSnapshots.length - scored.length,
+      realData: scored.length - fallbackCount,
+      fallbackData: fallbackCount,
+    },
+    verdict: buildVerdict(picks, regime.regime),
+    methodology: [
+      "Scores are deterministic and computed from the same factor snapshots, consensus grid, and stress regime shown elsewhere in the lab — the AI note is prose on top and never changes a number.",
+      "Evidence is technical only (momentum, trend, volatility, volume, multi-strategy confirmation). The platform has no fundamental data, so no valuation claim is made.",
+      "Component weights adapt to the market-stress regime: stress shifts weight from momentum to realized stability.",
+      "Benchmark ETFs (SPY/QQQ) are excluded — they are measuring sticks, not picks.",
+      "A name on labeled fallback/demo data is capped at the monitor tier regardless of score.",
+      "High cross-sectional rank is not a return forecast and none of this is investment advice.",
+    ],
+  };
+}
+
+function buildPick(
+  s: ScoredSnapshot,
+  ctx: {
+    weights: Record<PickComponentKey, number>;
+    mom60s: number[];
+    vols: number[];
+    consensusBySymbol: Map<string, { agreeCount: number; strategyTypes: string[] }>;
+  },
+): StockPick {
+  const { snapshot } = s;
+  const constituent = constituentOf(snapshot.symbol);
+  const consensusPick = ctx.consensusBySymbol.get(snapshot.symbol);
+  const heldBy = consensusPick?.agreeCount ?? 0;
+
+  const momentumScore = percentileRank(s.momentum60d, ctx.mom60s);
+  const trendScore = snapshot.aboveSma200 ? 100 : 0;
+  const stabilityScore = 100 - percentileRank(s.volatility20d, ctx.vols);
+  const overheatScore = rsiBalanceScore(s.rsi14);
+  const volumeScore = volumeConfirmationScore(snapshot.volumeSurge);
+  const evidenceScore = heldBy >= 3 ? 100 : heldBy === 2 ? 80 : heldBy === 1 ? 50 : 0;
+
+  const components: PickComponent[] = [
+    {
+      key: "momentum",
+      label: "Momentum",
+      score: momentumScore,
+      weight: ctx.weights.momentum,
+      detail: `60-day return ${fmtPct(s.momentum60d)} — cross-sectional percentile vs the universe.`,
+    },
+    {
+      key: "trend",
+      label: "Trend",
+      score: trendScore,
+      weight: ctx.weights.trend,
+      detail: snapshot.aboveSma200 ? "Trading above its 200-day average." : "Trading below its 200-day average.",
+    },
+    {
+      key: "stability",
+      label: "Stability",
+      score: stabilityScore,
+      weight: ctx.weights.stability,
+      detail: `20-day realized volatility ${fmtPct(s.volatility20d)} — lower than peers scores higher.`,
+    },
+    {
+      key: "overheat",
+      label: "Overheat guard",
+      score: overheatScore,
+      weight: ctx.weights.overheat,
+      detail: `RSI(14) at ${s.rsi14.toFixed(0)} — rewards the constructive band, penalizes chase and washout extremes.`,
+    },
+    {
+      key: "volume",
+      label: "Volume confirmation",
+      score: volumeScore,
+      weight: ctx.weights.volume,
+      detail:
+        snapshot.volumeSurge !== null
+          ? `Latest volume at ${snapshot.volumeSurge.toFixed(2)}× its 20-day average.`
+          : "No volume-average baseline available.",
+    },
+    {
+      key: "evidence",
+      label: "Strategy evidence",
+      score: evidenceScore,
+      weight: ctx.weights.evidence,
+      detail:
+        heldBy > 0
+          ? `Currently held by ${heldBy} independent ${heldBy === 1 ? "strategy" : "strategies"} (${(consensusPick?.strategyTypes ?? []).join(", ")}).`
+          : "No catalog strategy currently holds this name.",
+    },
+  ];
+
+  const compositeScore = Math.round(
+    components.reduce((sum, component) => sum + component.score * component.weight, 0),
+  );
+
+  const caveats = buildCaveats(s, heldBy, ctx.vols);
+  const tier: PickTier = snapshot.isFallback
+    ? "monitor"
+    : compositeScore >= 70
+      ? "prime watch"
+      : compositeScore >= 55
+        ? "constructive"
+        : "monitor";
+
+  return {
+    symbol: snapshot.symbol,
+    name: constituent?.name ?? snapshot.symbol,
+    sector: constituent?.sector ?? "Broad Market",
+    rank: 0,
+    compositeScore,
+    tier,
+    components,
+    heldByStrategies: heldBy,
+    strategyTypes: consensusPick?.strategyTypes ?? [],
+    isFallbackData: snapshot.isFallback,
+    caveats,
+  };
+}
+
+/**
+ * RSI balance: full marks inside the constructive 40–70 band, linear penalty
+ * outside it. An RSI of 85 (chase risk) or 20 (falling knife) scores low even
+ * if momentum looks great — "promising" should not mean "already vertical".
+ */
+export function rsiBalanceScore(rsi: number): number {
+  if (rsi >= 40 && rsi <= 70) return 100;
+  const distance = rsi < 40 ? 40 - rsi : rsi - 70;
+  return clamp(100 - distance * 4);
+}
+
+function volumeConfirmationScore(volumeSurge: number | null): number {
+  if (volumeSurge === null || !Number.isFinite(volumeSurge)) return 50;
+  return clamp(volumeSurge * 50);
+}
+
+function buildCaveats(s: ScoredSnapshot, heldBy: number, vols: number[]): string[] {
+  const caveats: string[] = [];
+  if (s.snapshot.isFallback) caveats.push("Built on labeled fallback/demo data — treat every number as illustrative.");
+  if (!s.snapshot.aboveSma200) caveats.push("Below its 200-day average — the long-term trend has not confirmed.");
+  if (s.rsi14 > 75) caveats.push(`RSI(14) at ${s.rsi14.toFixed(0)} — short-term overbought, entry chase risk.`);
+  if (s.rsi14 < 30) caveats.push(`RSI(14) at ${s.rsi14.toFixed(0)} — washout territory, wait for stabilization.`);
+  if (heldBy === 0) caveats.push("No independent strategy confirmation yet.");
+  if (percentileRank(s.volatility20d, vols) > 75)
+    caveats.push("Top-quartile realized volatility — position sizing matters more here.");
+  return caveats;
+}
+
+function buildVerdict(picks: StockPick[], regime: StressTone): string {
+  if (picks.length === 0) {
+    return "No universe name has a complete factor row to score — check the data page for provider coverage.";
+  }
+  const top = picks[0];
+  const prime = picks.filter((pick) => pick.tier === "prime watch").length;
+  const primeClause =
+    prime === 0
+      ? "no name clears the prime-watch bar"
+      : `${prime} ${prime === 1 ? "name clears" : "names clear"} the prime-watch bar`;
+  return (
+    `Under the ${regime} regime, ${primeClause}; ${top.symbol} (${top.name}) ranks first at ${top.compositeScore}/100. ` +
+    "Technical evidence only — not a return forecast, not investment advice."
+  );
+}
+
+function fmtPct(value: number): string {
+  return `${value >= 0 ? "+" : ""}${(value * 100).toFixed(1)}%`;
+}

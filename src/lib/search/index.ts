@@ -82,6 +82,13 @@ const ROUTE_ITEMS: SearchItem[] = [
     keywords: ["llm", "template memo", "deepseek", "market memo", "prose", "stress"],
   },
   {
+    title: "AI Stock Picks",
+    href: "/picks",
+    category: "Route",
+    description: "Model-ranked cross-sectional stock selection with regime-aware factor weights.",
+    keywords: ["picks", "stock picks", "selection", "screen", "ranking", "cross-sectional", "potential"],
+  },
+  {
     title: "Market Hotspots",
     href: "/hotspots",
     category: "Route",

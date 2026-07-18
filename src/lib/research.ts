@@ -32,6 +32,8 @@ import {
 } from "@/lib/quant/marketStress";
 import { buildHotspotReport } from "@/lib/agents/hotspotAgent";
 import type { HotspotAgentReport } from "@/lib/agents/types";
+import { buildStockPicks, type StockPickReport } from "@/lib/quant/stockPicks";
+import { generateStockPickNote, type StockPickNote } from "@/lib/ai/stockPickNote";
 import { createLogger } from "@/lib/observability/logger";
 
 const log = createLogger("research");
@@ -60,6 +62,8 @@ export interface ResearchDataset {
   factorStress: FactorStressGroup[];
   selloffMemo: SelloffMemo;
   hotspots: HotspotAgentReport;
+  stockPicks: StockPickReport;
+  stockPickNote: StockPickNote;
   metadata: {
     generatedAt: string;
     revalidateSeconds: number;
@@ -251,6 +255,19 @@ export async function buildResearchDatasetFromPrices(
     generatedAt,
   });
 
+  // 9. Cross-sectional stock selection over the same factor snapshots,
+  //    consensus grid, and regime read — deterministic scores + optional LLM
+  //    prose, same "numbers in code, prose on top" contract.
+  const stockPicks = buildStockPicks({
+    factors,
+    consensus: signalConsensus,
+    // The tone family (stress/caution/stable) drives the weight tilt; the
+    // finer risk-on/off regime label stays a display concern elsewhere.
+    regime: { regime: marketStress.tone, stressScore: marketStress.stressScore },
+    generatedAt,
+  });
+  const stockPickNote = await generateStockPickNote(stockPicks);
+
   const priceResults = Object.values(pricesBySymbol);
   return {
     pricesBySymbol,
@@ -274,6 +291,8 @@ export async function buildResearchDatasetFromPrices(
     factorStress,
     selloffMemo,
     hotspots,
+    stockPicks,
+    stockPickNote,
     metadata: {
       generatedAt,
       revalidateSeconds: RESEARCH_REVALIDATE_SECONDS,
