@@ -44,8 +44,9 @@ export async function generateStockPickNote(report: StockPickReport): Promise<St
         role: "system",
         content:
           "You are a quant desk analyst summarizing a deterministic cross-sectional stock screen for a RESEARCH workbench. " +
-          "The evidence is technical only (momentum, trend, volatility, volume, multi-strategy confirmation) — there is no fundamental data, and nothing here is investment advice or a return forecast. " +
-          "Cite only the numbers in the user payload; never invent scores, returns, or names. " +
+          "The evidence blends technicals (momentum, trend, volatility, volume, multi-strategy confirmation) with cross-sectional fundamentals (valuation and quality percentiles vs the universe). " +
+          "Value/quality are relative ranks, not intrinsic-value appraisals — never state a fair value, price target, or buy/sell recommendation; nothing here is investment advice or a return forecast. " +
+          "Cite only the numbers in the user payload; never invent scores, multiples, returns, or names. " +
           "Be sober and concrete. Respond ONLY with a valid JSON object using the exact schema requested.",
       },
       { role: "user", content: buildPrompt(report) },
@@ -83,6 +84,7 @@ function buildPrompt(report: StockPickReport): string {
     regime: report.regime,
     regimeNote: report.regimeNote,
     coverage: report.coverage,
+    fundamentals: { source: report.fundamentalsSource, asOf: report.fundamentalsAsOf },
     topPicks: report.picks.slice(0, 5).map((pick) => ({
       symbol: pick.symbol,
       name: pick.name,
@@ -91,6 +93,15 @@ function buildPrompt(report: StockPickReport): string {
       tier: pick.tier,
       heldByStrategies: pick.heldByStrategies,
       components: pick.components.map((c) => ({ label: c.label, score: Math.round(c.score) })),
+      fundamentals: pick.fundamentals
+        ? {
+            trailingPE: pick.fundamentals.trailingPE,
+            priceToBook: pick.fundamentals.priceToBook,
+            returnOnEquity: pick.fundamentals.returnOnEquity,
+            operatingMargin: pick.fundamentals.operatingMargin,
+            earningsGrowthYoY: pick.fundamentals.earningsGrowthYoY,
+          }
+        : null,
       caveats: pick.caveats,
     })),
   };
@@ -103,7 +114,7 @@ function buildPrompt(report: StockPickReport): string {
     "",
     "Constraints:",
     "- Use only the numbers in the payload. Do not fabricate values.",
-    "- Technical evidence only; never imply a valuation judgment or a return forecast.",
+    "- Value/quality are cross-sectional percentiles vs the universe; never state a fair value, price target, or return forecast.",
     "- This is research software, not investment advice — do not recommend buying or selling.",
     "- Plain prose, no markdown.",
     "",

@@ -1,7 +1,28 @@
 import { describe, expect, it } from "vitest";
 import type { FactorSnapshot } from "@/types/market";
 import type { SignalConsensusReport } from "@/lib/quant/signalConsensus";
+import type { FundamentalSnapshot } from "@/lib/data/fundamentals";
 import { buildStockPicks, percentileRank, rsiBalanceScore, type StockPickInputs } from "./stockPicks";
+
+function makeFundamentals(symbol: string, overrides: Partial<FundamentalSnapshot> = {}): FundamentalSnapshot {
+  return {
+    symbol,
+    asOf: "2026-07-18",
+    source: "yahoo",
+    trailingPE: 20,
+    forwardPE: 18,
+    priceToBook: 5,
+    evToEbitda: 15,
+    profitMargin: 0.2,
+    operatingMargin: 0.25,
+    returnOnEquity: 0.3,
+    revenueGrowthYoY: 0.1,
+    earningsGrowthYoY: 0.12,
+    dividendYield: 0.01,
+    marketCap: 1e12,
+    ...overrides,
+  };
+}
 
 function makeSnapshot(symbol: string, overrides: Partial<FactorSnapshot> = {}): FactorSnapshot {
   return {
@@ -144,6 +165,90 @@ describe("buildStockPicks", () => {
     const report = buildStockPicks(makeInputs());
     expect(report.verdict).toContain(report.picks[0].symbol);
     expect(report.verdict).toContain("not investment advice");
+  });
+});
+
+describe("buildStockPicks — fundamentals (value/quality)", () => {
+  it("ranks the cheaper name higher when technicals are identical", () => {
+    const factors = [makeSnapshot("AAPL"), makeSnapshot("MSFT")];
+    const report = buildStockPicks(
+      makeInputs({
+        factors,
+        fundamentals: {
+          AAPL: makeFundamentals("AAPL", { trailingPE: 12, priceToBook: 2, evToEbitda: 8 }),
+          MSFT: makeFundamentals("MSFT", { trailingPE: 45, priceToBook: 15, evToEbitda: 30 }),
+        },
+      }),
+    );
+    expect(report.picks[0].symbol).toBe("AAPL");
+    const valueOf = (symbol: string) =>
+      report.picks.find((p) => p.symbol === symbol)!.components.find((c) => c.key === "value")!.score;
+    expect(valueOf("AAPL")).toBeGreaterThan(valueOf("MSFT"));
+  });
+
+  it("ranks the more profitable name higher when technicals and valuation are identical", () => {
+    const factors = [makeSnapshot("AAPL"), makeSnapshot("MSFT")];
+    const report = buildStockPicks(
+      makeInputs({
+        factors,
+        fundamentals: {
+          AAPL: makeFundamentals("AAPL", { returnOnEquity: 0.45, operatingMargin: 0.4, earningsGrowthYoY: 0.3 }),
+          MSFT: makeFundamentals("MSFT", { returnOnEquity: 0.05, operatingMargin: 0.05, earningsGrowthYoY: -0.1 }),
+        },
+      }),
+    );
+    expect(report.picks[0].symbol).toBe("AAPL");
+  });
+
+  it("scores value/quality neutral with a caveat when a name has no fundamentals", () => {
+    const report = buildStockPicks(
+      makeInputs({
+        factors: [makeSnapshot("AAPL"), makeSnapshot("MSFT")],
+        fundamentals: { AAPL: makeFundamentals("AAPL") },
+      }),
+    );
+    const msft = report.picks.find((p) => p.symbol === "MSFT")!;
+    expect(msft.components.find((c) => c.key === "value")!.score).toBe(50);
+    expect(msft.components.find((c) => c.key === "quality")!.score).toBe(50);
+    expect(msft.caveats.some((c) => c.includes("No fundamentals"))).toBe(true);
+    expect(msft.fundamentals).toBeNull();
+    expect(report.coverage.withFundamentals).toBe(1);
+  });
+
+  it("labels snapshot-sourced fundamentals in the report and on the pick", () => {
+    const report = buildStockPicks(
+      makeInputs({
+        factors: [makeSnapshot("AAPL")],
+        fundamentals: { AAPL: makeFundamentals("AAPL", { source: "snapshot", asOf: "2026-07-01" }) },
+      }),
+    );
+    expect(report.fundamentalsSource).toBe("snapshot");
+    expect(report.fundamentalsAsOf).toBe("2026-07-01");
+    expect(report.picks[0].caveats.some((c) => c.includes("committed snapshot"))).toBe(true);
+  });
+
+  it("treats negative trailing earnings as unmeaningful, not as cheap", () => {
+    const report = buildStockPicks(
+      makeInputs({
+        factors: [makeSnapshot("AAPL"), makeSnapshot("MSFT")],
+        fundamentals: {
+          AAPL: makeFundamentals("AAPL", { trailingPE: -8, priceToBook: null, evToEbitda: null }),
+          MSFT: makeFundamentals("MSFT", { trailingPE: 25 }),
+        },
+      }),
+    );
+    const aapl = report.picks.find((p) => p.symbol === "AAPL")!;
+    expect(aapl.caveats.some((c) => c.includes("Negative trailing earnings"))).toBe(true);
+    // With PE<=0 and no PB/EV data, no valuation metric survives — the value
+    // component must not treat a negative multiple as infinitely cheap.
+    expect(aapl.components.find((c) => c.key === "value")!.detail).not.toContain("-8");
+  });
+
+  it("reports fundamentalsSource none when no fundamentals are supplied", () => {
+    const report = buildStockPicks(makeInputs());
+    expect(report.fundamentalsSource).toBe("none");
+    expect(report.fundamentalsAsOf).toBeNull();
+    expect(report.coverage.withFundamentals).toBe(0);
   });
 });
 

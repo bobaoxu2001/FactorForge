@@ -34,6 +34,7 @@ import { buildHotspotReport } from "@/lib/agents/hotspotAgent";
 import type { HotspotAgentReport } from "@/lib/agents/types";
 import { buildStockPicks, type StockPickReport } from "@/lib/quant/stockPicks";
 import { generateStockPickNote, type StockPickNote } from "@/lib/ai/stockPickNote";
+import { getSnapshotFundamentals, getUniverseFundamentals, type FundamentalsMap } from "@/lib/data/fundamentals";
 import { createLogger } from "@/lib/observability/logger";
 
 const log = createLogger("research");
@@ -99,7 +100,9 @@ export async function getResearchDataset(options: ResearchDatasetOptions = {}): 
 
   const promise = options.paperLedger
     ? getResearchDataset().then((dataset) => applyPaperLedger(dataset))
-    : getWatchlistPrices("3y").then((pricesBySymbol) => buildResearchDatasetFromPrices(pricesBySymbol, options));
+    : Promise.all([getWatchlistPrices("3y"), getUniverseFundamentals()]).then(([pricesBySymbol, fundamentals]) =>
+        buildResearchDatasetFromPrices(pricesBySymbol, options, fundamentals),
+      );
   datasetCache.set(cacheKey, { expiresAt: now + DATASET_CACHE_MAX_AGE_MS, promise });
 
   try {
@@ -145,6 +148,7 @@ async function applyPaperLedger(dataset: ResearchDataset): Promise<ResearchDatas
 export async function buildResearchDatasetFromPrices(
   pricesBySymbol: Record<string, HistoricalPriceResult>,
   options: ResearchDatasetOptions = {},
+  fundamentals?: FundamentalsMap,
 ): Promise<ResearchDataset> {
   // Run every strategy across the whole universe once. The best run per strategy
   // feeds the existing showcase; the full grid feeds multi-strategy consensus.
@@ -265,6 +269,9 @@ export async function buildResearchDatasetFromPrices(
     // finer risk-on/off regime label stays a display concern elsewhere.
     regime: { regime: marketStress.tone, stressScore: marketStress.stressScore },
     generatedAt,
+    // Offline callers (fixture tests, scripts) get the committed, labeled
+    // snapshot — same honest fallback the live facade degrades to.
+    fundamentals: fundamentals ?? getSnapshotFundamentals(),
   });
   const stockPickNote = await generateStockPickNote(stockPicks);
 

@@ -1,5 +1,7 @@
 # Fixture Refresh — Criteria and Review Steps
 
+> **Also applies to the fundamentals fixture** (`src/__fixtures__/fundamentals-snapshot.json`, refreshed via `npm run fundamentals:refresh`): same provenance rule (script only, never hand-edited), same isolation rule (own commit), and its drift guard lives in `fundamentals.test.ts` (keys must match the universe's single-name stocks). It backs the value/quality tiers on `/picks` when the live Yahoo quoteSummary tier is unavailable, always labeled with its as-of date. The script honors `HTTPS_PROXY` since some networks geo-block Yahoo endpoints.
+
 The committed market-data fixture (`src/__fixtures__/yahoo-snapshot.json`) is a real 3-year Yahoo OHLCV snapshot of the research universe. It powers three things:
 
 1. The **pipeline snapshot test** (`src/lib/research.snapshot.test.ts`) — the full factors → backtests → radar → portfolio → concentration run in CI, network-free.

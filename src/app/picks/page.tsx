@@ -15,7 +15,7 @@ export const revalidate = 60 * 60;
 export const metadata: Metadata = {
   title: "AI Stock Picks",
   description:
-    "Model-ranked cross-sectional stock selection: momentum, trend, stability, volume, and multi-strategy confirmation blended under the current market regime. Research only — no broker, no advice.",
+    "Model-ranked cross-sectional stock selection: momentum, trend, stability, volume, multi-strategy confirmation, and valuation/quality fundamentals blended under the current market regime. Research only — no broker, no advice.",
 };
 
 const TIER_STYLES: Record<PickTier, string> = {
@@ -35,15 +35,18 @@ export default async function PicksPage() {
       <PageHeader
         eyebrow="L4 Model Stock Selection"
         title="AI Stock Picks"
-        subtitle={`Every scored universe name, ranked by a regime-aware blend of momentum, trend, stability, overheat balance, volume confirmation, and multi-strategy evidence. The scores are deterministic; the AI writes the reading on top. Technical evidence only — no fundamental data, no broker, not investment advice.`}
+        subtitle={`Every scored universe name, ranked by a regime-aware blend of momentum, trend, stability, overheat balance, volume confirmation, multi-strategy evidence, and valuation/quality fundamentals. The scores are deterministic; the AI writes the reading on top. Relative evidence only — no price targets, no broker, not investment advice.`}
       />
 
       <PlainEnglish>
         This page answers &ldquo;which stocks look most promising right now, according to the model?&rdquo; — and shows the
-        receipts. Each name gets six sub-scores (how strongly it&apos;s been rising, whether the long-term trend agrees, how
-        calm it trades, whether it&apos;s already overheated, whether volume confirms, and how many independent strategies
-        hold it). The weights shift with the market <Term term="factor">regime</Term>: in a stressed market the model
-        prefers calm names over hot ones. <strong>High rank means strong technical evidence, not a prediction.</strong>
+        receipts. Each name gets eight sub-scores: six technical ones (how strongly it&apos;s been rising, whether the
+        long-term trend agrees, how calm it trades, whether it&apos;s already overheated, whether volume confirms, and how
+        many independent strategies hold it) plus two fundamental ones — <strong>value</strong> (is the price cheap
+        relative to earnings, book value, and cash flow vs peers?) and <strong>quality</strong> (is the business
+        profitable and growing vs peers?). The weights shift with the market <Term term="factor">regime</Term>: in a
+        stressed market the model prefers calm names over hot ones.{" "}
+        <strong>High rank means strong relative evidence, not a prediction.</strong>
       </PlainEnglish>
 
       <MethodologyCallout items={stockPicks.methodology} />
@@ -64,6 +67,18 @@ export default async function PicksPage() {
           <MetricCard label="Prime watch" value={String(picks.filter((p) => p.tier === "prime watch").length)} tone="accent" hint="Score ≥ 70 on real data" />
           <MetricCard label="Regime" value={regime} hint={regimeNote.split("—")[1]?.trim() ?? regimeNote} />
         </div>
+
+        <p className="mt-4 text-[12px] leading-relaxed text-ink-soft">
+          Fundamentals: {coverage.withFundamentals}/{coverage.scored} scored names covered ·{" "}
+          {stockPicks.fundamentalsSource === "yahoo"
+            ? "live Yahoo quoteSummary"
+            : stockPicks.fundamentalsSource === "snapshot"
+              ? "committed snapshot (labeled, not live)"
+              : stockPicks.fundamentalsSource === "mixed"
+                ? "mixed live + snapshot"
+                : "unavailable — value/quality scored neutral"}
+          {stockPicks.fundamentalsAsOf ? ` · as of ${stockPicks.fundamentalsAsOf}` : ""}
+        </p>
       </section>
 
       <section className="card p-5">
@@ -123,8 +138,9 @@ export default async function PicksPage() {
       )}
 
       <p className="text-[12px] leading-relaxed text-ink-soft">
-        Research software only. The screen ranks technical evidence over a 28-name universe; it does not know
-        earnings, valuations, or news, places no trades, and is not investment advice. Cross-check any name on{" "}
+        Research software only. The screen ranks relative evidence — technicals plus valuation/quality fundamentals —
+        over a 28-name universe. It does not know news or forward guidance, computes no fair value or price target,
+        places no trades, and is not investment advice. Cross-check any name on{" "}
         <Link href="/consensus" className="text-ink-muted underline decoration-dotted hover:text-ink">consensus</Link>,{" "}
         <Link href="/factors" className="text-ink-muted underline decoration-dotted hover:text-ink">factors</Link>, and{" "}
         <Link href="/data" className="text-ink-muted underline decoration-dotted hover:text-ink">data provenance</Link> before drawing conclusions.
@@ -187,11 +203,36 @@ function PickCard({ pick }: { pick: StockPick }) {
         ))}
       </div>
 
+      {pick.fundamentals && (
+        <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 rounded-2xl border border-line bg-white/[0.03] px-3.5 py-2.5">
+          <FundamentalStat label="Trailing P/E" value={ratio(pick.fundamentals.trailingPE)} />
+          <FundamentalStat label="P/B" value={ratio(pick.fundamentals.priceToBook)} />
+          <FundamentalStat label="ROE" value={pctOf(pick.fundamentals.returnOnEquity)} />
+          <FundamentalStat label="Op margin" value={pctOf(pick.fundamentals.operatingMargin)} />
+          <FundamentalStat label="Rev growth" value={pctOf(pick.fundamentals.revenueGrowthYoY)} />
+          <FundamentalStat label="Div yield" value={pctOf(pick.fundamentals.dividendYield)} />
+          <span className="ml-auto text-[10.5px] uppercase tracking-[0.14em] text-ink-soft">
+            {pick.fundamentals.source === "yahoo" ? "Yahoo quoteSummary" : `snapshot · ${pick.fundamentals.asOf}`}
+          </span>
+        </div>
+      )}
+
       {pick.caveats.length > 0 && (
         <div className="mt-4 rounded-2xl border border-amber-300/18 bg-amber-300/[0.05] p-3 text-[12px] leading-relaxed text-amber-100/85">
           <span className="font-semibold">Caveats:</span> {pick.caveats.join(" ")}
         </div>
       )}
     </article>
+  );
+}
+
+const ratio = (value: number | null) => (value !== null ? value.toFixed(1) : "—");
+const pctOf = (value: number | null) => (value !== null ? `${(value * 100).toFixed(1)}%` : "—");
+
+function FundamentalStat({ label, value }: { label: string; value: string }) {
+  return (
+    <span className="text-[11.5px] text-ink-soft">
+      {label} <span className="num font-medium text-ink-muted">{value}</span>
+    </span>
   );
 }

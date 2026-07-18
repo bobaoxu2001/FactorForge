@@ -27,7 +27,7 @@ Public demo mode is intentionally safe: market-data and LLM keys are optional, m
 | **Model Portfolio Performance Since May** | A deterministic, equal-weighted blend of the top-ranked research strategies, normalized on the start date and benchmarked against SPY/QQQ. Simulated research portfolio only — not a real-money account. |
 | **Market Stress Mode** | A selloff/stress research view (`/ai-market?demo=stress`) that diagnoses market regime, breadth deterioration, and drawdown pressure with a stress-aware research memo. |
 | **Market Hotspots & Scenario Research** | Configured catalyst intelligence (`/hotspots`) — coverage-weighted hotspot signals and scenario forecasts across themes, with private labeling for pre-IPO names. |
-| **AI Stock Picks** | Model-ranked cross-sectional selection (`/picks`) — every scored universe name ranked by a regime-aware blend of momentum, trend, stability, overheat balance, volume confirmation, and multi-strategy evidence, with per-component receipts and caveats. Deterministic scores; the LLM writes the reading on top. Technical evidence only — no fundamental data, not advice. |
+| **AI Stock Picks** | Model-ranked cross-sectional selection (`/picks`) — every scored universe name ranked by a regime-aware blend of momentum, trend, stability, overheat balance, volume confirmation, multi-strategy evidence, and valuation/quality fundamentals (Yahoo quoteSummary with a committed, dated snapshot fallback), with per-component receipts and caveats. Deterministic scores; the LLM writes the reading on top. Relative evidence only — no price targets, not advice. |
 | **Strategy Research Lab** | Five structurally different rule-based strategies with cost-aware backtests, in-sample/out-of-sample splits, factor-attribution regressions, and LLM strategy memos. |
 | **Radar Screening** | Composite scoring, rejection rules, and a concentration gate (`N_eff`) that demotes near-duplicate candidates before they reach observation. |
 | **Paper Observation** | Research-only simulated monitoring of radar-approved strategies, with a post-market Daily Review. No live orders. Optionally mirrors a **read-only Alpaca paper account** (account, positions, recent orders) when paper API keys are set — GET requests only, no order-submission path. |
@@ -184,6 +184,7 @@ src/
     cards, badges, charts, layout, research
   lib/
     data/                  Market data facade + Yahoo provider + fallback
+                           + fundamentals (quoteSummary + snapshot tier)
     quant/                 indicators, strategies, backtest, metrics,
                            radar, signal concentration (N_eff + gate),
                            paper trading, portfolio, consensus,
@@ -380,14 +381,15 @@ Security notes:
 
 ## Testing
 
-284 tests across 58 files under vitest + jsdom:
+297 tests across 59 files under vitest + jsdom:
 
 - **Engine** — backtest fees + execution semantics, indicators, radar verdict logic, paper-trading risk-budget transitions + N_eff slot cap, portfolio engine (Pearson, calendar intersection, score-weighted blend, phase-shifted decorrelation).
 - **Concentration** — `effectiveBets` / `concentrationLevel` math (monotonicity, bounds), the correlation gate demoting near-duplicate candidates, and the shared pairwise-correlation builder.
 - **Universe** — sector-diversification invariants (≥8 sectors, no sector >⅓ of single names), case-insensitive sector lookups, strategy-default coverage, and a guard that the committed fixture matches `DEFAULT_SYMBOLS` exactly.
 - **AI layer** — concentration-note template prose plus a mocked DeepSeek branch proving LLM prose is adopted while computed numbers are passed through (blank fields fall back via `pickString`); Daily Review note template covering the book split, today's tape, weakest leg, same-batch clause, and the empty-book / all-winners edge cases.
 - **Daily Review engine** — `buildDailyReview` winners/losers tally, weakest-leg selection, largest same-batch cluster by signal date, tape counts (skipped = continue-observing, rejected = concentration-gate demotions), watch-item derivation (underwater leg, fallback data), and empty-book degradation.
-- **Stock picks** — `buildStockPicks` cross-sectional ranking (momentum ordering, ETF and incomplete-row exclusion with coverage counts, regime weight-tilt promoting low-vol names under stress, strategy-evidence lift, fallback-data tier cap, weight normalization, honest empty verdict), `percentileRank` / `rsiBalanceScore` math, and the template stock-pick note (leader + score + regime, empty-screen degradation).
+- **Stock picks** — `buildStockPicks` cross-sectional ranking (momentum ordering, ETF and incomplete-row exclusion with coverage counts, regime weight-tilt promoting low-vol names under stress, strategy-evidence lift, fallback-data tier cap, weight normalization, honest empty verdict), value/quality fundamentals (cheaper-ranks-higher, profitability lift, neutral-with-caveat when fundamentals are missing, snapshot-source labeling, negative-earnings multiples treated as unmeaningful rather than cheap), `percentileRank` / `rsiBalanceScore` math, and the template stock-pick note (leader + score + regime, empty-screen degradation).
+- **Fundamentals** — `parseQuoteSummary` normalization (raw fields, nulls for gaps, throw-on-empty), the committed-snapshot drift guard (keys match the universe's single-name stocks, every row labeled with an as-of date), and the live-tier fallback (network failure and zero wait-budget both degrade to the labeled snapshot).
 - **Multi-strategy consensus** — `buildSignalConsensus` counting only currently-held symbols, ranking resonance ahead of single-strategy picks, the distinct-strategy-type tie-break, leg averaging + best-first ordering, and honest verdicts for the nothing-held and no-confirmation cases.
 - **Components** — StatusBadge (including the `idle` state introduced when fixing the zero-observation risk-budget bug), MetricCard tone classes, CorrelationMatrix rendering + empty state.
 - **Learn / glossary** — definition integrity (unique ids, no jargon creep, alias-collision guard), case-insensitive `lookupTerm`, the `<Term>` component (default + custom label, click-to-reveal explanation, alias resolution, graceful fallback for unknown terms), and the `<PlainEnglish>` page callout (default + custom title, composes with inline `<Term>`).
