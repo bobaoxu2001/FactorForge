@@ -8,6 +8,10 @@ The committed market-data fixture (`src/__fixtures__/yahoo-snapshot.json`) is a 
 2. The **demo wait budget** in `src/lib/data/marketData.ts` — when live providers exceed `MARKET_LIVE_WAIT_MS`, pages serve the snapshot (labeled as snapshot data, never as synthetic fallback).
 3. The **universe drift guard** (`src/data/watchlist.test.ts`) — asserts the fixture's keys match `DEFAULT_SYMBOLS` exactly.
 
+## Scheduled refresh
+
+A weekly GitHub Actions workflow (`.github/workflows/refresh-fixtures.yml`, Mondays 05:00 UTC, also runnable via *workflow_dispatch*) re-runs both refresh scripts on a US-based runner, verifies lint/typecheck/tests/build against the refreshed fixtures, and opens (or updates) a `chore/scheduled-fixture-refresh` PR. The PR is the review gate — walk the steps below before merging; nothing lands on `main` automatically. Note that CI does not auto-trigger on the bot-created PR (GitHub token limitation); the same gates already ran inside the refresh workflow.
+
 ## When to refresh
 
 Refresh (`npm run fixture:refresh`) only when one of these is true:

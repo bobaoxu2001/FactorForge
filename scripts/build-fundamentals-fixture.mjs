@@ -19,12 +19,13 @@
  */
 import { writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
-import { ProxyAgent } from "undici";
 
 // Yahoo geo-blocks some endpoints by IP; honor the shell's proxy settings the
-// way curl does (Node fetch ignores HTTP(S)_PROXY by default).
+// way curl does (Node fetch ignores HTTP(S)_PROXY by default). undici is a
+// transitive dependency, so import it lazily and only when a proxy is set —
+// proxy-less environments (CI runners) never need it.
 const proxyUrl = process.env.https_proxy ?? process.env.HTTPS_PROXY ?? null;
-const dispatcher = proxyUrl ? new ProxyAgent(proxyUrl) : undefined;
+const dispatcher = proxyUrl ? new (await import("undici")).ProxyAgent(proxyUrl) : undefined;
 
 // Keep in sync with UNIVERSE stocks in src/data/watchlist.ts (guarded by fundamentals.test.ts).
 const STOCK_SYMBOLS = [

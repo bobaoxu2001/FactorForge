@@ -439,6 +439,7 @@ Treat auth/session code, bcrypt password handling, iron-session cookie settings,
 
 Maintainers may use AI assistants for repetitive review and documentation work, but generated output should be checked against the code before merging.
 
+- **Scheduled fixture refresh** — a weekly GitHub Actions workflow (`.github/workflows/refresh-fixtures.yml`) re-fetches the committed price and fundamentals snapshots, runs the full gate suite against them, and opens a review PR; merging still follows [`docs/fixture_refresh.md`](docs/fixture_refresh.md).
 - **PR review checklists** — draft route/module-specific checks for data provenance, deterministic metrics, fallback labels, tests, and docs updates.
 - **Test generation for backtest edge cases** — propose cases for next-open execution, slippage/fees, stop exits, flat/long transitions, empty trades, and benchmark calendar alignment.
 - **Provider fallback testing** — generate mocked Yahoo/Polygon/Alpha Vantage failure cases and assertions that synthetic data remains clearly labeled.

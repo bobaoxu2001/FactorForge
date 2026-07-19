@@ -1,0 +1,121 @@
+name: Scheduled fixture refresh
+
+# Keeps the committed data snapshots fresh on a schedule:
+#   - src/__fixtures__/yahoo-snapshot.json        (3y OHLCV, npm run fixture:refresh)
+#   - src/__fixtures__/fundamentals-snapshot.json (valuation/quality, npm run fundamentals:refresh)
+#
+# Runs on GitHub's US-based runners where the keyless Yahoo endpoints are
+# reachable. The full verification suite (lint/typecheck/test/build) runs
+# AGAINST the refreshed fixtures before anything is pushed — the drift guards
+# and pipeline snapshot tests are the gate. Changes land as a pull request so
+# a maintainer walks the review steps in docs/fixture_refresh.md; nothing is
+# committed to main automatically.
+#
+# NOTE: PRs opened with GITHUB_TOKEN do not trigger the CI workflow (GitHub
+# limitation). The same gates already ran inside this workflow — the PR body
+# says so — but re-running CI manually on the PR is fine if you want the check
+# mark.
+
+on:
+  schedule:
+    # Mondays 05:00 UTC — pre-US-market, after a full trading week.
+    - cron: "0 5 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: refresh-fixtures
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    name: Refresh · Verify · Open PR
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Refresh price snapshot
+        run: npm run fixture:refresh
+
+      - name: Refresh fundamentals snapshot
+        run: npm run fundamentals:refresh
+
+      - name: Detect changes
+        id: diff
+        run: |
+          if git diff --quiet -- src/__fixtures__; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Fixtures unchanged — nothing to refresh."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            git diff --stat -- src/__fixtures__
+          fi
+
+      # The refreshed fixtures must pass the same gates as any other change:
+      # universe drift guards, the full research-pipeline snapshot test, and a
+      # keyless production build.
+      - name: Lint
+        if: steps.diff.outputs.changed == 'true'
+        run: npm run lint
+
+      - name: Typecheck
+        if: steps.diff.outputs.changed == 'true'
+        run: npm run typecheck
+
+      - name: Test
+        if: steps.diff.outputs.changed == 'true'
+        run: npm test
+
+      - name: Build
+        if: steps.diff.outputs.changed == 'true'
+        run: npm run build
+
+      - name: Open or update refresh PR
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          DATE="$(date -u +%F)"
+          BRANCH="chore/scheduled-fixture-refresh"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$BRANCH"
+          git add src/__fixtures__
+          git commit -m "chore(fixtures): scheduled snapshot refresh ($DATE)" \
+            -m "Automated weekly refresh of the committed Yahoo price and fundamentals snapshots. Lint, typecheck, the full test suite (universe drift guards + pipeline snapshot invariants), and a keyless production build all passed against the refreshed fixtures in this workflow run."
+          git push -f origin "$BRANCH"
+
+          BODY="Automated weekly refresh of the committed data snapshots (as of $DATE).
+
+          - \`src/__fixtures__/yahoo-snapshot.json\` — 3y OHLCV for the research universe
+          - \`src/__fixtures__/fundamentals-snapshot.json\` — valuation/quality fundamentals
+
+          Lint, typecheck, the full test suite, and a keyless production build **already passed against these fixtures** in the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}). CI does not auto-trigger on token-created PRs — re-run it manually if you want the check mark.
+
+          Before merging, walk the review steps in \`docs/fixture_refresh.md\` (provenance, key set, coverage sanity, no synthetic leakage).
+
+          🤖 Generated with [Claude Code](https://claude.com/claude-code)"
+
+          if gh pr view "$BRANCH" --json state --jq .state 2>/dev/null | grep -q OPEN; then
+            gh pr edit "$BRANCH" --title "chore(fixtures): scheduled snapshot refresh ($DATE)" --body "$BODY"
+          else
+            gh pr create --base main --head "$BRANCH" \
+              --title "chore(fixtures): scheduled snapshot refresh ($DATE)" \
+              --body "$BODY"
+          fi
