@@ -10,7 +10,6 @@ Recently completed (see git history for details): `getResearchDataset` build-tim
 
 ## Research engine
 
-- Add rolling walk-forward windows beyond the current single split.
 - Add more fixture-driven tests for next-open execution, slippage, stops, missing bars, flat/long transitions, and benchmark calendar alignment.
 - Separate showcase ranking from validation reporting more explicitly in UI and docs.
 - Evaluate external factor-return datasets for market, momentum, value, quality, and low-vol attribution.

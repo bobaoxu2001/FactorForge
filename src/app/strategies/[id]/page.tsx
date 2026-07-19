@@ -17,7 +17,7 @@ import StressDiagnosticsPanel from "@/components/research/StressDiagnosticsPanel
 import StrategyIntelPanel from "@/components/research/StrategyIntelPanel";
 import SelloffMemoBlock from "@/components/research/SelloffMemoBlock";
 import { buildStrategyIntel } from "@/lib/quant/strategyIntel";
-import { evaluateWalkForward } from "@/lib/quant/walkForward";
+import { evaluateRollingWalkForward, evaluateWalkForward } from "@/lib/quant/walkForward";
 import { attributeFactors } from "@/lib/quant/factorAttribution";
 import { scoreBacktest } from "@/lib/quant/radar";
 import { buildStrategyStressDiagnostics } from "@/lib/quant/marketStress";
@@ -76,6 +76,7 @@ export default async function StrategyDetailPage({
 
   const explanation = await generateStrategyExplanation(result);
   const walkForward = evaluateWalkForward(result);
+  const rollingWalkForward = evaluateRollingWalkForward(result);
   const factorAttribution = attributeFactors(result.equityCurve, dataset.factorReturns, dataset.factorBenchmarkSymbol);
   // Stress diagnostics for the currently-viewed symbol (recomputed because the
   // user can switch off the showcase pick). Base score uses the same radar scorer.
@@ -221,7 +222,7 @@ export default async function StrategyDetailPage({
       </section>
 
       <section>
-        <WalkForwardPanel split={walkForward} />
+        <WalkForwardPanel split={walkForward} rolling={rollingWalkForward} />
       </section>
 
       <section>
