@@ -36,7 +36,7 @@ const STOCK_SYMBOLS = [
   "JPM", "BAC", "V",
   "JNJ", "UNH", "PFE",
   "XOM", "CVX",
-  "CAT", "HON",
+  "CAT", "HON", "ETN", "VRT",
   "NEE", "DUK",
   "AMT", "O",
 ];

@@ -139,7 +139,7 @@ export default async function PicksPage() {
 
       <p className="text-[12px] leading-relaxed text-ink-soft">
         Research software only. The screen ranks relative evidence — technicals plus valuation/quality fundamentals —
-        over a 28-name universe. It does not know news or forward guidance, computes no fair value or price target,
+        over a 30-name universe. It does not know news or forward guidance, computes no fair value or price target,
         places no trades, and is not investment advice. Cross-check any name on{" "}
         <Link href="/consensus" className="text-ink-muted underline decoration-dotted hover:text-ink">consensus</Link>,{" "}
         <Link href="/factors" className="text-ink-muted underline decoration-dotted hover:text-ink">factors</Link>, and{" "}
