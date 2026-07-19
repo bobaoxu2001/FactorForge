@@ -152,6 +152,129 @@ export const THEME_TEMPLATES: ThemeTemplate[] = [
       "Check the factor-attribution panel for these names to confirm the move is momentum-led rather than a broad-market beta artifact.",
   },
   {
+    id: "ai-power-grid",
+    title: "AI Power & Grid Buildout",
+    tagline: "Transformers, turbines, and interconnection — the electron bottleneck",
+    assetType: "public-proxy",
+    sectorTags: ["Utilities", "Industrials", "Electrical Equipment", "Data Center"],
+    signalModel: "macro",
+    baseConfidence: 58,
+    catalystSummary:
+      "AI capex is migrating down the value chain into physical power: large-transformer lead times have stretched to ~5 years, gas-turbine order books run into 2029-30, and grid interconnection queues in key data-center markets run 4-7 years. Roughly half of announced US data-center capacity is stalled on power, not chips. Supply rigidity of this kind historically confers pricing power — the same structure that preceded the GPU (2023) and memory (2024-25) legs.",
+    catalysts: [
+      { label: "Transformer lead times", detail: "Large power transformers quoted at ~5-year lead times versus ~2 years pre-2020 — the hardest physical constraint.", sensitivity: 0.85 },
+      { label: "Turbine order books", detail: "Gas-turbine backlogs stretch into 2029-30; new capacity effectively pre-sold for years.", sensitivity: 0.75 },
+      { label: "Interconnection queues", detail: "Grid hookup queues of 4-7 years in Northern Virginia, Phoenix, and Dallas gate the entire buildout.", sensitivity: 0.7 },
+      { label: "Hyperscaler power deals", detail: "Nuclear PPAs, fuel-cell orders, and behind-the-meter generation deals mark demand desperation.", sensitivity: 0.65 },
+      { label: "Data-center delays", detail: "Announced-but-unbuilt capacity (only ~5 of 12 GW under construction in 2026) is the tension gauge.", sensitivity: 0.6 },
+    ],
+    proxyTemplates: [
+      { symbol: "NEE", name: "NextEra Energy", role: "core", catalystBeta: 1.0 },
+      { symbol: "DUK", name: "Duke Energy", role: "core", catalystBeta: 0.7 },
+      { symbol: "CAT", name: "Caterpillar", role: "core", catalystBeta: 0.9 },
+      { symbol: "HON", name: "Honeywell", role: "adjacent", catalystBeta: 0.8 },
+      { symbol: "GEV", name: "GE Vernova", role: "core", catalystBeta: 1.5 },
+      { symbol: "ETN", name: "Eaton", role: "core", catalystBeta: 1.2 },
+      { symbol: "VRT", name: "Vertiv", role: "core", catalystBeta: 1.8 },
+      { symbol: "PWR", name: "Quanta Services", role: "core", catalystBeta: 1.3 },
+      { symbol: "CEG", name: "Constellation Energy", role: "core", catalystBeta: 1.4 },
+    ],
+    scenarioTemplate: [
+      { case: "bull", label: "Bottleneck bites, pricing power compounds", impactLow: 0.06, impactHigh: 0.15, probability: 0.35, narrative: "Power scarcity worsens as AI capex holds; equipment makers and unregulated generators with multi-year backlogs re-rate on earnings revisions, echoing the memory-cycle template." },
+      { case: "base", label: "Backlog burn", impactLow: -0.02, impactHigh: 0.07, probability: 0.45, narrative: "Long order books convert steadily; regulated utilities lag the equipment names, and the theme grinds rather than melts up." },
+      { case: "bear", label: "Capex pause deflates the chain", impactLow: -0.15, impactHigh: -0.05, probability: 0.2, narrative: "Any AI-capex digestion hits every downstream bottleneck at once — today's 5-year lead times become tomorrow's overcapacity, the classic cyclical ending." },
+    ],
+    riskFlags: [
+      "Partially priced in — several equipment names have already re-rated hard; entry valuation decides whether you capture revisions or hold the bag.",
+      "Single demand source: this theme shares one downstream (AI capex) with GPUs, memory, and optics — correlations approach 1 in a capex pause.",
+      "Long lead times cut both ways: today's scarcity premium seeds 2029's oversupply, the standard cyclical death.",
+      "Key pure-plays (GEV, ETN, VRT, PWR, CEG) are outside the research universe — no live factor read on them.",
+    ],
+    researchNote:
+      "This is the bottleneck-migration thesis: AI spend flows to whichever link expands slowest, and physical power equipment currently expands slowest of all. The in-universe utilities (NEE, DUK) and CAT give a live but low-beta read; the true high-beta expressions sit outside the universe and are reference-only.",
+    suggestedResearchTest:
+      "Track the in-universe utility pair's stress-adjusted trend against SPY, and consider adding one liquid electrical-equipment proxy to the universe for a real factor read before any observation.",
+  },
+  {
+    id: "optical-interconnect",
+    title: "Optical Interconnect / CPO",
+    tagline: "1.6T optics, silicon photonics, and the laser constraint",
+    assetType: "public-proxy",
+    sectorTags: ["Technology", "Networking", "Photonics", "Data Center"],
+    signalModel: "growth",
+    baseConfidence: 50,
+    catalystSummary:
+      "Scale-out bandwidth is the third leg of the AI chain: 1.6T module shipments are guided from ~2.5M to ~20M units in 2026 with silicon-photonics penetration of 50-70% at the high end, and high-speed lasers (200G EML) flagged as the tightest component constraint. Unlike power, this leg has ALREADY re-rated through 2024-25 — it is a momentum-continuation read, not an undiscovered bottleneck.",
+    catalysts: [
+      { label: "1.6T ramp", detail: "Module shipment guidance (~8x unit growth in 2026) sets the revenue slope for the whole chain.", sensitivity: 0.8 },
+      { label: "Laser/EML supply", detail: "High-speed laser capacity is the tightest constraint — allocation decides share shifts.", sensitivity: 0.75 },
+      { label: "CPO transition", detail: "Co-packaged optics moves value from pluggable modules into the switch package — a route-shift risk for module makers.", sensitivity: 0.7 },
+      { label: "Switch ASIC cadence", detail: "1.6T-capable switch platforms gate deployment timing.", sensitivity: 0.6 },
+    ],
+    proxyTemplates: [
+      { symbol: "NVDA", name: "NVIDIA", role: "adjacent", catalystBeta: 1.2 },
+      { symbol: "AVGO", name: "Broadcom", role: "core", catalystBeta: 1.2 },
+      { symbol: "MRVL", name: "Marvell Technology", role: "core", catalystBeta: 1.6 },
+      { symbol: "LITE", name: "Lumentum", role: "core", catalystBeta: 1.8 },
+      { symbol: "COHR", name: "Coherent", role: "core", catalystBeta: 1.7 },
+      { symbol: "ANET", name: "Arista Networks", role: "adjacent", catalystBeta: 1.3 },
+    ],
+    scenarioTemplate: [
+      { case: "bull", label: "Ramp beats, constraint holds", impactLow: 0.07, impactHigh: 0.16, probability: 0.3, narrative: "1.6T deployment outruns supply; laser and DSP constraints keep pricing firm and the chain re-rates again despite the prior run." },
+      { case: "base", label: "Delivered as guided", impactLow: -0.05, impactHigh: 0.06, probability: 0.45, narrative: "The ramp lands roughly as priced; after a big 2024-25 run, in-line execution earns consolidation rather than upside." },
+      { case: "bear", label: "CPO reshuffle or capex pause", impactLow: -0.18, impactHigh: -0.07, probability: 0.25, narrative: "A faster-than-expected CPO transition disintermediates module makers, or a capex pause hits the highest-multiple names hardest." },
+    ],
+    riskFlags: [
+      "Already re-rated: this chain ran hard in 2024-25 — the easy phase of the cycle template is likely behind it.",
+      "Technology route risk is unusually high: CPO can reshuffle winners within the theme even if the theme itself is right.",
+      "Same single demand source as the rest of the AI chain — an AI-capex pause hits optics, power, and memory together.",
+      "Nearly all pure-plays are outside the research universe — reference-only, no live factor read.",
+    ],
+    researchNote:
+      "Optics is the 'currently-happening' leg of the bottleneck migration rather than the next one. The research question is not whether bandwidth demand grows (it does) but whether entry valuations already pay for it, and who survives the pluggable-to-CPO transition.",
+    suggestedResearchTest:
+      "Compare the in-universe NVDA networking read against the theme narrative, and stress-test the basket assuming a 2027 CPO share-shift away from pluggable modules.",
+  },
+  {
+    id: "thermal-liquid-cooling",
+    title: "Liquid Cooling & Thermal",
+    tagline: "From optional to standard as rack density explodes",
+    assetType: "public-proxy",
+    sectorTags: ["Industrials", "Data Center", "Thermal Management"],
+    signalModel: "growth",
+    baseConfidence: 46,
+    catalystSummary:
+      "Rack power density has pushed liquid cooling from a custom option to standard equipment in high-end AI data centers, and even optical modules now ship liquid-cooled variants. The theme rides the same capex wave as power and optics but with smaller per-rack value capture and a more fragmented competitive field — a beta expression of the buildout rather than a bottleneck with pricing power.",
+    catalysts: [
+      { label: "Rack density", detail: "Next-gen accelerator racks exceed air-cooling limits, making liquid loops mandatory.", sensitivity: 0.8 },
+      { label: "Standardization", detail: "Liquid-cooled configs becoming default in new AI builds converts option revenue to attach-rate revenue.", sensitivity: 0.7 },
+      { label: "Retrofit demand", detail: "Existing air-cooled halls retrofitting for AI adds a second demand stream.", sensitivity: 0.55 },
+    ],
+    proxyTemplates: [
+      { symbol: "HON", name: "Honeywell", role: "adjacent", catalystBeta: 0.8 },
+      { symbol: "CAT", name: "Caterpillar", role: "adjacent", catalystBeta: 0.9 },
+      { symbol: "VRT", name: "Vertiv", role: "core", catalystBeta: 1.7 },
+      { symbol: "NVT", name: "nVent Electric", role: "core", catalystBeta: 1.3 },
+      { symbol: "MOD", name: "Modine Manufacturing", role: "core", catalystBeta: 1.9 },
+      { symbol: "SPXC", name: "SPX Technologies", role: "core", catalystBeta: 1.4 },
+    ],
+    scenarioTemplate: [
+      { case: "bull", label: "Attach rate compounds", impactLow: 0.06, impactHigh: 0.14, probability: 0.3, narrative: "Liquid cooling attach rates and retrofit orders both accelerate; the pure-plays re-rate on backlog growth." },
+      { case: "base", label: "Growth without pricing power", impactLow: -0.04, impactHigh: 0.06, probability: 0.45, narrative: "Volume grows as guided but competition caps margins — revenue growth without the memory-style price spiral." },
+      { case: "bear", label: "Capex pause or in-housing", impactLow: -0.14, impactHigh: -0.05, probability: 0.25, narrative: "A capex pause, or hyperscalers in-housing thermal design, compresses the fragmented vendor field." },
+    ],
+    riskFlags: [
+      "Lower value capture per rack than power or optics — a volume story, not a scarcity story.",
+      "Fragmented competition means the theme can be right while any given vendor loses share.",
+      "Same single demand source as every other AI-chain theme — capex-pause correlation near 1.",
+      "Pure-plays are outside the research universe — reference-only.",
+    ],
+    researchNote:
+      "Cooling confirms the buildout but historically lacks the supply rigidity that creates memory-style pricing power. Treat it as the lower-conviction sibling of the power theme: same wave, weaker moat.",
+    suggestedResearchTest:
+      "Track whether cooling pure-play margins expand with volume (pricing power emerging) or stay flat (pure volume story) across the next two earnings cycles.",
+  },
+  {
     id: "semiconductors",
     title: "Semiconductors",
     tagline: "Cycle inflection, inventory, and export policy",
