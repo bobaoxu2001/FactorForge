@@ -381,7 +381,7 @@ Security notes:
 
 ## Testing
 
-307 tests across 59 files under vitest + jsdom:
+310 tests across 59 files under vitest + jsdom:
 
 - **Engine** — backtest fees + execution semantics, indicators, radar verdict logic, paper-trading risk-budget transitions + N_eff slot cap, portfolio engine (Pearson, calendar intersection, score-weighted blend, phase-shifted decorrelation), and walk-forward evaluation (single split + anchored rolling windows: contiguous OOS coverage, expanding in-sample, consistent/fragile aggregate verdicts, determinism).
 - **Concentration** — `effectiveBets` / `concentrationLevel` math (monotonicity, bounds), the correlation gate demoting near-duplicate candidates, and the shared pairwise-correlation builder.

@@ -277,6 +277,48 @@ export const THEME_TEMPLATES: ThemeTemplate[] = [
       "Track whether cooling pure-play margins expand with volume (pricing power emerging) or stay flat (pure volume story) across the next two earnings cycles.",
   },
   {
+    id: "humanoid-robotics",
+    title: "Humanoid Robotics Supply Chain",
+    tagline: "Actuators, vision, magnets — sell shovels to a pre-revenue gold rush",
+    assetType: "public-proxy",
+    sectorTags: ["Robotics", "Technology", "Industrials", "Materials"],
+    signalModel: "growth",
+    baseConfidence: 40,
+    catalystSummary:
+      "Humanoids crossed from demo to early commercial work in 2025-26 — Figure ran ~1,250 operating hours at BMW Spartanburg, Agility's Digit has 65,000+ hours across nine customer sites, Tesla runs 1,000+ Optimus units internally with $20-30K external pricing targeted — but sustained deployments still number in the hundreds of units, and integrator revenue is near zero. The investable read is the component layer (actuators, edge vision, rare-earth magnets), which locks in around winning platform designs before volume arrives. This is an OPTION-type theme priced on milestones, not a cycle trade priced on orders.",
+    catalysts: [
+      { label: "Deployed-unit milestones", detail: "Sustained commercial operating hours and named-customer counts — the honest metric that separates deployment from demos.", sensitivity: 0.85 },
+      { label: "Production-line starts", detail: "Optimus Fremont line start and planned 1M/yr capacity would move the theme from pilots to manufacturing reality.", sensitivity: 0.8 },
+      { label: "Preorders & design wins", detail: "Consumer preorders (1X NEO) and component design-wins that lock the 2027-28 supplier map.", sensitivity: 0.7 },
+      { label: "Actuator & magnet supply", detail: "Harmonic drives, planetary roller screws, and rare-earth magnets are the quantity bottlenecks if volume ever arrives.", sensitivity: 0.65 },
+      { label: "Unit-cost curve", detail: "The $20-30K price target versus bill-of-materials decides whether a mass market exists at all.", sensitivity: 0.6 },
+    ],
+    proxyTemplates: [
+      { symbol: "TSLA", name: "Tesla", role: "adjacent", catalystBeta: 1.4 },
+      { symbol: "NVDA", name: "NVIDIA", role: "adjacent", catalystBeta: 1.1 },
+      { symbol: "AMBA", name: "Ambarella", role: "core", catalystBeta: 1.9 },
+      { symbol: "MP", name: "MP Materials", role: "core", catalystBeta: 1.7 },
+      { symbol: "TER", name: "Teradyne", role: "core", catalystBeta: 1.2 },
+      { symbol: "QCOM", name: "Qualcomm", role: "adjacent", catalystBeta: 1.0 },
+    ],
+    scenarioTemplate: [
+      { case: "bull", label: "Milestone cluster lands", impactLow: 0.15, impactHigh: 0.35, probability: 0.25, narrative: "A production-line start plus new named customers re-rates the component layer sharply — milestone-driven pricing cuts both ways and this is the up-side of the blade." },
+      { case: "base", label: "Pilots grind forward", impactLow: -0.08, impactHigh: 0.12, probability: 0.45, narrative: "Operating hours and site counts compound quietly; the basket chops on each demo cycle without a decisive re-rating." },
+      { case: "bear", label: "Milestones slip", impactLow: -0.3, impactHigh: -0.12, probability: 0.3, narrative: "A delayed line start or a quiet CES resets story-premium valuations hard — with near-zero revenue there is no earnings floor." },
+    ],
+    riskFlags: [
+      "Revenue is approximately zero today — pricing rests on milestones and preorders, and ex ante this is indistinguishable from 2021's metaverse OR 2015's GPU moment. Option-type exposure with position-sizing discipline, never a cycle trade.",
+      "The integrators (Figure, 1X, Apptronik) are private — public exposure is components and adjacents only, which dilutes the theme read.",
+      "Key actuator pure-plays (Harmonic Drive 6324.T, A-share reducer makers) trade outside US markets — this pipeline cannot track them.",
+      "Trades with AI-complex sentiment despite a separate demand curve — a capex-pause drawdown would hit this basket too.",
+      "Core pure-plays are outside the research universe — reference-only, no live factor read.",
+    ],
+    researchNote:
+      "Deliberately a different animal from the AI-capex themes: those price current orders against supply rigidity (cycle logic, 1-2y); this prices a demand curve that has not arrived (option logic, 3-5y). Verified base as of 2026-07: hundreds of units in sustained commercial work, not thousands. The in-universe reads (TSLA, NVDA) are adjacents; treat basket moves as sentiment until component-supplier revenue actually inflects.",
+    suggestedResearchTest:
+      "Before ever treating this as a cycle theme, verify the component layer's revenue inflection directly — AMBA robotics design-wins and MP magnet volumes in filings — and track deployed-unit milestones against basket moves to see whether the market is pricing hours or hype.",
+  },
+  {
     id: "semiconductors",
     title: "Semiconductors",
     tagline: "Cycle inflection, inventory, and export policy",

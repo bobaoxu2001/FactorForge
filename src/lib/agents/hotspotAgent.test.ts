@@ -154,3 +154,34 @@ describe("AI value-chain themes (power / optics / cooling)", () => {
     expect(optics.catalystSummary.toLowerCase()).toContain("already");
   });
 });
+
+describe("humanoid robotics theme (option-type, narrative stage)", () => {
+  it("is configured and labeled honestly as pre-revenue / milestone-driven", () => {
+    const theme = report().themes.find((t) => t.id === "humanoid-robotics")!;
+    expect(theme).toBeTruthy();
+    const flags = theme.riskFlags.join(" ").toLowerCase();
+    expect(flags).toContain("revenue is approximately zero");
+    expect(flags).toContain("option-type");
+    expect(theme.researchNote.toLowerCase()).toContain("option logic");
+    // It must never claim cycle-style order evidence.
+    expect(theme.catalystSummary.toLowerCase()).toContain("not a cycle trade");
+  });
+
+  it("keeps in-universe adjacents live and pure-plays reference-only", () => {
+    const theme = report().themes.find((t) => t.id === "humanoid-robotics")!;
+    const tsla = theme.proxies.find((p) => p.symbol === "TSLA")!;
+    const amba = theme.proxies.find((p) => p.symbol === "AMBA")!;
+    expect(tsla.inUniverse).toBe(true);
+    expect(tsla.live).not.toBeNull();
+    expect(amba.inUniverse).toBe(false);
+    expect(amba.live).toBeNull();
+  });
+
+  it("is excluded from the AI-capex shared-downstream group (separate demand curve)", () => {
+    // The capex-pause warning test iterates the three AI-chain themes only;
+    // robotics prices a demand curve that has not arrived. Its sentiment
+    // coupling to the AI complex is still declared as a risk flag.
+    const theme = report().themes.find((t) => t.id === "humanoid-robotics")!;
+    expect(theme.riskFlags.join(" ").toLowerCase()).toContain("ai-complex sentiment");
+  });
+});
