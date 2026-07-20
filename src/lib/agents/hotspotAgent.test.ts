@@ -141,6 +141,13 @@ describe("AI value-chain themes (power / optics / cooling)", () => {
     }
   });
 
+  it("carries the regulatory-exception finding on the power theme (IPP premium unwind)", () => {
+    const power = report().themes.find((t) => t.id === "ai-power-grid")!;
+    expect(power.riskFlags.join(" ").toLowerCase()).toContain("regulat");
+    expect(power.researchNote.toLowerCase()).toContain("only where regulation permits");
+    expect(power.catalysts.some((c) => c.label.toLowerCase().includes("ratepayer"))).toBe(true);
+  });
+
   it("flags optics as already re-rated rather than an undiscovered bottleneck", () => {
     const optics = report().themes.find((t) => t.id === "optical-interconnect")!;
     expect(optics.riskFlags.join(" ").toLowerCase()).toContain("already re-rated");

@@ -166,6 +166,7 @@ export const THEME_TEMPLATES: ThemeTemplate[] = [
       { label: "Turbine order books", detail: "Gas-turbine backlogs stretch into 2029-30; new capacity effectively pre-sold for years.", sensitivity: 0.75 },
       { label: "Interconnection queues", detail: "Grid hookup queues of 4-7 years in Northern Virginia, Phoenix, and Dallas gate the entire buildout.", sensitivity: 0.7 },
       { label: "Hyperscaler power deals", detail: "Nuclear PPAs, fuel-cell orders, and behind-the-meter generation deals mark demand desperation.", sensitivity: 0.65 },
+      { label: "Co-location & ratepayer rules", detail: "FERC co-location rulings and ratepayer-protection commitments decide whether generators may charge a scarcity premium at all — the axis that de-rated the IPP leg in 2025-26.", sensitivity: 0.7 },
       { label: "Data-center delays", detail: "Announced-but-unbuilt capacity (only ~5 of 12 GW under construction in 2026) is the tension gauge.", sensitivity: 0.6 },
     ],
     proxyTemplates: [
@@ -186,12 +187,13 @@ export const THEME_TEMPLATES: ThemeTemplate[] = [
     ],
     riskFlags: [
       "Partially priced in — several equipment names have already re-rated hard; entry valuation decides whether you capture revisions or hold the bag.",
+      "The generation leg is NOT the equipment leg: regulators capped the IPP scarcity premium in 2025-26 (FERC co-location rejection, ratepayer-protection rules), de-rating listed generators even as scarcity persisted — see docs/research/ipp-power-premium-unwind.md.",
       "Single demand source: this theme shares one downstream (AI capex) with GPUs, memory, and optics — correlations approach 1 in a capex pause.",
       "Long lead times cut both ways: today's scarcity premium seeds 2029's oversupply, the standard cyclical death.",
-      "Key pure-plays (GEV, ETN, VRT, PWR, CEG) are outside the research universe — no live factor read on them.",
+      "Key pure-plays (GEV, PWR, CEG) are outside the research universe — no live factor read on them.",
     ],
     researchNote:
-      "This is the bottleneck-migration thesis: AI spend flows to whichever link expands slowest, and physical power equipment currently expands slowest of all. The in-universe utilities (NEE, DUK) and CAT give a live but low-beta read; the true high-beta expressions sit outside the universe and are reference-only.",
+      "This is the bottleneck-migration thesis: AI spend flows to whichever link expands slowest, and physical power equipment currently expands slowest of all. The scarcity-pricing clause has a regulatory exception the IPP leg proved in 2025-26: scarcity confers pricing power only where regulation permits the price — equipment backlogs are politically invisible, wholesale electricity is not. In-universe reads: NEE/DUK (regulated, low beta), CAT/HON (adjacent), and ETN/VRT (electrical equipment, high beta).",
     suggestedResearchTest:
       "Track the in-universe utility pair's stress-adjusted trend against SPY, and consider adding one liquid electrical-equipment proxy to the universe for a real factor read before any observation.",
   },
