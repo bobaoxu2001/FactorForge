@@ -54,6 +54,8 @@ export function runLongOnlyBacktest(
   let entryFee = 0;
   let highWater = 0;
   let holdingDays = 0;
+  // Stop or trailing stop breached on the last completed close; fills at the next open.
+  let pendingStop: "stop loss" | "trailing stop" | null = null;
   const trades: Trade[] = [];
   const signals: StrategySignal[] = [];
   const rawCurve: Omit<EquityPoint, "drawdown">[] = [];
@@ -72,15 +74,15 @@ export function runLongOnlyBacktest(
 
     if (shares > 0) {
       holdingDays += 1;
-      highWater = Math.max(highWater, price.close);
-      const stopHit = price.close <= entryPrice * (1 - stopLossPct);
-      const trailingHit = price.close <= highWater * (1 - trailingStopPct);
+      // Every exit fills at this bar's open. Stops are judged on the previous
+      // completed close (deciding and filling on the same close would need the
+      // close before it prints), so a gap through the stop is paid at the open.
       const expired = holdingDays >= maxHoldingDays;
       const plannedSell = previousPlan.sell === true;
-      const exitReason = stopHit ? "stop loss" : trailingHit ? "trailing stop" : expired ? "holding period" : plannedSell ? previousPlan.reason : null;
+      const exitReason = pendingStop ?? (expired ? "holding period" : plannedSell ? previousPlan.reason : null);
 
       if (exitReason) {
-        const baseExitPrice = stopHit || trailingHit ? price.close : price.open;
+        const baseExitPrice = price.open;
         const exitPrice = applySlippage(baseExitPrice, slippageBps, "sell");
         const proceeds = shares * exitPrice;
         const exitFee = feePerTrade;
@@ -100,13 +102,17 @@ export function runLongOnlyBacktest(
           holdingDays,
           exitReason,
         });
-        signals.push({ date: price.date, type: "sell", price: exitPrice, reason: `${exitReason}; executed at ${stopHit || trailingHit ? "same-day close" : "next open"}` });
+        signals.push({ date: price.date, type: "sell", price: exitPrice, reason: `${exitReason}; ${pendingStop ? "close breached the stop, " : ""}executed next open` });
         shares = 0;
         entryPrice = 0;
         entryDate = "";
         entryFee = 0;
         highWater = 0;
         holdingDays = 0;
+        pendingStop = null;
+      } else {
+        highWater = Math.max(highWater, price.close);
+        pendingStop = checkStops(price.close, entryPrice, highWater, stopLossPct, trailingStopPct);
       }
     }
 
@@ -122,6 +128,7 @@ export function runLongOnlyBacktest(
         entryFee = feePerTrade;
         highWater = price.close;
         holdingDays = 0;
+        pendingStop = checkStops(price.close, entryPrice, highWater, stopLossPct, trailingStopPct);
         signals.push({ date: price.date, type: "buy", price: entryExecutionPrice, reason: `${previousPlan.reason}; signal date ${previousPrice?.date ?? "n/a"}; executed next open` });
       }
     } else if (shares === 0 && previousPlan.reason !== "no signal" && previousPlan.buy === false && index > 0) {
@@ -164,6 +171,12 @@ export function runLongOnlyBacktest(
       adjusted: market.quality.adjusted,
     },
   };
+}
+
+function checkStops(close: number, entryPrice: number, highWater: number, stopLossPct: number, trailingStopPct: number): "stop loss" | "trailing stop" | null {
+  if (close <= entryPrice * (1 - stopLossPct)) return "stop loss";
+  if (close <= highWater * (1 - trailingStopPct)) return "trailing stop";
+  return null;
 }
 
 function applySlippage(price: number, slippageBps: number, side: "buy" | "sell"): number {

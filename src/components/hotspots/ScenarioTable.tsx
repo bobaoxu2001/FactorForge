@@ -1,7 +1,7 @@
 import type { HotspotScenario } from "@/lib/agents/types";
 import { formatImpactRange } from "@/lib/agents/scenarioForecast";
 import { pct } from "@/lib/utils/format";
-import { SCENARIO_ACCENT } from "./hotspotStyles";
+import { CONFIDENCE_HEURISTIC_NOTE, SCENARIO_ACCENT, confidenceBand, formatPrior } from "./hotspotStyles";
 
 const CASE_LABEL: Record<"bull" | "base" | "bear", string> = { bull: "Bull case", base: "Base case", bear: "Bear case" };
 
@@ -29,7 +29,7 @@ export default function ScenarioTable({ scenario, basketLabel = "proxy basket" }
                   <span className={`num text-[14px] font-semibold ${accent.text}`}>
                     {formatImpactRange(leg.impactLow, leg.impactHigh)}
                   </span>
-                  <span className="num text-[11px] text-ink-soft">{Math.round(leg.probability * 100)}% wt</span>
+                  <span className="num text-[11px] text-ink-soft">{formatPrior(leg.probability)} prior</span>
                 </div>
               </div>
               <p className="mt-1.5 text-[12px] leading-relaxed text-ink-muted">{leg.narrative}</p>
@@ -39,10 +39,10 @@ export default function ScenarioTable({ scenario, basketLabel = "proxy basket" }
       </div>
       <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-ink-soft">
         <span>
-          Weighted expected impact ≈ <span className="num text-ink-muted">{pct(scenario.expectedImpact)}</span>
+          Prior-weighted impact ≈ <span className="num text-ink-muted">{pct(scenario.expectedImpact)}</span>
         </span>
-        <span>
-          Confidence <span className="num text-ink-muted">{scenario.confidence}/100</span>
+        <span title={CONFIDENCE_HEURISTIC_NOTE}>
+          Confidence <span className="text-ink-muted">{confidenceBand(scenario.confidence).label.toLowerCase()} (heuristic)</span>
         </span>
         <span>
           Catalyst sensitivity <span className="num text-ink-muted">{scenario.catalystSensitivity}/100</span>

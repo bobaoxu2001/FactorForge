@@ -37,10 +37,23 @@ export default function LeadLagExplorer({ series, defaultLeader, defaultFollower
       ) : (
         <>
           <LagBars lags={result.lags} best={result.best.lag} />
-          <div className="grid gap-2 text-[12px] sm:grid-cols-3">
+          <div className="grid gap-2 text-[12px] sm:grid-cols-2 lg:grid-cols-4">
             <div className="stat-tile !p-3"><div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft">Strongest lag</div><div className="num mt-1 text-[17px] font-semibold text-ink">{result.best.lag} months</div></div>
             <div className="stat-tile !p-3"><div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft">Correlation (n)</div><div className="num mt-1 text-[17px] font-semibold text-ink">{(result.best.correlation as number).toFixed(2)} <span className="text-[12px] text-ink-soft">({result.best.n})</span></div></div>
             <div className="stat-tile !p-3"><div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft">Split-half</div><div className={`num mt-1 text-[17px] font-semibold ${result.stable ? "text-emerald-300" : "text-amber-200"}`}>{result.firstHalf?.toFixed(2)} / {result.secondHalf?.toFixed(2)}</div></div>
+            <div className="stat-tile !p-3">
+              <div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft">Out of sample</div>
+              {result.holdout ? (
+                <>
+                  <div className={`num mt-1 text-[17px] font-semibold ${result.holdout.confirmed ? "text-emerald-300" : "text-amber-200"}`}>
+                    {result.holdout.holdoutCorrelation?.toFixed(2) ?? "n/a"} <span className="text-[12px] text-ink-soft">({result.holdout.holdoutN})</span>
+                  </div>
+                  <div className="mt-0.5 text-[10.5px] text-ink-soft">{result.holdout.chosenLag}m lag picked on data to {result.holdout.splitMonth} (r {result.holdout.trainCorrelation.toFixed(2)})</div>
+                </>
+              ) : (
+                <div className="mt-1 text-[12px] text-ink-soft">Too little history for a holdout</div>
+              )}
+            </div>
           </div>
           <ul className="space-y-1 text-[11.5px] leading-relaxed text-ink-muted">
             {a && b && a.seasonalAdjustment !== b.seasonalAdjustment && <li>• Mixing {a.seasonalAdjustment} and {b.seasonalAdjustment} series is acceptable here only because both are compared as YoY changes, which removes most seasonality.</li>}

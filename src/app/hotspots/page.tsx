@@ -4,7 +4,7 @@ import CatalystMonitorCard from "@/components/hotspots/CatalystMonitorCard";
 import HotspotThemeCard from "@/components/hotspots/HotspotThemeCard";
 import ResearchAgentStatus from "@/components/hotspots/ResearchAgentStatus";
 import ConfidenceMeter from "@/components/hotspots/ConfidenceMeter";
-import { sentimentAccent } from "@/components/hotspots/hotspotStyles";
+import { CONFIDENCE_HEURISTIC_NOTE, confidenceBand, formatPrior, sentimentAccent } from "@/components/hotspots/hotspotStyles";
 import MethodologyCallout from "@/components/research/MethodologyCallout";
 import { getResearchDataset } from "@/lib/research";
 import { formatImpact } from "@/lib/agents/scenarioForecast";
@@ -103,7 +103,7 @@ export default async function HotspotsPage() {
                     </td>
                     <td className="px-4 py-3 text-ink-muted">{theme.catalysts[0]?.label ?? "—"}</td>
                     <td className="num px-4 py-3 text-right text-ink">{theme.signalStrength}</td>
-                    <td className="num px-4 py-3 text-right text-ink">{theme.scenario.confidence}</td>
+                    <td className="px-4 py-3 text-right text-ink" title={CONFIDENCE_HEURISTIC_NOTE}>{confidenceBand(theme.scenario.confidence).label}</td>
                     <td className="num px-4 py-3 text-right text-ink-muted">
                       {bear ? formatImpact(bear.impactLow) : "—"} … {bull ? formatImpact(bull.impactHigh) : "—"}
                     </td>
@@ -240,7 +240,8 @@ function HotspotHero({
             {topTheme.scenario.legs.map((leg) => (
               <div key={leg.case} className="rounded-2xl border border-line bg-white/[0.035] p-3">
                 <div className="text-[9.5px] font-semibold uppercase tracking-[0.14em] text-ink-soft">{leg.case}</div>
-                <div className="num mt-2 text-[18px] font-semibold text-white">{Math.round(leg.probability * 100)}%</div>
+                <div className="num mt-2 text-[18px] font-semibold text-white">{formatPrior(leg.probability)}</div>
+                <div className="text-[9.5px] uppercase tracking-[0.12em] text-ink-soft">configured prior</div>
                 <div className="mt-1 text-[11px] leading-relaxed text-ink-soft">{leg.label}</div>
               </div>
             ))}

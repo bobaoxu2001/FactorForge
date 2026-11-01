@@ -12,7 +12,7 @@ const VOL_EPSILON = 1e-12;
 // overridable so it isn't a silent hidden constant. Converted to a per-day rate
 // via simple division (close enough at these magnitudes).
 const ANNUAL_RISK_FREE_RATE = Number(process.env.RISK_FREE_RATE ?? 0) || 0;
-const DAILY_RISK_FREE_RATE = ANNUAL_RISK_FREE_RATE / annualization;
+export const DAILY_RISK_FREE_RATE = ANNUAL_RISK_FREE_RATE / annualization;
 
 export function calculateMetrics(
   equityCurve: EquityPoint[],

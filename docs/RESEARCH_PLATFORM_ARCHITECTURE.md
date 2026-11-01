@@ -105,7 +105,7 @@ No empty pages: industries without a data adapter appear only in the KPI-framewo
 1. **Point-in-time fundamentals.** Each XBRL fact keeps its *first* filing date and accession. Historical multiples at date D use only facts filed on or before D. Restatements are surfaced as revision history (`value` vs `latestValue`).
 2. **Quarterisation is explicit.** Values come from direct 3-month facts where filed. Otherwise they are derived from YTD differences or FY − 9M, and each derived value carries `derivation: "ytd-difference" | "fy-minus-9m"`.
 3. **One XBRL concept per metric per company**, with the concept name displayed, so line items never silently mix. Debt is a displayed sum of named components, with known exclusions.
-4. **KPI comparability guard.** Lead-lag and comparisons refuse incompatible pairs (e.g. NSA vs SA levels) or explain the transform (YoY on both). Correlation is labelled in-sample and never called predictive. A split-half stability check is shown next to it.
+4. **KPI comparability guard.** Lead-lag and comparisons refuse incompatible pairs (e.g. NSA vs SA levels) or explain the transform (YoY on both). Correlation is labelled in-sample and never called predictive. A split-half stability check and a train/holdout test (lag chosen on the first two-thirds, tested on later months) are shown next to it.
 5. **Freshness.** Every series has an expected cadence and lag. Readings are flagged `fresh / lagging / stale` against the snapshot build date, and the snapshot age itself is shown on every page.
 6. **Licences.** FRED licence labels are captured. "Pre-approval required" series are excluded from redistribution. "Citation required" series (Cass) carry a citation on every chart.
 7. **No invented precision.** No composite "AI confidence" scores. Quality checks are pass/warn/fail with reasons. Scenario probabilities are blank until the user enters them *with a justification*; expected return is only computed when they sum to 100%.
@@ -147,7 +147,7 @@ No new runtime dependencies were added.
 |---|---|
 | `npm run lint` | No warnings or errors |
 | `npm run typecheck` | Clean |
-| `npm test` | 400 / 400 passed (71 files; 90 new research tests) |
+| `npm test` | 400 / 400 passed (71 files; 90 new research tests). After the follow-up methodology pass: 412 / 412 (73 files) |
 | `npm run build` | Succeeded; 17 research pages prerendered (SSG), copilot API as a serverless function |
 | Production smoke (`next start`) | Query-param pages (`?kpi=`, `?since=`, `?id=`) render correctly; unknown project or ticker returns 404 |
 | Browser walkthrough | Home, overview, industry graph, KPIs (fuel residual), company page, primary-research save flow (compliance screen blocks until acknowledged), evidence explorer (user notes appear as user-primary), copilot, memo; no console errors; no horizontal overflow at 375px |

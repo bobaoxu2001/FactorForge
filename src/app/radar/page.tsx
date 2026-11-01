@@ -7,6 +7,7 @@ import SignalConcentrationPanel from "@/components/research/SignalConcentrationP
 import PlainEnglish from "@/components/learn/PlainEnglish";
 import Term from "@/components/learn/Term";
 import MethodologyCallout from "@/components/research/MethodologyCallout";
+import SelectionBiasPanel from "@/components/research/SelectionBiasPanel";
 import { getResearchDataset } from "@/lib/research";
 import { num, pct } from "@/lib/utils/format";
 
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
 };
 
 export default async function RadarPage() {
-  const { radarCandidates, signalConcentration, stressDiagnostics, marketStress } = await getResearchDataset();
+  const { radarCandidates, signalConcentration, stressDiagnostics, marketStress, selectionBias } = await getResearchDataset();
   return (
     <div className="space-y-8">
       <PageHeader
@@ -54,12 +55,20 @@ export default async function RadarPage() {
         </div>
       </section>
 
+      <SelectionBiasPanel
+        title="Does the radar's Sharpe > 1 bar beat luck?"
+        rows={radarCandidates
+          .filter((c) => selectionBias[c.result.strategyId])
+          .map((c) => ({ strategyId: c.result.strategyId, strategyName: c.result.strategyName, summary: selectionBias[c.result.strategyId] }))}
+      />
+
       <MethodologyCallout
         items={[
           "Scores combine return, Sharpe, drawdown, win rate, trade count, and data-provenance penalties.",
           "Candidate thresholds are explicit: high score with bounded drawdown and enough trades can reach radar candidate status.",
           "Hard rejection rules penalize severe drawdown, negative Sharpe, weak evidence, or poor data quality.",
           "Stress-adjusted score is a regime-aware re-weighting for research only; the base score and admission rules are unchanged.",
+          "Admission does not yet require the deflated Sharpe to clear 95%; the selection-bias check above shows which candidates would survive that stricter bar.",
           "Radar gates mean worthy of simulated observation review, not an instruction to trade.",
         ]}
       />

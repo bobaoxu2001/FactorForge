@@ -21,6 +21,14 @@ This project follows a human-maintained changelog. There is no automated release
 
 - Information architecture is research-first: sidebar groups Research / Quantitative / Portfolio & monitoring / Workspace. The former overview moved to `/quant` with unchanged content. "AI Stock Picks" is relabelled "Quant Screen" (route unchanged). The app title and metadata describe the research platform. Search index and sitemap include all research routes.
 
+#### Methodology follow-up
+
+- Added a Deflated Sharpe Ratio check (`src/lib/quant/selectionBias.ts`) for the best-of-N showcase. `/strategies`, `/radar` and each strategy page now show the luck threshold and the probability of real skill after the haircut. Radar admission rules are unchanged.
+- Backtest stops (stop loss, trailing stop) are now judged on the completed close and filled at the next open instead of the same close, so overnight gaps through a stop are paid. The entry bar's close is checked too. This changes backtest numbers.
+- The lead-lag scan adds a train/holdout test: the lag is chosen on the first two-thirds of the history and the correlation is re-measured on later months. Shown on the KPI page, in the explorer and in the memo.
+- Hotspot scenario weights are shown as configured priors to the nearest 5%, and confidence as a heuristic band (raw score in a tooltip).
+- The `inverseNormalCdf`/`expectedMaxSharpe` helpers moved to the quant layer and are re-exported from `src/lib/intel/attribution.ts`. Glossary adds "Deflated Sharpe ratio". (+12 tests; 412 total)
+
 #### Fixed
 
 - `calculateMetrics` returned gross profit (a dollar amount) as the profit factor when a backtest had no losing trades. It is now `null` (shown as "n/a").

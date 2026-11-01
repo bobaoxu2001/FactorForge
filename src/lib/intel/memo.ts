@@ -162,7 +162,7 @@ export function buildMemoSections(view: ResearchProjectView): MemoSection[] {
     .filter((l) => l.result.best)
     .map((l) => {
       const b = l.result.best!;
-      return `${l.leader} → ${l.follower}: strongest in-sample correlation ${(b.correlation as number).toFixed(2)} at a ${b.lag}-month lag (n=${b.n}; ${l.result.stable ? "same sign in both halves" : "unstable across halves"}). Exploratory, not predictive.`;
+      return `${l.leader} → ${l.follower}: strongest in-sample correlation ${(b.correlation as number).toFixed(2)} at a ${b.lag}-month lag (n=${b.n}; ${l.result.stable ? "same sign in both halves" : "unstable across halves"}${l.result.holdout ? `; a lag chosen on data to ${l.result.holdout.splitMonth} ${l.result.holdout.confirmed ? "held" : "did not hold"} on later months (r ${l.result.holdout.holdoutCorrelation?.toFixed(2) ?? "n/a"})` : ""}). Exploratory, not predictive.`;
     });
   add("kpi-analysis", "Industry KPI Analysis", [...kpiLines, ...leadLagLines], view.kpis.map((k) => `EV-KPI-${k.kpi.id}`));
 

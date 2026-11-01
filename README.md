@@ -40,7 +40,7 @@ See [`docs/PROJECT_AUDIT.md`](docs/PROJECT_AUDIT.md) for the audit that motivate
 | Overview | `/research/freight` | Research question, workflow status, computed variant view, hypothesis scorecard, KPI monitor, catalysts, quality checks |
 | Industry map | `/industry` | Interactive value-chain graph. 12 of 14 relationships are **verified** against verbatim 10-K sentences; the others are marked inferred or hypothetical |
 | Evidence | `/evidence` | Evidence Explorer: filter ~95 items by origin, status and hypothesis; trace any claim to its SEC filing or FRED series; see where the memo cites it |
-| KPIs | `/kpis` | 13 freight KPIs (BTS/ATA tonnage, Cass, BLS PPIs, EIA diesel, BLS payrolls, Fed IP, Census) with full metadata, freshness vs release cadence, ≥2σ anomaly flags, an out-of-sample **fuel-adjusted pricing residual**, and a lead-lag explorer with split-half stability |
+| KPIs | `/kpis` | 13 freight KPIs (BTS/ATA tonnage, Cass, BLS PPIs, EIA diesel, BLS payrolls, Fed IP, Census) with full metadata, freshness vs release cadence, ≥2σ anomaly flags, an out-of-sample **fuel-adjusted pricing residual**, and a lead-lag explorer with split-half stability and a holdout test |
 | Competitive intel | `/companies` | KNX, JBHT, CHRW (+ ODFL, SNDR, WERN, LSTR): growth, margins, FCF, leverage, ROIC, point-in-time valuation percentiles. No composite score |
 | Company research | `/companies/[ticker]` | Quarterly table with derivation markers, TTM cash flow, debt by XBRL component, 5-year PIT multiples, bull/base/bear scenarios, sensitivity grid, interactive DCF, filings & estimated earnings dates, market/sector attribution, and the quant lens with a multiple-testing haircut |
 | Primary research | `/primary` | Channel-check plan (stakeholders × hypotheses), interview guides, compliance safeguards, and a private workspace for **your** interview notes with MNPI/PII screening, theme and indicator extraction, contradiction detection and cross-source comparison |
@@ -71,7 +71,7 @@ Snapshots live in `src/__fixtures__/research/<project>/` and are rebuilt by `npm
 - **Quarterisation is explicit.** Values come from direct 3-month facts where filed. Otherwise they are derived from YTD differences (†) or FY − 9M (‡), and every derived value says so.
 - **One XBRL concept per metric per company**, chosen by recent coverage and displayed. Debt is a shown sum of named components, with known exclusions.
 - **Freshness**: each KPI is fresh/lagging/stale against its release cadence and publication lag. The price fixture flags itself stale when old.
-- **Comparability**: YoY by calendar period, never by array offset. NSA series are read YoY only. Lead-lag is labelled in-sample with a split-half stability check, and correlation is never called predictive.
+- **Comparability**: YoY by calendar period, never by array offset. NSA series are read YoY only. Lead-lag is labelled in-sample with a split-half stability check and a holdout test (lag chosen on the first two-thirds, tested on later months), and correlation is never called predictive.
 - **Fuel-adjusted residual**: OLS fitted only on data before a 12-month holdout, with an extrapolation warning.
 - **Valuation**: positive-denominator multiples only (negative-earnings P/E is "n/m", not cheap). Scenarios are anchored to each company's own 5-year history. Expected return is computed only from a complete, justified probability set.
 - **Backtests**: labelled backtest vs simulated vs actual (actual is not supported). The best-of-N Sharpe is shown next to the expected maximum Sharpe of N skill-less strategies.
@@ -354,7 +354,8 @@ Per-strategy notes (e.g. *"dividend component not connected yet"*) live on the s
 **Modeled**
 - Next-open execution: signals from completed daily bars fill at the next bar's open.
 - Modeled slippage (bps) and per-trade fees, applied symmetrically on entry/exit.
-- Stop loss, trailing stop, max-holding-days exit; strategy-level sell signals.
+- Stop loss, trailing stop, max-holding-days exit; strategy-level sell signals. Stops are judged on the close and filled at the next open, so overnight gaps through a stop are paid.
+- Selection-bias check: each `/strategies` showcase run is the best of ~30 symbols, so `/strategies`, `/radar` and each strategy page show its Deflated Sharpe Ratio (probability of real skill after the best-of-N haircut).
 - Daily mark-to-market equity curve; benchmark equity sampled on the same calendar.
 - Risk-adjusted metrics: total / annualized return, Sharpe, profit factor, win rate, max drawdown, volatility (all from the equity series, not invented).
 - Portfolio: score-weighted blend across legs with calendar intersection, per-leg contribution attribution, Pearson correlation of daily returns.
@@ -527,7 +528,7 @@ Security notes:
 
 ## Testing
 
-400 tests across 71 files under vitest + jsdom. The research layer added 90 tests in 12 files:
+412 tests across 73 files under vitest + jsdom. The research layer added 90 tests in 12 files; the follow-up methodology pass added 12 more (Deflated Sharpe, next-open stop fills, lead-lag holdout, hotspot display helpers):
 
 - **Research math** — YoY matched by calendar period (gaps give null, not a wrong month), weekly YoY, trailing z-score anomalies, lead-lag recovery of a known lag with split-half stability, freshness vs cadence and publication lag, OLS and inverse-normal accuracy, expected-max-Sharpe monotonicity, market/sector beta recovery and exact return decomposition.
 - **Financial statements** — YTD differencing and FY−9M quarterisation with derivation labels, point-in-time filing dates (latest component), restatement flags, TTM gap refusal, 52/53-week labels, debt composition (convertible double-count guard, finance leases, combined tags).
@@ -626,10 +627,10 @@ Maintainers may use AI assistants for repetitive review and documentation work, 
 
 Research-platform roadmap (details in [docs/PROJECT_AUDIT.md](docs/PROJECT_AUDIT.md) §8):
 1. FMCSA authority-data adapter (public) to test the capacity-exit hypothesis directly.
-2. Out-of-sample (rolling-origin) tests before any KPI is called "leading".
+2. Rolling-origin out-of-sample tests before any KPI is called "leading" (a single train/holdout split is in place).
 3. Server-side, multi-user research store behind the existing workspace reducer.
 4. A second industry project (e.g., software via XBRL `RevenueRemainingPerformanceObligation`) to prove the config-driven design.
-5. Multiple-testing haircut on the `/strategies` best-of-N showcase.
+5. Optionally gate radar admission on the deflated Sharpe instead of only showing it.
 6. Light theme and print-optimised memo layout.
 
 
@@ -652,7 +653,7 @@ The current roadmap is tracked in [ROADMAP.md](ROADMAP.md). Near-term maintainer
 - **No licensed market data.** Spot/contract rates, tender rejections, Class 8 orders, consensus estimates and call transcripts are listed as gaps with what would be required.
 - **Research workspace is per-browser.** Notes, memo edits and probabilities live in localStorage, with JSON export/import. There is no multi-user, server-side research store yet.
 - **Copilot quality depends on the LLM key.** Without a working key (the local key currently returns HTTP 402 "insufficient balance"), answers are deterministic evidence listings and hypothesis tests rather than synthesised prose.
-- **Lead-lag is exploratory.** No out-of-sample forecasting test has been implemented yet.
+- **Lead-lag is exploratory.** A single train/holdout split checks whether the chosen lag holds on later months, but there is no rolling-origin forecasting test, and YoY overlap means even the holdout has few independent observations.
 - **Dark theme only.** The token system predates the research layer; a light theme is on the roadmap.
 
 **Quantitative lab**

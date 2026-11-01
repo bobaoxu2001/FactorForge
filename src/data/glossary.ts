@@ -138,6 +138,16 @@ export const GLOSSARY: GlossaryEntry[] = [
     example: "Two strategies both return 10%, but the calmer one has the higher Sharpe — and is usually the better bet.",
   },
   {
+    id: "deflated-sharpe",
+    term: "Deflated Sharpe ratio",
+    aliases: ["deflated sharpe", "dsr", "selection bias", "multiple testing"],
+    category: "Returns & Risk",
+    level: "intermediate",
+    plain: "The chance a strategy's Sharpe reflects real skill after accounting for how many versions were tried before picking the best one.",
+    why: "Try enough rules or symbols and one will look great by luck. Deflating asks whether the winner beats what the luckiest of N skill-less tries would score.",
+    example: "The best of 30 coin-flip strategies over 3 years typically shows a Sharpe near 1.2 by chance alone, so a 1.3 Sharpe winner proves little.",
+  },
+  {
     id: "winrate",
     term: "Win rate",
     aliases: ["win rate", "hit rate"],

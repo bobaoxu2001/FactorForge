@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Flame } from "lucide-react";
 import type { HotspotAgentReport } from "@/lib/agents/types";
-import { sentimentAccent } from "./hotspotStyles";
+import { confidenceBand, sentimentAccent } from "./hotspotStyles";
 
 /** Compact top-themes hotspots card for the Overview dashboard. */
 export default function HotspotsSummaryCard({ report }: { report: HotspotAgentReport }) {
@@ -46,7 +46,7 @@ export default function HotspotsSummaryCard({ report }: { report: HotspotAgentRe
                     <span key={s} className="num rounded-md border border-line bg-white/[0.04] px-1.5 py-0.5 text-[10px] text-ink-muted">{s}</span>
                   ))}
                 </div>
-                <span className="text-[10px] text-ink-soft">conf {theme.scenario.confidence}</span>
+                <span className="text-[10px] text-ink-soft">{confidenceBand(theme.scenario.confidence).label.toLowerCase()} confidence</span>
               </div>
             </div>
           );

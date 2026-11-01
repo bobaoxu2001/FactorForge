@@ -143,6 +143,22 @@ export interface LagCorrelation {
   n: number;
 }
 
+/**
+ * Out-of-sample check: the lag is chosen using only pairs fully observed by
+ * `splitMonth` (the first two-thirds of the leader's history), then the
+ * correlation at that lag is measured on pairs whose leader month comes later.
+ */
+export interface LeadLagHoldout {
+  splitMonth: string;
+  chosenLag: number;
+  trainCorrelation: number;
+  trainN: number;
+  holdoutCorrelation: number | null;
+  holdoutN: number;
+  /** Holdout correlation keeps the training sign with |r| ≥ 0.3. */
+  confirmed: boolean;
+}
+
 export interface LeadLagResult {
   lags: LagCorrelation[];
   best: LagCorrelation | null;
@@ -150,8 +166,14 @@ export interface LeadLagResult {
   firstHalf: number | null;
   secondHalf: number | null;
   stable: boolean;
+  /** Null when the training window is too short to choose a lag (< 24 pairs) or the holdout has < 12. */
+  holdout: LeadLagHoldout | null;
   caveats: string[];
 }
+
+const MIN_LAG_PAIRS = 24;
+const MIN_HOLDOUT_PAIRS = 12;
+const HOLDOUT_MIN_ABS_CORRELATION = 0.3;
 
 /**
  * In-sample lead-lag scan between two monthly series (typically YoY changes,
@@ -168,20 +190,23 @@ export function leadLag(
     follower.filter((p) => p.value !== null).map((p) => [monthKey(p.date), p.value as number]),
   );
   const leaderClean = leader.filter((p) => p.value !== null) as Array<{ date: string; value: number }>;
-  const pairsAt = (lag: number): Array<[number, number]> =>
+  const datedPairsAt = (lag: number): Array<{ leaderMonth: string; followerMonth: string; pair: [number, number] }> =>
     leaderClean
       .map((p) => {
-        const y = followerByMonth.get(shiftMonthKey(monthKey(p.date), lag));
-        return y === undefined ? null : ([p.value, y] as [number, number]);
+        const leaderMonth = monthKey(p.date);
+        const followerMonth = shiftMonthKey(leaderMonth, lag);
+        const y = followerByMonth.get(followerMonth);
+        return y === undefined ? null : { leaderMonth, followerMonth, pair: [p.value, y] as [number, number] };
       })
-      .filter((pair): pair is [number, number] => pair !== null);
+      .filter((d): d is { leaderMonth: string; followerMonth: string; pair: [number, number] } => d !== null);
+  const pairsAt = (lag: number): Array<[number, number]> => datedPairsAt(lag).map((d) => d.pair);
 
   const lags: LagCorrelation[] = [];
   for (let lag = 0; lag <= maxLag; lag += 1) {
     const pairs = pairsAt(lag);
     lags.push({ lag, correlation: pearsonPairs(pairs), n: pairs.length });
   }
-  const usable = lags.filter((l) => l.correlation !== null && l.n >= 24);
+  const usable = lags.filter((l) => l.correlation !== null && l.n >= MIN_LAG_PAIRS);
   const best = usable.length
     ? usable.reduce((a, b) => (Math.abs(b.correlation as number) > Math.abs(a.correlation as number) ? b : a))
     : null;
@@ -203,13 +228,51 @@ export function leadLag(
     Math.abs(firstHalf) >= 0.3 &&
     Math.abs(secondHalf) >= 0.3;
 
+  const holdout = holdoutCheck(datedPairsAt, leaderClean.map((p) => monthKey(p.date)), maxLag);
+
   const caveats = [
     "In-sample Pearson correlation of YoY changes. It describes co-movement and does not demonstrate predictive power.",
     "YoY series overlap 11 of 12 months with their neighbours, so observations are not independent and naive significance would overstate confidence.",
     "The best lag is selected after scanning 0–" + maxLag + " months (a multiple-comparison choice).",
   ];
   if (best && !stable) caveats.push("The relationship is not stable across the two halves of the sample.");
-  return { lags, best, firstHalf, secondHalf, stable, caveats };
+  if (holdout && !holdout.confirmed) {
+    caveats.push(`A lag chosen on data through ${holdout.splitMonth} (${holdout.chosenLag} months) does not hold up on later months (holdout r ${holdout.holdoutCorrelation === null ? "n/a" : holdout.holdoutCorrelation.toFixed(2)}).`);
+  }
+  return { lags, best, firstHalf, secondHalf, stable, holdout, caveats };
+}
+
+function holdoutCheck(
+  datedPairsAt: (lag: number) => Array<{ leaderMonth: string; followerMonth: string; pair: [number, number] }>,
+  leaderMonths: string[],
+  maxLag: number,
+): LeadLagHoldout | null {
+  if (leaderMonths.length < 3) return null;
+  const splitMonth = leaderMonths[Math.floor((leaderMonths.length * 2) / 3) - 1];
+  let chosen: { lag: number; correlation: number; n: number } | null = null;
+  for (let lag = 0; lag <= maxLag; lag += 1) {
+    // Training uses only pairs whose follower value was already observed by the split.
+    const train = datedPairsAt(lag).filter((d) => d.followerMonth <= splitMonth).map((d) => d.pair);
+    const r = pearsonPairs(train);
+    if (r === null || train.length < MIN_LAG_PAIRS) continue;
+    if (!chosen || Math.abs(r) > Math.abs(chosen.correlation)) chosen = { lag, correlation: r, n: train.length };
+  }
+  if (!chosen) return null;
+  const test = datedPairsAt(chosen.lag).filter((d) => d.leaderMonth > splitMonth).map((d) => d.pair);
+  if (test.length < MIN_HOLDOUT_PAIRS) return null;
+  const holdoutCorrelation = pearsonPairs(test);
+  return {
+    splitMonth,
+    chosenLag: chosen.lag,
+    trainCorrelation: chosen.correlation,
+    trainN: chosen.n,
+    holdoutCorrelation,
+    holdoutN: test.length,
+    confirmed:
+      holdoutCorrelation !== null &&
+      Math.sign(holdoutCorrelation) === Math.sign(chosen.correlation) &&
+      Math.abs(holdoutCorrelation) >= HOLDOUT_MIN_ABS_CORRELATION,
+  };
 }
 
 // ── Simple OLS (one regressor) for fuel-adjusted residuals ─────────────────

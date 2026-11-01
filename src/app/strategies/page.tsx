@@ -8,6 +8,7 @@ import Term from "@/components/learn/Term";
 import MethodologyCallout from "@/components/research/MethodologyCallout";
 import MarketRegimeBanner from "@/components/research/MarketRegimeBanner";
 import ModelPortfolioCard from "@/components/research/ModelPortfolioCard";
+import SelectionBiasPanel from "@/components/research/SelectionBiasPanel";
 import { getResearchDataset } from "@/lib/research";
 
 export const revalidate = 60 * 60;
@@ -23,7 +24,7 @@ export default async function StrategiesPage({
 }: {
   searchParams?: { status?: string; symbol?: string; q?: string };
 }) {
-  const { radarCandidates, marketStress, stressDiagnostics, modelPortfolio } = await getResearchDataset();
+  const { radarCandidates, marketStress, stressDiagnostics, modelPortfolio, selectionBias } = await getResearchDataset();
   const enrichedCandidates = radarCandidates.map((candidate) => ({
     candidate,
     intel: buildStrategyIntel({
@@ -69,6 +70,12 @@ export default async function StrategiesPage({
 
       <StrategyQualityBoard items={enrichedCandidates} regimeLabel={marketStress.regimeLabel} />
 
+      <SelectionBiasPanel
+        rows={radarCandidates
+          .filter((c) => selectionBias[c.result.strategyId])
+          .map((c) => ({ strategyId: c.result.strategyId, strategyName: c.result.strategyName, summary: selectionBias[c.result.strategyId] }))}
+      />
+
       <PlainEnglish>
         A <Term term="strategy">strategy</Term> is a fixed research rule for entering, exiting, and sizing a simulated position.
         Each card below shows how the rule behaved on real past prices — a <Term term="backtest">backtest</Term>. Green-tinted
@@ -77,7 +84,7 @@ export default async function StrategiesPage({
 
       <MethodologyCallout
         items={[
-          "Signals are generated from completed daily bars and modeled with next-open execution.",
+          "Signals are generated from completed daily bars and modeled with next-open execution; stop and trailing-stop exits trigger on the close and fill at the next open, so overnight gaps are paid.",
           "Backtests include strategy-level slippage, per-trade fees, stops, trailing stops, and max-holding exits where defined.",
           "No intraday fills, market impact, margin, shorts, options, or live order routing are modeled.",
           "Strategy metrics come from the backtest engine and remain unchanged by memo text.",

@@ -130,7 +130,7 @@ export default function KpiPage({ params, searchParams }: { params: { projectId:
                 <div className="mb-2 text-[11px] text-ink-soft">{l.rationale}</div>
                 <LagBars lags={l.result.lags} best={l.result.best?.lag ?? null} height={120} />
                 <div className="mt-1 text-[11.5px] text-ink-muted">
-                  {l.result.best ? `Strongest: ${(l.result.best.correlation as number).toFixed(2)} at ${l.result.best.lag}m (n=${l.result.best.n}); halves ${l.result.firstHalf?.toFixed(2)} / ${l.result.secondHalf?.toFixed(2)} → ${l.result.stable ? "stable sign" : "unstable"}.` : "Insufficient overlap."}
+                  {l.result.best ? `Strongest: ${(l.result.best.correlation as number).toFixed(2)} at ${l.result.best.lag}m (n=${l.result.best.n}); halves ${l.result.firstHalf?.toFixed(2)} / ${l.result.secondHalf?.toFixed(2)} → ${l.result.stable ? "stable sign" : "unstable"}${l.result.holdout ? `; out of sample (lag picked on data to ${l.result.holdout.splitMonth}): ${l.result.holdout.holdoutCorrelation?.toFixed(2) ?? "n/a"} at ${l.result.holdout.chosenLag}m → ${l.result.holdout.confirmed ? "holds" : "does not hold"}` : ""}.` : "Insufficient overlap."}
                 </div>
               </div>
             );
@@ -140,7 +140,7 @@ export default function KpiPage({ params, searchParams }: { params: { projectId:
           <div className="mb-2 text-[12.5px] font-medium text-ink">Explore any pair</div>
           <LeadLagExplorer series={yoySeries} defaultLeader="retail-sales" defaultFollower="cass-shipments" />
         </div>
-        <div className="mt-3"><Note>Correlation is not demonstrated predictive power. Before calling a KPI &ldquo;leading&rdquo; in a memo, run an out-of-sample test (rolling-origin forecast against a naive benchmark). That test is on the roadmap and not implemented here.</Note></div>
+        <div className="mt-3"><Note>Correlation is not demonstrated predictive power. The out-of-sample tile re-checks the chosen lag on months the choice never saw, which can rule a relationship out but cannot prove it predicts. Before calling a KPI &ldquo;leading&rdquo; in a memo, a rolling-origin forecast against a naive benchmark is still needed; that test is on the roadmap and not implemented here.</Note></div>
       </Panel>
     </div>
   );

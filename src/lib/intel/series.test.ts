@@ -51,6 +51,23 @@ describe("leadLag", () => {
     expect(r.best?.correlation).toBeCloseTo(1, 6);
     expect(r.stable).toBe(true);
     expect(r.caveats.join(" ")).toMatch(/does not demonstrate predictive power/);
+    // A real 3-month lead is found on the first two-thirds and holds on the rest.
+    expect(r.holdout).toMatchObject({ chosenLag: 3, confirmed: true });
+    expect(r.holdout!.holdoutCorrelation).toBeCloseTo(1, 6);
+    expect(r.holdout!.holdoutN).toBeGreaterThanOrEqual(12);
+  });
+
+  it("flags a relationship that exists only in the training window", () => {
+    // Follower tracks the leader with a 2-month lag for 80 months, then becomes unrelated noise.
+    const leader = monthly(Array.from({ length: 120 }, (_, i) => Math.sin(i / 4)));
+    const follower = leader.map((p, i) => ({
+      date: p.date,
+      value: i < 2 ? null : i < 80 ? leader[i - 2].value : Math.sin(i * 1.7) * 0.3,
+    }));
+    const r = leadLag(leader.map((p) => ({ date: p.date, value: p.value })), follower, 12);
+    expect(r.holdout?.chosenLag).toBe(2);
+    expect(r.holdout?.confirmed).toBe(false);
+    expect(r.caveats.join(" ")).toMatch(/does not hold up on later months/);
   });
 });
 

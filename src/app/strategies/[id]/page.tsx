@@ -73,6 +73,7 @@ export default async function StrategyDetailPage({
   const active = requested ?? best;
   const result = active.result;
   const isDefaultSymbol = active.symbol === best.symbol;
+  const selection = dataset.selectionBias[definition.id];
 
   const explanation = await generateStrategyExplanation(result);
   const walkForward = evaluateWalkForward(result);
@@ -125,6 +126,18 @@ export default async function StrategyDetailPage({
             this rule scored highest across the {runs.length}-name watchlist. That is a deliberate <em>showcase</em> pick,
             not a survivorship-bias-free result, so the default numbers are optimistic by construction. Switch symbols
             below to see how the same rule behaves elsewhere.
+            {selection && (
+              <span className="mt-1.5 block">
+                <span className="font-medium text-amber-100">Quantified: </span>
+                the luckiest of {selection.trials} skill-less runs would reach a Sharpe of about{" "}
+                <span className="num text-ink">{num(selection.luckThreshold)}</span>. {best.symbol}&apos;s Sharpe of{" "}
+                <span className="num text-ink">{num(selection.sharpe)}</span> gives a{" "}
+                <span className="num font-medium text-ink">{selection.dsr === null ? "n/a" : `${Math.round(selection.dsr * 100)}%`}</span>{" "}
+                probability of real skill after that haircut (deflated Sharpe;{" "}
+                {selection.survives ? "clears" : "below"} the 95% bar
+                {selection.psr !== null && <>, vs {Math.round(selection.psr * 100)}% before accounting for the pick</>}).
+              </span>
+            )}
             {!isDefaultSymbol && (
               <span className="ml-1 text-ink">
                 Currently viewing <span className="font-medium">{active.symbol}</span> (rank {runs.indexOf(active) + 1} of {runs.length}).

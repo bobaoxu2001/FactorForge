@@ -12,6 +12,7 @@ import { buildDailyReview } from "@/lib/quant/dailyReview";
 import { generateDailyReviewNote, type DailyReviewNote } from "@/lib/ai/dailyReviewNote";
 import type { DailyReview } from "@/types/strategy";
 import { buildRadar } from "@/lib/quant/radar";
+import { deflatedSharpeForSelection, type SelectionBiasSummary } from "@/lib/quant/selectionBias";
 import { chooseBenchmark, runStrategyOnMarketCached } from "@/lib/quant/strategies";
 import { buildModelPortfolioPerformance, type ModelPortfolioPerformance } from "@/lib/quant/modelPortfolio";
 import { chooseWeights, runPortfolioBacktest, type PortfolioBacktest } from "@/lib/quant/portfolio";
@@ -46,6 +47,8 @@ export interface ResearchDataset {
   factors: FactorSnapshot[];
   strategyResults: BacktestResult[];
   radarCandidates: ReturnType<typeof buildRadar>;
+  /** Per strategy: Deflated Sharpe of the showcased run, picked as the best across the symbol universe. */
+  selectionBias: Record<string, SelectionBiasSummary>;
   paperObservations: ReturnType<typeof buildPaperObservations>;
   paperAccount: ReturnType<typeof buildPaperAccountSummary>;
   dailyReview: DailyReview;
@@ -174,6 +177,10 @@ export async function buildResearchDatasetFromPrices(
     if (!best) throw new Error(`No usable market data for strategy ${scan.strategyId}`);
     return best.result;
   });
+  // Each showcased run is the best of N symbols; deflate its Sharpe for that pick.
+  const selectionBias: Record<string, SelectionBiasSummary> = Object.fromEntries(
+    strategyScans.map((scan) => [scan.strategyId, deflatedSharpeForSelection(scan.runs[0].result, scan.runs.map((run) => run.result))]),
+  );
   const signalConsensus = buildSignalConsensus(strategyScans);
   const factors = DEFAULT_SYMBOLS
     .map((symbol) => pricesBySymbol[symbol])
@@ -285,6 +292,7 @@ export async function buildResearchDatasetFromPrices(
     factors,
     strategyResults,
     radarCandidates,
+    selectionBias,
     paperObservations,
     paperAccount,
     dailyReview,

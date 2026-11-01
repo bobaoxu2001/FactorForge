@@ -37,7 +37,7 @@ Statuses: verified · partially-verified (calculations that depend on a method c
 - **Freshness**: the latest observation is compared with the latest period expected to be published, given cadence and publication lag: fresh, lagging (one period behind) or stale.
 - **Comparability**: NSA series are read YoY only. Derived ratios (Cass cost per shipment) say that mix changes move them.
 - **Fuel-adjusted residual**: OLS of a price KPI's YoY on diesel YoY, fitted only on data before the last 12 months. The residual over the holdout is reported, with an extrapolation warning when diesel moves outside the training range.
-- **Lead-lag**: Pearson correlation of YoY series at lags 0–12, the best lag chosen after scanning (stated), plus a split-half sign/stability check. It is described as co-movement, never as predictive power.
+- **Lead-lag**: Pearson correlation of YoY series at lags 0–12, the best lag chosen after scanning (stated), plus a split-half sign/stability check. A **holdout test** then picks the lag using only pairs fully observed by the end of the first two-thirds of the leader's history and measures the correlation at that lag on later months; it "holds" only if the sign matches and |r| ≥ 0.3 (≥ 12 holdout pairs). It is still described as co-movement, never as predictive power. [`series.test.ts`]
 
 ## 5. Hypotheses & monitoring
 
@@ -50,6 +50,8 @@ Statuses: verified · partially-verified (calculations that depend on a method c
 - Market/sector attribution: daily OLS of total returns on SPY and (IYT − SPY), with t-statistics. Alpha with |t| < 2 is described as indistinguishable from zero.
 - **Outcome review** estimates betas on the 12 months *before* the thesis date and applies them after it (no look-ahead).
 - Company quant lens: the existing strategy engine runs on the snapshot (next-open execution, slippage, fees). Best-of-N Sharpe is compared with E[max Sharpe of N null strategies] ≈ (1−γ)Φ⁻¹(1−1/N) + γΦ⁻¹(1−1/(Ne)), scaled by 1/√years. [`attribution.test.ts`]
+- **Selection bias on `/strategies` and `/radar`**: each showcased run is the best of N symbols (≈30). Its Sharpe is tested with the Deflated Sharpe Ratio (Bailey & López de Prado, 2014): SR₀ = √Var(per-symbol Sharpe) · E[max Z_N], and P(true SR > SR₀) corrects for sample length, skew and kurtosis. A run "survives" at ≥ 95%. The radar's admission rule (Sharpe > 1) is not changed; the check is shown next to it. [`selectionBias.test.ts`]
+- **Stops** are judged on the completed close and filled at the next open, so overnight gaps through a stop are paid; the entry bar's close is checked too. [`backtest.test.ts`]
 - Backtested, simulated and actual performance are separated. Actual trading is not supported.
 
 ## 7. Primary research & compliance

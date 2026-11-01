@@ -82,4 +82,45 @@ describe("runLongOnlyBacktest", () => {
     expect(result.trades[0].fees).toBe(2);
     expect(result.trades[0].pnl).toBeGreaterThan(0);
   });
+
+  it("fills a stop at the next open, paying an overnight gap through the stop", () => {
+    const prices = market([
+      { date: "2024-01-01", open: 100, high: 101, low: 99, close: 100, volume: 1000 },
+      { date: "2024-01-02", open: 100, high: 101, low: 94, close: 95, volume: 1000 },
+      { date: "2024-01-03", open: 95, high: 96, low: 89, close: 90, volume: 1000 },
+      { date: "2024-01-04", open: 80, high: 82, low: 78, close: 81, volume: 1000 },
+    ]);
+    const plans = [{ buy: true, reason: "entry" }, ...Array.from({ length: 3 }, () => ({ buy: false, reason: "no signal" }))];
+
+    const result = runLongOnlyBacktest(strategy, prices, prices, plans, {
+      initialCapital: 1_000,
+      positionFraction: 1,
+      slippageBps: 0,
+      feePerTrade: 0,
+      stopLossPct: 0.08,
+    });
+
+    // Close 90 on Jan 3 breaches the 92 stop; the decision can only be acted on at Jan 4's open (80).
+    expect(result.trades).toHaveLength(1);
+    expect(result.trades[0]).toMatchObject({ exitDate: "2024-01-04", exitPrice: 80, exitReason: "stop loss" });
+    expect(result.signals.at(-1)?.reason).toContain("executed next open");
+  });
+
+  it("checks the entry bar's own close and leaves a final-bar breach open", () => {
+    const entryBreach = market([
+      { date: "2024-01-01", open: 100, high: 101, low: 99, close: 100, volume: 1000 },
+      { date: "2024-01-02", open: 100, high: 100, low: 88, close: 90, volume: 1000 },
+      { date: "2024-01-03", open: 91, high: 92, low: 90, close: 91, volume: 1000 },
+    ]);
+    const plans = [{ buy: true, reason: "entry" }, { buy: false, reason: "no signal" }, { buy: false, reason: "no signal" }];
+    const config = { initialCapital: 1_000, positionFraction: 1, slippageBps: 0, feePerTrade: 0, stopLossPct: 0.08 };
+
+    const stopped = runLongOnlyBacktest(strategy, entryBreach, entryBreach, plans, config);
+    expect(stopped.trades[0]).toMatchObject({ entryDate: "2024-01-02", exitDate: "2024-01-03", exitPrice: 91, exitReason: "stop loss" });
+
+    const lastBarBreach = market(entryBreach.prices.slice(0, 2));
+    const open = runLongOnlyBacktest(strategy, lastBarBreach, lastBarBreach, plans.slice(0, 2), config);
+    expect(open.trades).toHaveLength(0);
+    expect(open.equityCurve.at(-1)?.positionValue).toBe(10 * 90);
+  });
 });

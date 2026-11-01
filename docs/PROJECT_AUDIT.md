@@ -122,9 +122,9 @@ Missing for the target vision: industry taxonomy and value chain, company financ
 |---|---|---|---|
 | R1 | Profit-factor unit bug | High (calculation) | Fixed; now `null` = undefined, rendered as "—" |
 | R2 | Silent stale snapshot | High (integrity) | Fixed; staleness computed and surfaced |
-| R3 | Selection bias / multiple testing in the best-of-N showcase feeding radar and model portfolio | High (methodology) | Documented in code, not quantified in UI. A multiple-testing haircut (expected max Sharpe under the null) is now shown on company quant lenses. **Not yet applied to `/strategies` or the radar**: roadmap |
-| R4 | Stop exits fill at the trigger bar's close (no gap modelling) | Medium | Optimistic in gap-down markets; documented in the trade reason string |
-| R5 | Hotspot numeric confidence and probabilities are subjective configuration | Medium | Labelled "configured", but displayed as precise numbers. Navigation now calls the page "Thematic hypotheses". The numbers themselves are unchanged: roadmap |
+| R3 | Selection bias / multiple testing in the best-of-N showcase feeding radar and model portfolio | High (methodology) | **Quantified.** `/strategies`, `/radar` and each strategy page show the Deflated Sharpe Ratio of the best-of-N pick; company quant lenses show the expected-max-Sharpe haircut. Radar admission itself still uses Sharpe > 1 (gating on DSR is roadmap) |
+| R4 | Stop exits filled at the trigger bar's close (decided and filled on the same close) | Medium | **Fixed.** Stops are judged on the close and filled at the next open, so gaps through a stop are paid; the entry bar's close is checked too |
+| R5 | Hotspot numeric confidence and probabilities are subjective configuration | Medium | **Mitigated.** Scenario weights show as configured priors to the nearest 5% ("~35% prior"); confidence shows as a Lower/Moderate/Higher heuristic band with the raw score only in a tooltip. The underlying configuration is unchanged |
 | R6 | Recommendation-style framing ("AI Stock Picks", "prime watch") | Medium (product/compliance) | Page and navigation relabelled "Quant Screen". Internal tier names ("prime watch") are unchanged |
 | R7 | No persistence on Vercel | Medium | Research workspace state is kept client-side (versioned localStorage + JSON export). Private notes never touch the server unless the user explicitly runs an AI analysis |
 | R8 | New user-triggerable LLM endpoint could be abused | Medium (cost/security) | Copilot route is rate-limited, input-size-bounded, and never echoes secrets |
@@ -168,4 +168,4 @@ Missing for the target vision: industry taxonomy and value chain, company financ
 | **P3** | Primary research: stakeholder map, interview guides, user notes with provenance, MNPI/PII safeguards, note analysis | Done (client-side) |
 | **P4** | Quant integration: company quant lens (strategy runs, multiple-testing haircut, market/sector attribution), scenario valuation, portfolio context | Done for coverage names |
 | **P5** | Featured case study "Is the U.S. Freight Recovery Real?" | Done |
-| Later | Light theme; DB-backed multi-user research projects; more industries with data adapters; earnings-call transcripts (licensing); consensus estimates (needs a licensed provider); haircut on `/strategies` | Roadmap |
+| Later | Light theme; DB-backed multi-user research projects; more industries with data adapters; earnings-call transcripts (licensing); consensus estimates (needs a licensed provider); gate radar admission on the deflated Sharpe; rolling-origin lead-lag tests | Roadmap |

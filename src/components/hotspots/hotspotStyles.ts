@@ -45,6 +45,18 @@ export function sentimentAccent(sentiment: SignalDirection): AccentTheme {
 }
 
 /** Confidence band → label + accent for the meter. */
+/**
+ * Scenario weights are configured priors nudged by the regime, so they are shown
+ * to the nearest 5% with a "~" rather than to a false single-percent precision.
+ */
+export function formatPrior(probability: number): string {
+  return `~${Math.round(probability * 20) * 5}%`;
+}
+
+/** Heuristic score explained in tooltips wherever only its band is shown. */
+export const CONFIDENCE_HEURISTIC_NOTE =
+  "Heuristic, not a statistical confidence: a configured base adjusted for proxy coverage in the universe and regime clarity.";
+
 export function confidenceBand(score: number): { label: string; bar: string; text: string } {
   if (score >= 65) return { label: "Higher", bar: "from-emerald-400 to-cyan-400", text: "text-emerald-200" };
   if (score >= 45) return { label: "Moderate", bar: "from-cyan-400 to-blue-400", text: "text-cyan-100" };
