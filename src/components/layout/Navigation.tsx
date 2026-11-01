@@ -4,16 +4,20 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Bell,
+  BookOpenCheck,
   BrainCircuit,
   CandlestickChart,
   Database,
+  FileSearch,
   FileText,
   Gauge,
   GraduationCap,
   Layers,
+  LibraryBig,
   LineChart,
   Flame,
   Menu,
+  MessagesSquare,
   Network,
   PieChart,
   Server,
@@ -22,7 +26,9 @@ import {
   Sparkles,
   Star,
   Target,
+  Telescope,
   Trophy,
+  Truck,
   WalletCards,
   X,
 } from "lucide-react";
@@ -32,46 +38,51 @@ import SearchCommand from "./SearchCommand";
 type NavItem = { href: string; label: string; icon: typeof Gauge; tag?: string };
 type NavSection = { label: string; items: NavItem[] };
 
-// Grouped so the 17 surfaces read as one coherent product rather than a flat
-// demo list. Every existing route and tag is preserved — only the visual
-// structure changed. "Start here" stays ungrouped at the top.
-const startItems: NavItem[] = [
-  { href: "/", label: "Overview", icon: Gauge },
-  { href: "/learn", label: "Learn (Stocks 101)", icon: GraduationCap },
-];
+// Research-first information architecture. The quantitative lab is intact
+// under its own group; every pre-existing route is still reachable.
+const startItems: NavItem[] = [{ href: "/", label: "Research Home", icon: Telescope }];
 
 const sections: NavSection[] = [
   {
     label: "Research",
     items: [
-      { href: "/data", label: "Data", icon: Database },
-      { href: "/factors", label: "Factors", icon: Network },
-      { href: "/strategies", label: "Strategies", icon: LineChart },
-      { href: "/radar", label: "Radar", icon: Target },
+      { href: "/research/freight", label: "Freight case study", icon: Truck },
+      { href: "/research/freight/companies", label: "Company research", icon: LibraryBig },
+      { href: "/research/freight/evidence", label: "Evidence explorer", icon: FileSearch },
+      { href: "/research/freight/memo", label: "Research memo", icon: FileText },
+      { href: "/research/freight/copilot", label: "AI research copilot", icon: MessagesSquare },
+      { href: "/research/frameworks", label: "KPI frameworks", icon: BookOpenCheck },
+    ],
+  },
+  {
+    label: "Quantitative",
+    items: [
+      { href: "/quant", label: "Quant overview", icon: Gauge },
+      { href: "/factors", label: "Factor research", icon: Network },
+      { href: "/strategies", label: "Strategy lab", icon: LineChart },
+      { href: "/radar", label: "Radar screening", icon: Target },
       { href: "/consensus", label: "Consensus", icon: Layers },
-      { href: "/portfolio", label: "Portfolio", icon: PieChart },
+      { href: "/portfolio", label: "Portfolio & attribution", icon: PieChart },
+      { href: "/picks", label: "Quant screen", icon: Sparkles },
+      { href: "/ai-market", label: "Market stress", icon: BrainCircuit },
+      { href: "/hotspots", label: "Thematic hypotheses", icon: Flame },
     ],
   },
   {
-    label: "Intelligence",
+    label: "Portfolio & monitoring",
     items: [
-      { href: "/ai-market", label: "AI Market", icon: BrainCircuit },
-      { href: "/picks", label: "AI Stock Picks", icon: Sparkles },
-      { href: "/hotspots", label: "Market Hotspots", icon: Flame },
+      { href: "/research/freight/thesis", label: "Thesis monitor", icon: Target },
+      { href: "/paper-trading", label: "Paper observation", icon: WalletCards },
+      { href: "/simulator", label: "Trade simulator", icon: CandlestickChart },
+      { href: "/track-record", label: "Track record", icon: Trophy },
     ],
   },
   {
-    label: "Simulation",
+    label: "Workspace",
     items: [
-      { href: "/paper-trading", label: "Paper Trading", icon: WalletCards },
-      { href: "/simulator", label: "Trade Simulator", icon: CandlestickChart },
-      { href: "/track-record", label: "Track Record", icon: Trophy },
-    ],
-  },
-  {
-    label: "Project",
-    items: [
-      { href: "/reports", label: "Reports", icon: FileText },
+      { href: "/data", label: "Data sources", icon: Database },
+      { href: "/reports", label: "Report cards", icon: FileText },
+      { href: "/learn", label: "Learn (Stocks 101)", icon: GraduationCap },
       { href: "/oss", label: "OSS & Maintainers", icon: ShieldCheck },
       // Protected routes — tagged so it's clear they need a persistence backend.
       { href: "/my-watchlist", label: "My Watchlist", icon: Star, tag: "local" },
@@ -79,6 +90,14 @@ const sections: NavSection[] = [
     ],
   },
 ];
+
+const ALL_HREFS = [...startItems, ...sections.flatMap((s) => s.items)].map((i) => i.href);
+
+/** The single nav item for a path: the longest href that equals it or is a parent of it. */
+export function activeHref(pathname: string): string | null {
+  const matches = ALL_HREFS.filter((href) => (href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`)));
+  return matches.sort((a, b) => b.length - a.length)[0] ?? null;
+}
 
 export default function Navigation({ persistenceAvailable = true }: { persistenceAvailable?: boolean }) {
   const pathname = usePathname();
@@ -89,9 +108,9 @@ export default function Navigation({ persistenceAvailable = true }: { persistenc
       <aside className="fixed inset-y-0 left-0 z-50 hidden w-[256px] flex-col border-r border-line bg-[#030914]/88 px-4 py-5 shadow-[18px_0_80px_-70px_rgba(96,165,250,0.9)] backdrop-blur-xl lg:flex">
         <Brand />
         <div className="mt-6 rounded-2xl border border-line bg-white/[0.035] p-3">
-          <div className="text-[10px] uppercase tracking-[0.22em] text-ink-soft">Research Mode</div>
+          <div className="text-[10px] uppercase tracking-[0.22em] text-ink-soft">Workspace</div>
           <div className="mt-2 flex items-center justify-between">
-            <span className="text-[13px] font-medium text-white">AI Quant Lab</span>
+            <span className="text-[13px] font-medium text-white">Equity research</span>
             <span className="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_16px_rgba(52,211,153,0.9)]" />
           </div>
         </div>
@@ -115,7 +134,7 @@ export default function Navigation({ persistenceAvailable = true }: { persistenc
         <div className="mt-4 shrink-0 space-y-3">
           <div className="rounded-2xl border border-cyan-300/15 bg-cyan-300/[0.045] p-3">
             <div className="text-[10px] uppercase tracking-[0.2em] text-cyan-100/60">Status</div>
-            <div className="mt-1 text-[12.5px] leading-relaxed text-ink-muted">Public demo mode — places no trades, no live order execution. Optional read-only Alpaca paper mirror for local paper-account sync.</div>
+            <div className="mt-1 text-[12.5px] leading-relaxed text-ink-muted">Research software — places no trades, no live order execution. Your research notes stay in this browser.</div>
             {!persistenceAvailable && (
               <div className="mt-2 text-[11.5px] leading-relaxed text-ink-soft">
                 Saved preferences and admin cache controls are disabled in public demo mode.
@@ -197,7 +216,7 @@ export default function Navigation({ persistenceAvailable = true }: { persistenc
 }
 
 function DesktopNavLink({ item, pathname }: { item: NavItem; pathname: string }) {
-  const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+  const active = activeHref(pathname) === item.href;
   const Icon = item.icon;
   return (
     <Link
@@ -244,7 +263,7 @@ function Brand() {
       </div>
       <div>
         <div className="text-[16px] font-semibold tracking-[-0.02em] text-white">FactorForge</div>
-        <div className="text-[11px] text-cyan-100/55">OSS Research Workbench</div>
+        <div className="text-[11px] text-cyan-100/55">Equity Research Workbench</div>
       </div>
     </Link>
   );

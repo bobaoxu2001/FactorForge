@@ -1,33 +1,95 @@
 # FactorForge
 
-> **AI Quant Research Lab** — factor discovery, backtesting, market-stress analysis, hotspot monitoring, and a simulated model portfolio, all in one open-source workbench.
+> **AI-Native Equity Research & Market Intelligence.** A research-first workspace that takes an analyst from information to evidence, from evidence to a testable thesis, and from the thesis to a risk-aware decision and an honest outcome review. It is built on a quantitative factor and backtesting engine.
 
 [![CI](https://github.com/bobaoxu2001/FactorForge/actions/workflows/ci.yml/badge.svg)](https://github.com/bobaoxu2001/FactorForge/actions/workflows/ci.yml)
 [![Next.js 14](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Vitest](https://img.shields.io/badge/tests-passing-22c55e?logo=vitest&logoColor=white)](#testing)
-[![Docker](https://img.shields.io/badge/Docker-standalone-2496ed?logo=docker&logoColor=white)](#deployment)
 
-**🔗 Live demo: [factor-forge-ashy.vercel.app](https://factor-forge-ashy.vercel.app/)**
+**Live demo:** [factor-forge-ashy.vercel.app](https://factor-forge-ashy.vercel.app/) (currently deployed from `main`, which predates the research platform described here; see [Deployment](#deployment)).
 
-FactorForge is an AI-powered stock strategy research platform for factor discovery, cost-aware backtesting, market-stress analysis, hotspot monitoring, and simulated model-portfolio observation over daily OHLCV data.
-
-It is designed as a reusable research toolkit: deterministic engines compute the numbers, provider metadata keeps data provenance visible, and optional LLM calls turn validated payloads into prose without overwriting computed metrics.
-
-> Research software only. For educational and research use — **not investment advice**. The model portfolio is a **simulated research portfolio**, not a real-money trading account, and **historical performance does not indicate future results**. No live order execution. No live trading.
-
-Public demo mode is intentionally safe: market-data and LLM keys are optional, missing keys fall back to clearly labeled provider/template behavior, and account features are limited to saved research preferences/watchlists. The only broker touchpoint is an optional **read-only** Alpaca *paper* mirror (GET requests for account/positions/orders) — FactorForge has no order-submission path and never routes a live order.
+> Independent research software for educational and research use. **Not investment advice.** FactorForge is not affiliated with, or endorsed by, any company, data provider or research firm it cites. It places no trades and has no order-execution path. Backtests are in-sample research tools, not performance records.
 
 ---
 
-## Key features
+## What changed: from quant lab to research platform
+
+FactorForge started as a quant strategy lab (factor discovery, cost-aware backtests, radar screening, a simulated model portfolio). That engine is intact under **Quantitative**. On top of it sits a research domain layer (`src/lib/intel`) and a workflow organised around how institutional research is actually done:
+
+```
+Select industry → understand the value chain → explore companies → inspect real evidence
+  → analyse KPIs → evaluate competing hypotheses → write the memo → assess investment implications
+```
+
+Design rules enforced in code and tests:
+
+- **Every number traces to a dated, attributable source**: SEC EDGAR XBRL facts with accession numbers, FRED series with their licence and release dates, Yahoo prices.
+- **Every claim states what kind of thing it is**: public evidence, *your* primary research, AI-generated work product, or hypothesis. AI output can never be marked verified.
+- **No invented precision**: no composite AI scores. Quality checks are pass/warn/fail with reasons. Scenario probabilities stay blank until an analyst writes a justification.
+- **Point-in-time integrity**: historical valuation uses only fundamentals filed by each date; restatements are surfaced, not silently applied.
+
+See [`docs/PROJECT_AUDIT.md`](docs/PROJECT_AUDIT.md) for the audit that motivated the change and [`docs/RESEARCH_PLATFORM_ARCHITECTURE.md`](docs/RESEARCH_PLATFORM_ARCHITECTURE.md) for the design.
+
+## Featured case study: *Is the U.S. Freight Recovery Real?*
+
+`/research/freight`: a complete, working research project on U.S. trucking and freight.
+
+| Stage | Route | What it does |
+|---|---|---|
+| Overview | `/research/freight` | Research question, workflow status, computed variant view, hypothesis scorecard, KPI monitor, catalysts, quality checks |
+| Industry map | `/industry` | Interactive value-chain graph. 12 of 14 relationships are **verified** against verbatim 10-K sentences; the others are marked inferred or hypothetical |
+| Evidence | `/evidence` | Evidence Explorer: filter ~95 items by origin, status and hypothesis; trace any claim to its SEC filing or FRED series; see where the memo cites it |
+| KPIs | `/kpis` | 13 freight KPIs (BTS/ATA tonnage, Cass, BLS PPIs, EIA diesel, BLS payrolls, Fed IP, Census) with full metadata, freshness vs release cadence, ≥2σ anomaly flags, an out-of-sample **fuel-adjusted pricing residual**, and a lead-lag explorer with split-half stability |
+| Competitive intel | `/companies` | KNX, JBHT, CHRW (+ ODFL, SNDR, WERN, LSTR): growth, margins, FCF, leverage, ROIC, point-in-time valuation percentiles. No composite score |
+| Company research | `/companies/[ticker]` | Quarterly table with derivation markers, TTM cash flow, debt by XBRL component, 5-year PIT multiples, bull/base/bear scenarios, sensitivity grid, interactive DCF, filings & estimated earnings dates, market/sector attribution, and the quant lens with a multiple-testing haircut |
+| Primary research | `/primary` | Channel-check plan (stakeholders × hypotheses), interview guides, compliance safeguards, and a private workspace for **your** interview notes with MNPI/PII screening, theme and indicator extraction, contradiction detection and cross-source comparison |
+| Thesis & decision | `/thesis` | Hypothesis tests, invalidation triggers (monitored), scenario ranges, correlation/liquidity context, and a look-ahead-free outcome review (market vs sector vs residual) |
+| Memo | `/memo` | 19-section institutional memo with live citations, status (*exploratory / draft–incomplete verification / evidence-backed*), editable sections, Markdown export |
+| Copilot | `/copilot` | Grounded research copilot (14 workflows) with a citation validator |
+
+**What the committed snapshot (built 2026-11-01) shows.** These are computed findings, not opinions. They change when the snapshot is refreshed.
+- Headline truckload pricing is up strongly year over year (BLS PPI), but it rose *less* than its historical diesel sensitivity implies: the fuel-adjusted residual is negative. The pricing "recovery" looks like fuel-surcharge pass-through, not a linehaul rate cycle. Diesel's move is outside the model's training range, so read the sign, not the size.
+- Volume measures are flat to mixed (tonnage, Cass shipments, Freight TSI, rail carloads).
+- Truck-transportation payrolls are still slightly down year over year: slow capacity attrition.
+- Margin changes diverge by company rather than by business model. The focus names have underperformed SPY over six months and are not at valuation extremes.
+- No interviews have been conducted, so the memo is honestly labelled **"Research draft — incomplete verification"**. The primary-research page is a plan, not fabricated findings.
+
+## Research platform: data sources
+
+| Source | Used for | Access & terms |
+|---|---|---|
+| **SEC EDGAR** XBRL `companyfacts` + `submissions` + latest 10-K text | Quarterly financials (point-in-time, restatement-aware), filing index, 8-K Item 2.02 earnings dates, verbatim business-description excerpts | Public; fair-access policy requires a contact User-Agent (`SEC_EDGAR_USER_AGENT`, builder only, never stored) |
+| **FRED** (St. Louis Fed) series + series pages | Freight KPIs from BTS, BLS, EIA, Census, Federal Reserve and Cass Information Systems; units, frequency, release, last-updated and next-release dates | Licence captured per series. "Pre-approval required" series are excluded automatically. Cass data are copyrighted and shown with citation, as FRED's terms require |
+| **Yahoo Finance** chart API | Daily OHLCV + split events for valuation (raw price reconstructed) and returns | Unofficial keyless endpoint, research use |
+| **DeepSeek** (optional) | Copilot prose under a citation validator | `DEEPSEEK_API_KEY`; deterministic fallback otherwise |
+
+Snapshots live in `src/__fixtures__/research/<project>/` and are rebuilt by `npm run research:refresh` (and weekly in CI when the `SEC_EDGAR_USER_AGENT` secret is set). Not connected, and shown as explicit gaps: spot/contract rate feeds, tender rejections, Class 8 orders, consensus estimates, earnings-call transcripts (all licensed), and FMCSA authority data (public; adapter not built).
+
+## Research methodology safeguards
+
+- **Quarterisation is explicit.** Values come from direct 3-month facts where filed. Otherwise they are derived from YTD differences (†) or FY − 9M (‡), and every derived value says so.
+- **One XBRL concept per metric per company**, chosen by recent coverage and displayed. Debt is a shown sum of named components, with known exclusions.
+- **Freshness**: each KPI is fresh/lagging/stale against its release cadence and publication lag. The price fixture flags itself stale when old.
+- **Comparability**: YoY by calendar period, never by array offset. NSA series are read YoY only. Lead-lag is labelled in-sample with a split-half stability check, and correlation is never called predictive.
+- **Fuel-adjusted residual**: OLS fitted only on data before a 12-month holdout, with an extrapolation warning.
+- **Valuation**: positive-denominator multiples only (negative-earnings P/E is "n/m", not cheap). Scenarios are anchored to each company's own 5-year history. Expected return is computed only from a complete, justified probability set.
+- **Backtests**: labelled backtest vs simulated vs actual (actual is not supported). The best-of-N Sharpe is shown next to the expected maximum Sharpe of N skill-less strategies.
+- **Attribution**: daily OLS on SPY and IYT−SPY. Outcome review estimates betas *before* the thesis date.
+- **Primary research**: user notes stay in the browser, are screened for emails, phones, IDs and MNPI language, and contact details are redacted on save. Notes with possible MNPI are never sent to an AI model.
+- **Copilot grounding**: every fact or calculation must cite an evidence ID that was retrieved for that request, or it is moved to "unsupported".
+
+---
+
+## Quantitative lab (pre-existing, retained)
+
 
 | Module | What it does |
 |---|---|
 | **Model Portfolio Performance Since May** | A deterministic, equal-weighted blend of the top-ranked research strategies, normalized on the start date and benchmarked against SPY/QQQ. Simulated research portfolio only — not a real-money account. |
 | **Market Stress Mode** | A selloff/stress research view (`/ai-market?demo=stress`) that diagnoses market regime, breadth deterioration, and drawdown pressure with a stress-aware research memo. |
 | **Market Hotspots & Scenario Research** | Configured catalyst intelligence (`/hotspots`) — coverage-weighted hotspot signals and scenario forecasts across themes, with private labeling for pre-IPO names. |
-| **AI Stock Picks** | Model-ranked cross-sectional selection (`/picks`) — every scored universe name ranked by a regime-aware blend of momentum, trend, stability, overheat balance, volume confirmation, multi-strategy evidence, and valuation/quality fundamentals (Yahoo quoteSummary with a committed, dated snapshot fallback), with per-component receipts and caveats. Deterministic scores; the LLM writes the reading on top. Relative evidence only — no price targets, not advice. |
+| **Quant Screen** (`/picks`, formerly "AI Stock Picks") | Model-ranked cross-sectional selection (`/picks`) — every scored universe name ranked by a regime-aware blend of momentum, trend, stability, overheat balance, volume confirmation, multi-strategy evidence, and valuation/quality fundamentals (Yahoo quoteSummary with a committed, dated snapshot fallback), with per-component receipts and caveats. Deterministic scores; the LLM writes the reading on top. Relative evidence only — no price targets, not advice. |
 | **Strategy Research Lab** | Five structurally different rule-based strategies with cost-aware backtests, in-sample/out-of-sample splits, factor-attribution regressions, and LLM strategy memos. |
 | **Radar Screening** | Composite scoring, rejection rules, and a concentration gate (`N_eff`) that demotes near-duplicate candidates before they reach observation. |
 | **Paper Observation** | Research-only simulated monitoring of radar-approved strategies, with a post-market Daily Review. No live orders. Optionally mirrors a **read-only Alpaca paper account** (account, positions, recent orders) when paper API keys are set — GET requests only, no order-submission path. |
@@ -37,7 +99,7 @@ Public demo mode is intentionally safe: market-data and LLM keys are optional, m
 
 ---
 
-## Screenshots & demo
+### Screenshots & demo
 
 > **Maintainer note:** this section is wired but the image files are not committed yet — drop captures into `docs/screenshots/` and uncomment the lines below. Keeping the placeholders here so the layout is ready and reviewers know what to expect. The fastest path is the **[live demo](https://factor-forge-ashy.vercel.app/)**; the social preview image lives at [`src/app/opengraph-image.png`](src/app/opengraph-image.png).
 
@@ -60,7 +122,7 @@ Suggested captures (one of each is enough to tell the story for a recruiter):
 
 ---
 
-## Why this project is interesting
+### Why the quant engine is interesting
 
 | | |
 |---|---|
@@ -84,6 +146,47 @@ Suggested captures (one of each is enough to tell the story for a recruiter):
 ---
 
 ## Architecture
+
+```mermaid
+flowchart TB
+  subgraph SRC["Public sources"]
+    SEC[SEC EDGAR<br/>XBRL facts · submissions · 10-K text]
+    FRED[FRED<br/>BTS · BLS · EIA · Census · Fed · Cass]
+    YH[Yahoo Finance<br/>OHLCV + splits]
+  end
+  SRC -->|scripts/build-research-snapshot.mjs<br/>dated · licence-checked| SNAP[(Research snapshot<br/>src/__fixtures__/research)]
+
+  subgraph INTEL["Research domain layer (src/lib/intel)"]
+    FIN[financials<br/>quarterise · TTM · PIT · debt]
+    KPI[series / kpis<br/>YoY · anomalies · freshness ·<br/>fuel residual · lead-lag]
+    VAL[valuation · attribution<br/>multiples · scenarios · DCF ·<br/>OLS · multiple-testing haircut]
+    EV[evidence<br/>registry + integrity rules]
+    TH[thesis · quality<br/>tests · triggers · checks]
+    MEMO[memo · copilot · primary<br/>citations · grounding · MNPI screen]
+  end
+  SNAP --> FIN & KPI
+  FIN --> VAL --> EV
+  KPI --> EV --> TH --> MEMO
+
+  subgraph QUANT["Quant engine (src/lib/quant, unchanged)"]
+    BT[strategies · backtest · radar ·<br/>concentration · portfolio]
+  end
+  SNAP -.quant lens.-> BT
+  YHQ[Yahoo / Polygon / Alpha Vantage<br/>composite provider] --> BT
+
+  subgraph UI["Next.js App Router"]
+    HOME["/ Research Home"]
+    PROJ["/research/[project]/*<br/>industry · evidence · kpis · companies ·<br/>primary · thesis · memo · copilot"]
+    QUI["/quant /factors /strategies /radar …"]
+    API["/api/research/copilot<br/>rate-limited"]
+  end
+  MEMO --> PROJ & API
+  BT --> QUI
+  WS[(Browser workspace<br/>localStorage, versioned)] <--> PROJ
+```
+
+### Quant engine data flow (unchanged)
+
 
 ```mermaid
 flowchart TB
@@ -163,8 +266,38 @@ The page-level data flow is consolidated in `src/lib/research.ts → getResearch
 
 ```text
 src/
+  app/
+    page.tsx                  Research Home (projects, coverage, catalysts, tasks, workspace)
+    research/[projectId]/     Research project: layout (stage nav) + overview, industry, evidence,
+                              kpis, companies, companies/[ticker], primary, thesis, memo, copilot
+    research/frameworks/      KPI frameworks (freight connected; software/retail/healthcare definitions)
+    api/research/copilot/     Grounded copilot endpoint (rate-limited, LLM-or-deterministic)
+    quant/                    Former overview: model portfolio, stress, radar, factor evidence
+    strategies/ radar/ consensus/ portfolio/ factors/ picks/ ai-market/ hotspots/
+    paper-trading/ simulator/ track-record/ reports/ data/ learn/ oss/
+  components/
+    intel/                    Research UI: provenance chips, charts, value-chain graph, evidence
+                              explorer, scenario panel, DCF, primary-research workspace, memo
+                              builder, copilot, workspace hook
+    cards, badges, charts, layout, research, hotspots, sim, learn, auth
+  data/research/              Project configs (freight), KPI frameworks, config types
+  lib/
+    intel/                    Research domain layer (pure, tested): series, kpis, financials,
+                              valuation, attribution, companies, evidence, thesis, quality,
+                              primary, workspace, memo, copilot, quantLens, project (assembly)
+    quant/ data/ ai/ agents/ persistence/ auth/ ratelimit/ sim/ broker/ search/ …
+  __fixtures__/research/freight/   manifest · macro (FRED) · companies (SEC) · prices
+scripts/build-research-snapshot.mjs   Reproducible research snapshot builder
+docs/                         PROJECT_AUDIT.md · RESEARCH_PLATFORM_ARCHITECTURE.md · RESEARCH_METHODOLOGY.md
+```
+
+### Quant module notes
+
+
+```text
+src/
   app/                     Next.js routes (server components by default)
-    page.tsx               Overview / proof-moment dashboard
+    quant/page.tsx         Quant overview / proof-moment dashboard (moved from /)
     strategies/[id]        Per-strategy backtest + LLM memo
     learn/                 Stocks 101 — plain-English glossary for newcomers
     radar/                 Composite scoring + verdicts
@@ -297,6 +430,14 @@ npm test
 npm run build
 ```
 
+Refresh the research snapshot (SEC EDGAR + FRED + prices). SEC requires a contact User-Agent; it is used only for the requests and never written to disk:
+
+```bash
+SEC_EDGAR_USER_AGENT="Your Name you@example.com" npm run research:refresh
+```
+
+After a refresh, `npm test` re-verifies the snapshot: every configured KPI series present and licensed, no observation after the build date, every 10-K claim still matched to a sentence, every memo citation resolvable. If a company rewrites a sentence in its new 10-K, the affected claim fails the test (and shows as unverified in the UI) until you re-verify it in `src/data/research/projects/freight.ts`.
+
 Maintainer and contributor docs:
 
 - [Contributing guide](CONTRIBUTING.md)
@@ -313,7 +454,9 @@ Inside the app, `/oss` provides the same contribution and maintainer story for v
 
 | Variable | Required? | What it does |
 |---|---|---|
-| `DEEPSEEK_API_KEY` | optional | Enables LLM-written strategy memo, market tape note, and post-market Daily Review. Without it the platform uses the deterministic template and labels the source as `template memo`. |
+| `DEEPSEEK_API_KEY` | optional | Enables LLM-written strategy memo, market tape note, post-market Daily Review, and the research copilot's synthesised answers (under the citation validator). Without it the platform uses deterministic templates and deterministic copilot handlers, and labels the source. |
+| `SEC_EDGAR_USER_AGENT` | builder only | `"Name contact@email"`, required by SEC fair-access policy for `npm run research:refresh`. Not used at runtime and never stored in the snapshot. Add it as a GitHub secret to enable the weekly research refresh. |
+| `COPILOT_RATE_LIMIT_PER_HOUR` | optional | Copilot requests per client IP per hour (default 30), enforced by the same rate-limit store as auth. |
 | `POLYGON_API_KEY` | optional | Polygon.io aggregates as a second-tier real-data source (split + dividend adjusted). Composite provider tries it after Yahoo. |
 | `ALPHA_VANTAGE_API_KEY` | optional | Alpha Vantage daily as a third-tier real-data source. Free-tier endpoint is NOT corporate-action adjusted; the UI surfaces that honestly. |
 | `ALPACA_PAPER_API_KEY_ID` / `ALPACA_PAPER_API_SECRET` / `ALPACA_PAPER_BASE_URL` | optional | Enables the **read-only** Alpaca *paper* mirror on `/paper-trading` (account, positions, recent orders). The client issues GET requests only — there is no order-submission path. Unset → the panel reports `disabled`. Defaults to `https://paper-api.alpaca.markets`. Both key + secret must be set together, or env validation warns. |
@@ -321,7 +464,7 @@ Inside the app, `/oss` provides the same contribution and maintainer story for v
 | `SESSION_PASSWORD` | required in prod | Iron-session signing key (≥32 chars random). Set this as a Vercel environment variable before making the demo public; never expose it client-side. |
 | `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | optional | Shared rate-limit store so auth throttling holds across multiple instances. Without it, throttling is per-process. Vercel-KV's `KV_REST_API_URL` / `KV_REST_API_TOKEN` are also accepted. |
 | `SITE_URL` | optional | Public origin used for absolute metadata / OpenGraph URLs. Defaults to `http://localhost:3000`. |
-| `MARKET_FETCH_CONCURRENCY` | optional | Caps concurrent market-data fetches. Defaults to `4`. Lower it if a host or provider throttles requests. |
+| `MARKET_FETCH_CONCURRENCY` | optional | Caps concurrent market-data fetches. Defaults to `8`. Lower it if a host or provider throttles requests. |
 | `RISK_FREE_RATE` | optional | Annual risk-free rate used by metric helpers. Defaults to `0`. |
 
 Env is validated centrally in `src/lib/config/env.ts`. In production a missing/short `SESSION_PASSWORD` is a hard error (`assertProductionEnv` / `/api/health` → 503); optional keys that are unset become *warnings* and the corresponding feature degrades gracefully (LLM → template, providers → Yahoo-only).
@@ -344,6 +487,9 @@ docker run -p 3000:3000 -e SESSION_PASSWORD="$(openssl rand -hex 32)" factorforg
 - **`GET /api/health`** returns `ok` / `degraded` / `unhealthy` (503) with DB reachability, wired features, and env warnings — point a load balancer or `docker HEALTHCHECK` at it.
 
 ### Deploy to Vercel
+
+> **Research platform deployment notes.** The research pages are statically generated from the committed snapshot at build time and need no runtime secrets. `/api/research/copilot` is a serverless function: it works without `DEEPSEEK_API_KEY` (deterministic answers), and per-IP throttling is per instance unless Upstash/Vercel KV is configured. Research notes never reach the server (browser storage), so a public demo exposes no private notes. The current public deployment runs `main`; this branch must be merged and redeployed to show the research platform.
+
 
 FactorForge can be deployed as a public Vercel demo with the default build command:
 
@@ -381,7 +527,18 @@ Security notes:
 
 ## Testing
 
-310 tests across 59 files under vitest + jsdom:
+400 tests across 71 files under vitest + jsdom. The research layer added 90 tests in 12 files:
+
+- **Research math** — YoY matched by calendar period (gaps give null, not a wrong month), weekly YoY, trailing z-score anomalies, lead-lag recovery of a known lag with split-half stability, freshness vs cadence and publication lag, OLS and inverse-normal accuracy, expected-max-Sharpe monotonicity, market/sector beta recovery and exact return decomposition.
+- **Financial statements** — YTD differencing and FY−9M quarterisation with derivation labels, point-in-time filing dates (latest component), restatement flags, TTM gap refusal, 52/53-week labels, debt composition (convertible double-count guard, finance leases, combined tags).
+- **Valuation** — split-adjusted raw price and share restatement, negative-earnings P/E as n/m, scenario bridge arithmetic, sensitivity monotonicity, expected return only for complete distributions, a hand-computed DCF and its WACC ≤ g guard.
+- **Evidence & research integrity (on the real snapshot)** — drift guards (every KPI series present, licensed, not future-dated; pre-approval series never redistributed; SEC contact not committed), zero evidence-integrity issues, every 10-K claim verified against a retrieved sentence, every company fact linked to an SEC filing URL, point-in-time multiples never using later filings, relationships verified only with evidence, test-to-evidence attribution, 19 memo sections with no phantom citations.
+- **Primary research & workspace** — MNPI/PII screening and redaction, theme/indicator extraction, contradiction detection, cross-source disagreement; reducer rules (no "verified" without a document reference, justified probabilities only, AI drafts typed as AI), import migration drops mislabelled records.
+- **Copilot** — retrieval relevance, the citation validator (uncited or invented IDs move to unsupported), every deterministic task cites only real evidence, and the API route: input validation, mocked-LLM grounding, MNPI text never forwarded, per-IP rate limiting.
+- **P0 regressions** — profit factor undefined (not a dollar amount) without losing trades; stale committed price snapshot flagged with its age.
+
+Pre-existing suites (310 tests):
+
 
 - **Engine** — backtest fees + execution semantics, indicators, radar verdict logic, paper-trading risk-budget transitions + N_eff slot cap, portfolio engine (Pearson, calendar intersection, score-weighted blend, phase-shifted decorrelation), and walk-forward evaluation (single split + anchored rolling windows: contiguous OOS coverage, expanding in-sample, consistent/fragile aggregate verdicts, determinism).
 - **Concentration** — `effectiveBets` / `concentrationLevel` math (monotonicity, bounds), the correlation gate demoting near-duplicate candidates, and the shared pairwise-correlation builder.
@@ -467,6 +624,15 @@ Maintainers may use AI assistants for repetitive review and documentation work, 
 
 ## What I'd build next
 
+Research-platform roadmap (details in [docs/PROJECT_AUDIT.md](docs/PROJECT_AUDIT.md) §8):
+1. FMCSA authority-data adapter (public) to test the capacity-exit hypothesis directly.
+2. Out-of-sample (rolling-origin) tests before any KPI is called "leading".
+3. Server-side, multi-user research store behind the existing workspace reducer.
+4. A second industry project (e.g., software via XBRL `RevenueRemainingPerformanceObligation`) to prove the config-driven design.
+5. Multiple-testing haircut on the `/strategies` best-of-N showcase.
+6. Light theme and print-optimised memo layout.
+
+
 The current roadmap is tracked in [ROADMAP.md](ROADMAP.md). Near-term maintainer backlog notes live in [docs/maintainer_backlog](docs/maintainer_backlog/).
 
 ---
@@ -478,6 +644,18 @@ The current roadmap is tracked in [ROADMAP.md](ROADMAP.md). Near-term maintainer
 - **LLM narrates, never invents.** DeepSeek writes prose from a validated payload; computed numbers are not overwritten. Without a key, the app falls back to clearly labeled templates.
 
 ## Current limitations
+
+**Research platform**
+- **One connected industry.** Freight is fully wired. Software, retail and healthcare exist only as KPI-framework definitions with no data adapters.
+- **Snapshot, not streaming.** Research data is a committed, dated snapshot (refreshed manually or weekly in CI). FRED shows latest vintages, so KPI revision history is noted but not stored point-in-time.
+- **XBRL coverage varies by filer.** Some concepts are not tagged in standard us-gaap form (e.g., Werner's quarterly D&A, broker fuel). Those metrics show as unavailable rather than estimated. Segment-level data (XBRL dimensions) is not ingested.
+- **No licensed market data.** Spot/contract rates, tender rejections, Class 8 orders, consensus estimates and call transcripts are listed as gaps with what would be required.
+- **Research workspace is per-browser.** Notes, memo edits and probabilities live in localStorage, with JSON export/import. There is no multi-user, server-side research store yet.
+- **Copilot quality depends on the LLM key.** Without a working key (the local key currently returns HTTP 402 "insufficient balance"), answers are deterministic evidence listings and hypothesis tests rather than synthesised prose.
+- **Lead-lag is exploratory.** No out-of-sample forecasting test has been implemented yet.
+- **Dark theme only.** The token system predates the research layer; a light theme is on the roadmap.
+
+**Quantitative lab**
 
 - **Hotspots are configured catalyst intelligence, not a live news API.** Themes and scenarios are curated and coverage-weighted, not streamed from a real-time news feed.
 - **Provider fetches may fall back.** Yahoo/other provider calls can rate-limit or fail; when they do, the app degrades to a labeled fallback tier rather than failing the page.

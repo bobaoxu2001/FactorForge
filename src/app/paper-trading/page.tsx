@@ -300,7 +300,7 @@ export default async function PaperTradingPage() {
                 <div className="mt-2 grid grid-cols-2 gap-3 md:grid-cols-5">
                   <MetricCard label="Win rate" value={pctPlain(result.metrics.winRate)} hint="backtest" />
                   <MetricCard label="Sharpe" value={num(result.metrics.sharpe)} tone={result.metrics.sharpe >= 1 ? "positive" : "default"} hint="risk-adjusted" />
-                  <MetricCard label="Profit factor" value={num(result.metrics.profitFactor)} tone={result.metrics.profitFactor >= 1 ? "positive" : "negative"} />
+                  <MetricCard label="Profit factor" value={result.metrics.profitFactor === null ? "n/a" : num(result.metrics.profitFactor)} hint={result.metrics.profitFactor === null ? "no losing trades" : undefined} tone={result.metrics.profitFactor === null ? "default" : result.metrics.profitFactor >= 1 ? "positive" : "negative"} />
                   <MetricCard label="Trades" value={String(result.metrics.tradeCount)} hint="evidence sample" />
                   <MetricCard label="Avg hold" value={`${num(result.metrics.averageHoldingDays, 0)}d`} hint="days per trade" />
                 </div>

@@ -6,6 +6,27 @@ This project follows a human-maintained changelog. There is no automated release
 
 ## Unreleased
 
+### Research platform transformation (FactorForge → AI-native equity research & market intelligence)
+
+#### Added
+
+- Research domain layer `src/lib/intel` (pure, tested): XBRL quarterisation with derivation labels and point-in-time filing dates, TTM, debt composition, point-in-time valuation history, scenario valuation, sensitivity grid, FCFF DCF, KPI YoY/anomaly/freshness, out-of-sample fuel-adjusted pricing residual, lead-lag with split-half stability, OLS market/sector attribution, look-ahead-free outcome review, multiple-testing haircut, evidence registry with integrity rules, hypothesis tests and invalidation triggers, research-quality checks, memo assembly, MNPI/PII screening, note analysis, versioned browser workspace, grounded copilot.
+- Reproducible research snapshot builder `scripts/build-research-snapshot.mjs` (`npm run research:refresh`): SEC EDGAR company facts, submissions and 10-K excerpts; FRED series with scraped units, release, update dates and licence (pre-approval series excluded); Yahoo prices with split events. Committed snapshot for the freight project (7 companies, 12 FRED series, 9 price series, built 2026-11-01). Weekly refresh step in CI when `SEC_EDGAR_USER_AGENT` is set as a secret.
+- Featured case study `/research/freight`, "Is the U.S. Freight Recovery Real?", with stages: overview, industry map (value-chain graph, relationships verified against 10-K text), evidence explorer, KPI explorer, competitive intelligence, company research (KNX, JBHT, CHRW, ODFL, SNDR, WERN, LSTR), primary research (plan, guides, private notes workspace), thesis & decision support, 19-section memo builder (edit + Markdown export), research copilot.
+- `/api/research/copilot`: rate-limited, input-bounded, citation-validated LLM path (DeepSeek) with deterministic fallback; never forwards notes containing possible MNPI.
+- Research Home at `/`, KPI frameworks at `/research/frameworks` (freight connected; software, retail and healthcare definitions only).
+- Docs: `docs/PROJECT_AUDIT.md`, `docs/RESEARCH_PLATFORM_ARCHITECTURE.md`, `docs/RESEARCH_METHODOLOGY.md`. (+90 tests in 12 files; 400 total)
+
+#### Changed
+
+- Information architecture is research-first: sidebar groups Research / Quantitative / Portfolio & monitoring / Workspace. The former overview moved to `/quant` with unchanged content. "AI Stock Picks" is relabelled "Quant Screen" (route unchanged). The app title and metadata describe the research platform. Search index and sitemap include all research routes.
+
+#### Fixed
+
+- `calculateMetrics` returned gross profit (a dollar amount) as the profit factor when a backtest had no losing trades. It is now `null` (shown as "n/a").
+- The committed Yahoo price snapshot was served as current data regardless of age. It now carries `ageDays`/`stale`, the message says STALE, `/data` shows the latest bar date and stale count, and dataset metadata exposes `staleCount` and `latestBarDate`.
+- Documentation said `MARKET_FETCH_CONCURRENCY` defaults to 4; the code default is 8.
+
 ### Added
 
 - Humanoid Robotics Supply Chain theme on `/hotspots`: an explicitly OPTION-type theme (milestone-driven, revenue ≈ 0) tracking the component layer of humanoid robotics — actuators, edge vision, rare-earth magnets — with verified deployment facts as of 2026-07 in the catalyst summary (Figure ~1,250 operating hours at BMW, Agility 65,000+ hours across nine customer sites, Tesla 1,000+ internal Optimus units). Proxies: TSLA/NVDA in-universe adjacents with live factor reads; AMBA, MP, TER, QCOM reference-only; non-US actuator pure-plays flagged as untrackable. Risk flags state plainly that this is ex ante indistinguishable from 2021's metaverse or 2015's GPU moment, and tests lock the option-vs-cycle framing so it can never quietly masquerade as an order-driven cycle theme. (+3 tests)

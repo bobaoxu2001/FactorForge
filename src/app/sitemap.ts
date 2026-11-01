@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { STRATEGY_CATALOG } from "@/data/strategyCatalog";
+import { RESEARCH_PROJECTS } from "@/data/research/projects";
 import { SITE_URL } from "@/lib/config/site";
 
 /**
@@ -10,6 +11,8 @@ import { SITE_URL } from "@/lib/config/site";
  */
 export const PUBLIC_ROUTES = [
   "/",
+  "/quant",
+  "/research/frameworks",
   "/learn",
   "/data",
   "/factors",
@@ -41,5 +44,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "daily" as const,
     priority: 0.6,
   }));
-  return [...routes, ...strategies];
+  const research = RESEARCH_PROJECTS.flatMap((project) => [
+    ...["", "/industry", "/evidence", "/kpis", "/companies", "/primary", "/thesis", "/memo", "/copilot"].map((stage) => ({
+      url: `${SITE_URL}/research/${project.id}${stage}`,
+      lastModified,
+      changeFrequency: "daily" as const,
+      priority: stage === "" ? 0.9 : 0.7,
+    })),
+    ...project.companies.map((c) => ({
+      url: `${SITE_URL}/research/${project.id}/companies/${c.ticker}`,
+      lastModified,
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    })),
+  ]);
+  return [...routes, ...strategies, ...research];
 }

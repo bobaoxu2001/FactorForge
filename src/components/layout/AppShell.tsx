@@ -25,10 +25,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <footer className="border-t border-line lg:ml-[256px]">
         <div className="mx-auto max-w-3xl px-4 py-6 text-center md:px-6">
           <div className="text-[12px] font-medium text-ink-muted">
-            FactorForge — AI Quant Research Lab
+            FactorForge — AI-Native Equity Research &amp; Market Intelligence
           </div>
           <p className="mt-1.5 text-[11.5px] leading-relaxed text-ink-soft">
-            Research software only — for educational and research use, not investment advice. The model portfolio is a
+            Research software only — for educational and research use, not investment advice. Independent project, not
+            affiliated with any company, data provider or research firm it cites. The model portfolio is a
             simulated research portfolio, not a real-money trading account, and historical performance does not indicate
             future results. No live order execution and no live trading.
           </p>

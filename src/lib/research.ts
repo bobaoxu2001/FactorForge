@@ -72,6 +72,10 @@ export interface ResearchDataset {
     fallbackCount: number;
     adjustedCount: number;
     symbolCount: number;
+    /** Symbols whose last bar is older than the freshness threshold. */
+    staleCount: number;
+    /** Most recent last-bar date across the universe (null when nothing loaded). */
+    latestBarDate: string | null;
   };
 }
 
@@ -307,6 +311,13 @@ export async function buildResearchDatasetFromPrices(
       fallbackCount: priceResults.filter((result) => result.isFallback).length,
       adjustedCount: priceResults.filter((result) => result.quality.adjusted).length,
       symbolCount: priceResults.length,
+      staleCount: priceResults.filter((result) => result.quality.stale === true).length,
+      latestBarDate:
+        priceResults
+          .map((result) => result.quality.lastDate)
+          .filter((date): date is string => Boolean(date))
+          .sort()
+          .at(-1) ?? null,
     },
   };
 }

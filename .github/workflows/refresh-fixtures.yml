@@ -35,6 +35,8 @@ jobs:
     name: Refresh · Verify · Open PR
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      SEC_EDGAR_USER_AGENT: ${{ secrets.SEC_EDGAR_USER_AGENT }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -53,6 +55,13 @@ jobs:
 
       - name: Refresh fundamentals snapshot
         run: npm run fundamentals:refresh
+
+      # SEC EDGAR requires a contact User-Agent; store it as a repository
+      # secret. Without the secret this step is skipped and the committed
+      # research snapshot stays as-is (its build date is shown in the UI).
+      - name: Refresh research snapshot (SEC EDGAR + FRED + prices)
+        if: ${{ env.SEC_EDGAR_USER_AGENT != '' }}
+        run: npm run research:refresh
 
       - name: Detect changes
         id: diff

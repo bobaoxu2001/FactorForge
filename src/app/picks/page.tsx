@@ -13,7 +13,7 @@ import type { PickTier, StockPick } from "@/lib/quant/stockPicks";
 export const revalidate = 60 * 60;
 
 export const metadata: Metadata = {
-  title: "AI Stock Picks",
+  title: "Quant Screen",
   description:
     "Model-ranked cross-sectional stock selection: momentum, trend, stability, volume, multi-strategy confirmation, and valuation/quality fundamentals blended under the current market regime. Research only — no broker, no advice.",
 };
@@ -34,7 +34,7 @@ export default async function PicksPage() {
     <div className="space-y-8">
       <PageHeader
         eyebrow="L4 Model Stock Selection"
-        title="AI Stock Picks"
+        title="Quant Screen: Model-Ranked Cross-Section"
         subtitle={`Every scored universe name, ranked by a regime-aware blend of momentum, trend, stability, overheat balance, volume confirmation, multi-strategy evidence, and valuation/quality fundamentals. The scores are deterministic; the AI writes the reading on top. Relative evidence only — no price targets, no broker, not investment advice.`}
       />
 

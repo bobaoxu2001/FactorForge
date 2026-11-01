@@ -3,9 +3,9 @@ import type { Metadata, Viewport } from "next";
 import AppShell from "@/components/layout/AppShell";
 import { SITE_URL } from "@/lib/config/site";
 
-const TITLE = "FactorForge — AI Quant Research Lab";
+const TITLE = "FactorForge — AI-Native Equity Research & Market Intelligence";
 const DESCRIPTION =
-  "AI-powered stock strategy research platform for factor discovery, backtesting, market stress analysis, hotspot monitoring, and simulated model-portfolio observation. Research only — not investment advice.";
+  "Research-first workspace for industry mapping, SEC-sourced fundamentals, KPI tracking, evidence-graded theses, primary-research planning, research memos and quantitative factor analysis. Research only, not investment advice.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -18,6 +18,11 @@ export const metadata: Metadata = {
   authors: [{ name: "FactorForge" }],
   category: "finance",
   keywords: [
+    "equity research",
+    "market intelligence",
+    "industry mapping",
+    "channel checks",
+    "research memo",
     "quant research",
     "factor discovery",
     "backtesting",

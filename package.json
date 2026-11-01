@@ -10,7 +10,8 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "fixture:refresh": "node scripts/build-fixture.mjs",
-    "fundamentals:refresh": "node scripts/build-fundamentals-fixture.mjs"
+    "fundamentals:refresh": "node scripts/build-fundamentals-fixture.mjs",
+    "research:refresh": "node scripts/build-research-snapshot.mjs"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

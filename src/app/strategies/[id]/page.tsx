@@ -188,7 +188,7 @@ export default async function StrategyDetailPage({
         <MetricCard label="Sharpe" value={num(result.metrics.sharpe)} termId="sharpe" />
         <MetricCard label="Win rate" value={pctPlain(result.metrics.winRate)} termId="winrate" />
         <MetricCard label="Trades" value={String(result.metrics.tradeCount)} />
-        <MetricCard label="Profit factor" value={num(result.metrics.profitFactor)} tone={result.metrics.profitFactor >= 1 ? "positive" : "negative"} />
+        <MetricCard label="Profit factor" value={result.metrics.profitFactor === null ? "n/a" : num(result.metrics.profitFactor)} hint={result.metrics.profitFactor === null ? "no losing trades" : undefined} tone={result.metrics.profitFactor === null ? "default" : result.metrics.profitFactor >= 1 ? "positive" : "negative"} />
         <MetricCard label="Avg holding" value={`${num(result.metrics.averageHoldingDays, 0)}d`} />
       </section>
 

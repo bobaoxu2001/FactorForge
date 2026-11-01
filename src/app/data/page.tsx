@@ -43,7 +43,12 @@ export default async function DataPage() {
         <MetricCard label="Real loaded" value={String(metadata.realDataCount)} tone="accent" />
         <MetricCard label="Adjusted" value={String(metadata.adjustedCount)} />
         <MetricCard label="Fallback" value={String(metadata.fallbackCount)} tone={metadata.fallbackCount > 0 ? "negative" : "default"} />
-        <MetricCard label="Range" value="3y" />
+        <MetricCard
+          label="Latest bar"
+          value={metadata.latestBarDate ?? "—"}
+          hint={metadata.staleCount > 0 ? `${metadata.staleCount} stale (> 5 days old)` : "fresh"}
+          tone={metadata.staleCount > 0 ? "negative" : "default"}
+        />
       </div>
 
       <div className="card p-4 text-[12.5px] leading-relaxed text-ink-muted">

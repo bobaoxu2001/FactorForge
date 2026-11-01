@@ -2,6 +2,15 @@
 
 This roadmap is intentionally scoped to known project directions. It does not imply dates, external adoption, or committed release promises.
 
+## Research platform (next)
+
+- FMCSA operating-authority adapter (public data) to test capacity exits directly.
+- Rolling-origin out-of-sample tests before labelling any KPI "leading".
+- Server-side multi-user research store behind the workspace reducer (localStorage today).
+- Second industry project to prove the config-driven design (e.g., software: RPO, NRR from filings).
+- Licensed-data adapters behind the existing provider pattern: spot/contract rates, consensus estimates, transcripts.
+- Light theme; print-optimised memo layout.
+
 ## Near term
 
 - Keep README and route/module maps synchronized as features move.

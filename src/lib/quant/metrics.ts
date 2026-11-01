@@ -68,7 +68,9 @@ export function calculateMetrics(
     maxDrawdown: maxDrawdownFromSeries(equityCurve.map((point) => point.equity)),
     sharpe,
     winRate: trades.length === 0 ? 0 : wins.length / trades.length,
-    profitFactor: grossLoss === 0 ? (grossProfit > 0 ? grossProfit : 0) : grossProfit / grossLoss,
+    // Undefined without a losing trade. Previously this returned grossProfit (a
+    // dollar amount) and rendered as e.g. "profit factor 2,340.00".
+    profitFactor: grossLoss === 0 ? (grossProfit > 0 ? null : 0) : grossProfit / grossLoss,
     tradeCount: trades.length,
     averageHoldingDays: trades.length === 0 ? 0 : trades.reduce((sum, trade) => sum + trade.holdingDays, 0) / trades.length,
     volatility,
