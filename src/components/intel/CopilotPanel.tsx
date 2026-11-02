@@ -89,7 +89,7 @@ export default function CopilotPanel({ projectId, hypotheses, tickers, stakehold
       <div className="card space-y-3 p-4">
         <div className="flex items-center justify-between">
           <h3 className="text-[14px] font-semibold text-ink">Ask the research copilot</h3>
-          <span className={`chip ${llmConfigured ? "border-emerald-600/35 text-emerald-700" : "border-amber-600/35 text-amber-800"}`}>{llmConfigured ? "LLM + citation guard" : "deterministic mode"}</span>
+          <span className={`chip ${llmConfigured ? "border-emerald-600/35 text-emerald-700" : "border-amber-600/35 text-amber-800"}`}>{llmConfigured ? "Live AI · citation checks" : "Demo · source-linked templates"}</span>
         </div>
         <label className="block text-[11px] text-ink-soft">Workflow
           <select value={task} onChange={(e) => setTask(e.target.value as CopilotTask)} className={`${input} mt-1 w-full`}>

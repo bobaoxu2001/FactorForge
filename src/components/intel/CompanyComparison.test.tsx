@@ -26,6 +26,20 @@ const companies = [company("AAA", 0.1), company("BBB", null), company("CCC", 0.3
 const tableOrder = () => within(screen.getByRole("table")).getAllByRole("rowheader").map((row) => within(row).getByRole("link").textContent);
 
 describe("CompanyComparison", () => {
+  it("starts on common-quarter operations, links their evidence, and keeps latest valuation separate", () => {
+    const common = companies.map((item) => ({ ...item, quarter: "Q2 2026", ttmQuarter: "Q2 2026", evidenceIds: { marginChange: `EV-${item.ticker}-OM-2026-06-30` }, metrics: { ...item.metrics, marginChange: -0.04 } }));
+    render(<CompanyComparison projectId="freight" companies={companies} commonQuarter={{ label: "Q2 2026", companies: common }} />);
+    expect(screen.getByLabelText("Reporting period")).toHaveValue("common");
+    const table = screen.getByRole("table");
+    expect(within(table).getByRole("columnheader", { name: "Common quarter" })).toBeInTheDocument();
+    expect(within(table).getAllByRole("link", { name: "-4.0pp" })[0]).toHaveAttribute("href", "/research/freight/evidence?id=EV-AAA-OM-2026-06-30");
+    fireEvent.change(screen.getByLabelText("Reporting period"), { target: { value: "latest" } });
+    expect(within(table).getByRole("columnheader", { name: "Latest quarter" })).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("Reporting period"), { target: { value: "common" } });
+    fireEvent.click(screen.getByRole("button", { name: "Valuation & returns" }));
+    expect(screen.queryByLabelText("Reporting period")).not.toBeInTheDocument();
+    expect(within(table).getByRole("columnheader", { name: "Latest quarter" })).toBeInTheDocument();
+  });
   it("sorts observed metrics in either direction while keeping missing figures last", () => {
     render(<CompanyComparison projectId="freight" companies={companies} />);
     expect(tableOrder()).toEqual(["AAA", "BBB", "CCC"]);

@@ -1,6 +1,7 @@
 import type { ResearchProjectConfig } from "@/data/research/types";
 import { pct } from "@/lib/utils/format";
 import { ordinal, type CompanyView, type QuarterRow } from "./companies";
+import { findCommonQuarter, isQuarterComparisonMetric, quarterEvidenceId } from "./comparability";
 import type { FuelResidualAnalysis } from "./kpis";
 import { trailingAverageYoy } from "./series";
 import type { Evidence, EvidenceOrigin, KpiSeriesView, SourceRef, VerificationStatus } from "./types";
@@ -125,12 +126,12 @@ function filingSource(company: CompanyView, accession: string, filed: string): S
   };
 }
 
-function companyEvidence(projectId: string, company: CompanyView): Evidence[] {
-  const row: QuarterRow | null = company.latest;
+function companyEvidence(projectId: string, company: CompanyView, row: QuarterRow | null = company.latest, dated = false): Evidence[] {
   if (!row) return [];
   const revenueQ = company.metrics.revenue.quarters.find((q) => q.end === row.end);
   if (!revenueQ) return [];
   const source = filingSource(company, revenueQ.accession, revenueQ.filed);
+  const id = (metric: "REV" | "OM" | "FUEL") => dated ? quarterEvidenceId(company.ticker, metric, row.end) : `EV-${company.ticker}-${metric}`;
   const base = {
     projectId,
     source,
@@ -151,7 +152,7 @@ function companyEvidence(projectId: string, company: CompanyView): Evidence[] {
   if (row.revenueYoY !== null && row.revenue !== null) {
     items.push({
       ...base,
-      id: `EV-${company.ticker}-REV`,
+      id: id("REV"),
       subject: `${company.ticker} revenue`,
       claim: `${company.name} reported ${row.label} revenue of $${(row.revenue / 1e6).toLocaleString("en-US", { maximumFractionDigits: 0 })}M, ${pct(row.revenueYoY)} year over year.`,
       location: `XBRL us-gaap:${company.metrics.revenue.concept}, accession ${revenueQ.accession}.${derivationNote("revenue")}`,
@@ -163,7 +164,7 @@ function companyEvidence(projectId: string, company: CompanyView): Evidence[] {
   if (row.operatingMargin !== null && row.operatingMarginYoYChange !== null) {
     items.push({
       ...base,
-      id: `EV-${company.ticker}-OM`,
+      id: id("OM"),
       subject: `${company.ticker} operating margin`,
       claim: `${company.name}'s ${row.label} operating margin was ${(row.operatingMargin * 100).toFixed(1)}% (operating ratio ${((row.operatingRatio ?? 0) * 100).toFixed(1)}%), ${pp(row.operatingMarginYoYChange)} versus a year earlier.`,
       location: `Calculation: us-gaap:OperatingIncomeLoss ÷ us-gaap:${company.metrics.revenue.concept}, accession ${revenueQ.accession}.${derivationNote("operatingIncome")}`,
@@ -175,7 +176,7 @@ function companyEvidence(projectId: string, company: CompanyView): Evidence[] {
   if (row.fuelShare !== null && row.fuelShareYoYChange !== null) {
     items.push({
       ...base,
-      id: `EV-${company.ticker}-FUEL`,
+      id: id("FUEL"),
       subject: `${company.ticker} fuel cost share`,
       claim: `Fuel expense was ${(row.fuelShare * 100).toFixed(1)}% of ${company.name}'s ${row.label} revenue, ${pp(row.fuelShareYoYChange)} year over year.`,
       location: `Calculation: us-gaap:FuelCosts ÷ revenue, accession ${revenueQ.accession}.${derivationNote("fuelExpense")}`,
@@ -184,6 +185,8 @@ function companyEvidence(projectId: string, company: CompanyView): Evidence[] {
       confidenceRationale: "Arithmetic on company-reported GAAP figures.",
     });
   }
+  // A dated financial observation must never inherit today's valuation or return.
+  if (dated) return items;
   const val = company.valuation;
   if (val && val.current.evToEbitda !== null && val.percentiles.evToEbitda !== null && val.stats.evToEbitda) {
     items.push({
@@ -283,6 +286,28 @@ export function buildEvidence(
     if (item) evidence.push(item);
   }
   for (const company of companies) evidence.push(...companyEvidence(config.id, company));
+  // Register the actual periods used in the common-quarter table and peer tests.
+  // Latest-period aliases remain available for individual-company research.
+  const byTicker = new Map(companies.map((company) => [company.ticker, company]));
+  const selections = [findCommonQuarter(companies)];
+  for (const hypothesis of config.hypotheses) {
+    for (const test of hypothesis.tests) {
+      if (test.kind === "company-group-spread") {
+        selections.push(findCommonQuarter([...new Set([...test.groupA, ...test.groupB])].map((ticker) => byTicker.get(ticker)), [test.metric]));
+      } else if (test.kind === "company-metric" && isQuarterComparisonMetric(test.metric)) {
+        selections.push(findCommonQuarter(test.tickers.map((ticker) => byTicker.get(ticker)), [test.metric]));
+      }
+    }
+  }
+  const registered = new Set<string>();
+  for (const selection of selections) {
+    for (const { company, row } of selection?.rows ?? []) {
+      const key = `${company.ticker}:${row.end}`;
+      if (registered.has(key)) continue;
+      registered.add(key);
+      evidence.push(...companyEvidence(config.id, company, row, true));
+    }
+  }
   const { items, resolved } = excerptEvidence(config, companies);
   evidence.push(...items);
   return { evidence, resolvedClaims: resolved };

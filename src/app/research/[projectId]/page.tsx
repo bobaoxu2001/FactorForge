@@ -48,7 +48,7 @@ export default function ProjectOverviewPage({ params }: { params: { projectId: s
               ["kpis", "KPI trends", `${view.kpis.length} series; ${view.kpis.filter((k) => k.freshness === "fresh").length} fresh, ${view.kpis.filter((k) => k.latest?.anomaly).length} flagged anomalies`],
               ["companies", "Competitive intel", `${view.companies.length} companies from SEC XBRL (point-in-time)`],
               ["primary", "Primary research", "Channel-check plan ready. No interviews recorded on the server; yours stay in this browser."],
-              ["thesis", "Thesis & decision", `${view.hypotheses.filter((h) => h.overall !== "insufficient-data").length} of ${view.hypotheses.length} hypotheses tested; ${triggered.length} invalidation trigger(s) fired`],
+              ["thesis", "Thesis & decision", `${view.hypotheses.filter((h) => h.overall !== "insufficient-data").length} of ${view.hypotheses.length} public-data screens evaluated; ${triggered.length} trigger(s) fired. Direct validation incomplete.`],
               ["memo", "Memo", "19-section memo, editable and exportable"],
             ].map(([slug, label, status]) => (
               <li key={slug}>

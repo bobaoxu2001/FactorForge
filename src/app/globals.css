@@ -145,3 +145,21 @@ article:target {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }
+
+@media print {
+  @page { size: A4; margin: 11mm; }
+  body:has(.writing-sample) { background: white; }
+  body:has(.writing-sample) .app-navigation,
+  body:has(.writing-sample) .public-demo-notice,
+  body:has(.writing-sample) .app-footer,
+  body:has(.writing-sample) .research-project-header,
+  body:has(.writing-sample) .research-project-footer,
+  body:has(.writing-sample) nav[aria-label="Research stages"],
+  body:has(.writing-sample) .writing-sample-actions { display: none !important; }
+  body:has(.writing-sample) #main-content { margin: 0; padding: 0; }
+  .writing-sample { max-width: none; border: 0; padding: 0; }
+  .writing-sample h2 { margin-top: 10px; font-size: 23pt; }
+  .writing-sample section, .writing-sample li { break-inside: avoid; }
+  .writing-sample p, .writing-sample li { font-size: 9pt; line-height: 1.35; }
+  .writing-sample h3 { font-size: 10pt; }
+}

@@ -22,19 +22,20 @@ export default function ResearchProjectLayout({ children, params }: { children: 
   const priceDateLabel = priceDates.length === 1 ? priceDates[0] : priceDates.length ? `${priceDates[0]}–${priceDates.at(-1)}` : "Unavailable";
   const financialPeriods = [...new Set(view.companies.flatMap((company) => company.latest ? [company.latest.label] : []))];
   const stages: Stage[] = [
+    { slug: "sample", label: "One-page brief", step: "Read" },
     { slug: "", label: "Overview", step: "00" },
     { slug: "industry", label: "Industry map", step: "01", status: `${verified}/${view.valueChain.relationships.length} verified` },
     { slug: "evidence", label: "Evidence", step: "02", status: `${view.evidence.length} items` },
     { slug: "kpis", label: "KPIs", step: "03", status: `${fresh}/${view.kpis.length} fresh` },
     { slug: "companies", label: "Competitive intel", step: "04", status: `${view.companies.length} cos` },
     { slug: "primary", label: "Primary research", step: "05", status: "plan" },
-    { slug: "thesis", label: "Thesis & decision", step: "06", status: `${decided}/${view.hypotheses.length} tested` },
+    { slug: "thesis", label: "Thesis & decision", step: "06", status: `${decided}/${view.hypotheses.length} public-data screens evaluated; direct validation incomplete` },
     { slug: "memo", label: "Memo", step: "07", status: view.memoStatus === "evidence-backed" ? "evidence-backed" : "draft" },
     { slug: "copilot", label: "Copilot", step: "AI" },
   ];
   return (
     <div className="space-y-6">
-      <header className="relative pt-1">
+      <header className="research-project-header relative pt-1">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div className="min-w-0 flex-1">
             <div className="lab-eyebrow">
@@ -68,7 +69,7 @@ export default function ResearchProjectLayout({ children, params }: { children: 
       </header>
       <StageNav projectId={view.config.id} stages={stages} />
       {children}
-      <footer className="border-t border-line pt-3 text-[12px] leading-relaxed text-ink-soft">
+      <footer className="research-project-footer border-t border-line pt-3 text-[12px] leading-relaxed text-ink-soft">
         Independent research workbench. Not affiliated with, or endorsed by, any company, data provider or research firm named here. Sources: SEC EDGAR; FRED (BTS, BLS, EIA, Census Bureau, Federal Reserve Board, and Cass Information Systems, whose data are copyrighted and shown with citation as FRED&apos;s terms require); Yahoo Finance prices. Not investment advice.
       </footer>
     </div>

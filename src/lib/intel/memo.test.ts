@@ -42,14 +42,11 @@ describe("evidence-bounded research interpretation", () => {
     expect(pricing).not.toContain("more than diesel explains");
   });
 
-  it("flags mixed reporting periods instead of claiming a business-model or stock-selection advantage", () => {
+  it("describes the matched peer-test quarter and retains the mechanism limits", () => {
     const paragraph = variantView(view).find((p) => p.includes("operating-leverage advantage"))!;
-    const periods = [...new Set(view.companies.map((c) => c.latest?.label).filter(Boolean))];
-
-    expect(periods.length).toBeGreaterThan(1);
-    for (const period of periods) expect(paragraph).toContain(period);
-    expect(paragraph).toContain("comparison is provisional");
-    expect(paragraph).toContain("matched quarters");
+    const period = view.hypotheses.find((h) => h.id === "H5")!.tests[0].period!;
+    expect(paragraph).toContain(`common ${period}`);
+    expect(paragraph).toContain("Matched quarters");
     expect(paragraph).not.toContain("stock selection matters more than sector exposure");
   });
 

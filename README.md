@@ -7,7 +7,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Vitest](https://img.shields.io/badge/tests-passing-22c55e?logo=vitest&logoColor=white)](#testing)
 
-**Live demo:** [factor-forge-ashy.vercel.app](https://factor-forge-ashy.vercel.app/). The research platform is deployed on `main`; individual preview URLs are immutable snapshots of earlier builds.
+**Live demo:** [Freight research case study](https://factor-forge-ashy.vercel.app/research/freight). Start with the [one-page research brief](https://factor-forge-ashy.vercel.app/research/freight/sample). Share the stable production domain; immutable deployment URLs can require Vercel authentication.
 
 > Independent research software for educational and research use. **Not investment advice.** FactorForge is not affiliated with, or endorsed by, any company, data provider or research firm it cites. It places no trades and has no order-execution path. Backtests are in-sample research tools, not performance records.
 
@@ -38,21 +38,22 @@ See [`docs/PROJECT_AUDIT.md`](docs/PROJECT_AUDIT.md) for the audit that motivate
 | Stage | Route | What it does |
 |---|---|---|
 | Overview | `/research/freight` | Research question, workflow status, computed variant view, hypothesis scorecard, KPI monitor, catalysts, quality checks |
+| Writing sample | `/sample` | Short public-data research note with observed evidence, rival explanations, next checks and original-source links; downloadable one-page PDF |
 | Industry map | `/industry` | Interactive value-chain graph. 12 of 14 relationships are **verified** against verbatim 10-K sentences; the others are marked inferred or hypothetical |
-| Evidence | `/evidence` | Evidence Explorer: filter ~95 items by origin, status and hypothesis; trace any claim to its SEC filing or FRED series; see where the memo cites it |
+| Evidence | `/evidence` | Filter dated observations by origin, status and hypothesis, including the actual quarters used in peer tests; trace claims to SEC filings or FRED series and see memo citations |
 | KPIs | `/kpis` | 13 freight KPIs (BTS/ATA tonnage, Cass, BLS PPIs, EIA diesel, BLS payrolls, Fed IP, Census) with full metadata, freshness vs release cadence, ≥2σ anomaly flags, an out-of-sample **fuel-adjusted pricing residual**, and a lead-lag explorer with split-half stability and a holdout test |
-| Competitive intel | `/companies` | KNX, JBHT, CHRW (+ ODFL, SNDR, WERN, LSTR): growth, margins, FCF, leverage, ROIC, point-in-time valuation percentiles. No composite score |
+| Competitive intel | `/companies` | Default common-quarter operating comparison; switch to latest-filed context, valuation or risk. Figures link to the selected quarter's evidence; no composite score |
 | Company research | `/companies/[ticker]` | Quarterly table with derivation markers, TTM cash flow, debt by XBRL component, 5-year PIT multiples, bull/base/bear scenarios, sensitivity grid, interactive DCF, filings & estimated earnings dates, market/sector attribution, and the quant lens with a multiple-testing haircut |
-| Primary research | `/primary` | Channel-check plan (stakeholders × hypotheses), interview guides, compliance safeguards, and a private workspace for **your** interview notes with MNPI/PII screening, theme and indicator extraction, contradiction detection and cross-source comparison |
+| Primary research | `/primary` | Proposed nine-call sourcing and coverage plan, neutral interview guides, cross-checks, and a private workspace for **your** actual interview notes. Planned calls never count as completed interviews |
 | Thesis & decision | `/thesis` | Hypothesis tests, invalidation triggers (monitored), scenario ranges, correlation/liquidity context, and a look-ahead-free outcome review (market vs sector vs residual) |
 | Memo | `/memo` | 19-section institutional memo with live citations, status (*exploratory / draft–incomplete verification / evidence-backed*), editable sections, Markdown export |
 | Copilot | `/copilot` | Grounded research copilot (14 workflows) with a citation validator |
 
 **What the committed snapshot (built 2026-11-01) shows.** These are computed findings, not opinions. They change when the snapshot is refreshed.
-- Headline truckload pricing is up strongly year over year (BLS PPI), but the residual versus its historical diesel relationship is negative. This weakens the case for an underlying rate recovery; it does not identify fuel pass-through causally or directly measure ex-fuel rates. Diesel is outside the training range, reducing confidence in both the sign and magnitude. Matched-period ex-fuel rates and shipment counts are the next test.
+- Headline truckload pricing is up strongly year over year (BLS PPI), but the residual versus its historical diesel relationship is negative. This weakens the case for an underlying rate recovery; it does not identify fuel pass-through causally or directly measure ex-fuel rates. The UI separately flags extrapolation when diesel is outside the training range. Matched-period ex-fuel rates and shipment counts are the next test.
 - Volume measures are flat to mixed (tonnage, Cass shipments, Freight TSI, rail carloads).
-- Truck-transportation payrolls are still slightly down year over year: slow capacity attrition.
-- Margin changes differ by company, but mixed reporting periods, segments and business mix limit a business-model comparison. The focus names have underperformed SPY over six months; neither relative returns nor historical multiple percentiles establish what recovery the market already expects.
+- The three-month average payroll YoY signal is negative. This is a labour-capacity proxy; fleet counts, exits and utilisation are still missing.
+- Financial peer tests use a shared reporting quarter and date-specific evidence. Segments and business mix still limit a business-model interpretation. The focus names have underperformed SPY over six months; neither relative returns nor historical multiple percentiles establish what recovery the market already expects.
 - No interviews have been conducted, so the memo is honestly labelled **"Research draft — incomplete verification"**. The primary-research page is a plan, not fabricated findings.
 
 ## Research platform: data sources
@@ -72,12 +73,17 @@ Snapshots live in `src/__fixtures__/research/<project>/` and are rebuilt by `npm
 - **One XBRL concept per metric per company**, chosen by recent coverage and displayed. Debt is a shown sum of named components, with known exclusions.
 - **Freshness**: each KPI is fresh/lagging/stale against its release cadence and publication lag. The price fixture flags itself stale when old.
 - **Comparability**: YoY by calendar period, never by array offset. NSA series are read YoY only. Lead-lag is labelled in-sample with a split-half stability check and a holdout test (lag chosen on the first two-thirds, tested on later months), and correlation is never called predictive.
+- **Financial peer periods**: every requested company must have the metric in a common quarter, with end dates within 14 days for 52/53-week filers. Otherwise the test reports insufficient data. It never substitutes an unmatched latest quarter or silently drops a peer. Date-specific evidence is required before a peer verdict is published.
 - **Fuel-adjusted residual**: OLS fitted only on data before a 12-month holdout, with an extrapolation warning.
 - **Valuation**: positive-denominator multiples only (negative-earnings P/E is "n/m", not cheap). Scenarios are anchored to each company's own 5-year history. Expected return is computed only from a complete, justified probability set.
 - **Backtests**: labelled backtest vs simulated vs actual (actual is not supported). The best-of-N Sharpe is shown next to the expected maximum Sharpe of N skill-less strategies.
 - **Attribution**: daily OLS on SPY and IYT−SPY. Outcome review estimates betas *before* the thesis date.
 - **Primary research**: user notes stay in the browser, are screened for emails, phones, IDs and MNPI language, and contact details are redacted on save. Notes with possible MNPI are never sent to an AI model.
 - **Copilot grounding**: every fact or calculation must cite an evidence ID that was retrieved for that request, or it is moved to "unsupported".
+
+### Refreshing the one-page PDF
+
+The web brief and its public JSON source at `/research/freight/sample/data` share the same computed observations. After a data or writing-sample change, run the app locally, then `python3 scripts/export-writing-sample.py --url http://127.0.0.1:3126/research/freight/sample/data` (requires ReportLab and pypdf for local authoring). The exporter validates one page, copies the PDF into `public/research-samples/`, and records its snapshot date. The web download button is hidden if that date no longer matches the active research snapshot. Keep the prepared PDF, its source citations, and its public-data/fieldwork limits together when sharing.
 
 ---
 

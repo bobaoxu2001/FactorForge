@@ -9,3 +9,5 @@ out
 .cache
 .claude/
 .vercel
+output/
+tmp/pdfs/

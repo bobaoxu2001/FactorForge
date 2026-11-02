@@ -414,8 +414,8 @@ export const FREIGHT_PROJECT: ResearchProjectConfig = {
     },
     {
       id: "H3",
-      title: "Capacity is tightening",
-      statement: "Trucking capacity is still contracting, which would support rates as demand stabilises.",
+      title: "Labour-capacity contraction (proxy)",
+      statement: "Truck-transportation payrolls are contracting. This is preliminary labour-capacity evidence; fleet capacity and utilisation remain unverified.",
       stance: "bullish",
       marketNarrative: "Rate recoveries historically follow capacity attrition after a downcycle.",
       tests: [
@@ -553,6 +553,45 @@ export const FREIGHT_PROJECT: ResearchProjectConfig = {
       ],
     },
   ],
+  fieldworkPlan: {
+    purpose: "Test whether changes in comparable freight volumes and ex-fuel rates reflect demand, capacity, or business mix. This is a proposed purposive sample for directional checks, not a representative industry survey.",
+    cohorts: [
+      {
+        stakeholderId: "shipper-logistics",
+        targetInterviews: 3,
+        role: "Private shipper owner, COO or head of logistics",
+        recruitment: "Identify independent manufacturers and distributors through company websites and professional directories; request a 15–20 minute market discussion through a public business contact.",
+        coverage: "Include industrial and consumer-goods shippers in the Northeast and Southeast. Record mode, equipment, geography and spot/contract mix before comparing answers.",
+        question: "For comparable operations, how have shipment activity and general ex-fuel transport costs changed over the last three and twelve months? What changed in the business mix?",
+        crossCheck: "Compare first-hand shipment direction with the freight-volume series and a private carrier serving a similar market. Record a disagreement rather than averaging it away.",
+      },
+      {
+        stakeholderId: "small-carrier",
+        targetInterviews: 3,
+        role: "Independent fleet owner or president",
+        recruitment: "Use private-fleet websites, public carrier directories and industry associations to identify owners who directly manage fleet utilisation.",
+        coverage: "Include an owner-operator and small multi-truck fleets. Seek comparable dry-van operations across two regions; document fleet size and direct versus brokered freight.",
+        question: "On comparable routes and equipment, what changed in paid utilisation, empty miles, general ex-fuel rates and fuel recovery? Which observations point toward the opposite interpretation?",
+        crossCheck: "Distinguish trucks actually parked or exited from anecdotes about peers. Reconcile general rate direction with a shipper and a private broker in the same segment.",
+      },
+      {
+        stakeholderId: "broker-carrier-sales",
+        targetInterviews: 3,
+        role: "Private brokerage owner or operations head",
+        recruitment: "Identify independent brokerages through their public websites and industry directories; speak with someone who sees daily load coverage rather than a covered public issuer's current employee.",
+        coverage: "Include contract-focused and spot-exposed operations in the same regions as the fleet and shipper calls. Record equipment and customer-industry mix.",
+        question: "Is it getting easier or harder to cover comparable loads? In general terms, are carrier costs or shipper rates changing faster, and what else could explain the change?",
+        crossCheck: "Compare capacity availability and rate direction with the independent-fleet calls, separating company-specific execution from a broader market signal.",
+      },
+    ],
+    protocol: [
+      "Before each call: write one question the source can observe directly, one rival explanation, and the observation that would change the working view.",
+      "Open neutrally: establish role, market segment, geography, equipment, observation window and first-hand visibility before discussing the current hypothesis.",
+      "Use general market experience with consent. Do not request confidential contract terms, customer identities, unannounced results or other material non-public information.",
+      "After each call: separate observation, interpretation and hearsay; record date, sample coverage, limitations, disagreements and the next corroborating source.",
+      "Update the memo only after tracing a conclusion to a recorded source and checking an alternative explanation. Planned calls never change the completed-interview count.",
+    ],
+  },
   missingData: [
     { id: "spot-rates", name: "Spot & contract truckload rates (ex-fuel)", why: "Direct test of H2 instead of the fuel-adjusted residual proxy.", access: "licensed", requirement: "Licensed rate feed (e.g., DAT, Truckstop) behind a provider adapter." },
     { id: "tender-rejections", name: "Tender rejection rates", why: "Real-time capacity tightness (H3).", access: "licensed", requirement: "Licensed freight-market data subscription." },

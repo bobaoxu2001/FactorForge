@@ -3,6 +3,8 @@ import CompanyComparison, { type CompanyComparisonRow } from "@/components/intel
 import ResearchBrief from "@/components/intel/ResearchBrief";
 import { EvidenceLinks, Note, Panel } from "@/components/intel/ui";
 import { getResearchProject } from "@/lib/intel/project";
+import { findCommonQuarter, quarterEvidenceId } from "@/lib/intel/comparability";
+import type { CompanyView, QuarterRow } from "@/lib/intel/companies";
 
 export const revalidate = 3600;
 export const metadata = { title: "Competitive intelligence" };
@@ -12,9 +14,11 @@ export default function CompaniesPage({ params }: { params: { projectId: string 
   if (!view) notFound();
   const pid = view.config.id;
   const rows = view.companies;
-  const comparisonRows: CompanyComparisonRow[] = rows.map((company) => {
-    const latest = company.latest;
-    const ttm = company.latestTtm;
+  const common = findCommonQuarter(rows);
+  const known = new Set(view.evidence.map((item) => item.id));
+  const comparisonRow = (company: CompanyView, selected?: QuarterRow): CompanyComparisonRow => {
+    const latest = selected ?? company.latest;
+    const ttm = selected ?? company.latestTtm;
     const netDebt = ttm?.debt && ttm.cash !== null ? ttm.debt.total - ttm.cash : null;
     const ebitda = ttm?.ttmEbitda;
     return {
@@ -24,13 +28,17 @@ export default function CompaniesPage({ params }: { params: { projectId: string 
       focus: company.coverage.focus,
       quarter: latest?.label ?? null,
       ttmQuarter: ttm?.label ?? null,
+      evidenceIds: Object.fromEntries(([['revenueYoY', 'REV'], ['operatingMargin', 'OM'], ['marginChange', 'OM'], ['fuelShare', 'FUEL']] as const).flatMap(([metric, key]) => {
+        const id = selected ? quarterEvidenceId(company.ticker, key, selected.end) : `EV-${company.ticker}-${key}`;
+        return known.has(id) ? [[metric, id]] : [];
+      })),
       metrics: {
         revenueYoY: latest?.revenueYoY ?? null,
         operatingMargin: latest?.operatingMargin ?? null,
         marginChange: latest?.operatingMarginYoYChange ?? null,
         fuelShare: latest?.fuelShare ?? null,
         freeCashFlow: ttm?.ttmFreeCashFlow ?? null,
-        capexIntensity: company.capexIntensity,
+        capexIntensity: ttm?.ttmCapex != null && ttm.ttmRevenue ? ttm.ttmCapex / ttm.ttmRevenue : null,
         leverage: netDebt !== null && ebitda != null && ebitda > 0 ? netDebt / ebitda : null,
         roic: company.roicApprox?.value ?? null,
         evToEbitda: company.valuation?.current.evToEbitda ?? null,
@@ -41,17 +49,21 @@ export default function CompaniesPage({ params }: { params: { projectId: string 
         maxDrawdown1y: company.priceStats?.maxDrawdown1y ?? null,
       },
     };
-  });
+  };
+  const comparisonRows = rows.map((company) => comparisonRow(company));
   const concentration = (ticker: string) => view.config.excerptClaims.find((c) => c.ticker === ticker && c.subject === "Customer concentration");
 
   return (
     <div className="space-y-5">
-      <ResearchBrief view={view} />
+      <details className="rounded-md border border-line bg-paper p-4">
+        <summary className="cursor-pointer text-[13px] font-medium text-ink">Case-study context and working view</summary>
+        <div className="mt-4"><ResearchBrief view={view} /></div>
+      </details>
       <Panel eyebrow="Stage 04 · Competitive intelligence" title="Peer comparison: operating results, valuation and risk" source="SEC EDGAR XBRL company facts; Yahoo Finance prices; FactorForge calculation.">
         <p className="mb-3 max-w-4xl text-[12.5px] leading-relaxed text-ink-muted">
           Figures come from SEC XBRL filings and Yahoo prices. Start with operating performance, then test valuation and risk. Business models differ: compare margin <em>changes</em> and matching reporting periods before interpreting relative performance. There is no composite competitive score.
         </p>
-        <CompanyComparison projectId={pid} companies={comparisonRows} />
+        <CompanyComparison projectId={pid} companies={comparisonRows} commonQuarter={common ? { label: common.label, companies: common.rows.map(({ company, row }) => comparisonRow(company, row)) } : undefined} />
       </Panel>
 
       <div className="grid gap-4 lg:grid-cols-2">

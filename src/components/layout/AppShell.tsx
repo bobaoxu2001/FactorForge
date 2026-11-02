@@ -18,13 +18,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <Navigation persistenceAvailable={persistenceAvailable} />
       <main id="main-content" className="px-4 pb-10 pt-4 md:px-8 lg:ml-[256px]">
         <div className="mx-auto max-w-[1280px]">
-          <div className="mb-6">
+          <div className="public-demo-notice mb-6">
             <PublicDemoNotice />
           </div>
           {children}
         </div>
       </main>
-      <footer className="border-t border-line lg:ml-[256px]">
+      <footer className="app-footer border-t border-line lg:ml-[256px]">
         <div className="max-w-[80ch] px-4 py-6 md:px-8">
           <div className="text-[12.5px] font-medium text-ink-muted">
             FactorForge — AI-Native Equity Research &amp; Market Intelligence

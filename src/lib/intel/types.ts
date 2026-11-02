@@ -211,6 +211,8 @@ export interface KpiTestResult {
   outcome: TestOutcome;
   detail: string;
   evidenceIds: string[];
+  /** Common reporting quarter for a financial peer comparison. */
+  period?: string;
 }
 
 export type TriggerState = "holding" | "triggered" | "insufficient-data";

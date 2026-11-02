@@ -31,7 +31,7 @@ export default function ResearchBrief({ view }: { view: ResearchProjectView }) {
       </details>
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3 text-[12.5px]">
         <span className="text-ink-soft">Public sources and reproducible calculations; no primary interviews are included in this public study.</span>
-        <Link href={`/research/${pid}/memo`} className="font-medium text-accent hover:underline">Read the research memo →</Link>
+        <div className="flex flex-wrap gap-4"><Link href={`/research/${pid}/sample`} className="font-semibold text-accent hover:underline">Read the one-page brief →</Link><Link href={`/research/${pid}/memo`} className="font-medium text-accent hover:underline">Full research memo →</Link></div>
       </div>
     </Panel>
   );

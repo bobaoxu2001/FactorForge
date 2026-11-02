@@ -15,6 +15,20 @@ export default function PrimaryResearchPage({ params }: { params: { projectId: s
 
   return (
     <div className="space-y-5">
+      {config.fieldworkPlan && <Panel eyebrow="Proposed fieldwork · no published interviews" title="The next calls and the questions they can answer">
+        <p className="max-w-[95ch] text-[14px] leading-relaxed text-ink-muted">{config.fieldworkPlan.purpose}</p>
+        <p className="mt-3 text-[13px] font-medium text-accent">Proposed target: {config.fieldworkPlan.cohorts.reduce((sum, cohort) => sum + cohort.targetInterviews, 0)} interviews · 0 completed interviews in the public case study</p>
+        <div className="mt-4 grid gap-4 xl:grid-cols-3">
+          {config.fieldworkPlan.cohorts.map((cohort) => <article key={cohort.stakeholderId} className="border-t-2 border-accent/40 pt-3">
+            <h3 className="text-[14px] font-semibold text-ink">{cohort.role}</h3>
+            <p className="mt-1 text-[12px] font-medium text-accent">{cohort.targetInterviews} proposed calls · not yet conducted</p>
+            <dl className="mt-3 space-y-3 text-[12.5px] leading-relaxed text-ink-muted">
+              {[["Find the source", cohort.recruitment], ["Coverage", cohort.coverage], ["Ask neutrally", cohort.question], ["Cross-check", cohort.crossCheck]].map(([label, text]) => <div key={label}><dt className="font-semibold text-ink">{label}</dt><dd className="mt-0.5">{text}</dd></div>)}
+            </dl>
+          </article>)}
+        </div>
+        <details className="mt-5 border-t border-line pt-3"><summary className="cursor-pointer text-[13px] font-medium text-ink">Before the call, after the call, and before changing the view</summary><ol className="mt-3 list-decimal space-y-2 pl-5 text-[13px] leading-relaxed text-ink-muted">{config.fieldworkPlan.protocol.map((item) => <li key={item}>{item}</li>)}</ol></details>
+      </Panel>}
       <Panel eyebrow="Stage 05 · Primary research & channel checks" title="Channel-check research plan">
         <div className="mb-3"><Note tone="warn">No interviews have been conducted for this case study, so none are shown as findings. This page is an honest plan: who to talk to, what to ask, and what each answer would confirm or refute. Real interviews you record below are stored only in your browser and labelled as your primary research.</Note></div>
         <div className="grid gap-4 lg:grid-cols-2">
@@ -44,7 +58,7 @@ export default function PrimaryResearchPage({ params }: { params: { projectId: s
 
       <Panel eyebrow="Interview guides" title="Question templates by stakeholder" actions={<OriginChip origin="ai-generated" />}>
         <p className="mb-3 text-[12px] text-ink-muted">Template-generated from the project hypotheses. Questions are work product, not evidence. Ask the Copilot for a tailored guide.</p>
-        <div className="grid gap-3 lg:grid-cols-2">
+        <div className="grid items-start gap-3 lg:grid-cols-2">
           {guides.map((g) => (
             <details key={g.stakeholderId} className="rounded-md border border-line bg-ink/[0.02] p-3">
               <summary className="cursor-pointer text-[13px] font-medium text-ink">{g.stakeholder} <span className="ml-1 text-[11px] text-ink-soft">({g.hypotheses.map((h) => h.id).join(", ")})</span></summary>

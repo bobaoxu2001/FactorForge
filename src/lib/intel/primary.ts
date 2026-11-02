@@ -28,6 +28,7 @@ const OPENING = [
   "Confirm consent to take notes and whether any remarks may be quoted (attributed or anonymised).",
   "Remind the interviewee not to share confidential or material non-public information about any company.",
   "Ask about their role and what part of the freight market they see directly.",
+  "Establish the observation period, region, equipment or mode, business size and spot/contract mix so later comparisons use a consistent basis.",
 ];
 const CLOSING = [
   "What would change your view over the next two quarters?",
@@ -46,7 +47,9 @@ export function buildInterviewGuide(category: StakeholderCategory, hypotheses: H
     opening: OPENING,
     questions: [
       ...category.questions,
-      ...linked.map((h) => `What would you need to see to believe: "${h.statement}"? What do you see today?`),
+      "What changed within comparable operations, and what changed because of customer, route or equipment mix?",
+      "Which observations are first-hand, and which come from what others have told you?",
+      "What evidence points in the opposite direction, and what would change your interpretation?",
     ],
     closing: CLOSING,
     cautions: [

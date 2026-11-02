@@ -1,6 +1,7 @@
 import type { Comparator, HypothesisConfig, HypothesisTest, TriggerConfig } from "@/data/research/types";
 import { pct } from "@/lib/utils/format";
-import { ordinal, type CompanyView } from "./companies";
+import { ordinal, type CompanyView, type QuarterRow } from "./companies";
+import { findCommonQuarter, isQuarterComparisonMetric, quarterEvidenceId } from "./comparability";
 import { pp } from "./evidence";
 import { kpiMetric, type FuelResidualAnalysis } from "./kpis";
 import type { Evidence, HypothesisView, KpiSeriesView, KpiTestResult, Stance, TestOutcome, TriggerResult } from "./types";
@@ -42,16 +43,17 @@ function kpiValue(ctx: ThesisContext, kpiId: string, metric: "yoy" | "yoy3m" | "
   };
 }
 
-function companyMetric(company: CompanyView | undefined, metric: string): { value: number | null; evidenceId: string | null } {
+function companyMetric(company: CompanyView | undefined, metric: string, periodRow?: QuarterRow): { value: number | null; evidenceId: string | null } {
   if (!company) return { value: null, evidenceId: null };
-  const row = company.latest;
+  const row = periodRow ?? company.latest;
+  const id = (key: "OM" | "FUEL" | "REV") => periodRow ? quarterEvidenceId(company.ticker, key, periodRow.end) : `EV-${company.ticker}-${key}`;
   switch (metric) {
     case "operatingMarginYoYChange":
-      return { value: row?.operatingMarginYoYChange ?? null, evidenceId: `EV-${company.ticker}-OM` };
+      return { value: row?.operatingMarginYoYChange ?? null, evidenceId: id("OM") };
     case "fuelShareYoYChange":
-      return { value: row?.fuelShareYoYChange ?? null, evidenceId: `EV-${company.ticker}-FUEL` };
+      return { value: row?.fuelShareYoYChange ?? null, evidenceId: id("FUEL") };
     case "revenueYoY":
-      return { value: row?.revenueYoY ?? null, evidenceId: `EV-${company.ticker}-REV` };
+      return { value: row?.revenueYoY ?? null, evidenceId: id("REV") };
     case "evEbitdaPercentile":
       return { value: company.valuation?.percentiles.evToEbitda ?? null, evidenceId: `EV-${company.ticker}-VAL` };
     case "relativeReturn6m":
@@ -75,30 +77,41 @@ export function evaluateTest(test: HypothesisTest, ctx: ThesisContext): KpiTestR
     };
   }
   if (test.kind === "company-metric") {
-    const reads = test.tickers.map((t) => ({ ticker: t, ...companyMetric(ctx.companies.get(t), test.metric) }));
+    const matched = isQuarterComparisonMetric(test.metric)
+      ? findCommonQuarter(test.tickers.map((ticker) => ctx.companies.get(ticker)), [test.metric])
+      : undefined;
+    if (matched === null) return { id: test.id, description: test.description, outcome: "insufficient-data", detail: "No common reporting quarter with this metric for every requested company.", evidenceIds: [] };
+    const periodRows = new Map(matched?.rows.map(({ company, row }) => [company.ticker, row]));
+    const reads = test.tickers.map((t) => ({ ticker: t, ...companyMetric(ctx.companies.get(t), test.metric, periodRows.get(t)) }));
     const usable = reads.filter((r) => r.value !== null);
     const evidenceIds = existing(ctx, usable.map((r) => r.evidenceId as string));
     if (usable.length === 0) return { id: test.id, description: test.description, outcome: "insufficient-data", detail: "No company data for this metric.", evidenceIds };
     const passing = usable.filter((r) => compare(r.value as number, test.op, test.threshold) === test.supportsWhenTrue);
     const outcome: TestOutcome = passing.length === usable.length ? "supports" : passing.length === 0 ? "contradicts" : "mixed";
-    const detail = usable.map((r) => `${r.ticker} ${fmtMetric(test.metric, r.value as number)}`).join(" · ") + (usable.length < reads.length ? ` (no data: ${reads.filter((r) => r.value === null).map((r) => r.ticker).join(", ")})` : "");
-    return { id: test.id, description: test.description, outcome, detail, evidenceIds };
+    const detail = (matched ? `Common ${matched.label}: ` : "") + usable.map((r) => `${r.ticker} ${fmtMetric(test.metric, r.value as number)}`).join(" · ") + (usable.length < reads.length ? ` (no data: ${reads.filter((r) => r.value === null).map((r) => r.ticker).join(", ")})` : "");
+    if (matched && evidenceIds.length !== usable.length) return { id: test.id, description: test.description, outcome: "insufficient-data", detail: "The common-quarter calculation is missing its dated source evidence.", evidenceIds: [], period: matched.label };
+    return { id: test.id, description: test.description, outcome, detail, evidenceIds, period: matched?.label };
   }
+  const matched = findCommonQuarter([...new Set([...test.groupA, ...test.groupB])].map((ticker) => ctx.companies.get(ticker)), [test.metric]);
+  if (!matched) return { id: test.id, description: test.description, outcome: "insufficient-data", detail: "No common reporting quarter with this metric for every company in both peer groups.", evidenceIds: [] };
+  const periodRows = new Map(matched.rows.map(({ company, row }) => [company.ticker, row]));
   const groupMean = (tickers: string[]) => {
-    const values = tickers.map((t) => companyMetric(ctx.companies.get(t), test.metric)).filter((r) => r.value !== null);
+    const values = tickers.map((t) => companyMetric(ctx.companies.get(t), test.metric, periodRows.get(t))).filter((r) => r.value !== null);
     return { mean: values.length ? values.reduce((s, r) => s + (r.value as number), 0) / values.length : null, ids: values.map((r) => r.evidenceId as string), n: values.length };
   };
   const a = groupMean(test.groupA);
   const b = groupMean(test.groupB);
   const evidenceIds = existing(ctx, [...a.ids, ...b.ids]);
+  if (evidenceIds.length !== new Set([...a.ids, ...b.ids]).size) return { id: test.id, description: test.description, outcome: "insufficient-data", detail: "The common-quarter calculation is missing its dated source evidence.", evidenceIds: [], period: matched.label };
   if (a.mean === null || b.mean === null) return { id: test.id, description: test.description, outcome: "insufficient-data", detail: "One of the peer groups has no data.", evidenceIds };
   const spread = a.mean - b.mean;
   return {
     id: test.id,
     description: test.description,
     outcome: spread > test.threshold ? "supports" : "contradicts",
-    detail: `Group A mean ${fmtMetric(test.metric, a.mean)} (n=${a.n}) vs group B ${fmtMetric(test.metric, b.mean)} (n=${b.n}); spread ${pp(spread)}.`,
+    detail: `Common ${matched.label}; quarter ends ${matched.rows.map(({ company, row }) => `${company.ticker} ${row.end}`).join(", ")}. Group A mean ${fmtMetric(test.metric, a.mean)} (n=${a.n}) vs group B ${fmtMetric(test.metric, b.mean)} (n=${b.n}); spread ${pp(spread)}.`,
     evidenceIds,
+    period: matched.label,
   };
 }
 

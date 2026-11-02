@@ -19,6 +19,7 @@ export interface CompanyComparisonRow {
   quarter: string | null;
   ttmQuarter: string | null;
   metrics: Record<MetricKey, number | null>;
+  evidenceIds?: Partial<Record<MetricKey, string>>;
 }
 
 type View = "operating" | "valuation" | "risk";
@@ -54,15 +55,18 @@ const VIEWS: Array<{ id: View; label: string; question: string }> = [
   { id: "risk", label: "Balance sheet & risk", question: "Where are the capital, fuel and market-risk exposures?" },
 ];
 
-export default function CompanyComparison({ projectId, companies }: { projectId: string; companies: CompanyComparisonRow[] }) {
+export default function CompanyComparison({ projectId, companies, commonQuarter }: { projectId: string; companies: CompanyComparisonRow[]; commonQuarter?: { label: string; companies: CompanyComparisonRow[] } }) {
   const [view, setView] = useState<View>("operating");
+  const [period, setPeriod] = useState<"common" | "latest">(commonQuarter ? "common" : "latest");
   const [model, setModel] = useState("all");
   const [focusOnly, setFocusOnly] = useState(false);
   const [sort, setSort] = useState<SortKey>("ticker");
   const [descending, setDescending] = useState(false);
   const columns = COLUMNS[view];
+  const matched = view === "operating" && period === "common" && commonQuarter;
+  const sourceRows = matched ? matched.companies : companies;
   const models = Array.from(new Set(companies.map((c) => c.businessModel))).sort();
-  const rows = companies
+  const rows = sourceRows
     .filter((c) => (model === "all" || c.businessModel === model) && (!focusOnly || c.focus))
     .sort((a, b) => {
       if (sort === "ticker") return (descending ? -1 : 1) * a.ticker.localeCompare(b.ticker);
@@ -85,6 +89,12 @@ export default function CompanyComparison({ projectId, companies }: { projectId:
     else { setSort(key); setDescending(key !== "ticker"); }
   }
 
+  function metricValue(company: CompanyComparisonRow, column: Column) {
+    const value = column.format(company.metrics[column.key]);
+    const id = company.evidenceIds?.[column.key];
+    return id ? <Link href={`/research/${projectId}/evidence?id=${encodeURIComponent(id)}`} className="underline decoration-current/25 underline-offset-4 hover:decoration-current" title={`Source evidence for ${company.quarter}`}>{value}</Link> : value;
+  }
+
   return (
     <div className="space-y-4">
       <fieldset>
@@ -100,6 +110,13 @@ export default function CompanyComparison({ projectId, companies }: { projectId:
       <p className="text-[14px] font-medium text-ink">{VIEWS.find((item) => item.id === view)?.question}</p>
 
       <div className="flex flex-wrap items-end gap-x-4 gap-y-3 rounded-md border border-line bg-panel2 p-3">
+        {view === "operating" && <label className="flex min-w-0 flex-col gap-1 text-[12px] text-ink-muted">
+          Reporting period
+          <select value={period} onChange={(event) => setPeriod(event.target.value as "common" | "latest")} className="w-full max-w-[290px] rounded border border-line bg-paper px-2 py-2 text-[13px] text-ink">
+            {commonQuarter && <option value="common">Common quarter · {commonQuarter.label}</option>}
+            <option value="latest">Latest filed · periods may differ</option>
+          </select>
+        </label>}
         <label className="flex min-w-0 flex-col gap-1 text-[12px] text-ink-muted">
           Business model
           <select value={model} onChange={(event) => setModel(event.target.value)} className="w-full max-w-[250px] rounded border border-line bg-paper px-2 py-2 text-[13px] text-ink">
@@ -124,7 +141,7 @@ export default function CompanyComparison({ projectId, companies }: { projectId:
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-2 text-[12px] text-ink-soft">
-        <p role="status">Showing {rows.length} of {companies.length} companies</p>
+        <p role="status">Showing {rows.length} of {companies.length} companies{matched ? ` · common ${matched.label}` : " · latest filed"}</p>
         <p className="hidden md:block">Select a column heading to sort · company column stays visible</p>
       </div>
 
@@ -137,13 +154,13 @@ export default function CompanyComparison({ projectId, companies }: { projectId:
         <>
           <div className="hidden overflow-x-auto rounded-md border border-line md:block" role="region" aria-label={`${view} company comparison, horizontally scrollable`} tabIndex={0}>
             <table className="w-full min-w-[760px] text-left text-[13px]">
-              <caption className="sr-only">{VIEWS.find((item) => item.id === view)?.label}. Each row uses the company&apos;s latest filed quarter; periods can differ.</caption>
+              <caption className="sr-only">{VIEWS.find((item) => item.id === view)?.label}. {matched ? `All companies use common ${matched.label}, allowing 52/53-week period ends within 14 days.` : "Each row uses the company's latest filed quarter; periods can differ."}</caption>
               <thead className="bg-panel2 text-[12px] text-ink-muted">
                 <tr>
                   <th scope="col" className="sticky left-0 z-10 min-w-[180px] border-r border-line bg-panel2 px-3 py-3" aria-sort={sort === "ticker" ? descending ? "descending" : "ascending" : "none"}>
                     <button type="button" onClick={() => sortColumn("ticker")} className="font-semibold">Company {sort === "ticker" ? descending ? "↓" : "↑" : "↕"}</button>
                   </th>
-                  <th scope="col" className="whitespace-nowrap px-3 py-3">Latest quarter</th>
+                  <th scope="col" className="whitespace-nowrap px-3 py-3">{matched ? "Common quarter" : "Latest quarter"}</th>
                   {columns.map((column) => (
                     <th key={column.key} scope="col" className="px-3 py-3 text-right" aria-sort={sort === column.key ? descending ? "descending" : "ascending" : "none"}>
                       <button type="button" onClick={() => sortColumn(column.key)} className="font-semibold">{column.label} {sort === column.key ? descending ? "↓" : "↑" : "↕"}</button>
@@ -160,7 +177,7 @@ export default function CompanyComparison({ projectId, companies }: { projectId:
                       <div className="mt-0.5 max-w-[180px] text-[11px] text-ink-soft">{company.businessModel}</div>
                     </th>
                     <td className="whitespace-nowrap px-3 py-3 text-ink-muted">{company.quarter ?? "—"}<span className="mt-0.5 block text-[10.5px] text-ink-soft">TTM to {company.ttmQuarter ?? "n/a"}</span></td>
-                    {columns.map((column) => <td key={column.key} className={`num whitespace-nowrap px-3 py-3 text-right ${column.signed ? textTone(company.metrics[column.key]) : "text-ink"}`}>{column.format(company.metrics[column.key])}</td>)}
+                    {columns.map((column) => <td key={column.key} className={`num whitespace-nowrap px-3 py-3 text-right ${column.signed ? textTone(company.metrics[column.key]) : "text-ink"}`}>{metricValue(company, column)}</td>)}
                   </tr>
                 ))}
               </tbody>
@@ -175,9 +192,9 @@ export default function CompanyComparison({ projectId, companies }: { projectId:
                   {company.focus && <span className="rounded bg-accent-soft px-1.5 py-0.5 text-[11px] text-accent">focus</span>}
                 </div>
                 <p className="mt-1 text-[12px] text-ink-soft">{company.businessModel}</p>
-                <p className="mt-1 text-[12px] text-ink-muted">Latest {company.quarter ?? "unavailable"} · TTM to {company.ttmQuarter ?? "n/a"}</p>
+                <p className="mt-1 text-[12px] text-ink-muted">{matched ? "Common" : "Latest"} {company.quarter ?? "unavailable"} · TTM to {company.ttmQuarter ?? "n/a"}</p>
                 <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3">
-                  {columns.map((column) => <div key={column.key}><dt className="text-[12px] text-ink-soft">{column.label}</dt><dd className={`num mt-0.5 text-[15px] font-semibold ${column.signed ? textTone(company.metrics[column.key]) : "text-ink"}`}>{column.format(company.metrics[column.key])}</dd></div>)}
+                  {columns.map((column) => <div key={column.key}><dt className="text-[12px] text-ink-soft">{column.label}</dt><dd className={`num mt-0.5 text-[15px] font-semibold ${column.signed ? textTone(company.metrics[column.key]) : "text-ink"}`}>{metricValue(company, column)}</dd></div>)}
                 </dl>
                 <Link href={`/research/${projectId}/companies/${company.ticker}`} className="mt-3 inline-block text-[13px] font-medium text-accent hover:underline">Read company research →</Link>
               </li>
@@ -187,7 +204,8 @@ export default function CompanyComparison({ projectId, companies }: { projectId:
       )}
 
       <div className="space-y-1.5 border-t border-line pt-3 text-[12px] leading-relaxed text-ink-muted">
-        <p><strong className="font-medium text-ink">Comparability:</strong> rows use each company&apos;s latest filed quarter, so Q2 and Q3 may appear together. Compare matching periods before drawing cross-company conclusions. FCF, capex intensity, leverage and ROIC use trailing twelve months.</p>
+        <p><strong className="font-medium text-ink">Comparability:</strong> {matched ? `Operating results use common ${matched.label} across the full coverage universe, with quarter ends within 14 days. Filters preserve that period. Underlined figures link to that quarter's evidence.` : "Rows use each company's latest filed quarter, so Q2 and Q3 may appear together. Use the operating view's common-quarter mode for peer comparisons."} FCF, capex intensity, leverage and ROIC use trailing twelve months.</p>
+        {view !== "operating" && <p>Valuation and market-risk views use the latest available fundamentals and the dated price snapshot; the operating-view quarter selection does not change these views.</p>}
         {view === "valuation" && <p>Historical percentile compares EV/EBITDA with that company&apos;s own month-end history. A high percentile means a higher multiple relative to its past, not a forecast or a quality score. ROIC is approximate: TTM operating income × (1 − tax) ÷ (debt + equity − cash); goodwill-heavy balance sheets depress it.</p>}
         {view === "risk" && <p>n/t = no matching fuel tag in XBRL; brokers report purchased transportation instead. Leverage is n/m when EBITDA is zero, negative or unavailable. Negative leverage indicates net cash.</p>}
         <p>n/m = not meaningful or unavailable. Figures are company-reported or calculated from the dated research snapshot; sorting does not imply an investment ranking.</p>
