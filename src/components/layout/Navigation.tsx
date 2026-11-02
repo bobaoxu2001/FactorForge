@@ -32,7 +32,7 @@ import {
   WalletCards,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SearchCommand from "./SearchCommand";
 
 type NavItem = { href: string; label: string; icon: typeof Gauge; tag?: string };
@@ -102,6 +102,13 @@ export function activeHref(pathname: string): string | null {
 export default function Navigation({ persistenceAvailable = true }: { persistenceAvailable?: boolean }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [currentDate, setCurrentDate] = useState("");
+
+  // Cached server HTML and the visitor's browser can be on different days.
+  // Fill the local date after hydration so the initial render stays consistent.
+  useEffect(() => {
+    setCurrentDate(new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }));
+  }, []);
 
   return (
     <>
@@ -163,7 +170,7 @@ export default function Navigation({ persistenceAvailable = true }: { persistenc
 
           <div className="ml-auto flex items-center gap-3">
             <div className="hidden rounded-lg border border-line bg-white/[0.035] px-3 py-2 text-[12px] text-ink-muted sm:block">
-              {new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+              {currentDate || "\u00a0"}
             </div>
             <Link href="/reports" aria-label="Research reports" className="relative grid h-10 w-10 place-items-center rounded-lg border border-line bg-white/[0.04] text-ink-muted transition-colors hover:text-ink">
               <Bell className="h-4 w-4" />
