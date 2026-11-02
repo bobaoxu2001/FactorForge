@@ -56,7 +56,7 @@ export default function ThesisPage({ params, searchParams }: { params: { project
       <Panel eyebrow="Stage 06 · Thesis & decision support" title="Competing hypotheses and what would invalidate them">
         <div className="space-y-3">
           {view.hypotheses.map((h) => (
-            <article key={h.id} className="rounded-xl border border-line bg-white/[0.02] p-3">
+            <article key={h.id} className="rounded-md border border-line bg-ink/[0.02] p-3">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
                   <div className="text-[13.5px] font-semibold text-ink">{h.id} · {h.title} <span className="ml-1 text-[11px] font-normal text-ink-soft">{h.stance}</span></div>
@@ -90,10 +90,10 @@ export default function ThesisPage({ params, searchParams }: { params: { project
         </div>
       </Panel>
 
-      <Panel eyebrow="Expected return & valuation" title="Scenario ranges for the focus names">
+      <Panel eyebrow="Expected return & valuation" title="Scenario ranges for the focus names" source="FactorForge scenario model on SEC fundamentals and Yahoo Finance prices; probabilities only when you enter them.">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] text-right text-[12.5px]">
-            <thead className="text-[10.5px] uppercase tracking-[0.12em] text-ink-soft"><tr><th className="py-2 text-left">Company</th><th>Price</th><th>Bear</th><th>Base</th><th>Bull</th><th>Upside / downside</th><th className="text-left pl-3">Probabilities</th></tr></thead>
+            <thead className="text-[10.5px] text-ink-soft"><tr><th className="py-2 text-left">Company</th><th>Price</th><th>Bear</th><th>Base</th><th>Bull</th><th>Upside / downside</th><th className="text-left pl-3">Probabilities</th></tr></thead>
             <tbody className="divide-soft">
               {focus.map((c) => {
                 const s = scenarioResults(c);
@@ -102,13 +102,13 @@ export default function ThesisPage({ params, searchParams }: { params: { project
                 const down = get("bear");
                 return (
                   <tr key={c.ticker} className="table-row">
-                    <td className="py-2 text-left"><Link href={`/research/${pid}/companies/${c.ticker}`} className="font-medium text-ink hover:text-cyan-200">{c.ticker}</Link></td>
+                    <td className="py-2 text-left"><Link href={`/research/${pid}/companies/${c.ticker}`} className="font-medium text-ink hover:text-accent">{c.ticker}</Link></td>
                     <td className="text-ink-muted">{fmt.usd(c.valuation?.rawPrice)}</td>
                     <td className={textTone(down)}>{fmt.pct(down)}</td>
                     <td className={textTone(get("base"))}>{fmt.pct(get("base"))}</td>
                     <td className={textTone(up)}>{fmt.pct(up)}</td>
                     <td className="text-ink">{up !== null && down !== null && down < 0 ? `${(up / Math.abs(down)).toFixed(2)}×` : "n/m"}</td>
-                    <td className="pl-3 text-left text-[11.5px] text-ink-soft"><Link href={`/research/${pid}/companies/${c.ticker}`} className="text-cyan-200">set with justification →</Link></td>
+                    <td className="pl-3 text-left text-[11.5px] text-ink-soft"><Link href={`/research/${pid}/companies/${c.ticker}`} className="text-accent">set with justification →</Link></td>
                   </tr>
                 );
               })}
@@ -129,7 +129,7 @@ export default function ThesisPage({ params, searchParams }: { params: { project
                     <td className="py-1 text-left text-ink-muted">{a}</td>
                     {symbols.map((b) => {
                       const v = a === b ? 1 : corr(a, b);
-                      return <td key={b} className="num" style={{ background: v === null ? undefined : `rgba(34,211,238,${Math.max(0, v) * 0.35})` }}>{v === null ? "—" : v.toFixed(2)}</td>;
+                      return <td key={b} className="num" style={{ background: v === null ? undefined : `rgba(29,79,145,${Math.max(0, v) * 0.35})` }}>{v === null ? "—" : v.toFixed(2)}</td>;
                     })}
                   </tr>
                 ))}
@@ -147,13 +147,13 @@ export default function ThesisPage({ params, searchParams }: { params: { project
         <Panel eyebrow="Historical thesis review" title="Was the outcome research insight or market movement?">
           <form className="mb-3 flex flex-wrap items-end gap-2 text-[12px]" method="get">
             <label className="text-ink-soft">Thesis adopted on
-              <input type="date" name="since" defaultValue={since} max={lastDate} className="ml-2 h-8 rounded-md border border-line bg-white/[0.04] px-2 text-ink" />
+              <input type="date" name="since" defaultValue={since} max={lastDate} className="ml-2 h-8 rounded-md border border-line bg-ink/[0.04] px-2 text-ink" />
             </label>
-            <button className="h-8 rounded-md border border-cyan-300/35 bg-cyan-300/[0.08] px-3 text-cyan-100">Review</button>
+            <button className="h-8 rounded-md border border-accent/35 bg-accent/[0.08] px-3 text-accent">Review</button>
           </form>
           {illustrative && <div className="mb-2"><Note tone="warn">No thesis adoption date set. Showing the last six months to illustrate the method; this is not a review of a past call.</Note></div>}
           <table className="w-full text-right text-[12px]">
-            <thead className="text-[10.5px] uppercase tracking-[0.12em] text-ink-soft"><tr><th className="py-1 text-left">Since {since}</th><th>Total</th><th>Market</th><th>Sector</th><th>Residual</th></tr></thead>
+            <thead className="text-[10.5px] text-ink-soft"><tr><th className="py-1 text-left">Since {since}</th><th>Total</th><th>Market</th><th>Sector</th><th>Residual</th></tr></thead>
             <tbody className="divide-soft">
               {review.map(({ c, d }) => (
                 <tr key={c.ticker}>
@@ -178,9 +178,9 @@ export default function ThesisPage({ params, searchParams }: { params: { project
 
       <Panel eyebrow="Separation of performance types" title="Backtest vs simulated vs actual">
         <ul className="grid gap-2 text-[12px] text-ink-muted md:grid-cols-3">
-          <li className="rounded-lg border border-line bg-white/[0.02] p-3"><span className="font-medium text-ink">Backtested</span>: strategy runs on history (company quant lens, Strategy Lab). In-sample; shown with a multiple-testing haircut.</li>
-          <li className="rounded-lg border border-line bg-white/[0.02] p-3"><span className="font-medium text-ink">Simulated</span>: paper observation and the Trade Simulator. Forward but hypothetical; no orders are placed.</li>
-          <li className="rounded-lg border border-line bg-white/[0.02] p-3"><span className="font-medium text-ink">Actual trades</span>: not supported. FactorForge has no order execution and records no real-money positions.</li>
+          <li className="rounded-lg border border-line bg-ink/[0.02] p-3"><span className="font-medium text-ink">Backtested</span>: strategy runs on history (company quant lens, Strategy Lab). In-sample; shown with a multiple-testing haircut.</li>
+          <li className="rounded-lg border border-line bg-ink/[0.02] p-3"><span className="font-medium text-ink">Simulated</span>: paper observation and the Trade Simulator. Forward but hypothetical; no orders are placed.</li>
+          <li className="rounded-lg border border-line bg-ink/[0.02] p-3"><span className="font-medium text-ink">Actual trades</span>: not supported. FactorForge has no order execution and records no real-money positions.</li>
         </ul>
       </Panel>
     </div>

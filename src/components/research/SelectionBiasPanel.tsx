@@ -31,13 +31,13 @@ export default function SelectionBiasPanel({ rows, title = "Selection-bias check
             <Term term="deflated-sharpe">deflated Sharpe</Term> is the probability the edge is real after that haircut.
           </p>
         </div>
-        <span className={`chip ${survivors > 0 ? "border-emerald-400/35 bg-emerald-500/10 text-emerald-200" : "border-amber-300/35 bg-amber-300/10 text-amber-100"}`}>
+        <span className={`chip ${survivors > 0 ? "border-emerald-600/35 bg-emerald-500/10 text-emerald-700" : "border-amber-600/35 bg-amber-300/10 text-amber-800"}`}>
           {survivors} of {rows.length} clear {Math.round(DSR_CONFIDENCE * 100)}%
         </span>
       </div>
       <div className="mt-4 overflow-x-auto">
         <table className="w-full min-w-[640px] text-left text-[12.5px]">
-          <thead className="text-[10px] uppercase tracking-[0.12em] text-ink-soft">
+          <thead className="text-[10px] text-ink-soft">
             <tr className="border-b border-line">
               <th className="py-2 pr-3 font-semibold">Strategy</th>
               <th className="py-2 pr-3 font-semibold">Showcase pick</th>
@@ -58,7 +58,7 @@ export default function SelectionBiasPanel({ rows, title = "Selection-bias check
                 <td className="num py-2.5 pr-3 text-right text-ink">{num(summary.sharpe)}</td>
                 <td className="num py-2.5 pr-3 text-right text-ink-muted">{num(summary.luckThreshold)}</td>
                 <td className="num py-2.5 pr-3 text-right text-ink-muted">{prob(summary.psr)}</td>
-                <td className={`num py-2.5 pr-3 text-right font-semibold ${summary.survives ? "text-emerald-300" : "text-amber-200"}`}>{prob(summary.dsr)}</td>
+                <td className={`num py-2.5 pr-3 text-right font-semibold ${summary.survives ? "text-emerald-700" : "text-amber-700"}`}>{prob(summary.dsr)}</td>
                 <td className="py-2.5 text-ink-muted">{summary.survives ? "Edge survives the haircut" : "Not distinguishable from luck"}</td>
               </tr>
             ))}

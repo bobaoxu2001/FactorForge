@@ -31,8 +31,8 @@ describe("signed tones", () => {
     expect(signedTone(0.12)).toBe("positive");
     expect(signedTone(0)).toBe("positive");
     expect(signedTone(-0.001)).toBe("negative");
-    expect(signedText(0.12)).toBe("text-emerald-300");
-    expect(signedText(-0.12)).toBe("text-rose-300");
+    expect(signedText(0.12)).toBe("text-emerald-700");
+    expect(signedText(-0.12)).toBe("text-rose-700");
   });
 
   it("falls back to neutral for degenerate values", () => {

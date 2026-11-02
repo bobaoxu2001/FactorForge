@@ -51,7 +51,7 @@ export default function AuthForm({ mode, action, nextPath, protectedArea }: Prop
           <form action={formAction} className="mt-6 space-y-4">
             <input type="hidden" name="next" value={safeNext} />
             <label className="block">
-              <span className="text-[11px] uppercase tracking-[0.18em] text-ink-soft">Username</span>
+              <span className="text-[11px] text-ink-soft">Username</span>
               <input
                 name="username"
                 type="text"
@@ -59,23 +59,23 @@ export default function AuthForm({ mode, action, nextPath, protectedArea }: Prop
                 required
                 minLength={3}
                 maxLength={32}
-                className="mt-1 block w-full rounded-xl border border-line bg-white/[0.04] px-3 py-2 text-[13px] text-ink focus:border-blue-400/45 focus:outline-none"
+                className="mt-1 block w-full rounded-md border border-line bg-ink/[0.04] px-3 py-2 text-[13px] text-ink focus:border-accent/45 focus:outline-none"
               />
             </label>
             <label className="block">
-              <span className="text-[11px] uppercase tracking-[0.18em] text-ink-soft">Password</span>
+              <span className="text-[11px] text-ink-soft">Password</span>
               <input
                 name="password"
                 type="password"
                 autoComplete={mode === "sign-in" ? "current-password" : "new-password"}
                 required
                 minLength={8}
-                className="mt-1 block w-full rounded-xl border border-line bg-white/[0.04] px-3 py-2 text-[13px] text-ink focus:border-blue-400/45 focus:outline-none"
+                className="mt-1 block w-full rounded-md border border-line bg-ink/[0.04] px-3 py-2 text-[13px] text-ink focus:border-accent/45 focus:outline-none"
               />
             </label>
 
             {state.error && (
-              <div className="rounded-xl border border-rose-300/35 bg-rose-400/10 px-3 py-2 text-[12.5px] text-rose-100">
+              <div className="rounded-md border border-rose-600/35 bg-rose-400/10 px-3 py-2 text-[12.5px] text-rose-800">
                 {state.error}
               </div>
             )}
@@ -85,7 +85,7 @@ export default function AuthForm({ mode, action, nextPath, protectedArea }: Prop
 
           <div className="mt-6 text-[12.5px] text-ink-muted">
             {copy.altPrompt}{" "}
-            <Link href={altHref} className="text-cyan-200 hover:text-cyan-100">
+            <Link href={altHref} className="text-accent hover:text-accent">
               {copy.altCta}
             </Link>
           </div>
@@ -106,7 +106,7 @@ function SubmitButton({ label }: { label: string }) {
     <button
       type="submit"
       disabled={pending}
-      className="flex h-11 w-full items-center justify-center rounded-xl border border-cyan-300/35 bg-cyan-300/10 text-[13px] font-semibold text-cyan-100 transition-colors hover:bg-cyan-300/20 disabled:opacity-50"
+      className="flex h-11 w-full items-center justify-center rounded-md border border-accent/35 bg-accent/10 text-[13px] font-semibold text-accent transition-colors hover:bg-accent/20 disabled:opacity-50"
     >
       {pending ? "Working…" : label}
     </button>

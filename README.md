@@ -631,7 +631,7 @@ Research-platform roadmap (details in [docs/PROJECT_AUDIT.md](docs/PROJECT_AUDIT
 3. Server-side, multi-user research store behind the existing workspace reducer.
 4. A second industry project (e.g., software via XBRL `RevenueRemainingPerformanceObligation`) to prove the config-driven design.
 5. Optionally gate radar admission on the deflated Sharpe instead of only showing it.
-6. Light theme and print-optimised memo layout.
+6. Optional dark mode and a print-optimised memo layout.
 
 
 The current roadmap is tracked in [ROADMAP.md](ROADMAP.md). Near-term maintainer backlog notes live in [docs/maintainer_backlog](docs/maintainer_backlog/).
@@ -654,7 +654,7 @@ The current roadmap is tracked in [ROADMAP.md](ROADMAP.md). Near-term maintainer
 - **Research workspace is per-browser.** Notes, memo edits and probabilities live in localStorage, with JSON export/import. There is no multi-user, server-side research store yet.
 - **Copilot quality depends on the LLM key.** Without a working key (the local key currently returns HTTP 402 "insufficient balance"), answers are deterministic evidence listings and hypothesis tests rather than synthesised prose.
 - **Lead-lag is exploratory.** A single train/holdout split checks whether the chosen lag holds on later months, but there is no rolling-origin forecasting test, and YoY overlap means even the holdout has few independent observations.
-- **Dark theme only.** The token system predates the research layer; a light theme is on the roadmap.
+- **Light theme only.** The interface is styled as a printed research note (paper-white pages, Newsreader headlines, Public Sans body, numbered exhibits with source lines). There is no dark mode yet.
 
 **Quantitative lab**
 

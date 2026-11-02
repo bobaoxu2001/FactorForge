@@ -38,22 +38,22 @@ export default function DcfCalculator({ defaults, price }: { defaults: DcfInputs
               step={f.pct ? 0.5 : 1}
               value={f.pct ? Number(((inputs[f.key] as number) * 100).toFixed(2)) : (inputs[f.key] as number)}
               onChange={(e) => set(f, e.target.value)}
-              className="h-8 rounded-md border border-line bg-white/[0.04] px-2 text-right text-ink focus:border-cyan-300/50 focus:outline-none"
+              className="h-8 rounded-md border border-line bg-ink/[0.04] px-2 text-right text-ink focus:border-accent/50 focus:outline-none"
             />
           </label>
         ))}
-        <button onClick={() => setInputs(defaults)} className="text-[11.5px] text-cyan-200 hover:text-white">Reset to data-derived defaults</button>
+        <button onClick={() => setInputs(defaults)} className="text-[11.5px] text-accent hover:text-ink">Reset to data-derived defaults</button>
       </div>
       <div className="space-y-2">
         <div className="grid grid-cols-3 gap-2">
-          <div className="stat-tile !p-3"><div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft">Value / share</div><div className="num mt-1 text-[17px] font-semibold text-ink">{result.perShare === null ? "n/m" : fmt.usd(result.perShare)}</div></div>
-          <div className="stat-tile !p-3"><div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft">vs price</div><div className={`num mt-1 text-[17px] font-semibold ${textTone(implied)}`}>{fmt.pct(implied)}</div></div>
-          <div className="stat-tile !p-3"><div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft">Terminal share of EV</div><div className="num mt-1 text-[17px] font-semibold text-ink">{fmt.pctPlain(result.terminalShare, 0)}</div></div>
+          <div className="stat-tile !p-3"><div className="text-[10px] text-ink-soft">Value / share</div><div className="num mt-1 text-[17px] font-semibold text-ink">{result.perShare === null ? "n/m" : fmt.usd(result.perShare)}</div></div>
+          <div className="stat-tile !p-3"><div className="text-[10px] text-ink-soft">vs price</div><div className={`num mt-1 text-[17px] font-semibold ${textTone(implied)}`}>{fmt.pct(implied)}</div></div>
+          <div className="stat-tile !p-3"><div className="text-[10px] text-ink-soft">Terminal share of EV</div><div className="num mt-1 text-[17px] font-semibold text-ink">{fmt.pctPlain(result.terminalShare, 0)}</div></div>
         </div>
-        {result.warnings.map((w) => <div key={w} className="rounded-lg border border-amber-300/25 bg-amber-300/[0.06] px-3 py-1.5 text-[11.5px] text-amber-50/90">{w}</div>)}
+        {result.warnings.map((w) => <div key={w} className="rounded-lg border border-amber-600/25 bg-amber-300/[0.06] px-3 py-1.5 text-[11.5px] text-amber-800/90">{w}</div>)}
         <div className="overflow-x-auto">
           <table className="w-full text-right text-[11.5px]">
-            <thead className="text-[10px] uppercase tracking-[0.12em] text-ink-soft"><tr><th className="py-1 text-left">Year</th><th>Revenue</th><th>EBIT</th><th>NOPAT</th><th>Reinvest</th><th>FCFF</th><th>PV</th></tr></thead>
+            <thead className="text-[10px] text-ink-soft"><tr><th className="py-1 text-left">Year</th><th>Revenue</th><th>EBIT</th><th>NOPAT</th><th>Reinvest</th><th>FCFF</th><th>PV</th></tr></thead>
             <tbody className="divide-soft text-ink-muted">
               {result.projections.map((p) => (
                 <tr key={p.year}><td className="py-1 text-left">{p.year}</td><td>{fmt.usdM(p.revenue)}</td><td>{fmt.usdM(p.ebit)}</td><td>{fmt.usdM(p.nopat)}</td><td>{fmt.usdM(p.reinvestment)}</td><td>{fmt.usdM(p.fcff)}</td><td>{fmt.usdM(p.pv)}</td></tr>

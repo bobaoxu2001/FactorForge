@@ -14,7 +14,7 @@ export default function CopilotPage({ params }: { params: { projectId: string } 
     <div className="space-y-4">
       <Panel eyebrow="AI research copilot" title="A disciplined analyst, not a stock picker">
         <p className="max-w-4xl text-[12.5px] leading-relaxed text-ink-muted">
-          The copilot retrieves this project&apos;s evidence and answers only from it. With <code className="text-cyan-200">DEEPSEEK_API_KEY</code> set, a model writes the answer and a validator strips any fact that does not cite retrieved evidence. Without a key, deterministic handlers answer from the same evidence. Either way the output is AI-generated work product and never becomes evidence.
+          The copilot retrieves this project&apos;s evidence and answers only from it. With <code className="text-accent">DEEPSEEK_API_KEY</code> set, a model writes the answer and a validator strips any fact that does not cite retrieved evidence. Without a key, deterministic handlers answer from the same evidence. Either way the output is AI-generated work product and never becomes evidence.
         </p>
       </Panel>
       <CopilotPanel

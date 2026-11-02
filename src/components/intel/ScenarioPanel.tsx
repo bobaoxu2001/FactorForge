@@ -49,7 +49,7 @@ export default function ScenarioPanel({ ticker, scenarios, price }: { ticker: st
     <div className="space-y-3">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[680px] text-left text-[12.5px]">
-          <thead className="text-[10.5px] uppercase tracking-[0.14em] text-ink-soft">
+          <thead className="text-[10.5px] text-ink-soft">
             <tr><th className="py-2 pr-3">Case</th><th className="py-2 pr-3">NTM revenue growth</th><th className="py-2 pr-3">Op. margin</th><th className="py-2 pr-3">EV/EBITDA</th><th className="py-2 pr-3">Implied value / share</th><th className="py-2 pr-3">vs ${price.toFixed(2)}</th><th className="py-2">Probability %</th></tr>
           </thead>
           <tbody className="divide-soft">
@@ -65,7 +65,7 @@ export default function ScenarioPanel({ ticker, scenarios, price }: { ticker: st
                   <td className="py-2 pr-3 text-ink">{s.perShare === null ? "n/m" : fmt.usd(s.perShare)}</td>
                   <td className={`py-2 pr-3 ${textTone(s.impliedReturn)}`}>{fmt.pct(s.impliedReturn)}</td>
                   <td className="py-2">
-                    <input aria-label={`${c} probability`} inputMode="numeric" value={probs[c]} onChange={(e) => setProbs({ ...probs, [c]: e.target.value.replace(/[^0-9.]/g, "") })} placeholder="—" className="h-8 w-16 rounded-md border border-line bg-white/[0.04] px-2 text-[12.5px] text-ink focus:border-cyan-300/50 focus:outline-none" />
+                    <input aria-label={`${c} probability`} inputMode="numeric" value={probs[c]} onChange={(e) => setProbs({ ...probs, [c]: e.target.value.replace(/[^0-9.]/g, "") })} placeholder="—" className="h-8 w-16 rounded-md border border-line bg-ink/[0.04] px-2 text-[12.5px] text-ink focus:border-accent/50 focus:outline-none" />
                   </td>
                 </tr>
               );
@@ -77,15 +77,15 @@ export default function ScenarioPanel({ ticker, scenarios, price }: { ticker: st
         {scenarios.map((s) => <li key={s.case}><span className="capitalize text-ink-muted">{s.case}:</span> {s.rationale}</li>)}
       </ul>
       <div className="grid gap-2 sm:grid-cols-3">
-        <div className="stat-tile !p-3"><div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft">Upside to bull</div><div className={`num mt-1 text-[17px] font-semibold ${textTone(upside)}`}>{fmt.pct(upside)}</div></div>
-        <div className="stat-tile !p-3"><div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft">Downside to bear</div><div className={`num mt-1 text-[17px] font-semibold ${textTone(downside)}`}>{fmt.pct(downside)}</div></div>
-        <div className="stat-tile !p-3"><div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft">Upside / downside</div><div className="num mt-1 text-[17px] font-semibold text-ink">{upside !== null && downside !== null && downside < 0 ? `${(upside / Math.abs(downside)).toFixed(2)}×` : "n/m"}</div></div>
+        <div className="stat-tile !p-3"><div className="text-[10px] text-ink-soft">Upside to bull</div><div className={`num mt-1 text-[17px] font-semibold ${textTone(upside)}`}>{fmt.pct(upside)}</div></div>
+        <div className="stat-tile !p-3"><div className="text-[10px] text-ink-soft">Downside to bear</div><div className={`num mt-1 text-[17px] font-semibold ${textTone(downside)}`}>{fmt.pct(downside)}</div></div>
+        <div className="stat-tile !p-3"><div className="text-[10px] text-ink-soft">Upside / downside</div><div className="num mt-1 text-[17px] font-semibold text-ink">{upside !== null && downside !== null && downside < 0 ? `${(upside / Math.abs(downside)).toFixed(2)}×` : "n/m"}</div></div>
       </div>
-      <div className="rounded-xl border border-line bg-white/[0.02] p-3">
-        <label className="block text-[11px] uppercase tracking-[0.14em] text-ink-soft" htmlFor={`just-${ticker}`}>Why these probabilities? (required before any expected return is shown)</label>
-        <textarea id={`just-${ticker}`} value={justification} onChange={(e) => setJustification(e.target.value)} rows={2} className="mt-1 w-full rounded-lg border border-line bg-white/[0.04] p-2 text-[12.5px] text-ink focus:border-cyan-300/50 focus:outline-none" placeholder="e.g. Three shipper checks point to flat 2027 bid rates; fuel is the main swing factor." />
+      <div className="rounded-md border border-line bg-ink/[0.02] p-3">
+        <label className="block text-[11px] text-ink-soft" htmlFor={`just-${ticker}`}>Why these probabilities? (required before any expected return is shown)</label>
+        <textarea id={`just-${ticker}`} value={justification} onChange={(e) => setJustification(e.target.value)} rows={2} className="mt-1 w-full rounded-lg border border-line bg-ink/[0.04] p-2 text-[12.5px] text-ink focus:border-accent/50 focus:outline-none" placeholder="e.g. Three shipper checks point to flat 2027 bid rates; fuel is the main swing factor." />
         <div className="mt-2 flex flex-wrap items-center gap-3">
-          <button onClick={save} className="rounded-lg border border-cyan-300/35 bg-cyan-300/[0.08] px-3 py-1.5 text-[12px] text-cyan-100 hover:bg-cyan-300/[0.15]">Save to workspace</button>
+          <button onClick={save} className="rounded-lg border border-accent/35 bg-accent/[0.08] px-3 py-1.5 text-[12px] text-accent hover:bg-accent/[0.15]">Save to workspace</button>
           <span className="text-[12px] text-ink-muted">
             Probabilities sum to {Math.round(weighting.probabilitySum * 100)}%.{" "}
             {weighting.complete && justification.trim().length >= 20 ? (

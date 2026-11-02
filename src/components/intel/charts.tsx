@@ -19,10 +19,10 @@ const formatters: Record<ValueFormat, (v: number) => string> = {
 };
 
 const TOOLTIP_STYLE = {
-  background: "rgba(5,13,25,0.96)",
-  border: "1px solid rgba(120,149,184,0.24)",
+  background: "#ffffff",
+  border: "1px solid #dde1e7",
   borderRadius: 12,
-  color: "#eef4ff",
+  color: "#18202c",
   fontSize: 12,
 };
 
@@ -59,7 +59,7 @@ export function TimeSeriesChart({
   caption?: string;
 }) {
   const mounted = useMounted();
-  if (data.length === 0) return <div className="grid place-items-center rounded-xl border border-dashed border-line text-[12px] text-ink-soft" style={{ height }}>No data</div>;
+  if (data.length === 0) return <div className="grid place-items-center rounded-md border border-dashed border-line text-[12px] text-ink-soft" style={{ height }}>No data</div>;
   const left = formatters[leftFormat];
   const right = rightFormat ? formatters[rightFormat] : left;
   return (
@@ -76,14 +76,14 @@ export function TimeSeriesChart({
         {mounted ? (
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={data} margin={{ top: 4, right: rightFormat ? 4 : 8, bottom: 0, left: 0 }}>
-              <CartesianGrid stroke="rgba(120,149,184,0.12)" vertical={false} />
-              <XAxis dataKey="date" tick={{ fontSize: 10.5, fill: "#69778d" }} axisLine={false} tickLine={false} minTickGap={36} />
-              <YAxis yAxisId="left" tick={{ fontSize: 10.5, fill: "#69778d" }} axisLine={false} tickLine={false} width={58} tickFormatter={left} domain={["auto", "auto"]} />
-              {rightFormat && <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10.5, fill: "#69778d" }} axisLine={false} tickLine={false} width={58} tickFormatter={right} domain={["auto", "auto"]} />}
-              {zeroLine && <ReferenceLine yAxisId="left" y={0} stroke="rgba(238,244,255,0.25)" />}
+              <CartesianGrid stroke="#e6e9ee" vertical={false} />
+              <XAxis dataKey="date" tick={{ fontSize: 10.5, fill: "#677184" }} axisLine={false} tickLine={false} minTickGap={36} />
+              <YAxis yAxisId="left" tick={{ fontSize: 10.5, fill: "#677184" }} axisLine={false} tickLine={false} width={58} tickFormatter={left} domain={["auto", "auto"]} />
+              {rightFormat && <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10.5, fill: "#677184" }} axisLine={false} tickLine={false} width={58} tickFormatter={right} domain={["auto", "auto"]} />}
+              {zeroLine && <ReferenceLine yAxisId="left" y={0} stroke="rgba(24,32,44,0.25)" />}
               <Tooltip
                 contentStyle={TOOLTIP_STYLE}
-                labelStyle={{ color: "#a8b3c5", fontSize: 11 }}
+                labelStyle={{ color: "#475162", fontSize: 11 }}
                 formatter={(value, name) => {
                   const spec = series.find((s) => s.label === name);
                   const f = spec?.axis === "right" ? right : left;
@@ -117,14 +117,14 @@ export function LagBars({ lags, best, height = 150 }: { lags: Array<{ lag: numbe
       {mounted ? (
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
-            <CartesianGrid stroke="rgba(120,149,184,0.12)" vertical={false} />
-            <XAxis dataKey="lag" tick={{ fontSize: 10, fill: "#69778d" }} axisLine={false} tickLine={false} />
-            <YAxis domain={[-1, 1]} tick={{ fontSize: 10, fill: "#69778d" }} axisLine={false} tickLine={false} width={34} />
-            <ReferenceLine y={0} stroke="rgba(238,244,255,0.25)" />
+            <CartesianGrid stroke="#e6e9ee" vertical={false} />
+            <XAxis dataKey="lag" tick={{ fontSize: 10, fill: "#677184" }} axisLine={false} tickLine={false} />
+            <YAxis domain={[-1, 1]} tick={{ fontSize: 10, fill: "#677184" }} axisLine={false} tickLine={false} width={34} />
+            <ReferenceLine y={0} stroke="rgba(24,32,44,0.25)" />
             <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => (typeof v === "number" ? v.toFixed(2) : String(v))} />
             <Bar dataKey="correlation" name="Correlation" radius={[2, 2, 0, 0]}>
               {data.map((d) => (
-                <Cell key={d.lag} fill={d.correlation >= 0 ? (d.isBest ? "#22d3ee" : "rgba(34,211,238,0.45)") : d.isBest ? "#fb7185" : "rgba(251,113,133,0.45)"} />
+                <Cell key={d.lag} fill={d.correlation >= 0 ? (d.isBest ? "#1d4f91" : "rgba(29,79,145,0.45)") : d.isBest ? "#b42318" : "rgba(180,35,24,0.45)"} />
               ))}
             </Bar>
           </BarChart>
@@ -137,7 +137,7 @@ export function LagBars({ lags, best, height = 150 }: { lags: Array<{ lag: numbe
 }
 
 /** Tiny inline trend line for tiles. */
-export function Sparkline({ values, color = "#22d3ee", height = 34 }: { values: Array<number | null>; color?: string; height?: number }) {
+export function Sparkline({ values, color = "#1d4f91", height = 34 }: { values: Array<number | null>; color?: string; height?: number }) {
   const clean = values.map((v, i) => ({ i, v })).filter((p): p is { i: number; v: number } => p.v !== null && Number.isFinite(p.v));
   if (clean.length < 2) return <div style={{ height }} />;
   const min = Math.min(...clean.map((p) => p.v));
@@ -148,7 +148,7 @@ export function Sparkline({ values, color = "#22d3ee", height = 34 }: { values: 
   const zeroY = min < 0 && max > 0 ? height - 2 - ((0 - min) / span) * (height - 4) : null;
   return (
     <svg viewBox={`0 0 ${w} ${height}`} className="w-full" style={{ height }} preserveAspectRatio="none" aria-hidden="true">
-      {zeroY !== null && <line x1="0" x2={w} y1={zeroY} y2={zeroY} stroke="rgba(238,244,255,0.18)" strokeDasharray="3 3" />}
+      {zeroY !== null && <line x1="0" x2={w} y1={zeroY} y2={zeroY} stroke="rgba(24,32,44,0.18)" strokeDasharray="3 3" />}
       <path d={path} fill="none" stroke={color} strokeWidth="1.6" vectorEffect="non-scaling-stroke" />
     </svg>
   );

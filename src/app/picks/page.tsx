@@ -19,9 +19,9 @@ export const metadata: Metadata = {
 };
 
 const TIER_STYLES: Record<PickTier, string> = {
-  "prime watch": "border-emerald-400/35 bg-emerald-500/12 text-emerald-200",
-  constructive: "border-blue-400/35 bg-blue-400/10 text-blue-200",
-  monitor: "border-line bg-white/[0.05] text-ink-muted",
+  "prime watch": "border-emerald-600/35 bg-emerald-500/12 text-emerald-700",
+  constructive: "border-accent/35 bg-accent/10 text-accent",
+  monitor: "border-line bg-ink/[0.05] text-ink-muted",
 };
 
 export default async function PicksPage() {
@@ -54,7 +54,7 @@ export default async function PicksPage() {
       <section className="card p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">Screen summary</div>
+            <div className="text-[11px] text-ink-soft">Screen summary</div>
             <h2 className="mt-1 text-[20px] font-semibold text-ink">Cross-sectional rank · {regime} regime</h2>
             <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-muted">{verdict}</p>
           </div>
@@ -83,10 +83,10 @@ export default async function PicksPage() {
 
       <section className="card p-5">
         <div className="flex items-center justify-between gap-3">
-          <div className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-100/75">
+          <div className="inline-flex items-center gap-2 text-[11px] font-semibold text-accent/75">
             <Sparkles className="h-4 w-4" /> Model reading
           </div>
-          <span className="chip border-line bg-white/[0.04] text-ink-soft">
+          <span className="chip border-line bg-ink/[0.04] text-ink-soft">
             {stockPickNote.source === "deepseek" ? "LLM note · numbers computed in code" : "Deterministic template"}
           </span>
         </div>
@@ -125,7 +125,7 @@ export default async function PicksPage() {
                   <span className="num w-8 text-right text-[12px] text-ink-soft">#{pick.rank}</span>
                   <span className="text-[14px] font-semibold text-ink">{pick.symbol}</span>
                   <span className="text-[12px] text-ink-muted">{pick.name}</span>
-                  <span className="chip border-line bg-white/[0.04] text-ink-soft">{pick.sector}</span>
+                  <span className="chip border-line bg-ink/[0.04] text-ink-soft">{pick.sector}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className={`chip ${TIER_STYLES[pick.tier]}`}>{pick.tier}</span>
@@ -154,16 +154,16 @@ function PickCard({ pick }: { pick: StockPick }) {
     <article className="card p-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="grid h-12 w-12 place-items-center rounded-2xl border border-cyan-300/30 bg-cyan-300/10 text-[13px] font-semibold text-cyan-100">
+          <div className="grid h-12 w-12 place-items-center rounded-lg border border-accent/30 bg-accent/10 text-[13px] font-semibold text-accent">
             #{pick.rank}
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-[18px] font-semibold text-ink">{pick.symbol}</span>
               <span className="text-[13px] text-ink-muted">{pick.name}</span>
-              <span className="chip border-line bg-white/[0.04] text-ink-soft">{pick.sector}</span>
+              <span className="chip border-line bg-ink/[0.04] text-ink-soft">{pick.sector}</span>
               {pick.isFallbackData && (
-                <span className="chip border-amber-300/30 bg-amber-300/10 text-amber-200">fallback data</span>
+                <span className="chip border-amber-600/30 bg-amber-300/10 text-amber-700">fallback data</span>
               )}
             </div>
             <div className="mt-1.5 flex flex-wrap items-center gap-2">
@@ -177,7 +177,7 @@ function PickCard({ pick }: { pick: StockPick }) {
           </div>
         </div>
         <div className="text-right">
-          <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-soft">Composite</div>
+          <div className="text-[10.5px] text-ink-soft">Composite</div>
           <div className="num text-[26px] font-semibold text-ink">{pick.compositeScore}<span className="text-[13px] text-ink-soft">/100</span></div>
         </div>
       </div>
@@ -192,9 +192,9 @@ function PickCard({ pick }: { pick: StockPick }) {
               </span>
               <span className="num text-[12px] text-ink">{Math.round(component.score)}</span>
             </div>
-            <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+            <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-ink/[0.06]">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-cyan-400/80 to-blue-400/80"
+                className="h-full rounded-full bg-gradient-to-r from-accent/80 to-accent/80"
                 style={{ width: `${Math.round(component.score)}%` }}
               />
             </div>
@@ -204,21 +204,21 @@ function PickCard({ pick }: { pick: StockPick }) {
       </div>
 
       {pick.fundamentals && (
-        <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 rounded-2xl border border-line bg-white/[0.03] px-3.5 py-2.5">
+        <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 rounded-lg border border-line bg-ink/[0.03] px-3.5 py-2.5">
           <FundamentalStat label="Trailing P/E" value={ratio(pick.fundamentals.trailingPE)} />
           <FundamentalStat label="P/B" value={ratio(pick.fundamentals.priceToBook)} />
           <FundamentalStat label="ROE" value={pctOf(pick.fundamentals.returnOnEquity)} />
           <FundamentalStat label="Op margin" value={pctOf(pick.fundamentals.operatingMargin)} />
           <FundamentalStat label="Rev growth" value={pctOf(pick.fundamentals.revenueGrowthYoY)} />
           <FundamentalStat label="Div yield" value={pctOf(pick.fundamentals.dividendYield)} />
-          <span className="ml-auto text-[10.5px] uppercase tracking-[0.14em] text-ink-soft">
+          <span className="ml-auto text-[10.5px] text-ink-soft">
             {pick.fundamentals.source === "yahoo" ? "Yahoo quoteSummary" : `snapshot · ${pick.fundamentals.asOf}`}
           </span>
         </div>
       )}
 
       {pick.caveats.length > 0 && (
-        <div className="mt-4 rounded-2xl border border-amber-300/18 bg-amber-300/[0.05] p-3 text-[12px] leading-relaxed text-amber-100/85">
+        <div className="mt-4 rounded-lg border border-amber-600/18 bg-amber-300/[0.05] p-3 text-[12px] leading-relaxed text-amber-800/85">
           <span className="font-semibold">Caveats:</span> {pick.caveats.join(" ")}
         </div>
       )}

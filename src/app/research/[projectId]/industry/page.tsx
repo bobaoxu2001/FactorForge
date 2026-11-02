@@ -19,12 +19,12 @@ export default function IndustryPage({ params }: { params: { projectId: string }
 
   return (
     <div className="space-y-5">
-      <Panel eyebrow="Stage 01 · Industry mapping" title="U.S. freight value chain">
+      <Panel eyebrow="Stage 01 · Industry mapping" title="U.S. freight value chain" source="Company 10-K filings; links marked verified quote the filing text.">
         <p className="mb-3 max-w-4xl text-[12.5px] leading-relaxed text-ink-muted">
           How freight moves from shippers to capacity, who sits in between, and which inputs drive cost. A relationship is
-          <span className="text-emerald-300"> verified</span> only when a sentence in the company&apos;s latest 10-K supports it ({counts.verified}). The rest are
-          <span className="text-amber-200"> inferred</span> from industry structure ({counts.inferred}) or
-          <span className="text-slate-200"> hypothetical</span> pending data ({counts.hypothetical}).
+          <span className="text-emerald-700"> verified</span> only when a sentence in the company&apos;s latest 10-K supports it ({counts.verified}). The rest are
+          <span className="text-amber-700"> inferred</span> from industry structure ({counts.inferred}) or
+          <span className="text-ink-soft"> hypothetical</span> pending data ({counts.hypothetical}).
         </p>
         <ValueChainGraph projectId={pid} nodes={view.valueChain.nodes} relationships={view.valueChain.relationships} evidence={evidence} />
       </Panel>
@@ -43,7 +43,7 @@ export default function IndustryPage({ params }: { params: { projectId: string }
       <Panel eyebrow="Public peer group" title="Companies by position in the chain">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[720px] text-left text-[12.5px]">
-            <thead className="text-[10.5px] uppercase tracking-[0.14em] text-ink-soft">
+            <thead className="text-[10.5px] text-ink-soft">
               <tr><th className="py-2 pr-3">Company</th><th className="py-2 pr-3">Business model</th><th className="py-2 pr-3">SIC</th><th className="py-2 pr-3">TTM revenue</th><th className="py-2 pr-3">Disclosed in 10-K</th></tr>
             </thead>
             <tbody className="divide-soft">
@@ -51,7 +51,7 @@ export default function IndustryPage({ params }: { params: { projectId: string }
                 const claims = view.config.excerptClaims.filter((x) => x.ticker === c.ticker);
                 return (
                   <tr key={c.ticker} className="table-row align-top">
-                    <td className="py-2 pr-3"><Link href={`/research/${pid}/companies/${c.ticker}`} className="font-medium text-ink hover:text-cyan-200">{c.ticker}</Link><div className="text-[11px] text-ink-soft">{c.name}</div></td>
+                    <td className="py-2 pr-3"><Link href={`/research/${pid}/companies/${c.ticker}`} className="font-medium text-ink hover:text-accent">{c.ticker}</Link><div className="text-[11px] text-ink-soft">{c.name}</div></td>
                     <td className="py-2 pr-3 text-ink-muted">{c.coverage.businessModel}</td>
                     <td className="py-2 pr-3 text-ink-muted">{c.sicDescription}</td>
                     <td className="py-2 pr-3 text-ink-muted">{fmt.usdB(c.latestTtm?.ttmRevenue)}</td>
@@ -75,7 +75,7 @@ export default function IndustryPage({ params }: { params: { projectId: string }
           <Panel key={cat} eyebrow="Drivers" title={title}>
             <ul className="space-y-2 text-[12px]">
               {[...kpiByCategory(cat), ...(cat === "pricing" ? kpiByCategory("cost") : [])].map((k) => (
-                <li key={k.kpi.id} className="rounded-lg border border-line bg-white/[0.02] px-3 py-2">
+                <li key={k.kpi.id} className="rounded-lg border border-line bg-ink/[0.02] px-3 py-2">
                   <div className="flex justify-between gap-2"><span className="font-medium text-ink">{k.kpi.name}</span><span className="text-ink-muted">{fmt.pct(k.latest?.yoy)} YoY</span></div>
                   <div className="mt-0.5 text-[11px] text-ink-soft">{k.kpi.timing}: {k.kpi.timingRationale}</div>
                 </li>
@@ -88,13 +88,13 @@ export default function IndustryPage({ params }: { params: { projectId: string }
       <Panel eyebrow="Industry catalysts & risks" title="What could change the picture">
         <div className="grid gap-3 md:grid-cols-2">
           <div>
-            <div className="mb-1 text-[11px] uppercase tracking-[0.14em] text-ink-soft">Scheduled data</div>
+            <div className="mb-1 text-[11px] text-ink-soft">Scheduled data</div>
             <ul className="space-y-1 text-[12px] text-ink-muted">
               {view.catalysts.filter((c) => c.kind === "data-release").slice(0, 6).map((c) => <li key={c.label}>{c.date}: {c.label}</li>)}
             </ul>
           </div>
           <div>
-            <div className="mb-1 text-[11px] uppercase tracking-[0.14em] text-ink-soft">Structural risks (from filings)</div>
+            <div className="mb-1 text-[11px] text-ink-soft">Structural risks (from filings)</div>
             <ul className="space-y-1 text-[12px] text-ink-muted">
               {view.marketStructure.find((s) => s.heading.startsWith("Structural"))?.points.map((p) => <li key={p}><CitedText text={p} projectId={pid} /></li>)}
             </ul>

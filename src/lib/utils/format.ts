@@ -34,4 +34,4 @@ export const signedTone = (value: number): "default" | "positive" | "negative" =
   isFiniteNumber(value) ? (value >= 0 ? "positive" : "negative") : "default";
 
 export const signedText = (value: number) =>
-  isFiniteNumber(value) ? (value >= 0 ? "text-emerald-300" : "text-rose-300") : "text-ink";
+  isFiniteNumber(value) ? (value >= 0 ? "text-emerald-700" : "text-rose-700") : "text-ink";

@@ -22,14 +22,14 @@ export default function ProtectedRouteExplainer({ area }: { area?: string }) {
       </div>
       <div className="mt-4 flex flex-wrap gap-2">
         {PUBLIC_LINKS.map(([label, href]) => (
-          <Link key={href} href={href} className="chip border-line bg-white/[0.04] text-ink-muted hover:text-ink">
+          <Link key={href} href={href} className="chip border-line bg-ink/[0.04] text-ink-muted hover:text-ink">
             {label}
           </Link>
         ))}
       </div>
       <Link
         href="/"
-        className="mt-5 inline-flex rounded-xl border border-cyan-300/30 bg-cyan-300/10 px-3 py-2 text-[13px] font-semibold text-cyan-100 hover:bg-cyan-300/15"
+        className="mt-5 inline-flex rounded-md border border-accent/30 bg-accent/10 px-3 py-2 text-[13px] font-semibold text-accent hover:bg-accent/15"
       >
         Continue exploring public demo
       </Link>

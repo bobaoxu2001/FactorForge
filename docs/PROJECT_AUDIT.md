@@ -55,7 +55,7 @@ Next.js 14 App Router (server components, ISR revalidate=3600)
                                  fundamentals-snapshot.json (28 names, as of 2026-07-19)
 ```
 
-Stack: Next 14.2.5 · React 18 · TypeScript strict · Tailwind 3 (dark-only token set) · Recharts 3 · better-sqlite3 · iron-session · bcryptjs · Vitest 4 + jsdom · ESLint (next). Docker standalone image. GitHub Actions: CI (lint/typecheck/test/build) and a weekly fixture-refresh PR.
+Stack: Next 14.2.5 · React 18 · TypeScript strict · Tailwind 3 (dark-only token set at audit time; replaced by a light "research note" theme afterwards) · Recharts 3 · better-sqlite3 · iron-session · bcryptjs · Vitest 4 + jsdom · ESLint (next). Docker standalone image. GitHub Actions: CI (lint/typecheck/test/build) and a weekly fixture-refresh PR.
 
 ---
 
@@ -128,7 +128,7 @@ Missing for the target vision: industry taxonomy and value chain, company financ
 | R6 | Recommendation-style framing ("AI Stock Picks", "prime watch") | Medium (product/compliance) | Page and navigation relabelled "Quant Screen". Internal tier names ("prime watch") are unchanged |
 | R7 | No persistence on Vercel | Medium | Research workspace state is kept client-side (versioned localStorage + JSON export). Private notes never touch the server unless the user explicitly runs an AI analysis |
 | R8 | New user-triggerable LLM endpoint could be abused | Medium (cost/security) | Copilot route is rate-limited, input-size-bounded, and never echoes secrets |
-| R9 | Dark-only theme with hard-coded hex colours in ~40 files | Low (UX) | Light theme deferred; documented |
+| R9 | Dark-only theme with hard-coded hex colours in ~40 files | Low (UX) | **Replaced.** Light "research note" theme driven by Tailwind tokens; chart colours and glows converted; no dark mode now |
 | R10 | CSP allows `'unsafe-inline'` scripts | Low | Documented upstream; nonce CSP is the next step |
 | R11 | In-memory caches are per-instance on serverless | Low | Acceptable; snapshot tier keeps pages deterministic |
 
@@ -168,4 +168,4 @@ Missing for the target vision: industry taxonomy and value chain, company financ
 | **P3** | Primary research: stakeholder map, interview guides, user notes with provenance, MNPI/PII safeguards, note analysis | Done (client-side) |
 | **P4** | Quant integration: company quant lens (strategy runs, multiple-testing haircut, market/sector attribution), scenario valuation, portfolio context | Done for coverage names |
 | **P5** | Featured case study "Is the U.S. Freight Recovery Real?" | Done |
-| Later | Light theme; DB-backed multi-user research projects; more industries with data adapters; earnings-call transcripts (licensing); consensus estimates (needs a licensed provider); gate radar admission on the deflated Sharpe; rolling-origin lead-lag tests | Roadmap |
+| Later | Optional dark mode; DB-backed multi-user research projects; more industries with data adapters; earnings-call transcripts (licensing); consensus estimates (needs a licensed provider); gate radar admission on the deflated Sharpe; rolling-origin lead-lag tests | Roadmap |

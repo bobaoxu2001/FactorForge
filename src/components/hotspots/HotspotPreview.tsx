@@ -25,14 +25,14 @@ export default function HotspotPreview({ theme }: { theme: HotspotTheme }) {
     <section className="card relative overflow-hidden p-6 panel-glow">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-cyan-300/25 bg-cyan-300/[0.07]">
-            <Rocket className="h-5 w-5 text-cyan-200" />
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-md border border-accent/25 bg-accent/[0.07]">
+            <Rocket className="h-5 w-5 text-accent" />
           </div>
           <div>
             <div className="lab-eyebrow">Today&rsquo;s Hotspot</div>
-            <h3 className="mt-1 text-[19px] font-semibold tracking-tight text-white">{theme.title}</h3>
+            <h3 className="mt-1 text-[19px] font-semibold tracking-tight text-ink">{theme.title}</h3>
             <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-              <span className={`chip ${isPrivate ? "border-amber-300/35 bg-amber-400/10 text-amber-100" : "border-cyan-300/30 bg-cyan-400/[0.08] text-cyan-100"}`}>
+              <span className={`chip ${isPrivate ? "border-amber-600/35 bg-amber-400/10 text-amber-800" : "border-accent/30 bg-accent/[0.08] text-accent"}`}>
                 {ASSET_LABEL[theme.assetType]}
               </span>
               <span className={`chip ${accent.chip}`}>
@@ -42,7 +42,7 @@ export default function HotspotPreview({ theme }: { theme: HotspotTheme }) {
             </div>
           </div>
         </div>
-        <Link href="/hotspots" className="inline-flex items-center gap-1 text-[12px] font-medium text-cyan-200/90 transition-colors hover:text-cyan-100">
+        <Link href="/hotspots" className="inline-flex items-center gap-1 text-[12px] font-medium text-accent/90 transition-colors hover:text-accent">
           Open Market Hotspots <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
@@ -51,13 +51,13 @@ export default function HotspotPreview({ theme }: { theme: HotspotTheme }) {
         <div className="space-y-4">
           <p className="text-[13px] leading-relaxed text-ink-muted">{theme.catalystSummary}</p>
           <div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-soft">Scenario impact range (proxy basket)</div>
+            <div className="text-[10px] font-semibold text-ink-soft">Scenario impact range (proxy basket)</div>
             <div className="mt-2 grid grid-cols-3 gap-2">
               {theme.scenario.legs.map((leg) => {
                 const a = SCENARIO_ACCENT[leg.case];
                 return (
-                  <div key={leg.case} className={`rounded-xl border border-line border-l-2 ${a.row} bg-white/[0.025] p-2.5`}>
-                    <div className="text-[9.5px] font-semibold uppercase tracking-[0.1em] text-ink-soft">{leg.case}</div>
+                  <div key={leg.case} className={`rounded-md border border-line border-l-2 ${a.row} bg-ink/[0.025] p-2.5`}>
+                    <div className="text-[9.5px] font-semibold text-ink-soft">{leg.case}</div>
                     <div className={`num mt-1 text-[13px] font-semibold ${a.text}`}>{formatImpactRange(leg.impactLow, leg.impactHigh)}</div>
                   </div>
                 );
@@ -67,7 +67,7 @@ export default function HotspotPreview({ theme }: { theme: HotspotTheme }) {
           <SignalStrengthBar value={theme.signalStrength} sentiment={theme.sentiment} />
         </div>
 
-        <div className="space-y-4 rounded-2xl border border-line bg-white/[0.02] p-4">
+        <div className="space-y-4 rounded-lg border border-line bg-ink/[0.02] p-4">
           <ProxyBasket proxies={theme.proxies} coverage={theme.dataCoverage} title="Proxy basket" />
           <ConfidenceMeter score={theme.scenario.confidence} size="sm" />
           <p className="text-[11px] leading-relaxed text-ink-soft">

@@ -19,8 +19,8 @@ export default function StageNav({ projectId, stages }: { projectId: string; sta
   const pathname = usePathname();
   const base = `/research/${projectId}`;
   return (
-    <nav aria-label="Research stages" className="sticky top-16 z-30 -mx-4 border-y border-line bg-[#030914]/90 px-4 backdrop-blur-xl md:-mx-6 md:px-6">
-      <ol className="flex gap-1 overflow-x-auto py-2 text-[12px]">
+    <nav aria-label="Research stages" className="sticky top-14 z-30 -mx-4 border-b border-line bg-bg/95 px-4 backdrop-blur md:-mx-8 md:px-8">
+      <ol className="flex gap-5 overflow-x-auto text-[13.5px]">
         {stages.map((stage) => {
           const href = stage.slug ? `${base}/${stage.slug}` : base;
           const active = stage.slug ? pathname.startsWith(href) : pathname === base;
@@ -29,13 +29,13 @@ export default function StageNav({ projectId, stages }: { projectId: string; sta
               <Link
                 href={href}
                 aria-current={active ? "page" : undefined}
-                className={`flex items-center gap-2 rounded-lg border px-2.5 py-1.5 transition-colors ${
-                  active ? "border-cyan-300/45 bg-cyan-300/[0.09] text-white" : "border-transparent text-ink-muted hover:border-line hover:bg-white/[0.04] hover:text-white"
+                title={stage.status}
+                className={`-mb-px flex items-center gap-1.5 border-b-2 py-3 transition-colors ${
+                  active ? "border-accent font-semibold text-ink" : "border-transparent text-ink-muted hover:border-ink/20 hover:text-ink"
                 }`}
               >
-                <span className={`font-mono text-[10px] ${active ? "text-cyan-200" : "text-ink-soft"}`}>{stage.step}</span>
-                <span className="font-medium">{stage.label}</span>
-                {stage.status && <span className="hidden text-[10.5px] text-ink-soft xl:inline">· {stage.status}</span>}
+                <span className={`num text-[12px] ${active ? "text-accent" : "text-ink-soft"}`}>{stage.step}</span>
+                <span>{stage.label}</span>
               </Link>
             </li>
           );

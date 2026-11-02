@@ -27,9 +27,9 @@ export default function HotspotThemeCard({ theme }: { theme: HotspotTheme }) {
               <span className={`h-1.5 w-1.5 rounded-full ${accent.dot}`} />
               {theme.sentimentLabel}
             </span>
-            <span className="chip border-line bg-white/[0.04] text-ink-soft">{ASSET_LABEL[theme.assetType]}</span>
+            <span className="chip border-line bg-ink/[0.04] text-ink-soft">{ASSET_LABEL[theme.assetType]}</span>
           </div>
-          <h3 className="mt-2.5 text-[16px] font-semibold tracking-tight text-white">{theme.title}</h3>
+          <h3 className="mt-2.5 text-[16px] font-semibold tracking-tight text-ink">{theme.title}</h3>
           <p className="mt-1 text-[12px] leading-relaxed text-ink-muted">{theme.tagline}</p>
         </div>
       </div>
@@ -44,16 +44,16 @@ export default function HotspotThemeCard({ theme }: { theme: HotspotTheme }) {
 
       <div className="mt-4 grid grid-cols-2 gap-3">
         <div className="stat-tile !p-3">
-          <div className="text-[9.5px] font-semibold uppercase tracking-[0.12em] text-ink-soft">Scenario span</div>
-          <div className="num mt-1 text-[13px] font-semibold text-white">
+          <div className="text-[9.5px] font-semibold text-ink-soft">Scenario span</div>
+          <div className="num mt-1 text-[13px] font-semibold text-ink">
             {bear ? formatImpact(bear.impactLow) : "—"}
             <span className="text-ink-soft"> … </span>
             {bull ? formatImpact(bull.impactHigh) : "—"}
           </div>
         </div>
         <div className="stat-tile !p-3">
-          <div className="text-[9.5px] font-semibold uppercase tracking-[0.12em] text-ink-soft">Catalyst sens.</div>
-          <div className="num mt-1 text-[13px] font-semibold text-white">{theme.scenario.catalystSensitivity}/100</div>
+          <div className="text-[9.5px] font-semibold text-ink-soft">Catalyst sens.</div>
+          <div className="num mt-1 text-[13px] font-semibold text-ink">{theme.scenario.catalystSensitivity}/100</div>
         </div>
       </div>
 
@@ -63,7 +63,7 @@ export default function HotspotThemeCard({ theme }: { theme: HotspotTheme }) {
 
       {theme.riskFlags[0] && (
         <div className="mt-4 flex items-start gap-2 border-t border-line pt-3 text-[11.5px] leading-relaxed text-ink-soft">
-          <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-300/80" />
+          <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-700/80" />
           <span>{theme.riskFlags[0]}</span>
         </div>
       )}

@@ -8,11 +8,11 @@ import type { EvidenceOrigin, Freshness, RelationshipStatus, TestOutcome, Trigge
  */
 
 const STATUS_STYLE: Record<VerificationStatus, string> = {
-  verified: "border-emerald-400/35 bg-emerald-500/10 text-emerald-200",
-  "partially-verified": "border-cyan-300/35 bg-cyan-400/10 text-cyan-100",
-  unverified: "border-amber-300/35 bg-amber-400/10 text-amber-100",
-  contradicted: "border-rose-300/40 bg-rose-400/10 text-rose-100",
-  stale: "border-slate-400/35 bg-slate-400/10 text-slate-200",
+  verified: "border-emerald-600/35 bg-emerald-500/10 text-emerald-700",
+  "partially-verified": "border-accent/35 bg-accent/10 text-accent",
+  unverified: "border-amber-600/35 bg-amber-400/10 text-amber-800",
+  contradicted: "border-rose-600/40 bg-rose-400/10 text-rose-800",
+  stale: "border-ink/25 bg-slate-400/10 text-ink-soft",
 };
 
 export function StatusChip({ status }: { status: VerificationStatus }) {
@@ -20,10 +20,10 @@ export function StatusChip({ status }: { status: VerificationStatus }) {
 }
 
 const ORIGIN_STYLE: Record<EvidenceOrigin, { label: string; cls: string }> = {
-  "public-secondary": { label: "public source", cls: "border-blue-300/35 bg-blue-400/10 text-blue-100" },
-  "user-primary": { label: "your primary research", cls: "border-violet-300/40 bg-violet-400/10 text-violet-100" },
-  "ai-generated": { label: "AI-generated · not evidence", cls: "border-dashed border-amber-300/45 bg-transparent text-amber-100" },
-  hypothesis: { label: "hypothesis", cls: "border-dashed border-slate-300/40 bg-transparent text-slate-200" },
+  "public-secondary": { label: "public source", cls: "border-accent/35 bg-accent/10 text-accent" },
+  "user-primary": { label: "your primary research", cls: "border-violet-600/40 bg-violet-400/10 text-violet-800" },
+  "ai-generated": { label: "AI-generated · not evidence", cls: "border-dashed border-amber-600/45 bg-transparent text-amber-800" },
+  hypothesis: { label: "hypothesis", cls: "border-dashed border-ink/25 bg-transparent text-ink-soft" },
 };
 
 export function OriginChip({ origin }: { origin: EvidenceOrigin }) {
@@ -32,10 +32,10 @@ export function OriginChip({ origin }: { origin: EvidenceOrigin }) {
 }
 
 const OUTCOME_STYLE: Record<TestOutcome, string> = {
-  supports: "border-emerald-400/35 bg-emerald-500/10 text-emerald-200",
-  contradicts: "border-rose-300/40 bg-rose-400/10 text-rose-100",
-  mixed: "border-amber-300/35 bg-amber-400/10 text-amber-100",
-  "insufficient-data": "border-slate-400/35 bg-slate-400/10 text-slate-200",
+  supports: "border-emerald-600/35 bg-emerald-500/10 text-emerald-700",
+  contradicts: "border-rose-600/40 bg-rose-400/10 text-rose-800",
+  mixed: "border-amber-600/35 bg-amber-400/10 text-amber-800",
+  "insufficient-data": "border-ink/25 bg-slate-400/10 text-ink-soft",
 };
 
 export function OutcomeBadge({ outcome }: { outcome: TestOutcome }) {
@@ -43,9 +43,9 @@ export function OutcomeBadge({ outcome }: { outcome: TestOutcome }) {
 }
 
 const TRIGGER_STYLE: Record<TriggerState, string> = {
-  holding: "border-emerald-400/30 bg-emerald-500/10 text-emerald-200",
-  triggered: "border-rose-300/45 bg-rose-400/15 text-rose-100",
-  "insufficient-data": "border-slate-400/35 bg-slate-400/10 text-slate-200",
+  holding: "border-emerald-600/30 bg-emerald-500/10 text-emerald-700",
+  triggered: "border-rose-600/45 bg-rose-400/15 text-rose-800",
+  "insufficient-data": "border-ink/25 bg-slate-400/10 text-ink-soft",
 };
 
 export function TriggerBadge({ state }: { state: TriggerState }) {
@@ -53,9 +53,9 @@ export function TriggerBadge({ state }: { state: TriggerState }) {
 }
 
 const REL_STYLE: Record<RelationshipStatus, string> = {
-  verified: "border-emerald-400/35 bg-emerald-500/10 text-emerald-200",
-  inferred: "border-amber-300/35 bg-amber-400/10 text-amber-100",
-  hypothetical: "border-dashed border-slate-300/40 bg-transparent text-slate-200",
+  verified: "border-emerald-600/35 bg-emerald-500/10 text-emerald-700",
+  inferred: "border-amber-600/35 bg-amber-400/10 text-amber-800",
+  hypothetical: "border-dashed border-ink/25 bg-transparent text-ink-soft",
 };
 
 export function RelationshipChip({ status }: { status: RelationshipStatus }) {
@@ -63,15 +63,15 @@ export function RelationshipChip({ status }: { status: RelationshipStatus }) {
 }
 
 const FRESH_STYLE: Record<Freshness, string> = {
-  fresh: "text-emerald-200",
-  lagging: "text-amber-200",
-  stale: "text-rose-200",
+  fresh: "text-emerald-700",
+  lagging: "text-amber-700",
+  stale: "text-rose-700",
 };
 
 export function FreshnessDot({ freshness, note }: { freshness: Freshness; note?: string }) {
   return (
     <span className={`inline-flex items-center gap-1.5 text-[11px] ${FRESH_STYLE[freshness]}`} title={note}>
-      <span className={`h-1.5 w-1.5 rounded-full ${freshness === "fresh" ? "bg-emerald-300" : freshness === "lagging" ? "bg-amber-300" : "bg-rose-300"}`} />
+      <span className={`h-1.5 w-1.5 rounded-full ${freshness === "fresh" ? "bg-emerald-600" : freshness === "lagging" ? "bg-amber-600" : "bg-rose-600"}`} />
       {freshness}
     </span>
   );
@@ -83,7 +83,7 @@ export function EvidenceLink({ id, projectId, title }: { id: string; projectId: 
     <Link
       href={`/research/${projectId}/evidence?id=${encodeURIComponent(id)}`}
       title={title}
-      className="mx-0.5 inline-flex items-center rounded-md border border-blue-300/25 bg-blue-400/[0.07] px-1.5 py-[1px] font-mono text-[10px] text-blue-100/90 transition-colors hover:border-blue-300/55 hover:bg-blue-400/15"
+      className="num mx-0.5 inline-flex items-center rounded border border-accent/20 bg-accent-soft px-1 py-px text-[11px] font-medium text-accent transition-colors hover:border-accent/50"
     >
       {id.replace(/^EV-/, "")}
     </Link>
@@ -116,37 +116,68 @@ export function CitedText({ text, projectId }: { text: string; projectId: string
   );
 }
 
-export function Panel({ title, eyebrow, actions, children, className = "" }: { title?: string; eyebrow?: string; actions?: ReactNode; children: ReactNode; className?: string }) {
+/**
+ * A section of a research page. Passing `source` makes it an exhibit, as in a
+ * printed note: the title gets a running "Exhibit n" number (a CSS counter, so
+ * numbering follows page order) and the source line is printed underneath.
+ */
+export function Panel({
+  title,
+  eyebrow,
+  actions,
+  source,
+  children,
+  className = "",
+}: {
+  title?: string;
+  eyebrow?: string;
+  actions?: ReactNode;
+  source?: ReactNode;
+  children: ReactNode;
+  className?: string;
+}) {
   return (
-    <section className={`card p-4 md:p-5 ${className}`}>
+    <section className={`card min-w-0 p-5 md:p-6 ${className}`}>
       {(title || eyebrow || actions) && (
-        <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
-          <div>
-            {eyebrow && <div className="text-[10.5px] font-semibold uppercase tracking-[0.2em] text-cyan-100/70">{eyebrow}</div>}
-            {title && <h2 className="mt-0.5 text-[15px] font-semibold tracking-tight text-white">{title}</h2>}
+        <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            {eyebrow && <div className="text-[12.5px] font-medium text-ink-soft">{eyebrow}</div>}
+            {title && (
+              <h2 className={`mt-0.5 text-[19px] font-semibold leading-snug text-ink ${source ? "exhibit-title" : ""}`}>{title}</h2>
+            )}
           </div>
           {actions}
         </div>
       )}
       {children}
+      {source && <p className="mt-4 border-t border-line pt-2.5 text-[12px] leading-relaxed text-ink-soft">Source: {source}</p>}
     </section>
   );
 }
 
+/** A key finding set as a serif sentence; wrap the decisive phrase in <Highlight>. */
+export function KeyFinding({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <p className={`max-w-[46ch] font-serif text-[22px] leading-[1.4] text-ink md:text-[25px] ${className}`}>{children}</p>;
+}
+
+export function Highlight({ children }: { children: ReactNode }) {
+  return <mark className="highlight bg-transparent text-inherit">{children}</mark>;
+}
+
 export function Stat({ label, value, hint, tone = "default" }: { label: string; value: string; hint?: ReactNode; tone?: "default" | "positive" | "negative" | "accent" }) {
-  const toneCls = tone === "positive" ? "text-emerald-300" : tone === "negative" ? "text-rose-300" : tone === "accent" ? "text-cyan-200" : "text-ink";
+  const toneCls = tone === "positive" ? "text-emerald-700" : tone === "negative" ? "text-rose-700" : tone === "accent" ? "text-accent" : "text-ink";
   return (
-    <div className="stat-tile !p-3">
-      <div className="text-[10px] uppercase tracking-[0.16em] text-ink-soft">{label}</div>
-      <div className={`num mt-1 text-[19px] font-semibold tracking-tight ${toneCls}`}>{value}</div>
-      {hint && <div className="mt-0.5 text-[11px] leading-snug text-ink-muted">{hint}</div>}
+    <div className="border-l-2 border-line py-0.5 pl-3">
+      <div className="text-[12.5px] text-ink-soft">{label}</div>
+      <div className={`num mt-1 text-[22px] font-semibold leading-tight tracking-tight ${toneCls}`}>{value}</div>
+      {hint && <div className="mt-0.5 text-[12px] leading-snug text-ink-muted">{hint}</div>}
     </div>
   );
 }
 
 export function KeyValues({ rows }: { rows: Array<[string, ReactNode]> }) {
   return (
-    <dl className="grid grid-cols-1 gap-x-6 gap-y-1.5 text-[12.5px] sm:grid-cols-[minmax(140px,max-content)_1fr]">
+    <dl className="grid grid-cols-1 gap-x-6 gap-y-1.5 text-[13.5px] sm:grid-cols-[minmax(140px,max-content)_1fr]">
       {rows.map(([k, v]) => (
         <div key={k} className="contents">
           <dt className="text-ink-soft">{k}</dt>
@@ -160,11 +191,11 @@ export function KeyValues({ rows }: { rows: Array<[string, ReactNode]> }) {
 export function Note({ children, tone = "info" }: { children: ReactNode; tone?: "info" | "warn" | "danger" }) {
   const cls =
     tone === "warn"
-      ? "border-amber-300/25 bg-amber-300/[0.06] text-amber-50/90"
+      ? "border-amber-600 bg-amber-50 text-amber-900"
       : tone === "danger"
-        ? "border-rose-300/30 bg-rose-400/[0.07] text-rose-50/90"
-        : "border-cyan-300/20 bg-cyan-300/[0.05] text-cyan-50/85";
-  return <div className={`rounded-xl border px-3 py-2 text-[12px] leading-relaxed ${cls}`}>{children}</div>;
+        ? "border-rose-700 bg-rose-50 text-rose-900"
+        : "border-accent bg-accent-soft text-ink-muted";
+  return <div className={`border-l-2 px-3 py-2 text-[13px] leading-relaxed ${cls}`}>{children}</div>;
 }
 
 // ── Formatting ──────────────────────────────────────────────────────────────
@@ -183,4 +214,4 @@ export const fmt = {
 };
 
 export const toneOf = (v: number | null | undefined): "positive" | "negative" | "default" => (finite(v) ? (v >= 0 ? "positive" : "negative") : "default");
-export const textTone = (v: number | null | undefined) => (finite(v) ? (v >= 0 ? "text-emerald-300" : "text-rose-300") : "text-ink-muted");
+export const textTone = (v: number | null | undefined) => (finite(v) ? (v >= 0 ? "text-emerald-700" : "text-rose-700") : "text-ink-muted");

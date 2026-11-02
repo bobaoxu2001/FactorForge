@@ -17,12 +17,12 @@ export default function PlainEnglish({
   title?: string;
 }) {
   return (
-    <aside className="flex items-start gap-3 rounded-2xl border border-cyan-300/20 bg-cyan-300/[0.05] p-4">
-      <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full border border-cyan-300/30 bg-cyan-300/10">
-        <Sparkles className="h-3.5 w-3.5 text-cyan-200" />
+    <aside className="flex items-start gap-3 rounded-lg border border-accent/20 bg-accent/[0.05] p-4">
+      <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full border border-accent/30 bg-accent/10">
+        <Sparkles className="h-3.5 w-3.5 text-accent" />
       </span>
       <div>
-        <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-cyan-100/80">{title}</div>
+        <div className="text-[11px] font-semibold text-accent/80">{title}</div>
         <p className="mt-1 text-[13px] leading-relaxed text-ink-muted">{children}</p>
       </div>
     </aside>

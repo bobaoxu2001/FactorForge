@@ -16,10 +16,10 @@ export default function EquityCurveChart({ data }: { data: EquityPoint[] }) {
   return (
     <div className="card relative h-[320px] overflow-hidden p-4">
       <div className="mb-3 flex items-center justify-between">
-        <div className="text-[11px] uppercase tracking-wider text-ink-soft">Equity curve</div>
+        <div className="text-[11px] tracking-wider text-ink-soft">Equity curve</div>
         <div className="flex items-center gap-3 text-[10.5px] text-ink-soft">
-          <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(34,211,238,0.8)]" />Strategy</span>
-          <span className="inline-flex items-center gap-1.5"><span className="h-2 w-3 rounded-full bg-blue-400/70" />Benchmark</span>
+          <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-accent" />Strategy</span>
+          <span className="inline-flex items-center gap-1.5"><span className="h-2 w-3 rounded-full bg-accent/70" />Benchmark</span>
         </div>
       </div>
       {mounted ? (
@@ -27,21 +27,21 @@ export default function EquityCurveChart({ data }: { data: EquityPoint[] }) {
           <ComposedChart data={sampled} margin={{ top: 4, right: 6, bottom: 0, left: 0 }}>
             <defs>
               <linearGradient id="equityFill" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor="rgba(34,211,238,0.34)" />
-                <stop offset="55%" stopColor="rgba(34,211,238,0.08)" />
-                <stop offset="100%" stopColor="rgba(34,211,238,0)" />
+                <stop offset="0%" stopColor="rgba(29,79,145,0.34)" />
+                <stop offset="55%" stopColor="rgba(29,79,145,0.08)" />
+                <stop offset="100%" stopColor="rgba(29,79,145,0)" />
               </linearGradient>
             </defs>
-            <CartesianGrid stroke="rgba(120,149,184,0.12)" vertical={false} />
-            <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#69778d" }} axisLine={false} tickLine={false} minTickGap={28} />
-            <YAxis tick={{ fontSize: 11, fill: "#69778d" }} axisLine={false} tickLine={false} width={64} domain={["auto", "auto"]} />
+            <CartesianGrid stroke="#e6e9ee" vertical={false} />
+            <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#677184" }} axisLine={false} tickLine={false} minTickGap={28} />
+            <YAxis tick={{ fontSize: 11, fill: "#677184" }} axisLine={false} tickLine={false} width={64} domain={["auto", "auto"]} />
             <Tooltip
-              contentStyle={{ background: "rgba(5,13,25,0.96)", border: "1px solid rgba(120,149,184,0.24)", borderRadius: 12, color: "#eef4ff", boxShadow: "0 20px 50px -30px rgba(34,211,238,0.6)" }}
-              labelStyle={{ color: "#a8b3c5", fontSize: 11 }}
+              contentStyle={{ background: "#ffffff", border: "1px solid #dde1e7", borderRadius: 12, color: "#18202c", boxShadow: "0 6px 18px -12px rgba(24,32,44,0.3)" }}
+              labelStyle={{ color: "#475162", fontSize: 11 }}
               formatter={(value) => Number(value).toLocaleString("en-US", { maximumFractionDigits: 0 })}
             />
-            <Line type="monotone" dataKey="benchmarkEquity" stroke="#60a5fa" strokeWidth={1.5} strokeDasharray="5 6" dot={false} name="Benchmark" />
-            <Area type="monotone" dataKey="equity" stroke="#22d3ee" strokeWidth={2.4} fill="url(#equityFill)" dot={false} name="Strategy" activeDot={{ r: 4, fill: "#fbbf24", stroke: "rgba(5,13,25,0.9)", strokeWidth: 2 }} />
+            <Line type="monotone" dataKey="benchmarkEquity" stroke="#8a93a3" strokeWidth={1.5} strokeDasharray="5 6" dot={false} name="Benchmark" />
+            <Area type="monotone" dataKey="equity" stroke="#1d4f91" strokeWidth={2.4} fill="url(#equityFill)" dot={false} name="Strategy" activeDot={{ r: 4, fill: "#a15c07", stroke: "#ffffff", strokeWidth: 2 }} />
           </ComposedChart>
         </ResponsiveContainer>
       ) : (

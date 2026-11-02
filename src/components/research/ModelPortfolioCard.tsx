@@ -52,7 +52,7 @@ export default function ModelPortfolioCard({
     return (
       <section className="card p-5">
         <div className="section-label">{eyebrow}</div>
-        <h2 className="mt-1.5 text-[18px] font-semibold tracking-tight text-white">{title}</h2>
+        <h2 className="mt-1.5 text-[18px] font-semibold tracking-tight text-ink">{title}</h2>
         <p className="mt-2 text-[13px] leading-relaxed text-ink-muted">
           {data.notes[0] ??
             "A simulated model portfolio could not be built from the available historical data for this period."}
@@ -72,7 +72,7 @@ export default function ModelPortfolioCard({
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="section-label">{eyebrow}</div>
-            <h2 className="mt-1.5 text-[17px] font-semibold tracking-tight text-white">{title}</h2>
+            <h2 className="mt-1.5 text-[17px] font-semibold tracking-tight text-ink">{title}</h2>
             <p className="mt-1 text-[12px] text-ink-soft">
               {formatLongDate(data.startDate)} → {formatLongDate(data.endDate)} · {data.strategyCount} strategies · simulated research
             </p>
@@ -103,7 +103,7 @@ export default function ModelPortfolioCard({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="section-label">{eyebrow}</div>
-          <h2 className="mt-1.5 text-[20px] font-semibold tracking-tight text-white md:text-[22px]">{title}</h2>
+          <h2 className="mt-1.5 text-[20px] font-semibold tracking-tight text-ink md:text-[22px]">{title}</h2>
           <p className="mt-1.5 text-[12px] text-ink-soft">
             {formatLongDate(data.startDate)} → {formatLongDate(data.endDate)} · {data.tradingDays} trading days · {data.strategyCount} active strategies
           </p>
@@ -121,7 +121,7 @@ export default function ModelPortfolioCard({
         </div>
       </div>
 
-      <p className="mt-4 rounded-2xl border border-emerald-300/18 bg-emerald-300/[0.05] p-3.5 text-[13px] leading-relaxed text-emerald-50/90">
+      <p className="mt-4 rounded-lg border border-emerald-600/18 bg-emerald-300/[0.05] p-3.5 text-[13px] leading-relaxed text-emerald-800/90">
         {buildModelPortfolioHeadline(data)}
       </p>
 
@@ -158,9 +158,9 @@ export default function ModelPortfolioCard({
       </div>
 
       {data.constituents.length > 0 && (
-        <div className="mt-4 rounded-2xl border border-line bg-white/[0.025] p-3.5">
+        <div className="mt-4 rounded-lg border border-line bg-ink/[0.025] p-3.5">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-soft">
+            <div className="text-[10.5px] text-ink-soft">
               Constituent contribution · since {data.startDate}
             </div>
             <div className="text-[11px] text-ink-soft">{data.strategyCount} equal-weighted · normalized to 1.00</div>
@@ -174,13 +174,13 @@ export default function ModelPortfolioCard({
                     <div className="truncate text-[12.5px] font-medium text-ink">{constituent.strategyName}</div>
                     <div className="text-[10.5px] text-ink-soft">{constituent.symbol}</div>
                   </div>
-                  <div className="h-1.5 w-24 shrink-0 overflow-hidden rounded-full bg-white/[0.06] sm:w-32">
+                  <div className="h-1.5 w-24 shrink-0 overflow-hidden rounded-full bg-ink/[0.06] sm:w-32">
                     <div
-                      className={`h-full rounded-full ${constituent.returnSinceStart >= 0 ? "bg-gradient-to-r from-emerald-400 to-cyan-400" : "bg-gradient-to-r from-rose-400 to-amber-300"}`}
+                      className={`h-full rounded-full ${constituent.returnSinceStart >= 0 ? "bg-gradient-to-r from-emerald-400 to-accent" : "bg-gradient-to-r from-rose-400 to-amber-300"}`}
                       style={{ width: `${contributionBarWidth(constituent.returnSinceStart, data.constituents)}%` }}
                     />
                   </div>
-                  <div className={`num w-16 shrink-0 text-right text-[12.5px] font-semibold ${constituent.returnSinceStart >= 0 ? "text-emerald-300" : "text-rose-300"}`}>
+                  <div className={`num w-16 shrink-0 text-right text-[12.5px] font-semibold ${constituent.returnSinceStart >= 0 ? "text-emerald-700" : "text-rose-700"}`}>
                     {pct(constituent.returnSinceStart)}
                   </div>
                 </div>
@@ -193,9 +193,9 @@ export default function ModelPortfolioCard({
         </div>
       )}
 
-      <div className="mt-4 rounded-2xl border border-line bg-white/[0.025] p-3.5">
+      <div className="mt-4 rounded-lg border border-line bg-ink/[0.025] p-3.5">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-soft">Data source · {data.dataQuality.label}</div>
+          <div className="text-[10.5px] text-ink-soft">Data source · {data.dataQuality.label}</div>
           {data.dataQuality.sources.length > 0 && (
             <div className="text-[11px] text-ink-soft">{data.dataQuality.sources.join(" · ")}</div>
           )}
@@ -204,7 +204,7 @@ export default function ModelPortfolioCard({
           <ul className="mt-3 space-y-1.5">
             {data.notes.map((note) => (
               <li key={note} className="flex gap-2 text-[12px] leading-relaxed text-ink-muted">
-                <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-cyan-300/60" />
+                <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-accent/60" />
                 <span>{note}</span>
               </li>
             ))}

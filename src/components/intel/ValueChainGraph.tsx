@@ -19,9 +19,9 @@ const LAYERS: Array<{ id: ValueChainNode["layer"]; label: string }> = [
 ];
 
 const EDGE_STYLE: Record<Relationship["status"], { stroke: string; dash?: string; label: string }> = {
-  verified: { stroke: "#34d399", label: "verified in 10-K" },
-  inferred: { stroke: "#fbbf24", dash: "6 5", label: "inferred" },
-  hypothetical: { stroke: "#94a3b8", dash: "2 5", label: "hypothetical" },
+  verified: { stroke: "#17794a", label: "verified in 10-K" },
+  inferred: { stroke: "#a15c07", dash: "6 5", label: "inferred" },
+  hypothetical: { stroke: "#677184", dash: "2 5", label: "hypothetical" },
 };
 
 const W = 1000;
@@ -67,10 +67,10 @@ export default function ValueChainGraph({
 
   return (
     <div className="grid gap-4 xl:grid-cols-[1.45fr_0.85fr]">
-      <div className="overflow-x-auto rounded-2xl border border-line bg-[#040b16]/70 p-2">
+      <div className="overflow-x-auto rounded-lg border border-line bg-paper/70 p-2">
         <svg viewBox={`0 0 ${W} ${layout.height}`} className="min-w-[640px]" role="img" aria-label="Freight value chain graph">
           {LAYERS.map((l, i) => (
-            <text key={l.id} x={layout.colX(i) + NODE_W / 2} y={26} textAnchor="middle" fill="#69778d" fontSize="12" letterSpacing="1.5">
+            <text key={l.id} x={layout.colX(i) + NODE_W / 2} y={26} textAnchor="middle" fill="#677184" fontSize="12" letterSpacing="1.5">
               {l.label.toUpperCase()}
             </text>
           ))}
@@ -109,9 +109,9 @@ export default function ValueChainGraph({
             const related = !selected || isSel || relationships.some((r) => (r.from === selected && r.to === n.id) || (r.to === selected && r.from === n.id));
             return (
               <g key={n.id} transform={`translate(${p.x},${p.y})`} className="cursor-pointer" opacity={related ? 1 : 0.35} onClick={() => { setSelected(isSel ? null : n.id); setEdgeId(null); }}>
-                <rect width={NODE_W} height={NODE_H} rx={12} fill={isSel ? "rgba(34,211,238,0.16)" : "rgba(13,22,36,0.95)"} stroke={isSel ? "#22d3ee" : "rgba(120,149,184,0.35)"} />
-                <text x={12} y={19} fill="#eef4ff" fontSize="12.5" fontWeight="600">{n.label}</text>
-                <text x={12} y={35} fill="#7dd3fc" fontSize="10.5" fontFamily="ui-monospace, monospace">{n.tickers.length ? n.tickers.join(" · ") : "—"}</text>
+                <rect width={NODE_W} height={NODE_H} rx={12} fill={isSel ? "rgba(29,79,145,0.16)" : "#ffffff"} stroke={isSel ? "#1d4f91" : "rgba(24,32,44,0.35)"} />
+                <text x={12} y={19} fill="#18202c" fontSize="12.5" fontWeight="600">{n.label}</text>
+                <text x={12} y={35} fill="#1d4f91" fontSize="10.5" fontFamily="ui-monospace, monospace">{n.tickers.length ? n.tickers.join(" · ") : "—"}</text>
               </g>
             );
           })}
@@ -129,13 +129,13 @@ export default function ValueChainGraph({
       <div className="max-h-[560px] space-y-2 overflow-y-auto pr-1">
         <div className="flex items-center justify-between text-[11.5px] text-ink-soft">
           <span>{selected ? nodes.find((n) => n.id === selected)?.label : "All relationships"} · {shown.length}</span>
-          {(selected || edgeId) && <button className="text-cyan-200 hover:text-white" onClick={() => { setSelected(null); setEdgeId(null); }}>Clear</button>}
+          {(selected || edgeId) && <button className="text-accent hover:text-ink" onClick={() => { setSelected(null); setEdgeId(null); }}>Clear</button>}
         </div>
         {shown.map((r) => (
-          <div key={r.id} className="rounded-xl border border-line bg-white/[0.025] p-3">
+          <div key={r.id} className="rounded-md border border-line bg-ink/[0.025] p-3">
             <div className="flex items-start justify-between gap-2">
               <div className="text-[12.5px] font-medium text-ink">{r.label}</div>
-              <span className="text-[10.5px] uppercase tracking-[0.12em]" style={{ color: EDGE_STYLE[r.status].stroke }}>{r.status}</span>
+              <span className="text-[10.5px] " style={{ color: EDGE_STYLE[r.status].stroke }}>{r.status}</span>
             </div>
             <div className="mt-0.5 text-[11px] text-ink-soft">{nodes.find((n) => n.id === r.from)?.label} → {nodes.find((n) => n.id === r.to)?.label} · {r.type.replace("-", " ")}</div>
             <p className="mt-1 text-[11.5px] leading-relaxed text-ink-muted">{r.rationale}</p>
@@ -143,13 +143,13 @@ export default function ValueChainGraph({
               const e = evidence[id];
               if (!e) return null;
               return (
-                <blockquote key={id} className="mt-2 border-l-2 border-emerald-400/40 pl-2 text-[11.5px] leading-relaxed text-ink-muted">
+                <blockquote key={id} className="mt-2 border-l-2 border-emerald-600/40 pl-2 text-[11.5px] leading-relaxed text-ink-muted">
                   &ldquo;{e.excerpt}&rdquo;
-                  <Link href={`/research/${projectId}/evidence?id=${id}`} className="ml-1 font-mono text-[10px] text-blue-200 hover:text-white">{e.ticker} 10-K ↗</Link>
+                  <Link href={`/research/${projectId}/evidence?id=${id}`} className="ml-1 num text-[10px] text-accent hover:text-ink">{e.ticker} 10-K ↗</Link>
                 </blockquote>
               );
             })}
-            {r.evidenceIds.length === 0 && <div className="mt-2 text-[11px] text-amber-100/80">No filing sentence supports this link yet. Treat it as reasoning to verify.</div>}
+            {r.evidenceIds.length === 0 && <div className="mt-2 text-[11px] text-amber-800/80">No filing sentence supports this link yet. Treat it as reasoning to verify.</div>}
           </div>
         ))}
       </div>

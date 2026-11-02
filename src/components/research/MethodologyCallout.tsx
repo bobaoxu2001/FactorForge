@@ -11,7 +11,7 @@ export default function MethodologyCallout({ title = "Methodology / Assumptions"
       </summary>
       <ul className="mt-3 grid gap-2 text-[12.5px] leading-relaxed text-ink-muted md:grid-cols-2">
         {items.map((item) => (
-          <li key={item} className="rounded-xl border border-line bg-white/[0.03] px-3 py-2">
+          <li key={item} className="rounded-md border border-line bg-ink/[0.03] px-3 py-2">
             {item}
           </li>
         ))}

@@ -16,10 +16,10 @@ export default function SignalStrengthBar({
   return (
     <div>
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-soft">{label}</span>
+        <span className="text-[10px] font-semibold text-ink-soft">{label}</span>
         <span className={`num text-[13px] font-semibold ${accent.text}`}>{value}/100</span>
       </div>
-      <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
+      <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-ink/[0.06]">
         <div
           className={`h-full rounded-full bg-gradient-to-r ${accent.bar}`}
           style={{ width: `${pct}%`, boxShadow: `0 0 12px ${accent.glow}` }}

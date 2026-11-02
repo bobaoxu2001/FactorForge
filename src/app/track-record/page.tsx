@@ -31,11 +31,11 @@ export default async function TrackRecordPage() {
       <section className="hero-shell p-5 md:p-7">
         <div className="relative grid gap-6 xl:grid-cols-[1fr_0.78fr] xl:items-stretch">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300/25 bg-emerald-300/[0.08] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-100">
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-600/25 bg-emerald-300/[0.08] px-3 py-1.5 text-[11px] font-semibold text-emerald-800">
               <Trophy className="h-3.5 w-3.5" />
               Public paper track record
             </div>
-            <h1 className="mt-4 max-w-4xl text-[36px] font-semibold leading-none tracking-[-0.04em] text-white md:text-[58px]">
+            <h1 className="mt-3 max-w-[22ch] text-[34px] font-semibold leading-[1.08] text-ink md:text-[46px]">
               A shareable receipt for simulated strategy performance.
             </h1>
             <p className="mt-4 max-w-3xl text-[14px] leading-7 text-ink-muted">
@@ -47,11 +47,11 @@ export default async function TrackRecordPage() {
               <ProofPill icon={CalendarDays} label={record.latestMarkDate ?? record.asOf} detail="latest mark" />
             </div>
             <div className="mt-5 flex flex-wrap gap-3">
-              <Link href="/paper-trading" className="inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-cyan-300/[0.07] px-3.5 py-2 text-[12.5px] text-cyan-100 transition hover:border-cyan-300/45 hover:bg-cyan-300/[0.12]">
+              <Link href="/paper-trading" className="inline-flex items-center gap-2 rounded-full border border-accent/25 bg-accent/[0.07] px-3.5 py-2 text-[12.5px] text-accent transition hover:border-accent/45 hover:bg-accent/[0.12]">
                 Open full paper desk
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </Link>
-              <Link href="/radar" className="inline-flex items-center gap-2 rounded-full border border-line bg-white/[0.04] px-3.5 py-2 text-[12.5px] text-ink-muted transition hover:text-ink">
+              <Link href="/radar" className="inline-flex items-center gap-2 rounded-full border border-line bg-ink/[0.04] px-3.5 py-2 text-[12.5px] text-ink-muted transition hover:text-ink">
                 View admission rules
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </Link>
@@ -61,12 +61,12 @@ export default async function TrackRecordPage() {
           <div className="hero-showcase p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <div className="text-[11px] uppercase tracking-[0.18em] text-cyan-100/70">Share line</div>
-                <h2 className="mt-2 text-[22px] font-semibold tracking-tight text-white">FactorForge Paper Record</h2>
+                <div className="text-[11px] text-accent/70">Share line</div>
+                <h2 className="mt-2 text-[22px] font-semibold tracking-tight text-ink">FactorForge Paper Record</h2>
               </div>
               <StatusBadge status="simulation only" />
             </div>
-            <div className="mt-5 rounded-2xl border border-cyan-300/18 bg-cyan-300/[0.055] p-4">
+            <div className="mt-5 rounded-lg border border-accent/18 bg-accent/[0.055] p-4">
               <p className="text-[13px] leading-relaxed text-ink">{record.shareLine}</p>
               <p className="mt-2 text-[11.5px] leading-relaxed text-ink-soft">
                 Public URL: /track-record · generated {record.generatedAt.slice(0, 19).replace("T", " ")} UTC
@@ -105,13 +105,13 @@ export default async function TrackRecordPage() {
       <section className="card overflow-hidden">
         <div className="flex flex-wrap items-start justify-between gap-4 p-5">
           <div>
-            <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">Public Scorecard</div>
+            <div className="text-[11px] text-ink-soft">Public Scorecard</div>
             <h2 className="mt-1 text-[20px] font-semibold text-ink">Ledger-backed strategy rows</h2>
             <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-muted">
               Rows are ranked by paper ledger return. Entry and current marks come from the local paper ledger when available; otherwise the row is clearly labeled as an estimate.
             </p>
           </div>
-          <div className="flex items-center gap-2 rounded-full border border-line bg-white/[0.035] px-3 py-2 text-[12px] text-ink-muted">
+          <div className="flex items-center gap-2 rounded-full border border-line bg-ink/[0.035] px-3 py-2 text-[12px] text-ink-muted">
             <Eye className="h-3.5 w-3.5" />
             public view
           </div>
@@ -119,7 +119,7 @@ export default async function TrackRecordPage() {
 
         <div className="overflow-x-auto">
           <table className="w-full min-w-[1080px] text-[12.5px]">
-            <thead className="border-y border-line bg-white/[0.025] text-[10px] uppercase tracking-wider text-ink-soft">
+            <thead className="border-y border-line bg-ink/[0.025] text-[10px] tracking-wider text-ink-soft">
               <tr>
                 <th className="px-4 py-3 text-left">Rank</th>
                 <th className="px-4 py-3 text-left">Strategy</th>
@@ -136,19 +136,19 @@ export default async function TrackRecordPage() {
               {record.rows.map((row) => (
                 <tr key={row.id} className="table-row">
                   <td className="px-4 py-3">
-                    <span className="num inline-flex h-7 w-7 items-center justify-center rounded-lg border border-cyan-300/20 bg-cyan-300/[0.08] text-cyan-100">
+                    <span className="num inline-flex h-7 w-7 items-center justify-center rounded-lg border border-accent/20 bg-accent/[0.08] text-accent">
                       {row.rank}
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <Link href={`/strategies/${row.strategyId}`} className="font-medium text-white hover:text-blue-300">
+                    <Link href={`/strategies/${row.strategyId}`} className="font-medium text-ink hover:text-accent">
                       {row.strategyName}
                     </Link>
                     <div className="mt-0.5 text-[11px] text-ink-soft">{row.strategyId}</div>
                   </td>
                   <td className="px-4 py-3 font-medium text-ink">{row.symbol}</td>
-                  <td className={`num px-4 py-3 text-right ${row.returnPct >= 0 ? "text-emerald-300" : "text-rose-300"}`}>{pct(row.returnPct)}</td>
-                  <td className={`num px-4 py-3 text-right ${row.unrealizedPnl >= 0 ? "text-emerald-300" : "text-rose-300"}`}>{usd(row.unrealizedPnl)}</td>
+                  <td className={`num px-4 py-3 text-right ${row.returnPct >= 0 ? "text-emerald-700" : "text-rose-700"}`}>{pct(row.returnPct)}</td>
+                  <td className={`num px-4 py-3 text-right ${row.unrealizedPnl >= 0 ? "text-emerald-700" : "text-rose-700"}`}>{usd(row.unrealizedPnl)}</td>
                   <td className="num px-4 py-3 text-right text-ink">{usd(row.marketValue)}</td>
                   <td className="px-4 py-3 text-ink-muted">
                     {row.entryDate && row.currentDate ? (
@@ -182,11 +182,11 @@ export default async function TrackRecordPage() {
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-[0.8fr_1.2fr]">
         <section className="card p-5">
           <div className="flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-xl border border-blue-300/25 bg-blue-300/10">
-              <ClipboardList className="h-5 w-5 text-blue-200" />
+            <div className="grid h-10 w-10 place-items-center rounded-md border border-accent/25 bg-accent/10">
+              <ClipboardList className="h-5 w-5 text-accent" />
             </div>
             <div>
-              <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">Verification Notes</div>
+              <div className="text-[11px] text-ink-soft">Verification Notes</div>
               <h2 className="text-[18px] font-semibold text-ink">What an outside viewer can trust</h2>
             </div>
           </div>
@@ -196,8 +196,8 @@ export default async function TrackRecordPage() {
               ["Scope", "This page summarizes paper observation after radar admission. Full historical backtests remain on each strategy page."],
               ["Broker", "Alpaca paper sync, when configured, is a read-only mirror on the full desk page. Public track record does not expose broker account identifiers."],
             ].map(([label, value]) => (
-              <div key={label} className="rounded-2xl border border-line bg-white/[0.035] p-3">
-                <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-soft">{label}</div>
+              <div key={label} className="rounded-lg border border-line bg-ink/[0.035] p-3">
+                <div className="text-[10.5px] text-ink-soft">{label}</div>
                 <p className="mt-1 text-[12.5px] leading-relaxed text-ink-muted">{value}</p>
               </div>
             ))}
@@ -205,9 +205,9 @@ export default async function TrackRecordPage() {
         </section>
 
         <section className="card p-5">
-          <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">Live Public Summary</div>
+          <div className="text-[11px] text-ink-soft">Live Public Summary</div>
           <h2 className="mt-1 text-[20px] font-semibold text-ink">Readable performance receipt</h2>
-          <div className="mt-4 rounded-2xl border border-line bg-white/[0.035] p-4">
+          <div className="mt-4 rounded-lg border border-line bg-ink/[0.035] p-4">
             <p className="text-[15px] leading-7 text-ink">{record.shareLine}</p>
             <div className="mt-4 grid grid-cols-2 gap-3 text-[12px] md:grid-cols-4">
               <ReceiptCell label="Allocated" value={usd(record.totalAllocatedCapital)} />
@@ -224,23 +224,23 @@ export default async function TrackRecordPage() {
 
 function ProofPill({ icon: Icon, label, detail }: { icon: LucideIcon; label: string; detail: string }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-line bg-white/[0.04] p-3">
-      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-emerald-300/20 bg-emerald-300/[0.08]">
-        <Icon className="h-4 w-4 text-emerald-100" />
+    <div className="flex items-center gap-3 rounded-lg border border-line bg-ink/[0.04] p-3">
+      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-md border border-emerald-600/20 bg-emerald-300/[0.08]">
+        <Icon className="h-4 w-4 text-emerald-800" />
       </div>
       <div className="min-w-0">
-        <div className="truncate text-[13px] font-semibold text-white">{label}</div>
-        <div className="mt-0.5 truncate text-[10.5px] uppercase tracking-[0.14em] text-ink-soft">{detail}</div>
+        <div className="truncate text-[13px] font-semibold text-ink">{label}</div>
+        <div className="mt-0.5 truncate text-[10.5px] text-ink-soft">{detail}</div>
       </div>
     </div>
   );
 }
 
 function MiniStat({ label, value, tone = "default" }: { label: string; value: string; tone?: "default" | "positive" | "negative" }) {
-  const toneClass = tone === "positive" ? "text-emerald-300" : tone === "negative" ? "text-rose-300" : "text-white";
+  const toneClass = tone === "positive" ? "text-emerald-700" : tone === "negative" ? "text-rose-700" : "text-ink";
   return (
-    <div className="rounded-2xl border border-line bg-white/[0.035] p-3">
-      <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-soft">{label}</div>
+    <div className="rounded-lg border border-line bg-ink/[0.035] p-3">
+      <div className="text-[10.5px] text-ink-soft">{label}</div>
       <div className={`num mt-2 text-[22px] font-semibold ${toneClass}`}>{value}</div>
     </div>
   );
@@ -249,7 +249,7 @@ function MiniStat({ label, value, tone = "default" }: { label: string; value: st
 function ReceiptCell({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="text-[10px] uppercase tracking-[0.16em] text-ink-soft">{label}</div>
+      <div className="text-[10px] text-ink-soft">{label}</div>
       <div className="num mt-1 text-[14px] font-semibold text-ink">{value}</div>
     </div>
   );

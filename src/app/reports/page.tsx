@@ -38,8 +38,8 @@ export default async function ReportsPage() {
         title="Automated Research Report Cards"
         subtitle="Reports pair deterministic backtest metrics with an LLM-written narrative (DeepSeek, when configured). Numbers come from the engine; only prose is generated."
         actions={
-          <div className="rounded-xl border border-line bg-white/[0.03] px-3.5 py-2 text-right">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-soft">Dataset generated</div>
+          <div className="rounded-md border border-line bg-ink/[0.03] px-3.5 py-2 text-right">
+            <div className="text-[10px] font-semibold text-ink-soft">Dataset generated</div>
             <div className="num mt-0.5 text-[12.5px] text-ink">
               {new Date(metadata.generatedAt).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}
             </div>
@@ -61,7 +61,7 @@ export default async function ReportsPage() {
       {concentrationNote && signalConcentration && (
         <section className="card p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">Portfolio Concentration Note</div>
+            <div className="text-[11px] text-ink-soft">Portfolio Concentration Note</div>
             <div className="flex items-center gap-2">
               <StatusBadge status={`${signalConcentration.level} overlap`} />
               <span className="text-[12px] text-ink-soft">{concentrationNote.source === "deepseek" ? "deepseek memo" : "template memo"}</span>
@@ -97,12 +97,12 @@ export default async function ReportsPage() {
                   <StatusBadge status={candidate.status} />
                   <StatusBadge status={result.dataStatus.adjusted ? "adjusted prices" : "raw/demo prices"} />
                 </div>
-                <span className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-ink-soft">
+                <span className="text-[10.5px] font-medium text-ink-soft">
                   {explanation.source === "deepseek" ? "DeepSeek memo" : "Template memo"}
                 </span>
               </div>
 
-              <h2 className="mt-3 text-[18px] font-semibold tracking-tight text-white">
+              <h2 className="mt-3 text-[18px] font-semibold tracking-tight text-ink">
                 {result.strategyName} <span className="text-ink-soft">·</span> <span className="num">{result.symbol}</span>
               </h2>
               <p className="mt-2 text-[13px] leading-relaxed text-ink">{explanation.summary}</p>
@@ -114,26 +114,26 @@ export default async function ReportsPage() {
               </div>
 
               <div className="mt-4">
-                <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
+                <div className="flex items-center justify-between text-[10px] font-semibold text-ink-soft">
                   <span>Radar score</span>
                   <span className="num text-ink">{candidate.score}/100</span>
                 </div>
-                <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
+                <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-ink/[0.06]">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-blue-400 shadow-[0_0_12px_rgba(34,211,238,0.5)]"
+                    className="h-full rounded-full bg-gradient-to-r from-accent to-accent"
                     style={{ width: `${Math.max(4, Math.min(100, candidate.score))}%` }}
                   />
                 </div>
               </div>
 
               <div className="mt-4">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-soft">Key risks</div>
+                <div className="text-[10px] font-semibold text-ink-soft">Key risks</div>
                 <p className="mt-1 text-[13px] leading-relaxed text-ink-muted">{explanation.keyRisks}</p>
               </div>
 
               <Link
                 href={`/strategies/${result.strategyId}`}
-                className="mt-5 inline-flex w-fit items-center gap-1 text-[12px] font-medium text-cyan-200/90 transition-colors hover:text-cyan-100"
+                className="mt-5 inline-flex w-fit items-center gap-1 text-[12px] font-medium text-accent/90 transition-colors hover:text-accent"
               >
                 Open full backtest →
               </Link>
@@ -146,10 +146,10 @@ export default async function ReportsPage() {
 }
 
 function Mini({ label, value, tone = "default" }: { label: string; value: string; tone?: "default" | "pos" | "neg" }) {
-  const valueColor = tone === "pos" ? "text-emerald-300" : tone === "neg" ? "text-rose-300" : "text-ink";
+  const valueColor = tone === "pos" ? "text-emerald-700" : tone === "neg" ? "text-rose-700" : "text-ink";
   return (
     <div className="stat-tile !p-3">
-      <div className="text-[9.5px] font-semibold uppercase tracking-[0.12em] text-ink-soft">{label}</div>
+      <div className="text-[9.5px] font-semibold text-ink-soft">{label}</div>
       <div className={`num mt-1 text-[16px] font-semibold ${valueColor}`}>{value}</div>
     </div>
   );

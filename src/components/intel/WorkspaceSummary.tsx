@@ -19,8 +19,8 @@ export default function WorkspaceSummary({ projectId }: { projectId: string }) {
   return (
     <div className="grid grid-cols-2 gap-2">
       {items.map(([label, n, href]) => (
-        <Link key={label} href={href} className="stat-tile !p-3 transition-colors hover:border-cyan-300/35">
-          <div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft">{label}</div>
+        <Link key={label} href={href} className="stat-tile !p-3 transition-colors hover:border-accent/35">
+          <div className="text-[10px] text-ink-soft">{label}</div>
           <div className="num mt-1 text-[19px] font-semibold text-ink">{ready ? n : "…"}</div>
         </Link>
       ))}

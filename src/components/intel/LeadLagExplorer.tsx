@@ -23,29 +23,29 @@ export default function LeadLagExplorer({ series, defaultLeader, defaultFollower
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2 text-[12px]">
         <label className="text-ink-soft" htmlFor="ll-leader">Leader</label>
-        <select id="ll-leader" value={leader} onChange={(e) => setLeader(e.target.value)} className="h-8 rounded-lg border border-line bg-[#07111d] px-2 text-ink">
+        <select id="ll-leader" value={leader} onChange={(e) => setLeader(e.target.value)} className="h-8 rounded-lg border border-line bg-paper px-2 text-ink">
           {series.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
         </select>
         <span className="text-ink-soft">→</span>
         <label className="text-ink-soft" htmlFor="ll-follower">Follower</label>
-        <select id="ll-follower" value={follower} onChange={(e) => setFollower(e.target.value)} className="h-8 rounded-lg border border-line bg-[#07111d] px-2 text-ink">
+        <select id="ll-follower" value={follower} onChange={(e) => setFollower(e.target.value)} className="h-8 rounded-lg border border-line bg-paper px-2 text-ink">
           {series.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
         </select>
       </div>
       {!result || !result.best ? (
-        <div className="rounded-xl border border-dashed border-line p-4 text-[12px] text-ink-soft">{a?.id === b?.id ? "Choose two different series." : "Not enough overlapping observations (need ≥ 24 months)."}</div>
+        <div className="rounded-md border border-dashed border-line p-4 text-[12px] text-ink-soft">{a?.id === b?.id ? "Choose two different series." : "Not enough overlapping observations (need ≥ 24 months)."}</div>
       ) : (
         <>
           <LagBars lags={result.lags} best={result.best.lag} />
           <div className="grid gap-2 text-[12px] sm:grid-cols-2 lg:grid-cols-4">
-            <div className="stat-tile !p-3"><div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft">Strongest lag</div><div className="num mt-1 text-[17px] font-semibold text-ink">{result.best.lag} months</div></div>
-            <div className="stat-tile !p-3"><div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft">Correlation (n)</div><div className="num mt-1 text-[17px] font-semibold text-ink">{(result.best.correlation as number).toFixed(2)} <span className="text-[12px] text-ink-soft">({result.best.n})</span></div></div>
-            <div className="stat-tile !p-3"><div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft">Split-half</div><div className={`num mt-1 text-[17px] font-semibold ${result.stable ? "text-emerald-300" : "text-amber-200"}`}>{result.firstHalf?.toFixed(2)} / {result.secondHalf?.toFixed(2)}</div></div>
+            <div className="stat-tile !p-3"><div className="text-[10px] text-ink-soft">Strongest lag</div><div className="num mt-1 text-[17px] font-semibold text-ink">{result.best.lag} months</div></div>
+            <div className="stat-tile !p-3"><div className="text-[10px] text-ink-soft">Correlation (n)</div><div className="num mt-1 text-[17px] font-semibold text-ink">{(result.best.correlation as number).toFixed(2)} <span className="text-[12px] text-ink-soft">({result.best.n})</span></div></div>
+            <div className="stat-tile !p-3"><div className="text-[10px] text-ink-soft">Split-half</div><div className={`num mt-1 text-[17px] font-semibold ${result.stable ? "text-emerald-700" : "text-amber-700"}`}>{result.firstHalf?.toFixed(2)} / {result.secondHalf?.toFixed(2)}</div></div>
             <div className="stat-tile !p-3">
-              <div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft">Out of sample</div>
+              <div className="text-[10px] text-ink-soft">Out of sample</div>
               {result.holdout ? (
                 <>
-                  <div className={`num mt-1 text-[17px] font-semibold ${result.holdout.confirmed ? "text-emerald-300" : "text-amber-200"}`}>
+                  <div className={`num mt-1 text-[17px] font-semibold ${result.holdout.confirmed ? "text-emerald-700" : "text-amber-700"}`}>
                     {result.holdout.holdoutCorrelation?.toFixed(2) ?? "n/a"} <span className="text-[12px] text-ink-soft">({result.holdout.holdoutN})</span>
                   </div>
                   <div className="mt-0.5 text-[10.5px] text-ink-soft">{result.holdout.chosenLag}m lag picked on data to {result.holdout.splitMonth} (r {result.holdout.trainCorrelation.toFixed(2)})</div>

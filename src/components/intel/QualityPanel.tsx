@@ -4,9 +4,9 @@ import type { QualityCheck } from "@/lib/intel/types";
 import { useWorkspace } from "./useWorkspace";
 
 const STATE_STYLE: Record<QualityCheck["state"], string> = {
-  pass: "border-emerald-400/35 bg-emerald-500/10 text-emerald-200",
-  warn: "border-amber-300/35 bg-amber-400/10 text-amber-100",
-  fail: "border-rose-300/40 bg-rose-400/10 text-rose-100",
+  pass: "border-emerald-600/35 bg-emerald-500/10 text-emerald-700",
+  warn: "border-amber-600/35 bg-amber-400/10 text-amber-800",
+  fail: "border-rose-600/40 bg-rose-400/10 text-rose-800",
 };
 
 /**
@@ -30,7 +30,7 @@ export default function QualityPanel({ checks, projectId, compact = false }: { c
   return (
     <ul className={`grid gap-2 ${compact ? "" : "md:grid-cols-2"}`}>
       {adjusted.map((c) => (
-        <li key={c.id} className="rounded-xl border border-line bg-white/[0.025] px-3 py-2">
+        <li key={c.id} className="rounded-md border border-line bg-ink/[0.025] px-3 py-2">
           <div className="flex items-center justify-between gap-2">
             <span className="text-[12.5px] font-medium text-ink">{c.label}</span>
             <span className={`chip ${STATE_STYLE[c.state]}`}>{c.state}</span>

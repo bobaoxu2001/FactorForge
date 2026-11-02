@@ -7,11 +7,11 @@ export default function StressBadge({ label }: { label: string }) {
   const normalized = label.toLowerCase();
   const cls =
     normalized.includes("under stress") || normalized.includes("high drawdown")
-      ? "border-rose-300/35 bg-rose-400/10 text-rose-100"
+      ? "border-rose-600/35 bg-rose-400/10 text-rose-800"
       : normalized.includes("watch") || normalized.includes("fallback")
-        ? "border-amber-300/35 bg-amber-400/10 text-amber-100"
+        ? "border-amber-600/35 bg-amber-400/10 text-amber-800"
         : normalized.includes("resilient") || normalized.includes("stable")
-          ? "border-emerald-400/30 bg-emerald-500/12 text-emerald-200"
-          : "border-blue-300/30 bg-blue-400/10 text-blue-100";
+          ? "border-emerald-600/30 bg-emerald-500/12 text-emerald-700"
+          : "border-accent/30 bg-accent/10 text-accent";
   return <span className={`chip ${cls}`}>{label}</span>;
 }

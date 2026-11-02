@@ -18,7 +18,7 @@ export default function ScenarioTable({ scenario, basketLabel = "proxy basket" }
           return (
             <div
               key={leg.case}
-              className={`rounded-xl border border-line border-l-2 ${accent.row} bg-white/[0.025] p-3.5`}
+              className={`rounded-md border border-line border-l-2 ${accent.row} bg-ink/[0.025] p-3.5`}
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">

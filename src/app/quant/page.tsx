@@ -90,11 +90,11 @@ export default async function HomePage() {
       <section className="hero-shell p-6 md:p-8">
         <div className="relative grid gap-6 xl:grid-cols-[0.9fr_1.1fr] xl:items-stretch">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/[0.06] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-100/80">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 shadow-[0_0_14px_rgba(52,211,153,0.9)]" />
+            <div className="inline-flex items-center gap-2 rounded-full border border-accent/20 bg-accent/[0.06] px-3 py-1.5 text-[11px] font-semibold text-accent/80">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
               Open-source · AI Quant Research Lab
             </div>
-            <h1 className="mt-4 max-w-4xl text-[40px] font-semibold leading-[0.98] tracking-[-0.045em] text-white md:text-[64px]">
+            <h1 className="mt-3 max-w-[22ch] text-[34px] font-semibold leading-[1.08] text-ink md:text-[46px]">
               Factor discovery, backtests, and market-stress research in one AI quant lab.
             </h1>
             <p className="mt-5 max-w-2xl text-[15px] leading-7 text-ink-muted">
@@ -106,37 +106,37 @@ export default async function HomePage() {
             <div className="mt-5 flex flex-wrap items-center gap-2.5">
               <Link
                 href="/portfolio"
-                className="group inline-flex items-center gap-2 rounded-full border border-emerald-300/40 bg-gradient-to-r from-cyan-400/20 to-emerald-400/20 px-4 py-2 text-[13px] font-semibold text-white shadow-[0_0_22px_rgba(34,211,238,0.18)] transition-colors hover:border-emerald-300/70 hover:from-cyan-400/30 hover:to-emerald-400/30"
+                className="group inline-flex items-center gap-2 rounded-full border border-emerald-600/40 bg-gradient-to-r from-accent/20 to-emerald-400/20 px-4 py-2 text-[13px] font-semibold text-ink transition-colors hover:border-emerald-600/70 hover:from-accent/30 hover:to-emerald-400/30"
               >
-                <Trophy className="h-4 w-4 text-emerald-200" />
+                <Trophy className="h-4 w-4 text-emerald-700" />
                 Model Portfolio Since May
                 <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
               </Link>
               <Link
                 href="/ai-market?demo=stress"
-                className="inline-flex items-center gap-2 rounded-full border border-line bg-white/[0.04] px-3.5 py-2 text-[12.5px] text-ink-muted transition-colors hover:border-amber-300/45 hover:text-amber-100"
+                className="inline-flex items-center gap-2 rounded-full border border-line bg-ink/[0.04] px-3.5 py-2 text-[12.5px] text-ink-muted transition-colors hover:border-amber-600/45 hover:text-amber-800"
               >
-                <ShieldAlert className="h-3.5 w-3.5 text-amber-200/80" />
+                <ShieldAlert className="h-3.5 w-3.5 text-amber-700/80" />
                 Market Stress Mode
               </Link>
               <Link
                 href="/hotspots"
-                className="inline-flex items-center gap-2 rounded-full border border-line bg-white/[0.04] px-3.5 py-2 text-[12.5px] text-ink-muted transition-colors hover:border-cyan-300/45 hover:text-cyan-100"
+                className="inline-flex items-center gap-2 rounded-full border border-line bg-ink/[0.04] px-3.5 py-2 text-[12.5px] text-ink-muted transition-colors hover:border-accent/45 hover:text-accent"
               >
-                <Flame className="h-3.5 w-3.5 text-cyan-200/80" />
+                <Flame className="h-3.5 w-3.5 text-accent/80" />
                 Market Hotspots
               </Link>
               <Link
                 href="/strategies"
-                className="inline-flex items-center gap-2 rounded-full border border-line bg-white/[0.04] px-3.5 py-2 text-[12.5px] text-ink-muted transition-colors hover:border-blue-300/45 hover:text-blue-100"
+                className="inline-flex items-center gap-2 rounded-full border border-line bg-ink/[0.04] px-3.5 py-2 text-[12.5px] text-ink-muted transition-colors hover:border-accent/45 hover:text-accent"
               >
-                <LineChart className="h-3.5 w-3.5 text-blue-200/80" />
+                <LineChart className="h-3.5 w-3.5 text-accent/80" />
                 Strategy Research
               </Link>
             </div>
             <Link
               href="/learn"
-              className="mt-4 inline-flex items-center gap-2 rounded-full border border-cyan-300/30 bg-cyan-300/[0.07] px-3.5 py-1.5 text-[12.5px] text-cyan-100 transition-colors hover:border-cyan-300/55 hover:bg-cyan-300/[0.12]"
+              className="mt-4 inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/[0.07] px-3.5 py-1.5 text-[12.5px] text-accent transition-colors hover:border-accent/55 hover:bg-accent/[0.12]"
             >
               <GraduationCap className="h-3.5 w-3.5" />
               New to stocks? Start with Stocks 101 — every term in plain English
@@ -150,8 +150,8 @@ export default async function HomePage() {
               <EvidencePill label="CI + 229 tests" />
               <EvidencePill label="Contributor-ready" tone="green" />
             </div>
-            <div className="mt-6 rounded-2xl border border-amber-300/18 bg-amber-300/[0.045] p-4">
-              <div className="text-[11px] uppercase tracking-[0.18em] text-amber-100/70">Why the demo is safe and maintainable</div>
+            <div className="mt-6 rounded-lg border border-amber-600/18 bg-amber-300/[0.045] p-4">
+              <div className="text-[11px] text-amber-800/70">Why the demo is safe and maintainable</div>
               <p className="mt-2 text-[13px] leading-relaxed text-ink-muted">
                 No hardcoded returns. Metrics are calculated from OHLCV backtests, optional keys degrade to labeled fallback/template mode, and maintainer docs cover CI, releases, security policy, issue triage, and PR review.
               </p>
@@ -176,7 +176,7 @@ export default async function HomePage() {
             </div>
             <p className="mt-1.5 text-[12.5px] text-ink-soft">First time on FactorForge? Pick a thread — each surface flows into the next.</p>
           </div>
-          <Link href="/learn" className="text-[12px] text-cyan-300 hover:text-cyan-200">New to stocks? Stocks 101 ›</Link>
+          <Link href="/learn" className="text-[12px] text-accent hover:text-accent">New to stocks? Stocks 101 ›</Link>
         </div>
         <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {([
@@ -191,13 +191,13 @@ export default async function HomePage() {
               className="card card-hover group flex flex-col p-4"
             >
               <div className="flex items-center gap-2.5">
-                <div className="grid h-9 w-9 place-items-center rounded-xl border border-cyan-300/20 bg-cyan-300/[0.06]">
-                  <Icon className="h-4 w-4 text-cyan-200" />
+                <div className="grid h-9 w-9 place-items-center rounded-md border border-accent/20 bg-accent/[0.06]">
+                  <Icon className="h-4 w-4 text-accent" />
                 </div>
-                <div className="text-[13.5px] font-semibold text-white">{title}</div>
+                <div className="text-[13.5px] font-semibold text-ink">{title}</div>
               </div>
               <p className="mt-3 text-[12.5px] leading-relaxed text-ink-muted">{copy}</p>
-              <span className="mt-3 inline-flex items-center gap-1 text-[12px] text-blue-300 transition-transform group-hover:translate-x-0.5">
+              <span className="mt-3 inline-flex items-center gap-1 text-[12px] text-accent transition-transform group-hover:translate-x-0.5">
                 Explore <ArrowRight className="h-3.5 w-3.5" />
               </span>
             </Link>
@@ -223,8 +223,8 @@ export default async function HomePage() {
         <SectionHeader title="How This Works" label="Compact evidence pipeline for visitors" href="/reports" compact />
         <div className="mt-1 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {["1. Fetch real OHLCV", "2. Build factors", "3. Generate signals", "4. Run backtest", "5. Score radar", "6. Observe in paper"].map((step, index) => (
-            <div key={step} className="rounded-xl border border-line bg-white/[0.035] p-3">
-              <div className="text-[12px] font-semibold text-white">{step}</div>
+            <div key={step} className="rounded-md border border-line bg-ink/[0.035] p-3">
+              <div className="text-[12px] font-semibold text-ink">{step}</div>
               <p className="mt-1 text-[11.5px] leading-relaxed text-ink-muted">
                 {[
                   "Yahoo Finance daily bars with provider and fallback metadata.",
@@ -267,7 +267,7 @@ export default async function HomePage() {
                 metric={index === 1 ? `${dataset.factors.length} symbols` : index === 2 ? `${dataset.strategyResults.length} models` : index === 3 ? `${radarCandidateCount} candidates` : undefined}
                 icon={Icon}
               />
-              {index < modules.length - 1 && <ArrowRight className="absolute -right-3 top-1/2 hidden h-4 w-4 -translate-y-1/2 text-cyan-200/45 xl:block" />}
+              {index < modules.length - 1 && <ArrowRight className="absolute -right-3 top-1/2 hidden h-4 w-4 -translate-y-1/2 text-accent/45 xl:block" />}
             </div>
           ))}
         </div>
@@ -277,13 +277,13 @@ export default async function HomePage() {
         <SectionHeader title="Data Source Status" label="Provider provenance is visible on every result" href="/data" />
         <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-6">
           {engineStrip.map(([label, status, Icon]) => (
-            <div key={label} className="rounded-2xl border border-line bg-white/[0.035] p-3">
+            <div key={label} className="rounded-lg border border-line bg-ink/[0.035] p-3">
               <div className="flex items-center gap-3">
-                <div className="grid h-10 w-10 place-items-center rounded-xl border border-blue-300/25 bg-blue-300/10">
-                  <Icon className="h-5 w-5 text-blue-200" />
+                <div className="grid h-10 w-10 place-items-center rounded-md border border-accent/25 bg-accent/10">
+                  <Icon className="h-5 w-5 text-accent" />
                 </div>
                 <div>
-                  <div className="text-[13px] font-semibold text-white">{label}</div>
+                  <div className="text-[13px] font-semibold text-ink">{label}</div>
                   <StatusBadge status={status} />
                 </div>
               </div>
@@ -292,7 +292,7 @@ export default async function HomePage() {
         </div>
         <div className="mt-4 grid grid-cols-1 gap-3 xl:grid-cols-2">
           {priceResults.slice(0, 2).map((result) => (
-            <div key={result.symbol} className="rounded-2xl border border-line bg-white/[0.025] p-3">
+            <div key={result.symbol} className="rounded-lg border border-line bg-ink/[0.025] p-3">
               <DataSourceStatus result={result} />
             </div>
           ))}
@@ -304,7 +304,7 @@ export default async function HomePage() {
           <SectionHeader title="Top Strategies" label="Ranked by evidence, risk, and radar score" href="/strategies" compact />
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-[12.5px]">
-              <thead className="border-y border-line bg-white/[0.025] text-[10px] uppercase tracking-wider text-ink-soft">
+              <thead className="border-y border-line bg-ink/[0.025] text-[10px] tracking-wider text-ink-soft">
                 <tr>
                   <th className="px-4 py-3 text-left">Strategy</th>
                   <th className="px-4 py-3 text-right">Annual</th>
@@ -319,13 +319,13 @@ export default async function HomePage() {
                 {top.map((candidate) => (
                   <tr key={candidate.result.strategyId} className="table-row">
                     <td className="px-4 py-3">
-                      <Link href={`/strategies/${candidate.result.strategyId}`} className="font-medium text-white hover:text-blue-300">
+                      <Link href={`/strategies/${candidate.result.strategyId}`} className="font-medium text-ink hover:text-accent">
                         {candidate.result.strategyName}
                       </Link>
                       <div className="mt-0.5 text-[11px] text-ink-soft">{candidate.result.symbol}</div>
                     </td>
                     <td className={`num px-4 py-3 text-right ${signedText(candidate.result.metrics.annualizedReturn)}`}>{pct(candidate.result.metrics.annualizedReturn)}</td>
-                    <td className="num px-4 py-3 text-right text-rose-300">{pct(candidate.result.metrics.maxDrawdown)}</td>
+                    <td className="num px-4 py-3 text-right text-rose-700">{pct(candidate.result.metrics.maxDrawdown)}</td>
                     <td className="num px-4 py-3 text-right text-ink">{num(candidate.result.metrics.sharpe)}</td>
                     <td className="num px-4 py-3 text-right text-ink">{candidate.score}</td>
                     <td className="px-4 py-3"><MiniCurve data={candidate.result.equityCurve} /></td>
@@ -340,7 +340,7 @@ export default async function HomePage() {
 
         <div className="card p-4 xl:col-span-3">
           <SectionHeader title="Radar Summary" label="Screening funnel" href="/radar" compact />
-          <div className="mt-4 grid grid-cols-4 divide-x divide-line rounded-xl border border-line bg-white/[0.025] py-3 text-center">
+          <div className="mt-4 grid grid-cols-4 divide-x divide-line rounded-md border border-line bg-ink/[0.025] py-3 text-center">
             <RadarStat label="Total" value={dataset.radarCandidates.length} />
             <RadarStat label="Shortlist" value={shortlistedCount} />
             <RadarStat label="Radar" value={radarCandidateCount} />
@@ -358,8 +358,8 @@ export default async function HomePage() {
                   <span className="text-ink-muted">{label}</span>
                   <span className="num text-ink">{value} · {percent}</span>
                 </div>
-                <div className="h-2 rounded-full bg-white/[0.06]">
-                  <div className="h-2 rounded-full bg-gradient-to-r from-cyan-300 to-blue-400" style={{ width: String(percent) }} />
+                <div className="h-2 rounded-full bg-ink/[0.06]">
+                  <div className="h-2 rounded-full bg-gradient-to-r from-accent to-accent" style={{ width: String(percent) }} />
                 </div>
               </div>
             ))}
@@ -367,15 +367,15 @@ export default async function HomePage() {
           {dataset.signalConcentration && (
             <div
               className={[
-                "mt-5 flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-[12px]",
+                "mt-5 flex items-center justify-between gap-3 rounded-md border px-3 py-2.5 text-[12px]",
                 dataset.signalConcentration.level === "high"
-                  ? "border-rose-300/30 bg-rose-300/[0.06] text-rose-100"
+                  ? "border-rose-600/30 bg-rose-300/[0.06] text-rose-800"
                   : dataset.signalConcentration.level === "medium"
-                    ? "border-amber-300/30 bg-amber-300/[0.06] text-amber-100"
-                    : "border-emerald-300/30 bg-emerald-300/[0.06] text-emerald-100",
+                    ? "border-amber-600/30 bg-amber-300/[0.06] text-amber-800"
+                    : "border-emerald-600/30 bg-emerald-300/[0.06] text-emerald-800",
               ].join(" ")}
             >
-              <span className="uppercase tracking-wider text-ink-soft">Diversification</span>
+              <span className="tracking-wider text-ink-soft">Diversification</span>
               <span className="num text-right">
                 {dataset.signalConcentration.strategyCount} screened ≈{" "}
                 {dataset.signalConcentration.effectiveStrategies.toFixed(1)} independent bets ·{" "}
@@ -389,23 +389,23 @@ export default async function HomePage() {
           <SectionHeader title="Paper Observation" label="Simulation only" href="/paper-trading" compact />
           {paper ? (
             <div>
-              <div className="mt-4 grid grid-cols-4 divide-x divide-line rounded-xl border border-line bg-white/[0.025] py-3 text-center">
+              <div className="mt-4 grid grid-cols-4 divide-x divide-line rounded-md border border-line bg-ink/[0.025] py-3 text-center">
                 <RadarStat label="Watching" value={dataset.paperObservations.length} />
                 <RadarStat label="Return" value={pct(paper.simulatedReturn)} />
                 <RadarStat label="Exposure" value={pctPlain(dataset.paperAccount.exposurePct)} />
                 <RadarStat label="Risk" value={dataset.paperAccount.riskBudgetStatus} />
               </div>
-              <div className="mt-4 rounded-xl border border-line bg-white/[0.025] p-3">
+              <div className="mt-4 rounded-md border border-line bg-ink/[0.025] p-3">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <div className="text-[12px] uppercase tracking-wider text-ink-soft">Current strategy</div>
-                    <div className="mt-1 font-semibold text-white">{paper.candidate.result.strategyName}</div>
+                    <div className="text-[12px] tracking-wider text-ink-soft">Current strategy</div>
+                    <div className="mt-1 font-semibold text-ink">{paper.candidate.result.strategyName}</div>
                     <div className="mt-1 text-[12px] text-ink-muted">{paper.currentSymbol} · {paper.status}</div>
                   </div>
                   <StatusBadge status={paper.status} />
                 </div>
               <div className="mt-4 text-[12.5px] leading-relaxed text-ink-muted">{paper.recentSignal}</div>
-                <div className="mt-3 rounded-lg border border-line bg-white/[0.025] px-3 py-2 text-[12px] text-ink-muted">
+                <div className="mt-3 rounded-lg border border-line bg-ink/[0.025] px-3 py-2 text-[12px] text-ink-muted">
                   Account guardrail: {dataset.paperAccount.guardrails[2]} Current max observed drawdown is {pct(dataset.paperAccount.maxObservedDrawdown)}.
                 </div>
                 <div className="mt-4"><MiniCurve data={paper.candidate.result.equityCurve} wide /></div>
@@ -432,13 +432,13 @@ export default async function HomePage() {
           {aiInsights.map((detail, index) => {
             const Icon = [Target, Network, LineChart, ShieldAlert][index] ?? BrainCircuit;
             return (
-            <div key={detail} className="rounded-xl border border-blue-300/20 bg-blue-300/[0.055] p-4">
+            <div key={detail} className="rounded-md border border-accent/20 bg-accent/[0.055] p-4">
               <div className="flex items-center gap-3">
                 <div className="grid h-11 w-11 place-items-center rounded-full border border-current/25">
                   <Icon className="h-5 w-5" />
                 </div>
                 <div>
-                  <div className="text-[13px] font-semibold text-white">Insight {index + 1}</div>
+                  <div className="text-[13px] font-semibold text-ink">Insight {index + 1}</div>
                   <div className="mt-0.5 text-[12px] text-ink-muted">Derived from live metrics</div>
                 </div>
               </div>
@@ -458,7 +458,7 @@ function SectionHeader({ title, label, href, compact = false }: { title: string;
         <div className="panel-title">{title}</div>
         <div className="mt-0.5 text-[11px] text-ink-soft">{label}</div>
       </div>
-      <Link href={href} className="text-[12px] text-blue-300 hover:text-blue-200">View all ›</Link>
+      <Link href={href} className="text-[12px] text-accent hover:text-accent">View all ›</Link>
     </div>
   );
 }
@@ -466,17 +466,17 @@ function SectionHeader({ title, label, href, compact = false }: { title: string;
 function RadarStat({ label, value }: { label: string; value: string | number }) {
   return (
     <div>
-      <div className="num text-[19px] font-semibold text-white">{value}</div>
-      <div className="mt-1 text-[10px] uppercase tracking-wider text-ink-soft">{label}</div>
+      <div className="num text-[19px] font-semibold text-ink">{value}</div>
+      <div className="mt-1 text-[10px] tracking-wider text-ink-soft">{label}</div>
     </div>
   );
 }
 
 function HeroStat({ label, value, detail }: { label: string; value: string; detail: string }) {
   return (
-    <div className="rounded-2xl border border-line bg-white/[0.04] p-4">
-      <div className="text-[10px] uppercase tracking-[0.2em] text-ink-soft">{label}</div>
-      <div className="num mt-2 text-[26px] font-semibold text-white">{value}</div>
+    <div className="rounded-lg border border-line bg-ink/[0.04] p-4">
+      <div className="text-[10px] text-ink-soft">{label}</div>
+      <div className="num mt-2 text-[26px] font-semibold text-ink">{value}</div>
       <div className="mt-1 text-[12px] text-ink-muted">{detail}</div>
     </div>
   );
@@ -484,12 +484,12 @@ function HeroStat({ label, value, detail }: { label: string; value: string; deta
 
 function EvidencePill({ label, tone = "blue" }: { label: string; tone?: "blue" | "green" | "amber" }) {
   const cls = tone === "green"
-    ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-100"
+    ? "border-emerald-600/30 bg-emerald-400/10 text-emerald-800"
     : tone === "amber"
-      ? "border-amber-300/35 bg-amber-400/10 text-amber-100"
-      : "border-white/10 bg-white/[0.045] text-blue-100";
+      ? "border-amber-600/35 bg-amber-400/10 text-amber-800"
+      : "border-ink/10 bg-ink/[0.045] text-accent";
   return (
-    <div className={`inline-flex min-h-11 items-center gap-2 rounded-2xl border px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] ${cls}`}>
+    <div className={`inline-flex min-h-11 items-center gap-2 rounded-lg border px-3 py-2 ${cls}`}>
       <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
       <span>{label}</span>
     </div>
@@ -499,7 +499,7 @@ function EvidencePill({ label, tone = "blue" }: { label: string; tone?: "blue" |
 function LiveResearchCase({ candidate, fallbackCount }: { candidate: RadarCandidate | undefined; fallbackCount: number }) {
   if (!candidate) {
     return (
-      <div className="rounded-3xl border border-blue-300/20 bg-blue-300/[0.045] p-5">
+      <div className="rounded-lg border border-accent/20 bg-accent/[0.045] p-5">
         <EmptyState title="No radar evidence yet" message="A live research case — symbol, signals, backtest, and verdict — renders here as soon as the pipeline has usable OHLCV data." action={{ href: "/data", label: "Check data sources" }} />
       </div>
     );
@@ -516,14 +516,14 @@ function LiveResearchCase({ candidate, fallbackCount }: { candidate: RadarCandid
 
   return (
     <div className="hero-showcase relative min-h-[540px] overflow-hidden p-5">
-      <div className="absolute inset-x-5 top-1/2 h-px bg-gradient-to-r from-transparent via-cyan-300/24 to-transparent" />
+      <div className="absolute inset-x-5 top-1/2 h-px bg-gradient-to-r from-transparent via-accent/24 to-transparent" />
       <div className="relative flex flex-wrap items-start justify-between gap-4">
         <div>
-          <div className="text-[11px] uppercase tracking-[0.2em] text-blue-200/80">Live research case</div>
+          <div className="text-[11px] text-accent/80">Live research case</div>
           <div className="mt-2 flex flex-wrap items-end gap-3">
-            <div className="num text-[60px] font-semibold leading-none tracking-[-0.07em] text-white md:text-[82px]">{result.symbol}</div>
+            <div className="num text-[60px] font-semibold leading-none tracking-[-0.07em] text-ink md:text-[82px]">{result.symbol}</div>
             <div className="pb-2">
-              <div className="text-[15px] font-semibold text-white">{result.strategyName}</div>
+              <div className="text-[15px] font-semibold text-ink">{result.strategyName}</div>
               <div className="mt-1 text-[12px] text-ink-muted">{result.dataStatus.provider} · {result.dataStatus.isFallback ? "fallback labeled" : "real market data"}</div>
             </div>
           </div>
@@ -531,13 +531,13 @@ function LiveResearchCase({ candidate, fallbackCount }: { candidate: RadarCandid
         <StatusBadge status={fallbackCount === 0 ? "real data active" : `${fallbackCount} fallback labeled`} />
       </div>
 
-      <div className="relative mt-5 rounded-3xl border border-cyan-300/16 bg-black/24 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+      <div className="relative mt-5 rounded-lg border border-accent/16 bg-panel2 p-4">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <div className="text-[10px] uppercase tracking-[0.18em] text-ink-soft">Backtested equity curve</div>
-            <div className="num mt-1 text-[24px] font-semibold text-white">${Math.round(latestEquity).toLocaleString("en-US")}</div>
+            <div className="text-[10px] text-ink-soft">Backtested equity curve</div>
+            <div className="num mt-1 text-[24px] font-semibold text-ink">${Math.round(latestEquity).toLocaleString("en-US")}</div>
           </div>
-          <Link href={`/strategies/${result.strategyId}`} className="rounded-full border border-blue-300/30 bg-blue-400/10 px-3 py-1.5 text-[12px] text-blue-100 hover:bg-blue-400/15">
+          <Link href={`/strategies/${result.strategyId}`} className="rounded-full border border-accent/30 bg-accent/10 px-3 py-1.5 text-[12px] text-accent hover:bg-accent/15">
             Open case
           </Link>
         </div>
@@ -553,18 +553,18 @@ function LiveResearchCase({ candidate, fallbackCount }: { candidate: RadarCandid
 
       <div className="relative mt-4 grid grid-cols-1 gap-2 md:grid-cols-4">
         {caseSteps.map(([step, label, detail], index) => (
-          <div key={step} className="rounded-2xl border border-line bg-white/[0.035] p-3">
+          <div key={step} className="rounded-lg border border-line bg-ink/[0.035] p-3">
             <div className="flex items-center gap-2">
-              <span className="grid h-7 w-7 place-items-center rounded-full border border-cyan-300/25 bg-cyan-300/10 text-[10px] font-semibold text-cyan-100">{step}</span>
-              <span className="text-[12px] font-semibold text-white">{label}</span>
-              {index < caseSteps.length - 1 && <ArrowRight className="ml-auto hidden h-3.5 w-3.5 text-cyan-200/50 md:block" />}
+              <span className="grid h-7 w-7 place-items-center rounded-full border border-accent/25 bg-accent/10 text-[10px] font-semibold text-accent">{step}</span>
+              <span className="text-[12px] font-semibold text-ink">{label}</span>
+              {index < caseSteps.length - 1 && <ArrowRight className="ml-auto hidden h-3.5 w-3.5 text-accent/50 md:block" />}
             </div>
             <div className="mt-2 text-[11.5px] leading-relaxed text-ink-muted">{detail}</div>
           </div>
         ))}
       </div>
 
-      <div className="relative mt-4 rounded-2xl border border-emerald-300/20 bg-emerald-300/[0.06] p-3 text-[12px] leading-relaxed text-emerald-50/85">
+      <div className="relative mt-4 rounded-lg border border-emerald-600/20 bg-emerald-300/[0.06] p-3 text-[12px] leading-relaxed text-emerald-800/85">
         Research gate: {candidate.nextAction}. This is simulated research evidence only, not an instruction to trade.
       </div>
     </div>
@@ -572,10 +572,10 @@ function LiveResearchCase({ candidate, fallbackCount }: { candidate: RadarCandid
 }
 
 function CaseMetric({ label, value, tone = "default" }: { label: string; value: string; tone?: "default" | "positive" | "negative" }) {
-  const cls = tone === "positive" ? "text-emerald-300" : tone === "negative" ? "text-rose-300" : "text-white";
+  const cls = tone === "positive" ? "text-emerald-700" : tone === "negative" ? "text-rose-700" : "text-ink";
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.045] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-      <div className="text-[10px] uppercase tracking-[0.18em] text-ink-soft">{label}</div>
+    <div className="rounded-lg border border-ink/10 bg-ink/[0.045] p-3">
+      <div className="text-[10px] text-ink-soft">{label}</div>
       <div className={`num mt-2 text-[25px] font-semibold ${cls}`}>{value}</div>
     </div>
   );
@@ -600,8 +600,8 @@ function HeroCurve({ data }: { data: EquityPoint[] }) {
       <svg viewBox="0 0 1000 280" className="h-[220px] w-full">
         <defs>
           <linearGradient id="heroCurveFill" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="rgba(34,211,238,0.38)" />
-            <stop offset="100%" stopColor="rgba(34,211,238,0)" />
+            <stop offset="0%" stopColor="rgba(29,79,145,0.38)" />
+            <stop offset="100%" stopColor="rgba(29,79,145,0)" />
           </linearGradient>
           <filter id="heroCurveGlow" x="-10%" y="-25%" width="120%" height="150%">
             <feGaussianBlur stdDeviation="7" result="blur" />
@@ -611,17 +611,17 @@ function HeroCurve({ data }: { data: EquityPoint[] }) {
             </feMerge>
           </filter>
         </defs>
-        <line x1="0" x2="1000" y1="260" y2="260" stroke="rgba(148,163,184,0.22)" />
-        <line x1="0" x2="1000" y1="150" y2="150" stroke="rgba(148,163,184,0.15)" strokeDasharray="8 10" />
-        <line x1="0" x2="1000" y1="62" y2="62" stroke="rgba(251,191,36,0.12)" strokeDasharray="6 12" />
-        <polyline points={toPoints(benchmarkValues)} fill="none" stroke="rgba(148,163,184,0.55)" strokeWidth="4" strokeDasharray="10 10" strokeLinecap="round" strokeLinejoin="round" />
+        <line x1="0" x2="1000" y1="260" y2="260" stroke="rgba(103,113,132,0.22)" />
+        <line x1="0" x2="1000" y1="150" y2="150" stroke="rgba(103,113,132,0.15)" strokeDasharray="8 10" />
+        <line x1="0" x2="1000" y1="62" y2="62" stroke="rgba(161,92,7,0.12)" strokeDasharray="6 12" />
+        <polyline points={toPoints(benchmarkValues)} fill="none" stroke="rgba(103,113,132,0.55)" strokeWidth="4" strokeDasharray="10 10" strokeLinecap="round" strokeLinejoin="round" />
         <polygon points={`0,260 ${toPoints(values)} 1000,260`} fill="url(#heroCurveFill)" />
-        <polyline points={toPoints(values)} fill="none" stroke="rgba(34,211,238,0.3)" strokeWidth="18" strokeLinecap="round" strokeLinejoin="round" filter="url(#heroCurveGlow)" />
-        <polyline points={toPoints(values)} fill="none" stroke="#67e8f9" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
+        <polyline points={toPoints(values)} fill="none" stroke="rgba(29,79,145,0.3)" strokeWidth="18" strokeLinecap="round" strokeLinejoin="round" filter="url(#heroCurveGlow)" />
+        <polyline points={toPoints(values)} fill="none" stroke="#1d4f91" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
         {values.length > 0 && (
           <>
-            <circle cx="1000" cy={260 - ((values[values.length - 1] - min) / range) * 220} r="12" fill="rgba(34,211,238,0.18)" />
-            <circle cx="1000" cy={260 - ((values[values.length - 1] - min) / range) * 220} r="6" fill="#fbbf24" />
+            <circle cx="1000" cy={260 - ((values[values.length - 1] - min) / range) * 220} r="12" fill="rgba(29,79,145,0.18)" />
+            <circle cx="1000" cy={260 - ((values[values.length - 1] - min) / range) * 220} r="6" fill="#a15c07" />
           </>
         )}
       </svg>
@@ -688,7 +688,7 @@ function MarketPerformancePanel({ movers }: { movers: MarketMover[] }) {
       </div>
       <div className="mt-5 overflow-x-auto pb-1">
         <div className="min-w-[520px]">
-          <div className="grid grid-cols-[56px_1fr_88px_76px_76px] gap-3 border-y border-line py-2 text-[10px] uppercase tracking-wider text-ink-soft">
+          <div className="grid grid-cols-[56px_1fr_88px_76px_76px] gap-3 border-y border-line py-2 text-[10px] tracking-wider text-ink-soft">
             <span>Symbol</span>
             <span>5D relative move</span>
             <span>Sector</span>
@@ -701,13 +701,13 @@ function MarketPerformancePanel({ movers }: { movers: MarketMover[] }) {
               const positive = item.fiveDay >= 0;
               return (
                 <div key={item.symbol} className="grid grid-cols-[56px_1fr_88px_76px_76px] items-center gap-3 text-[12px]">
-                  <div className="font-semibold text-white">{item.symbol}</div>
-                  <div className="h-2.5 rounded-full bg-white/[0.06]">
-                    <div className={`h-2.5 rounded-full ${positive ? "bg-emerald-300" : "bg-rose-300"}`} style={{ width }} />
+                  <div className="font-semibold text-ink">{item.symbol}</div>
+                  <div className="h-2.5 rounded-full bg-ink/[0.06]">
+                    <div className={`h-2.5 rounded-full ${positive ? "bg-emerald-600" : "bg-rose-600"}`} style={{ width }} />
                   </div>
                   <div className="truncate text-[11px] text-ink-soft">{sectorOf(item.symbol) ?? "—"}</div>
-                  <div className={`num text-right ${item.oneDay >= 0 ? "text-emerald-300" : "text-rose-300"}`}>{pct(item.oneDay)}</div>
-                  <div className={`num text-right ${positive ? "text-emerald-300" : "text-rose-300"}`}>{pct(item.fiveDay)}</div>
+                  <div className={`num text-right ${item.oneDay >= 0 ? "text-emerald-700" : "text-rose-700"}`}>{pct(item.oneDay)}</div>
+                  <div className={`num text-right ${positive ? "text-emerald-700" : "text-rose-700"}`}>{pct(item.fiveDay)}</div>
                 </div>
               );
             })}
@@ -717,7 +717,7 @@ function MarketPerformancePanel({ movers }: { movers: MarketMover[] }) {
       {movers.length > topMovers.length && (
         <div className="mt-3 text-[11px] text-ink-soft">
           Showing the {topMovers.length} largest 5-day movers of {movers.length} names. Full table on the{" "}
-          <Link href="/data" className="text-blue-300 hover:text-blue-200">Data</Link> page.
+          <Link href="/data" className="text-accent hover:text-accent">Data</Link> page.
         </div>
       )}
     </section>
@@ -737,15 +737,15 @@ function MiniCurve({ data, wide = false }: { data: EquityPoint[]; wide?: boolean
   });
   const points = coords.map(([x, y]) => `${x},${y}`).join(" ");
   const up = (values[values.length - 1] ?? 0) >= (values[0] ?? 0);
-  const stroke = up ? "#34d399" : "#fb7185";
-  const fill = up ? "rgba(52,211,153,0.16)" : "rgba(251,113,133,0.14)";
+  const stroke = up ? "#17794a" : "#b42318";
+  const fill = up ? "rgba(23,121,74,0.16)" : "rgba(180,35,24,0.14)";
   const lastY = coords[coords.length - 1]?.[1] ?? 34;
 
   return (
     <svg viewBox="0 0 100 40" preserveAspectRatio="none" className={wide ? "h-16 w-full" : "h-10 w-24"}>
       <polygon points={`0,36 ${points} 100,36`} fill={fill} />
       <polyline points={points} fill="none" stroke={stroke} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-      <line x1="0" x2="100" y1="36" y2="36" stroke="rgba(120,149,184,0.16)" />
+      <line x1="0" x2="100" y1="36" y2="36" stroke="#e6e9ee" />
       <circle cx="100" cy={lastY} r="2.4" fill={stroke} />
     </svg>
   );

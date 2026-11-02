@@ -16,13 +16,13 @@ export default function CompaniesPage({ params }: { params: { projectId: string 
 
   return (
     <div className="space-y-5">
-      <Panel eyebrow="Stage 04 · Competitive intelligence" title="Peer comparison: same metrics, same definitions">
+      <Panel eyebrow="Stage 04 · Competitive intelligence" title="Peer comparison: same metrics, same definitions" source="SEC EDGAR XBRL company facts; Yahoo Finance prices; FactorForge calculation.">
         <p className="mb-3 max-w-4xl text-[12.5px] leading-relaxed text-ink-muted">
           Every figure is computed from SEC XBRL filings (first-reported, point-in-time) and Yahoo prices. Business models differ, so compare margin <em>changes</em> rather than levels across groups. There is no composite &ldquo;competitive score&rdquo;: rankings would need a weighting nobody can justify from this data.
         </p>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[1100px] text-left text-[12px]">
-            <thead className="text-[10px] uppercase tracking-[0.12em] text-ink-soft">
+            <thead className="text-[10px] text-ink-soft">
               <tr>
                 <th className="py-2 pr-3">Company</th>
                 <th className="py-2 pr-3">Latest Q</th>
@@ -49,7 +49,7 @@ export default function CompaniesPage({ params }: { params: { projectId: string 
                 return (
                   <tr key={c.ticker} className="table-row">
                     <td className="py-2 pr-3">
-                      <Link href={`/research/${pid}/companies/${c.ticker}`} className="font-medium text-ink hover:text-cyan-200">{c.ticker}</Link>
+                      <Link href={`/research/${pid}/companies/${c.ticker}`} className="font-medium text-ink hover:text-accent">{c.ticker}</Link>
                       <div className="text-[10.5px] text-ink-soft">{c.coverage.businessModel}{c.coverage.focus ? " · focus" : ""}</div>
                     </td>
                     <td className="py-2 pr-3 text-ink-muted">{l?.label}</td>
@@ -82,7 +82,7 @@ export default function CompaniesPage({ params }: { params: { projectId: string 
             {rows.map((c) => {
               const claim = view.config.excerptClaims.find((x) => x.ticker === c.ticker && (x.subject === "Business model" || x.subject === "Capacity sourcing"));
               return (
-                <li key={c.ticker} className="rounded-lg border border-line bg-white/[0.02] px-3 py-2">
+                <li key={c.ticker} className="rounded-lg border border-line bg-ink/[0.02] px-3 py-2">
                   <span className="font-medium text-ink">{c.ticker}</span>: {claim?.claim ?? c.coverage.businessModel} {claim && <EvidenceLinks ids={[`EV-10K-${claim.id}`]} projectId={pid} />}
                 </li>
               );
@@ -95,7 +95,7 @@ export default function CompaniesPage({ params }: { params: { projectId: string 
               const conc = concentration(c.ticker);
               const pricing = view.config.excerptClaims.find((x) => x.ticker === c.ticker && (x.subject === "Fuel pass-through" || x.subject === "Contract pricing"));
               return (
-                <li key={c.ticker} className="rounded-lg border border-line bg-white/[0.02] px-3 py-2">
+                <li key={c.ticker} className="rounded-lg border border-line bg-ink/[0.02] px-3 py-2">
                   <span className="font-medium text-ink">{c.ticker}</span>: {conc ? <>{conc.claim} <EvidenceLinks ids={[`EV-10K-${conc.id}`]} projectId={pid} /></> : <span className="text-ink-soft">No concentration figure extracted.</span>}
                   {pricing && <div className="mt-0.5">{pricing.claim} <EvidenceLinks ids={[`EV-10K-${pricing.id}`]} projectId={pid} /></div>}
                 </li>

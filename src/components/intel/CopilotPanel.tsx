@@ -21,10 +21,10 @@ function Block({ title, items, projectId, tone }: { title: string; items: Statem
   if (items.length === 0) return null;
   return (
     <section>
-      <h4 className={`mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${tone ?? "text-ink-soft"}`}>{title}</h4>
+      <h4 className={`mb-1 text-[11px] font-semibold ${tone ?? "text-ink-soft"}`}>{title}</h4>
       <ul className="space-y-1.5 text-[12.5px] leading-relaxed text-ink">
         {items.map((s, i) => (
-          <li key={i} className="rounded-lg border border-line bg-white/[0.02] px-3 py-1.5">
+          <li key={i} className="rounded-lg border border-line bg-ink/[0.02] px-3 py-1.5">
             {s.text} <EvidenceLinks ids={s.evidenceIds} projectId={projectId} max={5} />
           </li>
         ))}
@@ -82,14 +82,14 @@ export default function CopilotPanel({ projectId, hypotheses, tickers, stakehold
     setSaved(!error);
   };
 
-  const input = "rounded-lg border border-line bg-[#07111d] px-2.5 py-1.5 text-[12.5px] text-ink focus:border-cyan-300/50 focus:outline-none";
+  const input = "rounded-lg border border-line bg-paper px-2.5 py-1.5 text-[12.5px] text-ink focus:border-accent/50 focus:outline-none";
 
   return (
     <div className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
       <div className="card space-y-3 p-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-[14px] font-semibold text-white">Ask the research copilot</h3>
-          <span className={`chip ${llmConfigured ? "border-emerald-400/35 text-emerald-200" : "border-amber-300/35 text-amber-100"}`}>{llmConfigured ? "LLM + citation guard" : "deterministic mode"}</span>
+          <h3 className="text-[14px] font-semibold text-ink">Ask the research copilot</h3>
+          <span className={`chip ${llmConfigured ? "border-emerald-600/35 text-emerald-700" : "border-amber-600/35 text-amber-800"}`}>{llmConfigured ? "LLM + citation guard" : "deterministic mode"}</span>
         </div>
         <label className="block text-[11px] text-ink-soft">Workflow
           <select value={task} onChange={(e) => setTask(e.target.value as CopilotTask)} className={`${input} mt-1 w-full`}>
@@ -128,8 +128,8 @@ export default function CopilotPanel({ projectId, hypotheses, tickers, stakehold
             </label>
           </div>
         )}
-        <button onClick={run} disabled={loading} className="w-full rounded-lg border border-cyan-300/40 bg-cyan-300/[0.1] px-3 py-2 text-[13px] font-medium text-cyan-50 hover:bg-cyan-300/[0.18] disabled:opacity-50">{loading ? "Working…" : "Run"}</button>
-        {error && <div className="text-[12px] text-rose-200">{error}</div>}
+        <button onClick={run} disabled={loading} className="w-full rounded-lg border border-accent/40 bg-accent/[0.1] px-3 py-2 text-[13px] font-medium text-accent hover:bg-accent/[0.18] disabled:opacity-50">{loading ? "Working…" : "Run"}</button>
+        {error && <div className="text-[12px] text-rose-700">{error}</div>}
         <p className="text-[11px] leading-relaxed text-ink-soft">Rules: facts and calculations must cite retrieved evidence or are moved to &ldquo;unsupported&rdquo;; interpretation and hypotheses are labelled; nothing here is a recommendation.</p>
       </div>
 
@@ -140,29 +140,29 @@ export default function CopilotPanel({ projectId, hypotheses, tickers, stakehold
           <>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2"><OriginChip origin="ai-generated" /><span className="text-[11.5px] text-ink-soft">{answer.source === "deepseek" ? "DeepSeek, citation-validated" : "deterministic answer from project evidence"}</span></div>
-              <button onClick={saveDraft} className="text-[12px] text-cyan-200 hover:text-white">{saved ? "Saved to workspace drafts" : "Save as draft"}</button>
+              <button onClick={saveDraft} className="text-[12px] text-accent hover:text-ink">{saved ? "Saved to workspace drafts" : "Save as draft"}</button>
             </div>
-            {answer.warnings.length > 0 && <div className="space-y-1 rounded-xl border border-amber-300/25 bg-amber-300/[0.06] p-2 text-[11.5px] text-amber-50/90">{answer.warnings.map((w) => <div key={w}>• {w}</div>)}</div>}
-            <Block title="Facts (cited)" items={answer.facts} projectId={projectId} tone="text-emerald-200" />
-            <Block title="Calculations (cited)" items={answer.calculations} projectId={projectId} tone="text-cyan-200" />
-            <Block title="Interpretation" items={answer.interpretation} projectId={projectId} tone="text-amber-100" />
-            <Block title="Hypotheses (untested)" items={answer.hypotheses} projectId={projectId} tone="text-violet-200" />
-            <Block title="Missing information" items={answer.missing} projectId={projectId} tone="text-rose-200" />
+            {answer.warnings.length > 0 && <div className="space-y-1 rounded-md border border-amber-600/25 bg-amber-300/[0.06] p-2 text-[11.5px] text-amber-800/90">{answer.warnings.map((w) => <div key={w}>• {w}</div>)}</div>}
+            <Block title="Facts (cited)" items={answer.facts} projectId={projectId} tone="text-emerald-700" />
+            <Block title="Calculations (cited)" items={answer.calculations} projectId={projectId} tone="text-accent" />
+            <Block title="Interpretation" items={answer.interpretation} projectId={projectId} tone="text-amber-800" />
+            <Block title="Hypotheses (untested)" items={answer.hypotheses} projectId={projectId} tone="text-violet-700" />
+            <Block title="Missing information" items={answer.missing} projectId={projectId} tone="text-rose-700" />
             {answer.followUps.length > 0 && (
               <section>
-                <h4 className="mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-soft">Follow-up research</h4>
+                <h4 className="mb-1 text-[11px] font-semibold text-ink-soft">Follow-up research</h4>
                 <ol className="list-decimal space-y-1 pl-5 text-[12.5px] text-ink-muted">{answer.followUps.map((f) => <li key={f}>{f}</li>)}</ol>
               </section>
             )}
             {answer.unsupported.length > 0 && (
-              <section className="rounded-xl border border-rose-300/30 bg-rose-400/[0.05] p-3">
-                <h4 className="mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-rose-200">Removed: uncited or unverifiable statements</h4>
-                <ul className="space-y-1 text-[12px] text-rose-50/80 line-through decoration-rose-300/40">{answer.unsupported.map((s, i) => <li key={i}>{s.text}</li>)}</ul>
+              <section className="rounded-md border border-rose-600/30 bg-rose-400/[0.05] p-3">
+                <h4 className="mb-1 text-[11px] font-semibold text-rose-700">Removed: uncited or unverifiable statements</h4>
+                <ul className="space-y-1 text-[12px] text-rose-800/80 line-through decoration-rose-300/40">{answer.unsupported.map((s, i) => <li key={i}>{s.text}</li>)}</ul>
               </section>
             )}
             <details className="text-[11.5px]">
               <summary className="cursor-pointer text-ink-soft">Retrieved evidence ({answer.retrieved.length})</summary>
-              <ul className="mt-1 space-y-1">{answer.retrieved.map((r) => <li key={r.id} className="flex flex-wrap items-center gap-2 text-ink-muted"><Link href={`/research/${projectId}/evidence?id=${r.id}`} className="font-mono text-blue-200">{r.id}</Link><StatusChip status={r.status as never} />{r.claim}</li>)}</ul>
+              <ul className="mt-1 space-y-1">{answer.retrieved.map((r) => <li key={r.id} className="flex flex-wrap items-center gap-2 text-ink-muted"><Link href={`/research/${projectId}/evidence?id=${r.id}`} className="num text-accent">{r.id}</Link><StatusChip status={r.status as never} />{r.claim}</li>)}</ul>
             </details>
           </>
         )}

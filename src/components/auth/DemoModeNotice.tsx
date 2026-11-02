@@ -73,7 +73,7 @@ export default function DemoModeNotice({ mode, area }: { mode: Mode; area?: stri
         </div>
 
         {area && (
-          <div className="mt-4 rounded-xl border border-line bg-white/[0.035] p-4 text-[12.5px] leading-relaxed text-ink-muted">
+          <div className="mt-4 rounded-md border border-line bg-ink/[0.035] p-4 text-[12.5px] leading-relaxed text-ink-muted">
             <p>
               This page requires saved-preference storage ({areaLabel(area)}), which is disabled in the public demo.
             </p>
@@ -108,6 +108,6 @@ export default function DemoModeNotice({ mode, area }: { mode: Mode; area?: stri
 
 function linkClass(primary?: boolean): string {
   return primary
-    ? "inline-flex rounded-xl border border-cyan-300/35 bg-cyan-300/10 px-3 py-2 text-[13px] font-semibold text-cyan-100 transition-colors hover:bg-cyan-300/20"
-    : "chip border-line bg-white/[0.04] text-ink-muted hover:text-ink";
+    ? "inline-flex rounded-md border border-accent/35 bg-accent/10 px-3 py-2 text-[13px] font-semibold text-accent transition-colors hover:bg-accent/20"
+    : "chip border-line bg-ink/[0.04] text-ink-muted hover:text-ink";
 }

@@ -73,7 +73,7 @@ export default async function DataPage() {
 
       <div className="card overflow-x-auto">
         <table className="w-full min-w-[920px] text-[13px]">
-          <thead className="border-b border-line text-[11px] uppercase tracking-wider text-ink-soft">
+          <thead className="border-b border-line text-[11px] tracking-wider text-ink-soft">
             <tr>
               <th className="px-4 py-3 text-left">Symbol</th>
               <th className="px-4 py-3 text-left">Provider</th>
@@ -106,10 +106,10 @@ export default async function DataPage() {
 function DataCredCard({ icon: Icon, title, detail }: { icon: React.ComponentType<{ className?: string }>; title: string; detail: string }) {
   return (
     <div className="card p-4">
-      <div className="grid h-10 w-10 place-items-center rounded-xl border border-blue-300/20 bg-blue-300/10">
-        <Icon className="h-5 w-5 text-blue-200" />
+      <div className="grid h-10 w-10 place-items-center rounded-md border border-accent/20 bg-accent/10">
+        <Icon className="h-5 w-5 text-accent" />
       </div>
-      <h2 className="mt-4 text-[15px] font-semibold text-white">{title}</h2>
+      <h2 className="mt-4 text-[15px] font-semibold text-ink">{title}</h2>
       <p className="mt-2 text-[12.5px] leading-relaxed text-ink-muted">{detail}</p>
     </div>
   );

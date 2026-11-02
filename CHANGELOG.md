@@ -21,6 +21,13 @@ This project follows a human-maintained changelog. There is no automated release
 
 - Information architecture is research-first: sidebar groups Research / Quantitative / Portfolio & monitoring / Workspace. The former overview moved to `/quant` with unchanged content. "AI Stock Picks" is relabelled "Quant Screen" (route unchanged). The app title and metadata describe the research platform. Search index and sitemap include all research routes.
 
+#### Visual redesign
+
+- Replaced the dark glass theme (grid background, cyan/purple glows, ALL-CAPS labels) with a light "research note" theme: paper-white pages, blue-black ink, hairline rules, one research blue for interaction, and colour reserved for meaning.
+- Typography: Newsreader (serif) for headlines and Public Sans for interface text and tabular figures, self-hosted via `next/font` so the CSP is unchanged.
+- Research panels with a data source render as numbered exhibits ("Exhibit n", CSS counter) with a source line; key findings get a highlighter mark. Home now opens with the featured note's computed headline finding and a hypothesis scorecard.
+- Sidebar, top bar, page headers and the case-study stage navigation restyled (underlined tabs, status box). Every page passes an automated text-contrast check (≥ 3:1) and fits a 375px screen.
+
 #### Methodology follow-up
 
 - Added a Deflated Sharpe Ratio check (`src/lib/quant/selectionBias.ts`) for the best-of-N showcase. `/strategies`, `/radar` and each strategy page now show the luck threshold and the probability of real skill after the haircut. Radar admission rules are unchanged.

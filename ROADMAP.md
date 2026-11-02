@@ -10,7 +10,7 @@ This roadmap is intentionally scoped to known project directions. It does not im
 - Server-side multi-user research store behind the workspace reducer (localStorage today).
 - Second industry project to prove the config-driven design (e.g., software: RPO, NRR from filings).
 - Licensed-data adapters behind the existing provider pattern: spot/contract rates, consensus estimates, transcripts.
-- Light theme; print-optimised memo layout.
+- Optional dark mode; print-optimised memo layout.
 
 ## Near term
 

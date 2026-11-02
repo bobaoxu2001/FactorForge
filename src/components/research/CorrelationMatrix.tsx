@@ -25,7 +25,7 @@ export default function CorrelationMatrix({ cells }: Props) {
 
   return (
     <div className="card overflow-x-auto p-4">
-      <div className="mb-3 text-[11px] uppercase tracking-wider text-ink-soft">Daily return correlation</div>
+      <div className="mb-3 text-[11px] tracking-wider text-ink-soft">Daily return correlation</div>
       <table className="w-full min-w-[420px] text-[12px]">
         <thead>
           <tr>
@@ -63,9 +63,9 @@ export default function CorrelationMatrix({ cells }: Props) {
 }
 
 function colorFor(value: number): string {
-  if (value >= 0.85) return "#f87171"; // hot red — diversification weak
-  if (value >= 0.6) return "#fbbf24";
-  if (value >= 0.3) return "#a3e635";
-  if (value >= 0) return "#67e8f9";
-  return "#60a5fa"; // negative correlation — best diversifier
+  if (value >= 0.85) return "#b42318"; // hot red — diversification weak
+  if (value >= 0.6) return "#a15c07";
+  if (value >= 0.3) return "#4d7c0f";
+  if (value >= 0) return "#1d4f91";
+  return "#8a93a3"; // negative correlation — best diversifier
 }

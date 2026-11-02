@@ -68,15 +68,15 @@ export default function CompanyPage({ params }: { params: { projectId: string; t
       <Panel>
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <div className="lab-eyebrow"><Link href={`/research/${pid}/companies`} className="hover:text-white">Competitive intel</Link> / {c.coverage.businessModel}</div>
-            <h2 className="mt-1 text-[24px] font-semibold tracking-tight text-white">{c.ticker} · {c.name}</h2>
+            <div className="lab-eyebrow"><Link href={`/research/${pid}/companies`} className="hover:text-ink">Competitive intel</Link> / {c.coverage.businessModel}</div>
+            <h2 className="mt-1 text-[24px] font-semibold tracking-tight text-ink">{c.ticker} · {c.name}</h2>
             <div className="mt-1 text-[12px] text-ink-soft">SEC registrant: {c.legalName} · CIK {c.cik} · {c.sicDescription} · FYE {c.fiscalYearEnd}</div>
             <p className="mt-2 max-w-3xl text-[12.5px] text-ink-muted">Research angle: {c.coverage.researchAngle}</p>
           </div>
           <div className="flex flex-wrap gap-2 text-[11.5px]">
-            <a className="rounded-lg border border-line px-2.5 py-1.5 text-cyan-200 hover:border-cyan-300/40" href={c.sources.browse} target="_blank" rel="noopener noreferrer">EDGAR filings ↗</a>
-            {c.annualReport && <a className="rounded-lg border border-line px-2.5 py-1.5 text-cyan-200 hover:border-cyan-300/40" href={c.annualReport.url} target="_blank" rel="noopener noreferrer">Latest 10-K ({c.annualReport.filed}) ↗</a>}
-            <a className="rounded-lg border border-line px-2.5 py-1.5 text-cyan-200 hover:border-cyan-300/40" href={c.sources.companyFacts} target="_blank" rel="noopener noreferrer">XBRL facts ↗</a>
+            <a className="rounded-lg border border-line px-2.5 py-1.5 text-accent hover:border-accent/40" href={c.sources.browse} target="_blank" rel="noopener noreferrer">EDGAR filings ↗</a>
+            {c.annualReport && <a className="rounded-lg border border-line px-2.5 py-1.5 text-accent hover:border-accent/40" href={c.annualReport.url} target="_blank" rel="noopener noreferrer">Latest 10-K ({c.annualReport.filed}) ↗</a>}
+            <a className="rounded-lg border border-line px-2.5 py-1.5 text-accent hover:border-accent/40" href={c.sources.companyFacts} target="_blank" rel="noopener noreferrer">XBRL facts ↗</a>
           </div>
         </div>
         {ps && (
@@ -96,8 +96,8 @@ export default function CompanyPage({ params }: { params: { projectId: string; t
           {topics.slice(0, 10).map((topic) => {
             const e = c.excerpts.find((x) => x.topic === topic)!;
             return (
-              <blockquote key={topic} className="rounded-xl border border-line bg-white/[0.02] px-3 py-2 text-[12px] leading-relaxed text-ink-muted">
-                <div className="mb-0.5 text-[10px] uppercase tracking-[0.14em] text-ink-soft">{topic.replace(/([A-Z])/g, " $1")} · {e.section} (approx.)</div>
+              <blockquote key={topic} className="rounded-md border border-line bg-ink/[0.02] px-3 py-2 text-[12px] leading-relaxed text-ink-muted">
+                <div className="mb-0.5 text-[10px] text-ink-soft">{topic.replace(/([A-Z])/g, " $1")} · {e.section} (approx.)</div>
                 &ldquo;{e.text}&rdquo;
               </blockquote>
             );
@@ -106,16 +106,16 @@ export default function CompanyPage({ params }: { params: { projectId: string; t
         <p className="mt-2 text-[11px] text-ink-soft">Short excerpts from {c.annualReport?.form} filed {c.annualReport?.filed}, selected by keyword to orient the reader. Read the full filing for context.</p>
       </Panel>
 
-      <Panel eyebrow="Financial analysis" title="Quarterly results (as first reported)" actions={<EvidenceLinks ids={[`EV-${c.ticker}-REV`, `EV-${c.ticker}-OM`, `EV-${c.ticker}-FUEL`].filter((id) => view.evidence.some((e) => e.id === id))} projectId={pid} />}>
+      <Panel eyebrow="Financial analysis" title="Quarterly results (as first reported)" source={`SEC EDGAR XBRL company facts (CIK ${c.cik}); values as first filed.`} actions={<EvidenceLinks ids={[`EV-${c.ticker}-REV`, `EV-${c.ticker}-OM`, `EV-${c.ticker}-FUEL`].filter((id) => view.evidence.some((e) => e.id === id))} projectId={pid} />}>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[900px] text-right text-[12px]">
-            <thead className="text-[10px] uppercase tracking-[0.12em] text-ink-soft">
+            <thead className="text-[10px] text-ink-soft">
               <tr><th className="py-2 pr-3 text-left">Quarter</th><th className="pr-3">Revenue</th><th className="pr-3">YoY</th><th className="pr-3">Op. income</th><th className="pr-3">Op. margin</th><th className="pr-3">Op. ratio</th><th className="pr-3">Fuel / rev</th><th className="pr-3">EBITDA</th><th className="pr-3">OCF</th><th className="pr-3">Capex</th><th className="pr-3">FCF</th><th className="text-left">Filed</th></tr>
             </thead>
             <tbody className="divide-soft text-ink-muted">
               {rows.map((r) => (
                 <tr key={r.end} className="table-row">
-                  <td className="py-1.5 pr-3 text-left text-ink">{r.label}{r.revised && <span title="Restated in a later filing" className="ml-1 text-amber-200">*</span>}</td>
+                  <td className="py-1.5 pr-3 text-left text-ink">{r.label}{r.revised && <span title="Restated in a later filing" className="ml-1 text-amber-700">*</span>}</td>
                   <td className="pr-3">{fmt.usdM(r.revenue)}{DERIVATION_MARK[r.derivations.revenue ?? ""] ?? ""}</td>
                   <td className={`pr-3 ${textTone(r.revenueYoY)}`}>{fmt.pct(r.revenueYoY)}</td>
                   <td className="pr-3">{fmt.usdM(r.operatingIncome)}</td>
@@ -137,7 +137,7 @@ export default function CompanyPage({ params }: { params: { projectId: string; t
           Concepts: revenue = {c.metrics.revenue.concept}; D&amp;A = {c.metrics.depreciationAmortization.concept ?? "n/a"}; capex = {c.metrics.capex.concept ?? "n/a"}. Operating ratio = 1 − operating margin (trucking convention).
         </p>
         <div className="mt-4">
-          <TimeSeriesChart data={chartRows} series={[{ key: "revenue", label: "Revenue", color: "rgba(96,165,250,0.6)", kind: "bar" }, { key: "margin", label: "Operating margin", color: "#22d3ee", axis: "right" }]} leftFormat="usdM" rightFormat="pct" height={240} />
+          <TimeSeriesChart data={chartRows} series={[{ key: "revenue", label: "Revenue", color: "rgba(29,79,145,0.6)", kind: "bar" }, { key: "margin", label: "Operating margin", color: "#1d4f91", axis: "right" }]} leftFormat="usdM" rightFormat="pct" height={240} />
         </div>
       </Panel>
 
@@ -165,7 +165,7 @@ export default function CompanyPage({ params }: { params: { projectId: string; t
             ]}
           />
         </Panel>
-        <Panel eyebrow="Valuation" title="Where the price sits versus its own history" actions={<EvidenceLinks ids={[`EV-${c.ticker}-VAL`].filter((id) => view.evidence.some((e) => e.id === id))} projectId={pid} />}>
+        <Panel eyebrow="Valuation" title="Where the price sits versus its own history" source="SEC EDGAR fundamentals known on each date; Yahoo Finance daily prices; FactorForge calculation." actions={<EvidenceLinks ids={[`EV-${c.ticker}-VAL`].filter((id) => view.evidence.some((e) => e.id === id))} projectId={pid} />}>
           {valuation ? (
             <>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -177,7 +177,7 @@ export default function CompanyPage({ params }: { params: { projectId: string; t
               <div className="mt-3">
                 <TimeSeriesChart
                   data={valuation.history.map((h) => ({ date: h.date.slice(0, 7), evToEbitda: h.evToEbitda, pe: h.pe !== null && h.pe < 150 ? h.pe : null }))}
-                  series={[{ key: "evToEbitda", label: "EV/EBITDA", color: "#22d3ee" }, { key: "pe", label: "P/E (capped at 150×)", color: "#a78bfa", axis: "right", dashed: true }]}
+                  series={[{ key: "evToEbitda", label: "EV/EBITDA", color: "#1d4f91" }, { key: "pe", label: "P/E (capped at 150×)", color: "#8a93a3", axis: "right", dashed: true }]}
                   leftFormat="x"
                   rightFormat="x"
                   height={200}
@@ -196,14 +196,14 @@ export default function CompanyPage({ params }: { params: { projectId: string; t
           <ScenarioPanel ticker={c.ticker} scenarios={scenarios} price={valuation.rawPrice} />
           {grid && (
             <div className="mt-4 overflow-x-auto">
-              <div className="mb-1 text-[11px] uppercase tracking-[0.14em] text-ink-soft">Sensitivity: implied value per share (rows: NTM operating margin; columns: EV/EBITDA at the 25th / 50th / 75th historical percentile)</div>
+              <div className="mb-1 text-[11px] text-ink-soft">Sensitivity: implied value per share (rows: NTM operating margin; columns: EV/EBITDA at the 25th / 50th / 75th historical percentile)</div>
               <table className="w-full min-w-[480px] text-right text-[12px]">
                 <thead className="text-[10.5px] text-ink-soft"><tr><th className="py-1 text-left">Margin</th>{multiples.map((m) => <th key={m}>{m.toFixed(1)}×</th>)}</tr></thead>
                 <tbody className="divide-soft">
                   {margins.map((m, i) => (
                     <tr key={m}>
                       <td className="py-1 text-left text-ink-muted">{fmt.pctPlain(m)}</td>
-                      {grid[i].map((v, j) => <td key={j} className={v !== null && v >= valuation.rawPrice ? "text-emerald-300" : "text-rose-300"}>{v === null ? "n/m" : fmt.usd(v, 0)}</td>)}
+                      {grid[i].map((v, j) => <td key={j} className={v !== null && v >= valuation.rawPrice ? "text-emerald-700" : "text-rose-700"}>{v === null ? "n/m" : fmt.usd(v, 0)}</td>)}
                     </tr>
                   ))}
                 </tbody>
@@ -221,19 +221,19 @@ export default function CompanyPage({ params }: { params: { projectId: string; t
 
       <div className="grid gap-4 xl:grid-cols-2">
         <Panel eyebrow="Earnings & catalysts" title="Filings and expected dates">
-          {c.nextEarningsEstimate && <Note>Next results: around <span className="text-white">{c.nextEarningsEstimate.date}</span>. {c.nextEarningsEstimate.basis}</Note>}
+          {c.nextEarningsEstimate && <Note>Next results: around <span className="text-ink">{c.nextEarningsEstimate.date}</span>. {c.nextEarningsEstimate.basis}</Note>}
           <ul className="mt-2 space-y-1 text-[12px]">
             {c.filings.slice(0, 8).map((f) => (
               <li key={f.accession} className="flex items-center justify-between gap-2 border-b border-line/60 pb-1 last:border-0">
-                <span className="font-mono text-[11.5px] text-ink-muted">{f.filed}</span>
+                <span className="num text-[11.5px] text-ink-muted">{f.filed}</span>
                 <span className="flex-1 text-ink">{f.kind === "earnings-release" ? "Earnings release (8-K Item 2.02)" : f.form}{f.reportDate ? ` · period ${f.reportDate}` : ""}</span>
-                <a href={f.url} target="_blank" rel="noopener noreferrer" className="text-cyan-200 hover:text-white">open ↗</a>
+                <a href={f.url} target="_blank" rel="noopener noreferrer" className="text-accent hover:text-ink">open ↗</a>
               </li>
             ))}
           </ul>
           <p className="mt-2 text-[11px] text-ink-soft">Guidance and consensus expectations are not shown: guidance is not XBRL-tagged, and consensus needs a licensed provider. See the earnings releases above for management commentary.</p>
         </Panel>
-        <Panel eyebrow="Risk & attribution" title="What explains the stock's returns?">
+        <Panel eyebrow="Risk & attribution" title="What explains the stock's returns?" source="Yahoo Finance daily total returns; OLS on SPY and IYT minus SPY over two years.">
           {attribution ? (
             <KeyValues
               rows={[
@@ -248,7 +248,7 @@ export default function CompanyPage({ params }: { params: { projectId: string; t
           ) : (
             <Note tone="warn">Attribution unavailable (insufficient overlapping prices).</Note>
           )}
-          <p className="mt-2 text-[11px] leading-relaxed text-ink-soft">OLS on daily total returns over two years. Most of a trucking stock&apos;s movement is market and transport-sector exposure; company-specific research has to explain the residual. See <Link href={`/research/${pid}/thesis`} className="text-cyan-200">Thesis → outcome review</Link> to decompose returns since a thesis date.</p>
+          <p className="mt-2 text-[11px] leading-relaxed text-ink-soft">OLS on daily total returns over two years. Most of a trucking stock&apos;s movement is market and transport-sector exposure; company-specific research has to explain the residual. See <Link href={`/research/${pid}/thesis`} className="text-accent">Thesis → outcome review</Link> to decompose returns since a thesis date.</p>
         </Panel>
       </div>
 
@@ -263,7 +263,7 @@ export default function CompanyPage({ params }: { params: { projectId: string; t
           </div>
           <div className="mt-3 overflow-x-auto">
             <table className="w-full min-w-[700px] text-right text-[12px]">
-              <thead className="text-[10px] uppercase tracking-[0.12em] text-ink-soft"><tr><th className="py-2 text-left">Strategy (backtest)</th><th>Return</th><th>vs SPY B&amp;H</th><th>Sharpe</th><th>Max DD</th><th>Trades</th><th>Win rate</th><th>Now</th></tr></thead>
+              <thead className="text-[10px] text-ink-soft"><tr><th className="py-2 text-left">Strategy (backtest)</th><th>Return</th><th>vs SPY B&amp;H</th><th>Sharpe</th><th>Max DD</th><th>Trades</th><th>Win rate</th><th>Now</th></tr></thead>
               <tbody className="divide-soft text-ink-muted">
                 {lens.runs.map((r) => (
                   <tr key={r.id} className="table-row">
@@ -286,7 +286,7 @@ export default function CompanyPage({ params }: { params: { projectId: string; t
             <Stat label="Best after haircut" value={lens.bestSharpeAfterHaircut === null ? "—" : lens.bestSharpeAfterHaircut.toFixed(2)} tone={toneOf(lens.bestSharpeAfterHaircut)} hint={lens.bestSharpeAfterHaircut !== null && lens.bestSharpeAfterHaircut <= 0 ? "no evidence of a timing edge" : "positive, but in-sample"} />
           </div>
           <ul className="mt-2 space-y-0.5 text-[11px] leading-relaxed text-ink-soft">{lens.notes.map((n) => <li key={n}>• {n}</li>)}</ul>
-          <div className="mt-2 text-[11.5px]"><Link href="/strategies" className="text-cyan-200 hover:text-white">Open the full Strategy Lab →</Link></div>
+          <div className="mt-2 text-[11.5px]"><Link href="/strategies" className="text-accent hover:text-ink">Open the full Strategy Lab →</Link></div>
         </Panel>
       )}
 

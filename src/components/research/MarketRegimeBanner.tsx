@@ -16,29 +16,29 @@ export default function MarketRegimeBanner({ report }: { report: MarketStressRep
     report.dataQuality === "mixed" ? `Mixed · ${report.fallbackCount} fallback labeled` : "Fallback / demo data";
 
   return (
-    <section className={`relative overflow-hidden rounded-2xl border p-5 ${stressToneCard[report.tone]}`}>
+    <section className={`relative overflow-hidden rounded-lg border p-5 ${stressToneCard[report.tone]}`}>
       <div className="absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-current/[0.05] to-transparent" aria-hidden />
       <div className="relative flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-start gap-3">
-          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-current/25 bg-current/[0.06]">
+          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-md border border-current/25 bg-current/[0.06]">
             <Icon className="h-5 w-5" />
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <span className={`h-1.5 w-1.5 rounded-full ${stressToneDot[report.tone]}`} />
-              <span className="text-[10.5px] font-semibold uppercase tracking-[0.2em] opacity-80">Market Regime Monitor</span>
+              <span className="text-[10.5px] font-semibold opacity-80">Market Regime Monitor</span>
               {report.isPreview && (
-                <span className="chip border-amber-300/40 bg-amber-400/15 text-amber-100">Illustrative preview · not live data</span>
+                <span className="chip border-amber-600/40 bg-amber-400/15 text-amber-800">Illustrative preview · not live data</span>
               )}
             </div>
-            <h2 className="mt-1 text-[19px] font-semibold tracking-tight text-white">{report.regimeLabel}</h2>
+            <h2 className="mt-1 text-[19px] font-semibold tracking-tight text-ink">{report.regimeLabel}</h2>
             <p className="mt-1.5 max-w-3xl text-[12.5px] leading-relaxed text-ink-muted">{report.headline}</p>
           </div>
         </div>
         <div className="text-right">
-          <div className="text-[10px] uppercase tracking-[0.18em] opacity-70">Stress score</div>
-          <div className="num text-[30px] font-semibold leading-none text-white">{report.stressScore}<span className="text-[14px] opacity-60">/100</span></div>
-          <div className="mt-1 text-[10.5px] uppercase tracking-[0.14em] opacity-70">{report.regime}</div>
+          <div className="text-[10px] opacity-70">Stress score</div>
+          <div className="num text-[30px] font-semibold leading-none text-ink">{report.stressScore}<span className="text-[14px] opacity-60">/100</span></div>
+          <div className="mt-1 text-[10.5px] opacity-70">{report.regime}</div>
         </div>
       </div>
 
@@ -61,12 +61,12 @@ function StateTile({
   icon: Icon, label, value, detail,
 }: { icon: typeof Activity; label: string; value: string; detail: string }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-black/20 p-3">
-      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.16em] text-ink-soft">
+    <div className="rounded-md border border-ink/10 bg-panel2 p-3">
+      <div className="flex items-center gap-1.5 text-[10px] text-ink-soft">
         <Icon className="h-3.5 w-3.5" />
         {label}
       </div>
-      <div className="mt-1.5 text-[14px] font-semibold text-white">{value}</div>
+      <div className="mt-1.5 text-[14px] font-semibold text-ink">{value}</div>
       <div className="num mt-0.5 text-[11px] text-ink-muted">{detail}</div>
     </div>
   );
