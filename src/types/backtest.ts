@@ -36,7 +36,8 @@ export interface BacktestMetrics {
   maxDrawdown: number;
   sharpe: number;
   winRate: number;
-  profitFactor: number;
+  /** Gross profit ÷ gross loss. `null` when undefined (no losing trades). */
+  profitFactor: number | null;
   tradeCount: number;
   averageHoldingDays: number;
   volatility: number;

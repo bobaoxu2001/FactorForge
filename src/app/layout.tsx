@@ -1,13 +1,17 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
+import { Newsreader, Public_Sans } from "next/font/google";
 import AppShell from "@/components/layout/AppShell";
+import { SITE_URL } from "@/lib/config/site";
 
-// Public origin for absolute metadata/OpenGraph URLs. Defaults to the live
-// deployment so social cards resolve correctly even when SITE_URL is unset.
-const SITE_URL = process.env.SITE_URL ?? "https://factor-forge-ashy.vercel.app";
-const TITLE = "FactorForge — AI Quant Research Lab";
+// Self-hosted at build time by next/font, so the CSP's font-src 'self' still holds.
+const sans = Public_Sans({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
+// Next 14.2 ships no fallback metrics for Newsreader, so the fallback is declared rather than auto-adjusted.
+const serif = Newsreader({ subsets: ["latin"], weight: ["400", "500", "600"], style: ["normal", "italic"], variable: "--font-serif", display: "swap", adjustFontFallback: false, fallback: ["Georgia", "serif"] });
+
+const TITLE = "FactorForge — AI-Native Equity Research & Market Intelligence";
 const DESCRIPTION =
-  "AI-powered stock strategy research platform for factor discovery, backtesting, market stress analysis, hotspot monitoring, and simulated model-portfolio observation. Research only — not investment advice.";
+  "Research-first workspace for industry mapping, SEC-sourced fundamentals, KPI tracking, evidence-graded theses, primary-research planning, research memos and quantitative factor analysis. Research only, not investment advice.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -20,6 +24,11 @@ export const metadata: Metadata = {
   authors: [{ name: "FactorForge" }],
   category: "finance",
   keywords: [
+    "equity research",
+    "market intelligence",
+    "industry mapping",
+    "channel checks",
+    "research memo",
     "quant research",
     "factor discovery",
     "backtesting",
@@ -49,15 +58,15 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#02040b",
-  colorScheme: "dark",
+  themeColor: "#eef0f3",
+  colorScheme: "light",
   width: "device-width",
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${sans.variable} ${serif.variable}`}>
       <AppShell>{children}</AppShell>
     </html>
   );

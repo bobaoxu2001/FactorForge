@@ -1,0 +1,64 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import type { ReactNode } from "react";
+import StageNav, { type Stage } from "@/components/intel/StageNav";
+import { getResearchProject, listProjectIds } from "@/lib/intel/project";
+import { MEMO_STATUS_LABEL } from "@/lib/intel/quality";
+
+// Every valid id is known at build time; anything else is a real 404.
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return listProjectIds().map((projectId) => ({ projectId }));
+}
+
+export default function ResearchProjectLayout({ children, params }: { children: ReactNode; params: { projectId: string } }) {
+  const view = getResearchProject(params.projectId);
+  if (!view) notFound();
+  const verified = view.valueChain.relationships.filter((r) => r.status === "verified").length;
+  const decided = view.hypotheses.filter((h) => h.overall !== "insufficient-data").length;
+  const fresh = view.kpis.filter((k) => k.freshness === "fresh").length;
+  const stages: Stage[] = [
+    { slug: "", label: "Overview", step: "00" },
+    { slug: "industry", label: "Industry map", step: "01", status: `${verified}/${view.valueChain.relationships.length} verified` },
+    { slug: "evidence", label: "Evidence", step: "02", status: `${view.evidence.length} items` },
+    { slug: "kpis", label: "KPIs", step: "03", status: `${fresh}/${view.kpis.length} fresh` },
+    { slug: "companies", label: "Competitive intel", step: "04", status: `${view.companies.length} cos` },
+    { slug: "primary", label: "Primary research", step: "05", status: "plan" },
+    { slug: "thesis", label: "Thesis & decision", step: "06", status: `${decided}/${view.hypotheses.length} tested` },
+    { slug: "memo", label: "Memo", step: "07", status: view.memoStatus === "evidence-backed" ? "evidence-backed" : "draft" },
+    { slug: "copilot", label: "Copilot", step: "AI" },
+  ];
+  return (
+    <div className="space-y-6">
+      <header className="relative pt-1">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+          <div className="min-w-0 flex-1">
+            <div className="lab-eyebrow">
+              <Link href="/" className="hover:text-ink">Research</Link>
+              <span className="text-ink-soft">/</span>
+              <span>{view.config.industry}</span>
+            </div>
+            <h1 className="mt-2 text-[34px] font-semibold leading-[1.08] text-ink md:text-[44px]">{view.config.title}</h1>
+            <p className="mt-2 max-w-[68ch] text-[15px] leading-relaxed text-ink-muted">{view.config.subtitle}</p>
+          </div>
+          <dl className="grid shrink-0 grid-cols-2 border border-line bg-paper text-[12.5px] xl:min-w-[340px]">
+            <div className="border-r border-line px-3 py-2">
+              <dt className="text-ink-soft">Status</dt>
+              <dd className={`mt-0.5 font-semibold ${view.memoStatus === "evidence-backed" ? "text-emerald-700" : "text-amber-800"}`}>{MEMO_STATUS_LABEL[view.memoStatus]}</dd>
+            </div>
+            <div className="px-3 py-2" title={`Snapshot built ${view.snapshot.builtAt}`}>
+              <dt className="text-ink-soft">Data as of</dt>
+              <dd className="num mt-0.5 font-semibold text-ink">{view.snapshot.builtAt.slice(0, 10)}</dd>
+            </div>
+          </dl>
+        </div>
+      </header>
+      <StageNav projectId={view.config.id} stages={stages} />
+      {children}
+      <footer className="border-t border-line pt-3 text-[12px] leading-relaxed text-ink-soft">
+        Independent research workbench. Not affiliated with, or endorsed by, any company, data provider or research firm named here. Sources: SEC EDGAR; FRED (BTS, BLS, EIA, Census Bureau, Federal Reserve Board, and Cass Information Systems, whose data are copyrighted and shown with citation as FRED&apos;s terms require); Yahoo Finance prices. Not investment advice.
+      </footer>
+    </div>
+  );
+}

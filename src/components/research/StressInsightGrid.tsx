@@ -16,26 +16,26 @@ export default function StressInsightGrid({ cards }: { cards: StressInsightCard[
   return (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
       {cards.map((card) => (
-        <div key={card.title} className={`rounded-2xl border p-4 ${stressToneCard[card.tone]}`}>
+        <div key={card.title} className={`rounded-lg border p-4 ${stressToneCard[card.tone]}`}>
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="flex items-center gap-2">
                 <span className={`h-1.5 w-1.5 rounded-full ${stressToneDot[card.tone]}`} />
-                <span className="text-[10px] uppercase tracking-[0.16em] opacity-75">{card.title}</span>
+                <span className="text-[10px] opacity-75">{card.title}</span>
               </div>
-              <div className="mt-1.5 text-[15px] font-semibold text-white">{card.state}</div>
+              <div className="mt-1.5 text-[15px] font-semibold text-ink">{card.state}</div>
             </div>
             <div className="text-right">
-              <div className="num text-[20px] font-semibold leading-none text-white">{card.confidence}</div>
-              <div className="text-[9px] uppercase tracking-[0.14em] opacity-70">confidence</div>
+              <div className="num text-[20px] font-semibold leading-none text-ink">{card.confidence}</div>
+              <div className="text-[9px] opacity-70">confidence</div>
             </div>
           </div>
           <p className="mt-3 text-[12px] leading-relaxed text-ink-muted">{card.explanation}</p>
-          <div className="mt-3 rounded-lg border border-white/10 bg-black/20 p-2.5">
-            <div className="text-[9.5px] uppercase tracking-[0.16em] text-ink-soft">Suggested research action</div>
+          <div className="mt-3 rounded-lg border border-ink/10 bg-panel2 p-2.5">
+            <div className="text-[9.5px] text-ink-soft">Suggested research action</div>
             <p className="mt-1 text-[11.5px] leading-relaxed text-ink">{card.researchAction}</p>
           </div>
-          <div className="mt-2.5 flex items-center justify-between text-[10px] uppercase tracking-[0.12em] text-ink-soft">
+          <div className="mt-2.5 flex items-center justify-between text-[10px] text-ink-soft">
             <span>{dataQualityLabel[card.dataQuality]}</span>
             <span>Research only</span>
           </div>

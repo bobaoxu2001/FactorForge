@@ -2,17 +2,24 @@
 
 This roadmap is intentionally scoped to known project directions. It does not imply dates, external adoption, or committed release promises.
 
+## Research platform (next)
+
+- FMCSA operating-authority adapter (public data) to test capacity exits directly.
+- Rolling-origin out-of-sample tests before labelling any KPI "leading" (a single train/holdout split exists).
+- Optionally gate radar admission on the deflated Sharpe rather than only displaying it.
+- Server-side multi-user research store behind the workspace reducer (localStorage today).
+- Second industry project to prove the config-driven design (e.g., software: RPO, NRR from filings).
+- Licensed-data adapters behind the existing provider pattern: spot/contract rates, consensus estimates, transcripts.
+- Optional dark mode; print-optimised memo layout.
+
 ## Near term
 
-- Reduce repeated live-provider work during static builds by memoizing or restructuring `getResearchDataset` calls.
-- Improve visual honesty for negative performance metrics so losses and gains use the correct tone everywhere.
-- Expand provider fallback tests for mixed-provider and partial-universe scenarios.
-- Add maintainer notes for fixture refresh review and snapshot drift.
 - Keep README and route/module maps synchronized as features move.
+
+Recently completed (see git history for details): `getResearchDataset` build-time memoization; sign-aware gain/loss tones (`signedTone` / `signedText` in `src/lib/utils/format.ts`) so losses never render in the gain color; watchlist fan-out tests for mixed-provider and partial-universe scenarios; deterministic Polygon and Alpha Vantage parser tests; fixture refresh maintainer notes in `docs/fixture_refresh.md`.
 
 ## Research engine
 
-- Add rolling walk-forward windows beyond the current single split.
 - Add more fixture-driven tests for next-open execution, slippage, stops, missing bars, flat/long transitions, and benchmark calendar alignment.
 - Separate showcase ranking from validation reporting more explicitly in UI and docs.
 - Evaluate external factor-return datasets for market, momentum, value, quality, and low-vol attribution.
@@ -20,8 +27,6 @@ This roadmap is intentionally scoped to known project directions. It does not im
 ## Data and providers
 
 - Improve provider observability with per-provider hit/failure summaries that do not expose credentials.
-- Add deterministic tests for Yahoo, Polygon, Alpha Vantage, and fallback transitions.
-- Document fixture refresh criteria and expected review steps.
 
 ## Maintainer operations
 

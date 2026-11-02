@@ -52,7 +52,7 @@ export default function Term({
         onClick={show}
         onFocus={show}
         onBlur={hide}
-        className="cursor-help border-b border-dotted border-cyan-300/50 text-inherit decoration-dotted underline-offset-2 transition-colors hover:border-cyan-300 focus:outline-none focus-visible:rounded-sm focus-visible:ring-1 focus-visible:ring-cyan-300/60"
+        className="cursor-help border-b border-dotted border-accent/50 text-inherit decoration-dotted underline-offset-2 transition-colors hover:border-accent/40 focus:outline-none focus-visible:rounded-sm focus-visible:ring-1 focus-visible:ring-cyan-300/60"
       >
         {label}
       </button>
@@ -63,18 +63,18 @@ export default function Term({
           role="tooltip"
           onMouseEnter={show}
           onMouseLeave={hide}
-          className="absolute bottom-full left-1/2 z-50 mb-2 w-[min(20rem,80vw)] -translate-x-1/2 rounded-xl border border-cyan-300/25 bg-[#070c16] p-3 text-left shadow-[0_18px_50px_-20px_rgba(34,211,238,0.45)]"
+          className="absolute bottom-full left-1/2 z-50 mb-2 w-[min(20rem,80vw)] -translate-x-1/2 rounded-md border border-accent/25 bg-paper p-3 text-left"
         >
           <span className="flex items-center justify-between gap-2">
-            <span className="text-[12px] font-semibold text-white">{entry.term}</span>
-            <span className="chip border-cyan-300/30 bg-cyan-300/10 text-[9.5px] text-cyan-100">
+            <span className="text-[12px] font-semibold text-ink">{entry.term}</span>
+            <span className="chip border-accent/30 bg-accent/10 text-[9.5px] text-accent">
               {entry.level === "starter" ? "basics" : "intermediate"}
             </span>
           </span>
           <span className="mt-1.5 block text-[12.5px] leading-relaxed text-ink-muted">{entry.plain}</span>
           {entry.why && (
-            <span className="mt-1.5 block text-[12px] leading-relaxed text-cyan-100/80">
-              <span className="font-medium text-cyan-200">Why it matters: </span>
+            <span className="mt-1.5 block text-[12px] leading-relaxed text-accent/80">
+              <span className="font-medium text-accent">Why it matters: </span>
               {entry.why}
             </span>
           )}
@@ -86,7 +86,7 @@ export default function Term({
           )}
           <a
             href={`/learn#${entry.id}`}
-            className="mt-2 inline-block text-[11px] text-blue-300 hover:text-blue-200"
+            className="mt-2 inline-block text-[11px] text-accent hover:text-accent"
           >
             More in Stocks 101 →
           </a>

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import StatusBadge from "@/components/badges/StatusBadge";
@@ -8,6 +9,12 @@ import { getWatchlistFor } from "@/lib/persistence/watchlist";
 import { DEFAULT_SYMBOLS } from "@/data/watchlist";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "My Watchlist",
+  description:
+    "Saved research preferences and watchlist. Sign-in required; accounts store research preferences only.",
+};
 
 export default async function MyWatchlistPage() {
   const session = await getSession();
@@ -26,7 +33,7 @@ export default async function MyWatchlistPage() {
           </p>
         </div>
         <form action={signOutAction}>
-          <button type="submit" className="rounded-xl border border-line bg-white/[0.04] px-3 py-2 text-[12.5px] text-ink-muted hover:text-ink">
+          <button type="submit" className="rounded-md border border-line bg-ink/[0.04] px-3 py-2 text-[12.5px] text-ink-muted hover:text-ink">
             Sign out
           </button>
         </form>
@@ -38,7 +45,7 @@ export default async function MyWatchlistPage() {
       </section>
 
       <section className="card overflow-x-auto">
-        <div className="border-b border-line px-4 py-3 text-[11px] uppercase tracking-wider text-ink-soft">
+        <div className="border-b border-line px-4 py-3 text-[11px] tracking-wider text-ink-soft">
           {entries.length} symbol{entries.length === 1 ? "" : "s"} on watchlist
         </div>
         {entries.length === 0 ? (
@@ -47,7 +54,7 @@ export default async function MyWatchlistPage() {
           </div>
         ) : (
           <table className="w-full min-w-[480px] text-[13px]">
-            <thead className="border-b border-line text-[11px] uppercase tracking-wider text-ink-soft">
+            <thead className="border-b border-line text-[11px] tracking-wider text-ink-soft">
               <tr>
                 <th className="px-4 py-3 text-left">Symbol</th>
                 <th className="px-4 py-3 text-left">Added</th>
@@ -70,7 +77,7 @@ export default async function MyWatchlistPage() {
                         <input type="hidden" name="symbol" value={entry.symbol} />
                         <button
                           type="submit"
-                          className="grid h-8 w-8 place-items-center rounded-lg border border-line bg-white/[0.04] text-ink-muted hover:text-rose-200"
+                          className="grid h-8 w-8 place-items-center rounded-lg border border-line bg-ink/[0.04] text-ink-muted hover:text-rose-700"
                           aria-label={`Remove ${entry.symbol} from watchlist`}
                         >
                           <Trash2 className="h-4 w-4" />

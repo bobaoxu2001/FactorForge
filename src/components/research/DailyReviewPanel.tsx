@@ -21,7 +21,7 @@ export default function DailyReviewPanel({ review, note }: Props) {
     <section className="card p-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">Daily Review</div>
+          <div className="text-[11px] text-ink-soft">Daily Review</div>
           <h2 className="mt-1 text-[20px] font-semibold text-ink">Post-market auto-review</h2>
           <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-muted">
             An automatic end-of-session read of the simulated book: P&amp;L breadth, the weakest leg, how many
@@ -33,7 +33,7 @@ export default function DailyReviewPanel({ review, note }: Props) {
           As of<br />
           <span className="num text-ink">{review.asOf}</span>
           {note && (
-            <div className="mt-1 text-[10.5px] uppercase tracking-[0.16em] text-ink-soft">
+            <div className="mt-1 text-[10.5px] text-ink-soft">
               {note.source === "deepseek" ? "AI narrative" : "template narrative"}
             </div>
           )}
@@ -41,7 +41,7 @@ export default function DailyReviewPanel({ review, note }: Props) {
       </div>
 
       {note && (
-        <div className="mt-5 rounded-2xl border border-line bg-white/[0.035] p-4">
+        <div className="mt-5 rounded-lg border border-line bg-ink/[0.035] p-4">
           <p className="text-[15px] font-medium leading-relaxed text-ink">{note.headline}</p>
           <p className="mt-2 text-[13px] leading-relaxed text-ink-muted">{note.body}</p>
         </div>
@@ -75,17 +75,17 @@ export default function DailyReviewPanel({ review, note }: Props) {
       </div>
 
       <div className="mt-5">
-        <div className="text-[11px] uppercase tracking-wider text-ink-soft">Needs a look before next session</div>
+        <div className="text-[11px] tracking-wider text-ink-soft">Needs a look before next session</div>
         <ul className="mt-2 space-y-2">
           {review.watchItems.map((item) => (
-            <li key={item} className="rounded-2xl border border-line bg-white/[0.035] p-3 text-[12px] leading-relaxed text-ink-muted">
+            <li key={item} className="rounded-lg border border-line bg-ink/[0.035] p-3 text-[12px] leading-relaxed text-ink-muted">
               {item}
             </li>
           ))}
         </ul>
         {note?.watch && (
           <p className="mt-3 text-[12px] leading-relaxed text-ink-soft">
-            <span className="uppercase tracking-wider">Desk note · </span>
+            <span className="tracking-wider">Desk note · </span>
             {note.watch}
           </p>
         )}

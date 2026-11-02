@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import PortfolioCurveChart from "@/components/charts/PortfolioCurveChart";
 import CorrelationMatrix from "@/components/research/CorrelationMatrix";
 import MetricCard from "@/components/cards/MetricCard";
@@ -8,9 +9,15 @@ import Term from "@/components/learn/Term";
 import MethodologyCallout from "@/components/research/MethodologyCallout";
 import { getResearchDataset } from "@/lib/research";
 import { concentrationLevel } from "@/lib/quant/signalConcentration";
-import { num, pct, pctPlain } from "@/lib/utils/format";
+import { num, pct, pctPlain, signedTone } from "@/lib/utils/format";
 
 export const revalidate = 60 * 60;
+
+export const metadata: Metadata = {
+  title: "Model Portfolio",
+  description:
+    "Score-weighted model portfolio construction with benchmark comparison and effective-bets diagnostics. Simulated research portfolio — not a real-money account.",
+};
 
 export default async function PortfolioPage() {
   const { portfolio, radarCandidates, metadata } = await getResearchDataset();
@@ -34,10 +41,10 @@ export default async function PortfolioPage() {
   const level = concentrationLevel(portfolio.averagePairwiseCorrelation);
   const levelClass =
     level === "high"
-      ? "border-rose-300/30 bg-rose-300/[0.06] text-rose-100"
+      ? "border-rose-600/30 bg-rose-300/[0.06] text-rose-800"
       : level === "medium"
-        ? "border-amber-300/30 bg-amber-300/[0.06] text-amber-100"
-        : "border-emerald-300/30 bg-emerald-300/[0.06] text-emerald-100";
+        ? "border-amber-600/30 bg-amber-300/[0.06] text-amber-800"
+        : "border-emerald-600/30 bg-emerald-300/[0.06] text-emerald-800";
   const dataNote =
     metadata.fallbackCount === 0
       ? "All legs use real Yahoo daily OHLCV data."
@@ -77,8 +84,8 @@ export default async function PortfolioPage() {
       />
 
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <MetricCard label="Total return" value={pct(portfolio.metrics.totalReturn)} tone="positive" termId="return" />
-        <MetricCard label="Annualized" value={pct(portfolio.metrics.annualizedReturn)} tone="positive" termId="annualized" />
+        <MetricCard label="Total return" value={pct(portfolio.metrics.totalReturn)} tone={signedTone(portfolio.metrics.totalReturn)} termId="return" />
+        <MetricCard label="Annualized" value={pct(portfolio.metrics.annualizedReturn)} tone={signedTone(portfolio.metrics.annualizedReturn)} termId="annualized" />
         <MetricCard label={`vs ${portfolio.benchmarkSymbol}`} value={pct(portfolio.metrics.excessReturn)} tone="accent" termId="benchmark" />
         <MetricCard label="Sharpe" value={num(portfolio.metrics.sharpe)} termId="sharpe" />
         <MetricCard label="Volatility" value={pctPlain(portfolio.metrics.volatility)} termId="volatility" />
@@ -87,8 +94,8 @@ export default async function PortfolioPage() {
         <MetricCard label="Effective bets" value={num(portfolio.effectiveBets, 1)} tone="accent" termId="neff" />
       </section>
 
-      <section className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border px-4 py-3 text-[12.5px] ${levelClass}`}>
-        <span className="uppercase tracking-wider text-ink-soft">Diversification</span>
+      <section className={`flex flex-wrap items-center justify-between gap-3 rounded-md border px-4 py-3 text-[12.5px] ${levelClass}`}>
+        <span className="tracking-wider text-ink-soft">Diversification</span>
         <span className="num text-right">
           {portfolio.legs.length} legs ≈ {num(portfolio.effectiveBets, 1)} independent bets · {level} overlap ·
           max weight {pctPlain(concentration)}
@@ -101,9 +108,9 @@ export default async function PortfolioPage() {
       </section>
 
       <section className="card overflow-x-auto">
-        <div className="border-b border-line px-4 py-3 text-[11px] uppercase tracking-wider text-ink-soft">Leg contributions</div>
+        <div className="border-b border-line px-4 py-3 text-[11px] tracking-wider text-ink-soft">Leg contributions</div>
         <table className="w-full min-w-[760px] text-[13px]">
-          <thead className="border-b border-line text-[11px] uppercase tracking-wider text-ink-soft">
+          <thead className="border-b border-line text-[11px] tracking-wider text-ink-soft">
             <tr>
               <th className="px-4 py-3 text-left">Symbol</th>
               <th className="px-4 py-3 text-left">Strategy</th>

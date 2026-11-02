@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import StatusBadge from "@/components/badges/StatusBadge";
 import PageHeader from "@/components/layout/PageHeader";
@@ -6,13 +7,20 @@ import SignalConcentrationPanel from "@/components/research/SignalConcentrationP
 import PlainEnglish from "@/components/learn/PlainEnglish";
 import Term from "@/components/learn/Term";
 import MethodologyCallout from "@/components/research/MethodologyCallout";
+import SelectionBiasPanel from "@/components/research/SelectionBiasPanel";
 import { getResearchDataset } from "@/lib/research";
 import { num, pct } from "@/lib/utils/format";
 
 export const revalidate = 60 * 60;
 
+export const metadata: Metadata = {
+  title: "Strategy Radar",
+  description:
+    "Composite scoring, rejection rules, and a concentration gate that screens strategies before simulated observation.",
+};
+
 export default async function RadarPage() {
-  const { radarCandidates, signalConcentration, stressDiagnostics, marketStress } = await getResearchDataset();
+  const { radarCandidates, signalConcentration, stressDiagnostics, marketStress, selectionBias } = await getResearchDataset();
   return (
     <div className="space-y-8">
       <PageHeader
@@ -33,10 +41,10 @@ export default async function RadarPage() {
 
       <RadarFunnel candidates={radarCandidates} />
 
-      <section className="rounded-2xl border border-amber-300/25 bg-amber-300/[0.05] p-4">
+      <section className="rounded-lg border border-amber-600/25 bg-amber-300/[0.05] p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <div className="text-[11px] uppercase tracking-[0.16em] text-amber-100/75">Stress-adjusted ranking active</div>
+            <div className="text-[11px] text-amber-800/75">Stress-adjusted ranking active</div>
             <p className="mt-1 max-w-3xl text-[12.5px] leading-relaxed text-ink-muted">
               Under the current <span className="text-ink">{marketStress.regime}</span> regime (stress score {marketStress.stressScore}/100), each
               candidate also carries a <span className="text-ink">stress-adjusted score</span> that penalizes high drawdown and downside
@@ -47,12 +55,20 @@ export default async function RadarPage() {
         </div>
       </section>
 
+      <SelectionBiasPanel
+        title="Does the radar's Sharpe > 1 bar beat luck?"
+        rows={radarCandidates
+          .filter((c) => selectionBias[c.result.strategyId])
+          .map((c) => ({ strategyId: c.result.strategyId, strategyName: c.result.strategyName, summary: selectionBias[c.result.strategyId] }))}
+      />
+
       <MethodologyCallout
         items={[
           "Scores combine return, Sharpe, drawdown, win rate, trade count, and data-provenance penalties.",
           "Candidate thresholds are explicit: high score with bounded drawdown and enough trades can reach radar candidate status.",
           "Hard rejection rules penalize severe drawdown, negative Sharpe, weak evidence, or poor data quality.",
           "Stress-adjusted score is a regime-aware re-weighting for research only; the base score and admission rules are unchanged.",
+          "Admission does not yet require the deflated Sharpe to clear 95%; the selection-bias check above shows which candidates would survive that stricter bar.",
           "Radar gates mean worthy of simulated observation review, not an instruction to trade.",
         ]}
       />
@@ -66,14 +82,14 @@ export default async function RadarPage() {
           "Paper Trading can only observe strategies admitted by radar candidates",
         ].map((rule, index) => (
           <div key={rule} className="card p-4">
-            <div className="text-[11px] uppercase tracking-wider text-ink-soft">Rule {index + 1}</div>
+            <div className="text-[11px] tracking-wider text-ink-soft">Rule {index + 1}</div>
             <div className="mt-2 text-[13px] leading-relaxed text-ink">{rule}</div>
           </div>
         ))}
       </section>
 
       <section>
-        <div className="mb-3 text-[11px] uppercase tracking-[0.16em] text-ink-soft">
+        <div className="mb-3 text-[11px] text-ink-soft">
           Concentration gate — prefer diversification, not duplicates
         </div>
         <SignalConcentrationPanel report={signalConcentration} />
@@ -83,14 +99,14 @@ export default async function RadarPage() {
         {radarCandidates.length > 0 ? radarCandidates.map((candidate) => (
           <Link key={candidate.result.strategyId} href={`/strategies/${candidate.result.strategyId}`} className="card card-hover grid grid-cols-1 gap-4 p-5 lg:grid-cols-[80px_1.2fr_1fr_1.3fr]">
             <div>
-              <div className="text-[11px] uppercase tracking-wider text-ink-soft">Rank</div>
+              <div className="text-[11px] tracking-wider text-ink-soft">Rank</div>
               <div className="num mt-1 text-3xl font-semibold text-ink">{candidate.rank}</div>
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-1.5">
                 <StatusBadge status={candidate.status} />
                 {candidate.redundancy?.demoted && (
-                  <span className="rounded-full border border-rose-300/30 bg-rose-300/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-rose-200">
+                  <span className="rounded-full border border-rose-600/30 bg-rose-300/10 px-2 py-0.5 text-[10px] tracking-wider text-rose-700">
                     redundant {Math.round(candidate.redundancy.correlation * 100)}%
                   </span>
                 )}
@@ -150,9 +166,9 @@ function RadarFunnel({ candidates }: { candidates: Array<{ status: string }> }) 
   const pct100 = (n: number) => (total > 0 ? Math.round((n / total) * 100) : 0);
 
   const stages = [
-    { label: "Screened", sub: "Backtests scored", count: total, color: "from-slate-300/70 to-slate-400/40", text: "text-ink" },
-    { label: "Passed gate", sub: "Candidate or observing", count: passedGate, color: "from-blue-400/80 to-cyan-400/50", text: "text-blue-100" },
-    { label: "Radar candidates", sub: "Cleared for paper observation", count: candidateCount, color: "from-cyan-400 to-emerald-400/70", text: "text-cyan-100" },
+    { label: "Screened", sub: "Backtests scored", count: total, color: "from-ink/60 to-ink/45", text: "text-ink" },
+    { label: "Passed gate", sub: "Candidate or observing", count: passedGate, color: "from-accent to-accent/85", text: "text-accent" },
+    { label: "Radar candidates", sub: "Cleared for paper observation", count: candidateCount, color: "from-emerald-700 to-emerald-700/85", text: "text-accent" },
   ];
 
   return (
@@ -164,9 +180,9 @@ function RadarFunnel({ candidates }: { candidates: Array<{ status: string }> }) 
             Every backtest enters at the top; only candidates that clear the score, drawdown, and trade-count gates reach the bottom.
           </p>
         </div>
-        <div className="flex items-center gap-2 rounded-full border border-rose-300/25 bg-rose-300/[0.06] px-3 py-1.5">
-          <span className="num text-[15px] font-semibold text-rose-200">{rejectedCount}</span>
-          <span className="text-[10.5px] font-medium uppercase tracking-[0.12em] text-rose-200/80">rejected</span>
+        <div className="flex items-center gap-2 rounded-full border border-rose-600/25 bg-rose-300/[0.06] px-3 py-1.5">
+          <span className="num text-[15px] font-semibold text-rose-700">{rejectedCount}</span>
+          <span className="text-[10.5px] font-medium text-rose-700/80">rejected</span>
         </div>
       </div>
 
@@ -177,15 +193,15 @@ function RadarFunnel({ candidates }: { candidates: Array<{ status: string }> }) 
               <div className={`text-[13px] font-semibold ${stage.text}`}>{stage.label}</div>
               <div className="text-[10.5px] text-ink-soft">{stage.sub}</div>
             </div>
-            <div className="h-7 overflow-hidden rounded-lg bg-white/[0.04]">
+            <div className="h-7 overflow-hidden rounded-lg bg-ink/[0.04]">
               <div
                 className={`flex h-full items-center justify-end rounded-lg bg-gradient-to-r px-2.5 ${stage.color} transition-all duration-500`}
                 style={{ width: `${Math.max(8, pct100(stage.count))}%` }}
               >
-                <span className="num text-[12px] font-semibold text-[#04121f]">{pct100(stage.count)}%</span>
+                <span className="num text-[12px] font-semibold text-paper">{pct100(stage.count)}%</span>
               </div>
             </div>
-            <div className="num text-right text-[20px] font-semibold text-white">{stage.count}</div>
+            <div className="num text-right text-[20px] font-semibold text-ink">{stage.count}</div>
           </div>
         ))}
       </div>
@@ -194,10 +210,10 @@ function RadarFunnel({ candidates }: { candidates: Array<{ status: string }> }) 
 }
 
 function Small({ label, value, tone = "default" }: { label: string; value: string; tone?: "default" | "up" | "down" }) {
-  const cls = tone === "up" ? "text-emerald-300" : tone === "down" ? "text-rose-300" : "text-ink";
+  const cls = tone === "up" ? "text-emerald-700" : tone === "down" ? "text-rose-700" : "text-ink";
   return (
     <div>
-      <div className="text-[10px] uppercase tracking-wider text-ink-soft">{label}</div>
+      <div className="text-[10px] tracking-wider text-ink-soft">{label}</div>
       <div className={`num mt-0.5 text-[15px] font-semibold ${cls}`}>{value}</div>
     </div>
   );

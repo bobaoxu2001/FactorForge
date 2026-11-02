@@ -81,6 +81,44 @@ export interface SimPositionSummary {
   investedWeight: number;
 }
 
+export interface SimTradeSummary {
+  /** Number of closed trades (each sell fill books a realized result). */
+  closedTrades: number;
+  /** Sells that booked a gain (realized > 0). */
+  wins: number;
+  /** Sells that booked a loss (realized < 0). */
+  losses: number;
+  /** Fraction of closed trades that were wins (0–1); 0 when no trades closed. */
+  winRate: number;
+  /** Mean realized gain across winning trades (>= 0). */
+  avgWin: number;
+  /** Mean realized loss across losing trades, as a positive number (>= 0). */
+  avgLoss: number;
+  /** Sum of winning realized P&L (>= 0). */
+  grossProfit: number;
+  /** Sum of losing realized P&L, as a positive number (>= 0). */
+  grossLoss: number;
+  /**
+   * Gross profit divided by gross loss. `null` when there are no losses yet
+   * (an undefined ratio) so the UI can show "∞" rather than a divide-by-zero.
+   */
+  profitFactor: number | null;
+  /** Average realized P&L per closed trade — the desk's per-trade expectancy. */
+  expectancy: number;
+  /** The single most profitable closed trade, or null when none have closed. */
+  bestTrade: SimTrade | null;
+  /** The single worst closed trade, or null when none have closed. */
+  worstTrade: SimTrade | null;
+}
+
+export interface SectorExposure {
+  sector: string;
+  /** Dollar market value held in this sector. */
+  marketValue: number;
+  /** Share of the *invested* book (0–1); sectors sum to 1 when anything is held. */
+  weight: number;
+}
+
 export type TradeOutcome = { ok: true; state: SimState } | { ok: false; reason: string };
 
 export const DEFAULT_STARTING_CAPITAL = 100_000;
@@ -245,4 +283,76 @@ export function summarizePositions(snap: SimSnapshot): SimPositionSummary {
     worstPosition,
     investedWeight: snap.totalValue > 0 ? snap.investedValue / snap.totalValue : 0,
   };
+}
+
+/**
+ * Realized-performance analytics over the closed trades (every sell fill).
+ * Where `summarizePositions` describes the *open* book, this describes actual
+ * decision quality: win rate, average win/loss, profit factor, and per-trade
+ * expectancy. Pure — derived only from `state.trades`, never from live prices,
+ * so it's stable regardless of where the market has moved since.
+ */
+export function summarizeTrades(state: SimState): SimTradeSummary {
+  const closed = state.trades.filter((trade) => trade.side === "sell");
+
+  let wins = 0;
+  let losses = 0;
+  let grossProfit = 0;
+  let grossLoss = 0;
+  let bestTrade: SimTrade | null = null;
+  let worstTrade: SimTrade | null = null;
+
+  for (const trade of closed) {
+    if (trade.realized > 0) {
+      wins += 1;
+      grossProfit += trade.realized;
+    } else if (trade.realized < 0) {
+      losses += 1;
+      grossLoss += -trade.realized;
+    }
+    if (bestTrade === null || trade.realized > bestTrade.realized) bestTrade = trade;
+    if (worstTrade === null || trade.realized < worstTrade.realized) worstTrade = trade;
+  }
+
+  const closedTrades = closed.length;
+  return {
+    closedTrades,
+    wins,
+    losses,
+    winRate: closedTrades > 0 ? wins / closedTrades : 0,
+    avgWin: wins > 0 ? grossProfit / wins : 0,
+    avgLoss: losses > 0 ? grossLoss / losses : 0,
+    grossProfit,
+    grossLoss,
+    profitFactor: grossLoss > 0 ? grossProfit / grossLoss : null,
+    expectancy: closedTrades > 0 ? (grossProfit - grossLoss) / closedTrades : 0,
+    bestTrade,
+    worstTrade,
+  };
+}
+
+/**
+ * Group the invested book by sector so a single-name desk still shows its real
+ * concentration risk (five different names in one sector is one bet, not five).
+ * Weights are a share of *invested* value — they sum to 1 whenever anything is
+ * held — so cash doesn't dilute the read. Symbols whose sector is unknown fall
+ * into "Other". Sorted largest sector first; empty for an all-cash book.
+ */
+export function summarizeSectorExposure(
+  snap: SimSnapshot,
+  sectorOf: (symbol: string) => string | undefined,
+): SectorExposure[] {
+  if (snap.investedValue <= 0) return [];
+  const bySector = new Map<string, number>();
+  for (const position of snap.positions) {
+    const sector = sectorOf(position.symbol)?.trim() || "Other";
+    bySector.set(sector, (bySector.get(sector) ?? 0) + position.marketValue);
+  }
+  return [...bySector.entries()]
+    .map(([sector, marketValue]) => ({
+      sector,
+      marketValue,
+      weight: marketValue / snap.investedValue,
+    }))
+    .sort((a, b) => b.marketValue - a.marketValue);
 }

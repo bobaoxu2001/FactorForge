@@ -27,15 +27,15 @@ export default function StressDiagnosticsPanel({
     <section className={`card overflow-hidden p-5`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <div className={`grid h-10 w-10 place-items-center rounded-xl border ${stressToneCard[d.tone]}`}>
+          <div className={`grid h-10 w-10 place-items-center rounded-md border ${stressToneCard[d.tone]}`}>
             <ShieldAlert className="h-5 w-5" />
           </div>
           <div>
             <div className="section-label">Stress Diagnostics</div>
-            <h2 className="mt-1 text-[20px] font-semibold text-white">{statusLabel[d.status]} under a {report.regime} tape</h2>
+            <h2 className="mt-1 text-[20px] font-semibold text-ink">{statusLabel[d.status]} under a {report.regime} tape</h2>
             <p className="mt-1 text-[12px] text-ink-muted">
               Suitability for paper observation during selloff conditions:{" "}
-              <span className={d.paperSuitable ? "text-emerald-200" : "text-amber-200"}>
+              <span className={d.paperSuitable ? "text-emerald-700" : "text-amber-700"}>
                 {d.paperSuitable ? "suitable" : "hold — review drawdown first"}
               </span>.
             </p>
@@ -50,9 +50,9 @@ export default function StressDiagnosticsPanel({
       <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-3">
         <ScoreTile label="Base score" value={String(d.baseScore)} />
         <ScoreTile label="Stress-adjusted score" value={String(d.stressAdjustedScore)} tone={d.stressAdjustedScore < d.baseScore ? "down" : "up"} delta={d.stressAdjustedScore - d.baseScore} />
-        <div className="rounded-2xl border border-line bg-white/[0.025] p-4">
-          <div className="text-[10px] uppercase tracking-[0.16em] text-ink-soft">Risk flags</div>
-          <div className="num mt-2 text-[24px] font-semibold text-white">{d.riskFlagCount}</div>
+        <div className="rounded-lg border border-line bg-ink/[0.025] p-4">
+          <div className="text-[10px] text-ink-soft">Risk flags</div>
+          <div className="num mt-2 text-[24px] font-semibold text-ink">{d.riskFlagCount}</div>
           <div className="mt-1 text-[11px] text-ink-muted">{d.stopLossTriggers} stop-loss exit{d.stopLossTriggers === 1 ? "" : "s"} on record</div>
         </div>
       </div>
@@ -65,7 +65,7 @@ export default function StressDiagnosticsPanel({
 
       {/* Drawdown-focused views — what matters most in a crash. */}
       <div className="mt-5">
-        <div className="text-[10px] uppercase tracking-[0.16em] text-ink-soft">Drawdown-focused views</div>
+        <div className="text-[10px] text-ink-soft">Drawdown-focused views</div>
         <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
           <RiskMetric label="Max drawdown" value={pct(d.maxDrawdown)} negative />
           <RiskMetric label="Current drawdown" value={pct(d.currentDrawdown)} negative={d.currentDrawdown < 0} />
@@ -88,12 +88,12 @@ export default function StressDiagnosticsPanel({
 
 function ScoreTile({ label, value, tone, delta }: { label: string; value: string; tone?: "up" | "down"; delta?: number }) {
   return (
-    <div className="rounded-2xl border border-line bg-white/[0.025] p-4">
-      <div className="text-[10px] uppercase tracking-[0.16em] text-ink-soft">{label}</div>
-      <div className="num mt-2 flex items-end gap-2 text-[24px] font-semibold text-white">
+    <div className="rounded-lg border border-line bg-ink/[0.025] p-4">
+      <div className="text-[10px] text-ink-soft">{label}</div>
+      <div className="num mt-2 flex items-end gap-2 text-[24px] font-semibold text-ink">
         {value}
         {tone && delta !== undefined && delta !== 0 && (
-          <span className={`text-[12px] ${tone === "down" ? "text-rose-300" : "text-emerald-300"}`}>
+          <span className={`text-[12px] ${tone === "down" ? "text-rose-700" : "text-emerald-700"}`}>
             {delta > 0 ? "+" : ""}{delta}
           </span>
         )}
@@ -104,14 +104,14 @@ function ScoreTile({ label, value, tone, delta }: { label: string; value: string
 }
 
 function SensitivityBar({ label, value }: { label: string; value: number }) {
-  const tone = value >= 65 ? "bg-rose-300" : value >= 40 ? "bg-amber-300" : "bg-emerald-300";
+  const tone = value >= 65 ? "bg-rose-600" : value >= 40 ? "bg-amber-600" : "bg-emerald-600";
   return (
-    <div className="rounded-2xl border border-line bg-white/[0.025] p-4">
+    <div className="rounded-lg border border-line bg-ink/[0.025] p-4">
       <div className="mb-2 flex items-center justify-between text-[12px]">
         <span className="text-ink-muted">{label}</span>
-        <span className="num text-white">{value}/100</span>
+        <span className="num text-ink">{value}/100</span>
       </div>
-      <div className="h-2 rounded-full bg-white/[0.06]">
+      <div className="h-2 rounded-full bg-ink/[0.06]">
         <div className={`h-2 rounded-full ${tone}`} style={{ width: `${value}%` }} />
       </div>
     </div>
@@ -119,10 +119,10 @@ function SensitivityBar({ label, value }: { label: string; value: number }) {
 }
 
 function RiskMetric({ label, value, negative, positive }: { label: string; value: string; negative?: boolean; positive?: boolean }) {
-  const cls = positive ? "text-emerald-300" : negative ? "text-rose-300" : "text-white";
+  const cls = positive ? "text-emerald-700" : negative ? "text-rose-700" : "text-ink";
   return (
-    <div className="rounded-xl border border-line bg-white/[0.025] p-3">
-      <div className="text-[10px] uppercase tracking-[0.14em] text-ink-soft">{label}</div>
+    <div className="rounded-md border border-line bg-ink/[0.025] p-3">
+      <div className="text-[10px] text-ink-soft">{label}</div>
       <div className={`num mt-1.5 text-[16px] font-semibold ${cls}`}>{value}</div>
     </div>
   );

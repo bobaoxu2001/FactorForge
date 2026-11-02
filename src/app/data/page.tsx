@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { CheckCircle2, Database, ShieldAlert } from "lucide-react";
 import MetricCard from "@/components/cards/MetricCard";
 import StatusBadge from "@/components/badges/StatusBadge";
@@ -8,6 +9,12 @@ import MethodologyCallout from "@/components/research/MethodologyCallout";
 import { getResearchDataset } from "@/lib/research";
 
 export const revalidate = 60 * 60;
+
+export const metadata: Metadata = {
+  title: "Data Layer",
+  description:
+    "Provider provenance, fallback policy, and adjusted-close metadata for every symbol the platform loads.",
+};
 
 export default async function DataPage() {
   const { pricesBySymbol, metadata } = await getResearchDataset();
@@ -36,7 +43,12 @@ export default async function DataPage() {
         <MetricCard label="Real loaded" value={String(metadata.realDataCount)} tone="accent" />
         <MetricCard label="Adjusted" value={String(metadata.adjustedCount)} />
         <MetricCard label="Fallback" value={String(metadata.fallbackCount)} tone={metadata.fallbackCount > 0 ? "negative" : "default"} />
-        <MetricCard label="Range" value="3y" />
+        <MetricCard
+          label="Latest bar"
+          value={metadata.latestBarDate ?? "—"}
+          hint={metadata.staleCount > 0 ? `${metadata.staleCount} stale (> 5 days old)` : "fresh"}
+          tone={metadata.staleCount > 0 ? "negative" : "default"}
+        />
       </div>
 
       <div className="card p-4 text-[12.5px] leading-relaxed text-ink-muted">
@@ -61,7 +73,7 @@ export default async function DataPage() {
 
       <div className="card overflow-x-auto">
         <table className="w-full min-w-[920px] text-[13px]">
-          <thead className="border-b border-line text-[11px] uppercase tracking-wider text-ink-soft">
+          <thead className="border-b border-line text-[11px] tracking-wider text-ink-soft">
             <tr>
               <th className="px-4 py-3 text-left">Symbol</th>
               <th className="px-4 py-3 text-left">Provider</th>
@@ -94,10 +106,10 @@ export default async function DataPage() {
 function DataCredCard({ icon: Icon, title, detail }: { icon: React.ComponentType<{ className?: string }>; title: string; detail: string }) {
   return (
     <div className="card p-4">
-      <div className="grid h-10 w-10 place-items-center rounded-xl border border-blue-300/20 bg-blue-300/10">
-        <Icon className="h-5 w-5 text-blue-200" />
+      <div className="grid h-10 w-10 place-items-center rounded-md border border-accent/20 bg-accent/10">
+        <Icon className="h-5 w-5 text-accent" />
       </div>
-      <h2 className="mt-4 text-[15px] font-semibold text-white">{title}</h2>
+      <h2 className="mt-4 text-[15px] font-semibold text-ink">{title}</h2>
       <p className="mt-2 text-[12.5px] leading-relaxed text-ink-muted">{detail}</p>
     </div>
   );

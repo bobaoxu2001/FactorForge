@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { BacktestResult, EquityPoint, Trade } from "@/types/backtest";
-import { evaluateWalkForward } from "./walkForward";
+import { evaluateRollingWalkForward, evaluateWalkForward } from "./walkForward";
 
 function dates(n: number): string[] {
   const out: string[] = [];
@@ -132,5 +132,93 @@ describe("walk-forward evaluation", () => {
     expect(split?.splitDate).toBe(target);
     expect(split?.inSample.endDate).toBe(target);
     expect(split?.outOfSample.startDate).toBe(target);
+  });
+});
+
+describe("rolling walk-forward evaluation", () => {
+  const steadyTrades = (days: number): Trade[] =>
+    Array.from({ length: 12 }, (_, k) => ({
+      entryDate: dates(days)[k * 30],
+      exitDate: dates(days)[k * 30 + 10],
+      entryPrice: 100,
+      exitPrice: 102,
+      shares: 100,
+      fees: 2,
+      slippage: 1,
+      pnl: 150,
+      returnPct: 0.02,
+      holdingDays: 10,
+      exitReason: "trailing stop",
+    }));
+
+  it("returns null when the curve cannot support the requested windows", () => {
+    const result = buildResult({ equityFn: (i) => 100_000 + i, days: 100 });
+    expect(evaluateRollingWalkForward(result)).toBeNull();
+  });
+
+  it("cuts sequential, contiguous OOS windows after the burn-in", () => {
+    const days = 500;
+    const result = buildResult({ equityFn: (i) => 100_000 + i * 10, trades: steadyTrades(days), days });
+    const report = evaluateRollingWalkForward(result, { windows: 4 });
+    expect(report).not.toBeNull();
+    if (!report) return;
+
+    expect(report.windows).toHaveLength(4);
+    // Contiguous coverage: each window starts where the previous one ended,
+    // and the last window ends at the curve's final bar.
+    for (let i = 1; i < report.windows.length; i += 1) {
+      expect(report.windows[i].outOfSample.startDate).toBe(report.windows[i - 1].outOfSample.endDate);
+    }
+    expect(report.windows[report.windows.length - 1].outOfSample.endDate).toBe(dates(days)[days - 1]);
+    // Anchored in-sample: each successive window trains on strictly more bars.
+    for (let i = 1; i < report.windows.length; i += 1) {
+      expect(report.windows[i].inSample.bars).toBeGreaterThan(report.windows[i - 1].inSample.bars);
+    }
+  });
+
+  it("reads consistent when every window generalizes", () => {
+    const days = 500;
+    const result = buildResult({
+      equityFn: (i) => 100_000 * (1 + 0.0004 * i + Math.sin(i * 0.17) * 0.008),
+      benchEquityFn: (i) => 100_000 * (1 + 0.0001 * i),
+      trades: steadyTrades(days),
+      days,
+    });
+    const report = evaluateRollingWalkForward(result);
+    expect(report).not.toBeNull();
+    if (!report) return;
+    expect(report.verdict).toBe("consistent");
+    expect(report.oosPositiveShare).toBe(1);
+    expect(report.oosBeatBenchmarkShare).toBe(1);
+    expect(report.avgOosSharpe).toBeGreaterThan(0);
+  });
+
+  it("reads fragile when the edge disappears out of sample", () => {
+    // Strong burn-in trend, then a persistent decline across every OOS window.
+    const days = 500;
+    const result = buildResult({
+      equityFn: (i) => {
+        if (i < 200) return 100_000 * (1 + 0.001 * i);
+        const peak = 100_000 * (1 + 0.001 * 200);
+        return peak * (1 - 0.0012 * (i - 200));
+      },
+      trades: steadyTrades(days),
+      days,
+    });
+    const report = evaluateRollingWalkForward(result);
+    expect(report).not.toBeNull();
+    if (!report) return;
+    expect(report.verdict).toBe("fragile");
+    expect(report.avgOosSharpe).toBeLessThan(0);
+    expect(report.oosPositiveShare).toBe(0);
+  });
+
+  it("keeps the whole report deterministic for identical inputs", () => {
+    const days = 500;
+    const build = () =>
+      evaluateRollingWalkForward(
+        buildResult({ equityFn: (i) => 100_000 * (1 + 0.0003 * i), trades: steadyTrades(days), days }),
+      );
+    expect(build()).toEqual(build());
   });
 });

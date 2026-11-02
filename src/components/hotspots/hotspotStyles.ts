@@ -11,32 +11,32 @@ export interface AccentTheme {
 
 export const SENTIMENT_ACCENT: Record<SignalDirection, AccentTheme> = {
   "risk-on": {
-    text: "text-emerald-200",
-    chip: "border-emerald-400/35 bg-emerald-500/12 text-emerald-200",
-    bar: "from-emerald-400 to-cyan-400",
-    dot: "bg-emerald-300",
-    glow: "rgba(52,211,153,0.5)",
+    text: "text-emerald-700",
+    chip: "border-emerald-600/35 bg-emerald-500/12 text-emerald-700",
+    bar: "from-emerald-400 to-accent",
+    dot: "bg-emerald-600",
+    glow: "rgba(23,121,74,0.5)",
   },
   "risk-off": {
-    text: "text-rose-200",
-    chip: "border-rose-300/35 bg-rose-400/10 text-rose-100",
+    text: "text-rose-700",
+    chip: "border-rose-600/35 bg-rose-400/10 text-rose-800",
     bar: "from-rose-400 to-amber-400",
-    dot: "bg-rose-300",
-    glow: "rgba(251,113,133,0.45)",
+    dot: "bg-rose-600",
+    glow: "rgba(180,35,24,0.45)",
   },
   rotational: {
-    text: "text-amber-100",
-    chip: "border-amber-300/35 bg-amber-400/10 text-amber-100",
+    text: "text-amber-800",
+    chip: "border-amber-600/35 bg-amber-400/10 text-amber-800",
     bar: "from-amber-400 to-amber-300",
-    dot: "bg-amber-300",
-    glow: "rgba(251,191,36,0.4)",
+    dot: "bg-amber-600",
+    glow: "rgba(161,92,7,0.4)",
   },
   neutral: {
-    text: "text-cyan-100",
-    chip: "border-cyan-300/30 bg-cyan-400/[0.08] text-cyan-100",
-    bar: "from-cyan-400 to-blue-400",
-    dot: "bg-cyan-300",
-    glow: "rgba(34,211,238,0.4)",
+    text: "text-accent",
+    chip: "border-accent/30 bg-accent/[0.08] text-accent",
+    bar: "from-accent to-accent",
+    dot: "bg-accent",
+    glow: "rgba(29,79,145,0.4)",
   },
 };
 
@@ -45,14 +45,26 @@ export function sentimentAccent(sentiment: SignalDirection): AccentTheme {
 }
 
 /** Confidence band → label + accent for the meter. */
+/**
+ * Scenario weights are configured priors nudged by the regime, so they are shown
+ * to the nearest 5% with a "~" rather than to a false single-percent precision.
+ */
+export function formatPrior(probability: number): string {
+  return `~${Math.round(probability * 20) * 5}%`;
+}
+
+/** Heuristic score explained in tooltips wherever only its band is shown. */
+export const CONFIDENCE_HEURISTIC_NOTE =
+  "Heuristic, not a statistical confidence: a configured base adjusted for proxy coverage in the universe and regime clarity.";
+
 export function confidenceBand(score: number): { label: string; bar: string; text: string } {
-  if (score >= 65) return { label: "Higher", bar: "from-emerald-400 to-cyan-400", text: "text-emerald-200" };
-  if (score >= 45) return { label: "Moderate", bar: "from-cyan-400 to-blue-400", text: "text-cyan-100" };
-  return { label: "Lower", bar: "from-amber-400 to-amber-300", text: "text-amber-100" };
+  if (score >= 65) return { label: "Higher", bar: "from-emerald-400 to-accent", text: "text-emerald-700" };
+  if (score >= 45) return { label: "Moderate", bar: "from-accent to-accent", text: "text-accent" };
+  return { label: "Lower", bar: "from-amber-400 to-amber-300", text: "text-amber-800" };
 }
 
 export const SCENARIO_ACCENT: Record<"bull" | "base" | "bear", { text: string; chip: string; row: string }> = {
-  bull: { text: "text-emerald-200", chip: "border-emerald-400/35 bg-emerald-500/12 text-emerald-200", row: "border-l-emerald-400/60" },
-  base: { text: "text-cyan-100", chip: "border-cyan-300/30 bg-cyan-400/[0.08] text-cyan-100", row: "border-l-cyan-400/50" },
-  bear: { text: "text-rose-200", chip: "border-rose-300/35 bg-rose-400/10 text-rose-100", row: "border-l-rose-400/60" },
+  bull: { text: "text-emerald-700", chip: "border-emerald-600/35 bg-emerald-500/12 text-emerald-700", row: "border-l-emerald-400/60" },
+  base: { text: "text-accent", chip: "border-accent/30 bg-accent/[0.08] text-accent", row: "border-l-cyan-400/50" },
+  bear: { text: "text-rose-700", chip: "border-rose-600/35 bg-rose-400/10 text-rose-800", row: "border-l-rose-400/60" },
 };

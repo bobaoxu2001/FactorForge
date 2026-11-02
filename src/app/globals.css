@@ -2,169 +2,146 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: dark; }
+/* Research-note theme: white paper on a cool canvas, ink text, hairline rules.
+   Decoration is deliberately absent; colour is reserved for meaning. */
+
+:root { color-scheme: light; }
 
 html, body {
   min-height: 100%;
-  background:
-    linear-gradient(rgba(125, 145, 182, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(125, 145, 182, 0.03) 1px, transparent 1px),
-    radial-gradient(circle at 18% -8%, rgba(34, 211, 238, 0.13), transparent 28%),
-    radial-gradient(circle at 88% 8%, rgba(167, 139, 250, 0.11), transparent 24%),
-    linear-gradient(180deg, #02040b 0%, #050a14 46%, #02040b 100%);
-  background-size: 36px 36px, 36px 36px, auto, auto, auto;
-  color: #eef4ff;
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  background: #eef0f3;
+  color: #18202c;
+  font-feature-settings: "kern", "liga";
   -webkit-font-smoothing: antialiased;
-  text-rendering: geometricPrecision;
+  text-rendering: optimizeLegibility;
 }
 
-* { scrollbar-color: rgba(120,149,184,0.45) transparent; }
+* { scrollbar-color: rgba(24, 32, 44, 0.28) transparent; }
 *::-webkit-scrollbar { width: 10px; height: 10px; }
 *::-webkit-scrollbar-thumb {
   border-radius: 999px;
   border: 3px solid transparent;
   background-clip: padding-box;
-  background-color: rgba(120, 149, 184, 0.32);
+  background-color: rgba(24, 32, 44, 0.2);
 }
-*::-webkit-scrollbar-thumb:hover { background-color: rgba(120, 149, 184, 0.5); }
+*::-webkit-scrollbar-thumb:hover { background-color: rgba(24, 32, 44, 0.34); }
 
-.num { font-variant-numeric: tabular-nums; }
+/* Headlines are set in the serif, like the title and section heads of a printed note. */
+h1, h2 { font-family: var(--font-serif), Georgia, serif; letter-spacing: -0.01em; }
 
-::selection { background: rgba(34, 211, 238, 0.26); color: #f4fbff; }
+.num { font-variant-numeric: tabular-nums lining-nums; }
 
+::selection { background: #ffe27a; color: #18202c; }
+
+:focus-visible { outline: 2px solid #1d4f91; outline-offset: 2px; }
+
+/* A page or exhibit: white paper, hairline border, small radius, no glow. */
 .card {
-  @apply border border-line shadow-card transition-all duration-200;
-  background:
-    linear-gradient(180deg, rgba(13, 22, 36, 0.82), rgba(5, 10, 19, 0.86)),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.012));
-  border-radius: 20px;
-  backdrop-filter: blur(18px) saturate(1.12);
+  @apply border border-line bg-paper shadow-card transition-colors duration-150;
+  border-radius: 8px;
 }
-.card-hover { @apply hover:border-cyan-300/35 hover:shadow-cardHover hover:-translate-y-[2px]; }
+.card-hover { @apply hover:border-ink/25 hover:shadow-cardHover; }
 
+/* Former hero surfaces now read as the opening page of a note. */
 .hero-shell {
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  border-radius: 28px;
-  background:
-    linear-gradient(115deg, rgba(10, 18, 31, 0.92), rgba(3, 8, 16, 0.9) 42%, rgba(7, 12, 22, 0.96)),
-    linear-gradient(90deg, rgba(34, 211, 238, 0.1), rgba(167, 139, 250, 0.07), rgba(251, 191, 36, 0.045));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 30px 90px -55px rgba(34, 211, 238, 0.55),
-    0 28px 80px -62px rgba(167, 139, 250, 0.55);
+  border: 1px solid #dde1e7;
+  border-radius: 8px;
+  background: #ffffff;
 }
-
-.hero-shell::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(rgba(148, 163, 184, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.04) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: linear-gradient(90deg, rgba(0,0,0,0.55), rgba(0,0,0,0.18));
-}
-
 .hero-showcase {
-  border: 1px solid rgba(125, 211, 252, 0.26);
-  border-radius: 26px;
-  background:
-    linear-gradient(180deg, rgba(12, 22, 38, 0.9), rgba(3, 8, 16, 0.86)),
-    linear-gradient(135deg, rgba(34, 211, 238, 0.12), rgba(167, 139, 250, 0.08), rgba(251, 191, 36, 0.035));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 26px 82px -46px rgba(34, 211, 238, 0.5);
+  border: 1px solid #dde1e7;
+  border-radius: 8px;
+  background: #f6f7f9;
 }
 
+/* Brand mark: a stack of ruled lines, like the margin of a ledger page. */
 .brand-mark {
   display: grid;
-  grid-template-columns: repeat(3, 8px);
-  grid-template-rows: repeat(3, 8px);
-  gap: 4px;
+  grid-template-columns: 22px;
+  grid-auto-rows: 3px;
+  gap: 3px;
 }
-
-.brand-mark span {
-  border-radius: 3px;
-  background: rgba(96, 165, 250, 0.38);
-  box-shadow: 0 0 16px rgba(96, 165, 250, 0.35);
-}
-
-.brand-mark span:nth-child(1),
-.brand-mark span:nth-child(5),
-.brand-mark span:nth-child(9) {
-  background: #22d3ee;
-}
-
-.brand-mark span:nth-child(3),
-.brand-mark span:nth-child(7) {
-  background: #a78bfa;
-}
-
-.brand-mark span:nth-child(6) {
-  background: #fbbf24;
-}
+.brand-mark span { border-radius: 1px; background: #18202c; }
+.brand-mark span:nth-child(n + 4) { display: none; }
+.brand-mark span:nth-child(2) { width: 15px; }
+.brand-mark span:nth-child(3) { width: 9px; background: #1d4f91; }
 
 .chip {
-  @apply inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10.5px] font-medium uppercase tracking-[0.12em];
+  @apply inline-flex items-center gap-1.5 rounded border px-2 py-0.5 text-[12px] font-medium;
 }
 
-.divide-soft > * + * { border-top: 1px solid rgba(120,149,184,0.16); }
+.divide-soft > * + * { border-top: 1px solid #e6e9ee; }
 
-.lab-grid {
-  background-image:
-    linear-gradient(rgba(120,149,184,0.055) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(120,149,184,0.055) 1px, transparent 1px);
-  background-size: 32px 32px;
-}
+/* Kept as a hook for older markup; the canvas no longer carries a grid. */
+.lab-grid { background: #eef0f3; }
 
+/* Section heading inside a page: small, sentence case, ink. */
 .section-label {
-  @apply text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-100/75;
+  @apply text-[13px] font-semibold text-ink;
 }
 
 .panel-title {
-  @apply text-[15px] font-semibold tracking-tight text-white;
+  @apply text-[15px] font-semibold tracking-tight text-ink;
 }
 
 .muted-copy {
-  @apply text-[13px] leading-relaxed text-ink-muted;
+  @apply text-[14px] leading-relaxed text-ink-muted;
 }
 
 .table-row {
-  @apply transition-colors hover:bg-white/[0.035];
+  @apply transition-colors hover:bg-ink/[0.025];
 }
 
-/* Hairline gradient divider — used under page headers and between sections. */
+/* Plain hairline rule under page headers and between sections. */
 .hairline {
   height: 1px;
   width: 100%;
-  background: linear-gradient(90deg, rgba(34, 211, 238, 0.32), rgba(120, 149, 184, 0.2), transparent);
+  background: #dde1e7;
 }
 
-/* Reusable inset stat tile for KPI strips inside cards/heroes. */
+/* Inset figure for KPI strips: a ruled box rather than a floating tile. */
 .stat-tile {
-  @apply rounded-2xl border border-line p-4;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.01));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  @apply rounded-md border border-line bg-panel2 p-4;
 }
 
-/* Soft section eyebrow used by the shared PageHeader and inline labels. */
+/* Breadcrumb-style context above a page title. */
 .lab-eyebrow {
-  @apply inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-100/75;
+  @apply inline-flex items-center gap-2 text-[12.5px] font-medium text-ink-soft;
 }
 
-/* Faint corner glow for premium panels — opt in with `relative overflow-hidden`. */
-.panel-glow::after {
-  content: "";
-  position: absolute;
-  top: -40%;
-  right: -20%;
-  width: 60%;
-  height: 120%;
-  pointer-events: none;
-  background: radial-gradient(circle, rgba(34, 211, 238, 0.10), transparent 70%);
+/* Retired decoration: classes stay valid so older markup renders cleanly. */
+.panel-glow::after { content: none; }
+
+/* Exhibits are numbered in page order, as in a printed research note. */
+main { counter-reset: exhibit; }
+.exhibit-title::before {
+  counter-increment: exhibit;
+  content: "Exhibit " counter(exhibit);
+  display: block;
+  margin-bottom: 2px;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: #1d4f91;
+}
+
+/* Highlighter mark for the handful of key findings on a page. */
+.highlight {
+  background: linear-gradient(transparent 12%, rgba(255, 226, 122, 0.85) 12%, rgba(255, 226, 122, 0.85) 88%, transparent 88%);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  padding: 0 0.12em;
+}
+
+/* Glossary deep-link: ⌘K search and inline <Term> links land on /learn#<id>. */
+article:target {
+  border-color: #1d4f91;
+  box-shadow: 0 0 0 1px #1d4f91;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }

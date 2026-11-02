@@ -1,14 +1,21 @@
+import type { Metadata } from "next";
 import { Activity, BrainCircuit, Database, Radar, ShieldCheck, Sparkles, TrendingUp } from "lucide-react";
 import CatalystMonitorCard from "@/components/hotspots/CatalystMonitorCard";
 import HotspotThemeCard from "@/components/hotspots/HotspotThemeCard";
 import ResearchAgentStatus from "@/components/hotspots/ResearchAgentStatus";
 import ConfidenceMeter from "@/components/hotspots/ConfidenceMeter";
-import { sentimentAccent } from "@/components/hotspots/hotspotStyles";
+import { CONFIDENCE_HEURISTIC_NOTE, confidenceBand, formatPrior, sentimentAccent } from "@/components/hotspots/hotspotStyles";
 import MethodologyCallout from "@/components/research/MethodologyCallout";
 import { getResearchDataset } from "@/lib/research";
 import { formatImpact } from "@/lib/agents/scenarioForecast";
 
 export const revalidate = 60 * 60;
+
+export const metadata: Metadata = {
+  title: "Market Hotspots",
+  description:
+    "Coverage-weighted catalyst intelligence and scenario research across market themes, with private labeling for pre-IPO names. Research only — not investment advice.",
+};
 
 export default async function HotspotsPage() {
   const { hotspots } = await getResearchDataset();
@@ -67,7 +74,7 @@ export default async function HotspotsPage() {
         </div>
         <div className="card overflow-x-auto">
           <table className="w-full min-w-[820px] text-[13px]">
-            <thead className="border-b border-line text-[11px] uppercase tracking-wider text-ink-soft">
+            <thead className="border-b border-line text-[11px] tracking-wider text-ink-soft">
               <tr>
                 <th className="px-4 py-3 text-left">Theme</th>
                 <th className="px-4 py-3 text-left">Read</th>
@@ -96,7 +103,7 @@ export default async function HotspotsPage() {
                     </td>
                     <td className="px-4 py-3 text-ink-muted">{theme.catalysts[0]?.label ?? "—"}</td>
                     <td className="num px-4 py-3 text-right text-ink">{theme.signalStrength}</td>
-                    <td className="num px-4 py-3 text-right text-ink">{theme.scenario.confidence}</td>
+                    <td className="px-4 py-3 text-right text-ink" title={CONFIDENCE_HEURISTIC_NOTE}>{confidenceBand(theme.scenario.confidence).label}</td>
                     <td className="num px-4 py-3 text-right text-ink-muted">
                       {bear ? formatImpact(bear.impactLow) : "—"} … {bull ? formatImpact(bull.impactHigh) : "—"}
                     </td>
@@ -118,8 +125,8 @@ export default async function HotspotsPage() {
           {themes.slice(0, 3).map((theme) => (
             <div key={theme.id} className="card p-5">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[13px] font-semibold text-white">{theme.title}</span>
-                <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-ink-soft">Template memo</span>
+                <span className="text-[13px] font-semibold text-ink">{theme.title}</span>
+                <span className="text-[10px] font-medium text-ink-soft">Template memo</span>
               </div>
               <p className="mt-2 text-[12.5px] leading-relaxed text-ink-muted">{theme.researchNote}</p>
               <div className="mt-3">
@@ -142,7 +149,7 @@ export default async function HotspotsPage() {
         ]}
       />
 
-      <div className="rounded-2xl border border-line bg-white/[0.02] p-4 text-[12px] leading-relaxed text-ink-soft">
+      <div className="rounded-lg border border-line bg-ink/[0.02] p-4 text-[12px] leading-relaxed text-ink-soft">
         {disclaimer}
       </div>
     </div>
@@ -162,11 +169,11 @@ function Overview({
 }) {
   return (
     <div className="stat-tile">
-      <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
-        <Icon className="h-3.5 w-3.5 text-cyan-200/80" />
+      <div className="flex items-center gap-2 text-[10px] font-semibold text-ink-soft">
+        <Icon className="h-3.5 w-3.5 text-accent/80" />
         {label}
       </div>
-      <div className="mt-2 truncate text-[17px] font-semibold tracking-tight text-white" title={value}>{value}</div>
+      <div className="mt-2 truncate text-[17px] font-semibold tracking-tight text-ink" title={value}>{value}</div>
       <div className="mt-0.5 text-[11px] text-ink-soft">{sub}</div>
     </div>
   );
@@ -200,11 +207,11 @@ function HotspotHero({
     <section className="hero-shell p-6 md:p-8">
       <div className="relative grid gap-6 xl:grid-cols-[1.05fr_0.95fr] xl:items-stretch">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/[0.06] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-100/80">
+          <div className="inline-flex items-center gap-2 rounded-full border border-accent/20 bg-accent/[0.06] px-3 py-1.5 text-[11px] font-semibold text-accent/80">
             <BrainCircuit className="h-3.5 w-3.5" />
             L7 Market Hotspot Intelligence
           </div>
-          <h1 className="mt-4 max-w-4xl text-[38px] font-semibold leading-[1] tracking-[-0.04em] text-white md:text-[58px]">
+          <h1 className="mt-3 max-w-[22ch] text-[34px] font-semibold leading-[1.08] text-ink md:text-[46px]">
             Catalyst themes mapped into auditable public-market proxy baskets.
           </h1>
           <p className="mt-5 max-w-2xl text-[14.5px] leading-7 text-ink-muted">
@@ -224,25 +231,26 @@ function HotspotHero({
         <div className="hero-showcase relative overflow-hidden p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-soft">Flagship catalyst monitor</div>
-              <h2 className="mt-2 text-[24px] font-semibold tracking-tight text-white">{featuredTitle}</h2>
+              <div className="text-[10px] font-semibold text-ink-soft">Flagship catalyst monitor</div>
+              <h2 className="mt-2 text-[24px] font-semibold tracking-tight text-ink">{featuredTitle}</h2>
             </div>
-            <span className="chip border-amber-300/35 bg-amber-400/10 text-amber-100">Private-market catalyst</span>
+            <span className="chip border-amber-600/35 bg-amber-400/10 text-amber-800">Private-market catalyst</span>
           </div>
           <div className="mt-5 grid grid-cols-3 gap-2">
             {topTheme.scenario.legs.map((leg) => (
-              <div key={leg.case} className="rounded-2xl border border-line bg-white/[0.035] p-3">
-                <div className="text-[9.5px] font-semibold uppercase tracking-[0.14em] text-ink-soft">{leg.case}</div>
-                <div className="num mt-2 text-[18px] font-semibold text-white">{Math.round(leg.probability * 100)}%</div>
+              <div key={leg.case} className="rounded-lg border border-line bg-ink/[0.035] p-3">
+                <div className="text-[9.5px] font-semibold text-ink-soft">{leg.case}</div>
+                <div className="num mt-2 text-[18px] font-semibold text-ink">{formatPrior(leg.probability)}</div>
+                <div className="text-[9.5px] text-ink-soft">configured prior</div>
                 <div className="mt-1 text-[11px] leading-relaxed text-ink-soft">{leg.label}</div>
               </div>
             ))}
           </div>
-          <div className="mt-5 rounded-2xl border border-cyan-300/20 bg-cyan-300/[0.055] p-4">
+          <div className="mt-5 rounded-lg border border-accent/20 bg-accent/[0.055] p-4">
             <div className="flex items-start gap-3">
-              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-cyan-200" />
+              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
               <p className="text-[12.5px] leading-relaxed text-ink-muted">
-                <span className="font-medium text-white">Research-only guardrail. </span>
+                <span className="font-medium text-ink">Research-only guardrail. </span>
                 No investment advice, no direct orders, no price-certainty claims, and no private-company trading claim.
               </p>
             </div>
@@ -269,12 +277,12 @@ function HeroMini({
   detail: string;
 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
-      <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
-        <Icon className="h-3.5 w-3.5 text-cyan-200/80" />
+    <div className="rounded-lg border border-ink/10 bg-ink/[0.04] p-3">
+      <div className="flex items-center gap-2 text-[10px] font-semibold text-ink-soft">
+        <Icon className="h-3.5 w-3.5 text-accent/80" />
         {label}
       </div>
-      <div className="mt-2 truncate text-[17px] font-semibold tracking-tight text-white" title={value}>{value}</div>
+      <div className="mt-2 truncate text-[17px] font-semibold tracking-tight text-ink" title={value}>{value}</div>
       <div className="mt-0.5 text-[11px] text-ink-soft">{detail}</div>
     </div>
   );

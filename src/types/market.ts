@@ -19,6 +19,10 @@ export interface MarketDataQuality {
   rows: number;
   firstDate: string | null;
   lastDate: string | null;
+  /** Calendar days between the last bar and the time the result was served. */
+  ageDays?: number;
+  /** True when the last bar is older than the freshness threshold (see lib/data/freshness). */
+  stale?: boolean;
 }
 
 export interface HistoricalPriceResult {

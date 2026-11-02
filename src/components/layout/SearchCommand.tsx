@@ -34,7 +34,7 @@ export default function SearchCommand() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="hidden min-w-[280px] max-w-2xl flex-1 items-center gap-2 rounded-xl border border-line bg-white/[0.04] px-3 py-2 text-left text-[13px] text-ink-soft transition-colors hover:border-cyan-300/25 hover:text-ink md:flex"
+        className="hidden min-w-[280px] max-w-2xl flex-1 items-center gap-2 rounded-md border border-line bg-ink/[0.04] px-3 py-2 text-left text-[13px] text-ink-soft transition-colors hover:border-accent/25 hover:text-ink md:flex"
         aria-label="Search FactorForge"
       >
         <Search className="h-4 w-4" />
@@ -43,10 +43,10 @@ export default function SearchCommand() {
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-[70] bg-black/70 px-4 py-20 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Search FactorForge">
-          <div className="mx-auto max-w-2xl overflow-hidden rounded-2xl border border-line bg-[#050a14] shadow-card">
+        <div className="fixed inset-0 z-[70] bg-panel2 px-4 py-20 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Search FactorForge">
+          <div className="mx-auto max-w-2xl overflow-hidden rounded-lg border border-line bg-paper shadow-card">
             <div className="flex items-center gap-3 border-b border-line px-4 py-3">
-              <Search className="h-4 w-4 text-cyan-200" />
+              <Search className="h-4 w-4 text-accent" />
               <input
                 ref={inputRef}
                 value={query}
@@ -64,11 +64,11 @@ export default function SearchCommand() {
                   key={`${item.href}-${item.title}`}
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className="block rounded-xl border border-transparent px-3 py-3 hover:border-line hover:bg-white/[0.04]"
+                  className="block rounded-md border border-transparent px-3 py-3 hover:border-line hover:bg-ink/[0.04]"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <span className="text-[14px] font-semibold text-ink">{item.title}</span>
-                    <span className="chip border-line bg-white/[0.035] text-ink-soft">{item.category}</span>
+                    <span className="chip border-line bg-ink/[0.035] text-ink-soft">{item.category}</span>
                   </div>
                   <p className="mt-1 text-[12.5px] leading-relaxed text-ink-muted">{item.description}</p>
                 </Link>

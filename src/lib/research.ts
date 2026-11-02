@@ -12,6 +12,7 @@ import { buildDailyReview } from "@/lib/quant/dailyReview";
 import { generateDailyReviewNote, type DailyReviewNote } from "@/lib/ai/dailyReviewNote";
 import type { DailyReview } from "@/types/strategy";
 import { buildRadar } from "@/lib/quant/radar";
+import { deflatedSharpeForSelection, type SelectionBiasSummary } from "@/lib/quant/selectionBias";
 import { chooseBenchmark, runStrategyOnMarketCached } from "@/lib/quant/strategies";
 import { buildModelPortfolioPerformance, type ModelPortfolioPerformance } from "@/lib/quant/modelPortfolio";
 import { chooseWeights, runPortfolioBacktest, type PortfolioBacktest } from "@/lib/quant/portfolio";
@@ -32,6 +33,9 @@ import {
 } from "@/lib/quant/marketStress";
 import { buildHotspotReport } from "@/lib/agents/hotspotAgent";
 import type { HotspotAgentReport } from "@/lib/agents/types";
+import { buildStockPicks, type StockPickReport } from "@/lib/quant/stockPicks";
+import { generateStockPickNote, type StockPickNote } from "@/lib/ai/stockPickNote";
+import { getSnapshotFundamentals, getUniverseFundamentals, type FundamentalsMap } from "@/lib/data/fundamentals";
 import { createLogger } from "@/lib/observability/logger";
 
 const log = createLogger("research");
@@ -43,6 +47,8 @@ export interface ResearchDataset {
   factors: FactorSnapshot[];
   strategyResults: BacktestResult[];
   radarCandidates: ReturnType<typeof buildRadar>;
+  /** Per strategy: Deflated Sharpe of the showcased run, picked as the best across the symbol universe. */
+  selectionBias: Record<string, SelectionBiasSummary>;
   paperObservations: ReturnType<typeof buildPaperObservations>;
   paperAccount: ReturnType<typeof buildPaperAccountSummary>;
   dailyReview: DailyReview;
@@ -60,6 +66,8 @@ export interface ResearchDataset {
   factorStress: FactorStressGroup[];
   selloffMemo: SelloffMemo;
   hotspots: HotspotAgentReport;
+  stockPicks: StockPickReport;
+  stockPickNote: StockPickNote;
   metadata: {
     generatedAt: string;
     revalidateSeconds: number;
@@ -67,6 +75,10 @@ export interface ResearchDataset {
     fallbackCount: number;
     adjustedCount: number;
     symbolCount: number;
+    /** Symbols whose last bar is older than the freshness threshold. */
+    staleCount: number;
+    /** Most recent last-bar date across the universe (null when nothing loaded). */
+    latestBarDate: string | null;
   };
 }
 
@@ -95,7 +107,9 @@ export async function getResearchDataset(options: ResearchDatasetOptions = {}): 
 
   const promise = options.paperLedger
     ? getResearchDataset().then((dataset) => applyPaperLedger(dataset))
-    : getWatchlistPrices("3y").then((pricesBySymbol) => buildResearchDatasetFromPrices(pricesBySymbol, options));
+    : Promise.all([getWatchlistPrices("3y"), getUniverseFundamentals()]).then(([pricesBySymbol, fundamentals]) =>
+        buildResearchDatasetFromPrices(pricesBySymbol, options, fundamentals),
+      );
   datasetCache.set(cacheKey, { expiresAt: now + DATASET_CACHE_MAX_AGE_MS, promise });
 
   try {
@@ -141,6 +155,7 @@ async function applyPaperLedger(dataset: ResearchDataset): Promise<ResearchDatas
 export async function buildResearchDatasetFromPrices(
   pricesBySymbol: Record<string, HistoricalPriceResult>,
   options: ResearchDatasetOptions = {},
+  fundamentals?: FundamentalsMap,
 ): Promise<ResearchDataset> {
   // Run every strategy across the whole universe once. The best run per strategy
   // feeds the existing showcase; the full grid feeds multi-strategy consensus.
@@ -162,6 +177,10 @@ export async function buildResearchDatasetFromPrices(
     if (!best) throw new Error(`No usable market data for strategy ${scan.strategyId}`);
     return best.result;
   });
+  // Each showcased run is the best of N symbols; deflate its Sharpe for that pick.
+  const selectionBias: Record<string, SelectionBiasSummary> = Object.fromEntries(
+    strategyScans.map((scan) => [scan.strategyId, deflatedSharpeForSelection(scan.runs[0].result, scan.runs.map((run) => run.result))]),
+  );
   const signalConsensus = buildSignalConsensus(strategyScans);
   const factors = DEFAULT_SYMBOLS
     .map((symbol) => pricesBySymbol[symbol])
@@ -251,12 +270,29 @@ export async function buildResearchDatasetFromPrices(
     generatedAt,
   });
 
+  // 9. Cross-sectional stock selection over the same factor snapshots,
+  //    consensus grid, and regime read — deterministic scores + optional LLM
+  //    prose, same "numbers in code, prose on top" contract.
+  const stockPicks = buildStockPicks({
+    factors,
+    consensus: signalConsensus,
+    // The tone family (stress/caution/stable) drives the weight tilt; the
+    // finer risk-on/off regime label stays a display concern elsewhere.
+    regime: { regime: marketStress.tone, stressScore: marketStress.stressScore },
+    generatedAt,
+    // Offline callers (fixture tests, scripts) get the committed, labeled
+    // snapshot — same honest fallback the live facade degrades to.
+    fundamentals: fundamentals ?? getSnapshotFundamentals(),
+  });
+  const stockPickNote = await generateStockPickNote(stockPicks);
+
   const priceResults = Object.values(pricesBySymbol);
   return {
     pricesBySymbol,
     factors,
     strategyResults,
     radarCandidates,
+    selectionBias,
     paperObservations,
     paperAccount,
     dailyReview,
@@ -274,6 +310,8 @@ export async function buildResearchDatasetFromPrices(
     factorStress,
     selloffMemo,
     hotspots,
+    stockPicks,
+    stockPickNote,
     metadata: {
       generatedAt,
       revalidateSeconds: RESEARCH_REVALIDATE_SECONDS,
@@ -281,6 +319,13 @@ export async function buildResearchDatasetFromPrices(
       fallbackCount: priceResults.filter((result) => result.isFallback).length,
       adjustedCount: priceResults.filter((result) => result.quality.adjusted).length,
       symbolCount: priceResults.length,
+      staleCount: priceResults.filter((result) => result.quality.stale === true).length,
+      latestBarDate:
+        priceResults
+          .map((result) => result.quality.lastDate)
+          .filter((date): date is string => Boolean(date))
+          .sort()
+          .at(-1) ?? null,
     },
   };
 }

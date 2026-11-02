@@ -2,9 +2,9 @@ import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
 import type { FactorStressGroup } from "@/lib/quant/marketStress";
 
 const impactCls: Record<FactorStressGroup["stressImpact"], string> = {
-  elevated: "border-rose-300/30 bg-rose-400/10 text-rose-100",
-  moderate: "border-amber-300/30 bg-amber-400/10 text-amber-100",
-  low: "border-emerald-400/28 bg-emerald-500/10 text-emerald-100",
+  elevated: "border-rose-600/30 bg-rose-400/10 text-rose-800",
+  moderate: "border-amber-600/30 bg-amber-400/10 text-amber-800",
+  low: "border-emerald-600/28 bg-emerald-500/10 text-emerald-800",
 };
 
 const directionIcon = {
@@ -14,8 +14,8 @@ const directionIcon = {
 } as const;
 
 const directionCls = {
-  improving: "text-emerald-300",
-  weakening: "text-rose-300",
+  improving: "text-emerald-700",
+  weakening: "text-rose-700",
   stable: "text-ink-soft",
 } as const;
 
@@ -32,7 +32,7 @@ export default function FactorStressBreakdown({ groups }: { groups: FactorStress
           <div key={group.group} className="card p-4">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h3 className="text-[15px] font-semibold text-white">{group.group}</h3>
+                <h3 className="text-[15px] font-semibold text-ink">{group.group}</h3>
                 <div className="num mt-1 text-[12px] text-ink-muted">{group.condition}</div>
               </div>
               <span className={`chip ${impactCls[group.stressImpact]}`}>{group.stressImpact} impact</span>

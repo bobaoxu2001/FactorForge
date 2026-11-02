@@ -46,9 +46,9 @@ export default function PaperStressObservation({
             and no orders routed.
           </p>
         </div>
-        <div className={`rounded-xl border px-3 py-2 text-right ${stressToneCard[data.riskState]}`}>
-          <div className="text-[10px] uppercase tracking-[0.16em] opacity-75">Risk state</div>
-          <div className="mt-0.5 text-[14px] font-semibold text-white">{statusLabel[data.riskState]}</div>
+        <div className={`rounded-md border px-3 py-2 text-right ${stressToneCard[data.riskState]}`}>
+          <div className="text-[10px] opacity-75">Risk state</div>
+          <div className="mt-0.5 text-[14px] font-semibold text-ink">{statusLabel[data.riskState]}</div>
         </div>
       </div>
 
@@ -60,16 +60,16 @@ export default function PaperStressObservation({
       </div>
 
       {/* Selloff timeline. */}
-      <div className="mt-5 rounded-2xl border border-line bg-white/[0.025] p-4">
-        <div className="text-[10px] uppercase tracking-[0.16em] text-ink-soft">Stress timeline</div>
+      <div className="mt-5 rounded-lg border border-line bg-ink/[0.025] p-4">
+        <div className="text-[10px] text-ink-soft">Stress timeline</div>
         <ol className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-4">
           {data.timeline.map((step) => {
             const Icon = step.state === "active" ? CircleDot : CheckCircle2;
             return (
               <li key={step.label} className="flex items-start gap-2.5">
-                <Icon className={`mt-0.5 h-4 w-4 shrink-0 ${step.state === "active" ? "text-amber-300" : "text-emerald-300"}`} />
+                <Icon className={`mt-0.5 h-4 w-4 shrink-0 ${step.state === "active" ? "text-amber-700" : "text-emerald-700"}`} />
                 <div>
-                  <div className="text-[12px] font-semibold text-white">{step.label}</div>
+                  <div className="text-[12px] font-semibold text-ink">{step.label}</div>
                   <div className="mt-0.5 text-[11px] leading-relaxed text-ink-muted">{step.detail}</div>
                 </div>
               </li>
@@ -81,7 +81,7 @@ export default function PaperStressObservation({
       {rows.length > 0 ? (
         <div className="mt-5 overflow-x-auto">
           <table className="w-full min-w-[760px] text-[12.5px]">
-            <thead className="border-y border-line bg-white/[0.025] text-[10px] uppercase tracking-wider text-ink-soft">
+            <thead className="border-y border-line bg-ink/[0.025] text-[10px] tracking-wider text-ink-soft">
               <tr>
                 <th className="px-4 py-3 text-left">Strategy</th>
                 <th className="px-4 py-3 text-left">State</th>
@@ -96,14 +96,14 @@ export default function PaperStressObservation({
               {rows.map((row) => (
                 <tr key={row.id} className="table-row">
                   <td className="px-4 py-3">
-                    <div className="font-medium text-white">{row.strategyName}</div>
+                    <div className="font-medium text-ink">{row.strategyName}</div>
                     <div className="text-[11px] text-ink-soft">{row.symbol}</div>
                   </td>
                   <td className="px-4 py-3"><StatusBadge status={row.observationStatus} /></td>
                   <td className="px-4 py-3"><StressBadge label={row.stressStatusBadge} /></td>
-                  <td className={`num px-4 py-3 text-right ${row.todayReturn >= 0 ? "text-emerald-300" : "text-rose-300"}`}>{pct(row.todayReturn)}</td>
-                  <td className={`num px-4 py-3 text-right ${row.currentDrawdown < 0 ? "text-rose-300" : "text-ink"}`}>{pct(row.currentDrawdown)}</td>
-                  <td className={`num px-4 py-3 text-right ${row.benchmarkRelative < 0 ? "text-rose-300" : "text-emerald-300"}`}>{pct(row.benchmarkRelative)}</td>
+                  <td className={`num px-4 py-3 text-right ${row.todayReturn >= 0 ? "text-emerald-700" : "text-rose-700"}`}>{pct(row.todayReturn)}</td>
+                  <td className={`num px-4 py-3 text-right ${row.currentDrawdown < 0 ? "text-rose-700" : "text-ink"}`}>{pct(row.currentDrawdown)}</td>
+                  <td className={`num px-4 py-3 text-right ${row.benchmarkRelative < 0 ? "text-rose-700" : "text-emerald-700"}`}>{pct(row.benchmarkRelative)}</td>
                   <td className="max-w-[260px] px-4 py-3 text-ink-muted">{row.note}</td>
                 </tr>
               ))}
@@ -111,7 +111,7 @@ export default function PaperStressObservation({
           </table>
         </div>
       ) : (
-        <div className="mt-5 rounded-2xl border border-line bg-white/[0.025] p-4 text-[12.5px] leading-relaxed text-ink-muted">
+        <div className="mt-5 rounded-lg border border-line bg-ink/[0.025] p-4 text-[12.5px] leading-relaxed text-ink-muted">
           No radar-admitted strategy is live, so there is no simulated book to stress-test this session. The desk keeps waiting
           for a radar candidate that clears every admission gate.
         </div>
@@ -134,10 +134,10 @@ export default function PaperStressObservation({
 }
 
 function StressStat({ label, value, tone = "flat" }: { label: string; value: string; tone?: "up" | "down" | "flat" }) {
-  const cls = tone === "up" ? "text-emerald-300" : tone === "down" ? "text-rose-300" : "text-white";
+  const cls = tone === "up" ? "text-emerald-700" : tone === "down" ? "text-rose-700" : "text-ink";
   return (
-    <div className="rounded-2xl border border-line bg-white/[0.025] p-3">
-      <div className="text-[10px] uppercase tracking-[0.16em] text-ink-soft">{label}</div>
+    <div className="rounded-lg border border-line bg-ink/[0.025] p-3">
+      <div className="text-[10px] text-ink-soft">{label}</div>
       <div className={`num mt-2 text-[20px] font-semibold ${cls}`}>{value}</div>
     </div>
   );

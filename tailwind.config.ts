@@ -1,26 +1,36 @@
 import type { Config } from "tailwindcss";
 
+/**
+ * "Research note" palette: white paper, blue-black printer's ink, hairline rules,
+ * one research blue for interaction, and a highlighter reserved for key findings.
+ * Colour otherwise only carries meaning (up/down, supports/contradicts).
+ */
 const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        bg: "#020812",
-        panel: "#07111d",
-        panel2: "#0b1624",
-        ink: { DEFAULT: "#eef4ff", muted: "#a8b3c5", soft: "#69778d" },
-        line: "rgba(120, 149, 184, 0.20)",
-        brand: { red: "#fb7185", green: "#34d399", blue: "#60a5fa", cyan: "#22d3ee", amber: "#fbbf24", purple: "#a78bfa" },
+        // Canvas behind the page, the page itself, and a faint inset surface.
+        bg: "#eef0f3",
+        paper: "#ffffff",
+        panel: "#ffffff",
+        panel2: "#f6f7f9",
+        ink: { DEFAULT: "#18202c", muted: "#475162", soft: "#677184" },
+        line: "#dde1e7",
+        accent: { DEFAULT: "#1d4f91", soft: "#e8eef7" },
+        highlight: "#ffe27a",
+        brand: { red: "#b42318", green: "#17794a", blue: "#1d4f91", cyan: "#0e6f86", amber: "#a15c07", purple: "#5b3fa3" },
       },
       fontFamily: {
-        sans: ["ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "Inter", "sans-serif"],
+        sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
+        serif: ["var(--font-serif)", "Georgia", "serif"],
         mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
       },
       boxShadow: {
-        card: "0 1px 0 rgba(255,255,255,0.06), 0 22px 70px -54px rgba(59,130,246,0.70)",
-        cardHover: "0 22px 58px -34px rgba(59,130,246,0.52), 0 1px 0 rgba(255,255,255,0.10)",
+        card: "0 1px 0 rgba(24, 32, 44, 0.03)",
+        cardHover: "0 1px 0 rgba(24, 32, 44, 0.05), 0 6px 18px -12px rgba(24, 32, 44, 0.25)",
       },
-      borderRadius: { xl2: "14px" },
+      borderRadius: { xl2: "8px" },
     },
   },
   plugins: [],

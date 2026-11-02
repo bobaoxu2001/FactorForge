@@ -42,12 +42,12 @@ export default function ModelPortfolioChart({
   return (
     <div className="card relative overflow-hidden p-4" style={{ height: height + 56 }}>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <div className="text-[11px] uppercase tracking-wider text-ink-soft">
+        <div className="text-[11px] tracking-wider text-ink-soft">
           Simulated model portfolio · indexed to 100 on {data.startDate}
         </div>
         <div className="flex items-center gap-3 text-[10.5px] text-ink-soft">
           <span className="inline-flex items-center gap-1.5">
-            <span className="h-2 w-3 rounded-full bg-emerald-300 shadow-[0_0_10px_rgba(52,211,153,0.7)]" />
+            <span className="h-2 w-3 rounded-full bg-emerald-600" />
             Model portfolio
           </span>
           {hasSpy && (
@@ -67,16 +67,16 @@ export default function ModelPortfolioChart({
       {mounted ? (
         <ResponsiveContainer width="100%" height={height}>
           <LineChart data={merged} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
-            <CartesianGrid stroke="rgba(120,149,184,0.12)" vertical={false} />
+            <CartesianGrid stroke="#e6e9ee" vertical={false} />
             <XAxis
               dataKey="date"
-              tick={{ fontSize: 11, fill: "#69778d" }}
+              tick={{ fontSize: 11, fill: "#677184" }}
               axisLine={false}
               tickLine={false}
               minTickGap={28}
             />
             <YAxis
-              tick={{ fontSize: 11, fill: "#69778d" }}
+              tick={{ fontSize: 11, fill: "#677184" }}
               axisLine={false}
               tickLine={false}
               width={48}
@@ -84,20 +84,20 @@ export default function ModelPortfolioChart({
             />
             <Tooltip
               contentStyle={{
-                background: "rgba(5,13,25,0.96)",
-                border: "1px solid rgba(120,149,184,0.24)",
+                background: "#ffffff",
+                border: "1px solid #dde1e7",
                 borderRadius: 12,
-                color: "#eef4ff",
-                boxShadow: "0 20px 50px -30px rgba(34,211,238,0.6)",
+                color: "#18202c",
+                boxShadow: "0 6px 18px -12px rgba(24,32,44,0.3)",
               }}
-              labelStyle={{ color: "#a8b3c5", fontSize: 11 }}
+              labelStyle={{ color: "#475162", fontSize: 11 }}
               formatter={(value, name) => [Number(value).toFixed(2), labelFor(name)]}
             />
             {hasSpy && (
               <Line
                 type="monotone"
                 dataKey="spy"
-                stroke="#94a3b8"
+                stroke="#8a93a3"
                 strokeWidth={1.5}
                 dot={false}
                 name="spy"
@@ -108,7 +108,7 @@ export default function ModelPortfolioChart({
               <Line
                 type="monotone"
                 dataKey="qqq"
-                stroke="#64748b"
+                stroke="#677184"
                 strokeWidth={1.5}
                 strokeDasharray="5 6"
                 dot={false}
@@ -119,11 +119,11 @@ export default function ModelPortfolioChart({
             <Line
               type="monotone"
               dataKey="portfolio"
-              stroke="#34d399"
+              stroke="#17794a"
               strokeWidth={2.4}
               dot={false}
               name="portfolio"
-              activeDot={{ r: 4, fill: "#34d399", stroke: "rgba(5,13,25,0.9)", strokeWidth: 2 }}
+              activeDot={{ r: 4, fill: "#17794a", stroke: "#ffffff", strokeWidth: 2 }}
             />
           </LineChart>
         </ResponsiveContainer>

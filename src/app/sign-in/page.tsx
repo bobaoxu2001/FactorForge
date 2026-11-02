@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
 import AuthForm from "@/components/auth/AuthForm";
 import DemoModeNotice from "@/components/auth/DemoModeNotice";
 import { signInAction } from "@/lib/auth/actions";
 import { isPersistenceAvailable } from "@/lib/persistence/db";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Sign In",
+  description:
+    "Sign in to your FactorForge research account. Accounts store saved research preferences and watchlists only.",
+};
 
 export default function SignInPage({
   searchParams,

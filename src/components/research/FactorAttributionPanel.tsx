@@ -35,9 +35,9 @@ export default function FactorAttributionPanel({ attribution }: Props) {
             Strategy daily return regressed on [Market, Momentum, Low-vol]. Alpha is what&apos;s left after these known factors are accounted for — the part the simple factors cannot explain.
           </p>
         </div>
-        <div className="rounded-2xl border border-cyan-300/25 bg-cyan-300/[0.07] px-4 py-3 text-right">
-          <div className="text-[10.5px] uppercase tracking-[0.18em] text-cyan-100/70">Annualized alpha</div>
-          <div className={`num mt-1 text-[22px] font-semibold ${attribution.alphaAnnualized > 0 ? "text-emerald-200" : "text-rose-200"}`}>{alphaSigned}</div>
+        <div className="rounded-lg border border-accent/25 bg-accent/[0.07] px-4 py-3 text-right">
+          <div className="text-[10.5px] text-accent/70">Annualized alpha</div>
+          <div className={`num mt-1 text-[22px] font-semibold ${attribution.alphaAnnualized > 0 ? "text-emerald-700" : "text-rose-700"}`}>{alphaSigned}</div>
           <div className="text-[11px] text-ink-soft">t = {num(attribution.tStats.alpha, 2)} ({sigT(attribution.tStats.alpha)})</div>
         </div>
       </div>
@@ -71,10 +71,10 @@ export default function FactorAttributionPanel({ attribution }: Props) {
 function FactorRow({ name, tooltip, beta, t }: { name: string; tooltip: string; beta: number; t: number }) {
   const significant = Math.abs(t) >= 2;
   return (
-    <div className="rounded-2xl border border-line bg-white/[0.035] p-4">
+    <div className="rounded-lg border border-line bg-ink/[0.035] p-4">
       <div className="flex items-center justify-between">
         <div className="text-[12px] font-medium text-ink">{name}</div>
-        <span className={`chip ${significant ? "border-emerald-400/35 bg-emerald-500/12 text-emerald-200" : "border-line bg-white/[0.04] text-ink-muted"}`}>
+        <span className={`chip ${significant ? "border-emerald-600/35 bg-emerald-500/12 text-emerald-700" : "border-line bg-ink/[0.04] text-ink-muted"}`}>
           {significant ? "t-significant" : "noise"}
         </span>
       </div>
@@ -88,7 +88,7 @@ function FactorRow({ name, tooltip, beta, t }: { name: string; tooltip: string; 
 function Mini({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="text-[10.5px] uppercase tracking-wider text-ink-soft">{label}</div>
+      <div className="text-[10.5px] tracking-wider text-ink-soft">{label}</div>
       <div className="mt-0.5 text-[13px] font-medium text-ink">{value}</div>
     </div>
   );

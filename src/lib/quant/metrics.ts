@@ -12,7 +12,7 @@ const VOL_EPSILON = 1e-12;
 // overridable so it isn't a silent hidden constant. Converted to a per-day rate
 // via simple division (close enough at these magnitudes).
 const ANNUAL_RISK_FREE_RATE = Number(process.env.RISK_FREE_RATE ?? 0) || 0;
-const DAILY_RISK_FREE_RATE = ANNUAL_RISK_FREE_RATE / annualization;
+export const DAILY_RISK_FREE_RATE = ANNUAL_RISK_FREE_RATE / annualization;
 
 export function calculateMetrics(
   equityCurve: EquityPoint[],
@@ -68,7 +68,9 @@ export function calculateMetrics(
     maxDrawdown: maxDrawdownFromSeries(equityCurve.map((point) => point.equity)),
     sharpe,
     winRate: trades.length === 0 ? 0 : wins.length / trades.length,
-    profitFactor: grossLoss === 0 ? (grossProfit > 0 ? grossProfit : 0) : grossProfit / grossLoss,
+    // Undefined without a losing trade. Previously this returned grossProfit (a
+    // dollar amount) and rendered as e.g. "profit factor 2,340.00".
+    profitFactor: grossLoss === 0 ? (grossProfit > 0 ? null : 0) : grossProfit / grossLoss,
     tradeCount: trades.length,
     averageHoldingDays: trades.length === 0 ? 0 : trades.reduce((sum, trade) => sum + trade.holdingDays, 0) / trades.length,
     volatility,

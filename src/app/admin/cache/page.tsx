@@ -54,7 +54,7 @@ export default async function CacheAdminPage() {
       </section>
 
       <section className="card overflow-x-auto">
-        <div className="border-b border-line px-4 py-3 text-[11px] uppercase tracking-wider text-ink-soft">
+        <div className="border-b border-line px-4 py-3 text-[11px] tracking-wider text-ink-soft">
           By strategy
         </div>
         {byStrategy.length === 0 ? (
@@ -63,7 +63,7 @@ export default async function CacheAdminPage() {
           </div>
         ) : (
           <table className="w-full min-w-[640px] text-[13px]">
-            <thead className="border-b border-line text-[11px] uppercase tracking-wider text-ink-soft">
+            <thead className="border-b border-line text-[11px] tracking-wider text-ink-soft">
               <tr>
                 <th className="px-4 py-3 text-left">Strategy</th>
                 <th className="px-4 py-3 text-right">Rows</th>

@@ -2,15 +2,18 @@
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import MetricCard from "@/components/cards/MetricCard";
-import { num, pct, usd } from "@/lib/utils/format";
+import { num, pct, pctPlain, signedTone, usd } from "@/lib/utils/format";
 import {
   buy,
   sell,
   snapshot,
   summarizePositions,
+  summarizeTrades,
+  summarizeSectorExposure,
   createInitialState,
   DEFAULT_STARTING_CAPITAL,
   type SimState,
+  type SectorExposure,
 } from "@/lib/sim/portfolioSim";
 
 export interface SimQuote {
@@ -96,6 +99,11 @@ export default function SimTradingDesk({ quotes, asOf, anyFallback }: Props) {
 
   const snap = useMemo(() => snapshot(data.state, latestPrices), [data.state, latestPrices]);
   const bookSummary = useMemo(() => summarizePositions(snap), [snap]);
+  const tradeSummary = useMemo(() => summarizeTrades(data.state), [data.state]);
+  const sectorExposure = useMemo(
+    () => summarizeSectorExposure(snap, (sym) => quoteFor.get(sym)?.sector),
+    [snap, quoteFor],
+  );
 
   function commit(next: SimState, ts: number) {
     const value = snapshot(next, latestPrices).totalValue;
@@ -165,8 +173,8 @@ export default function SimTradingDesk({ quotes, asOf, anyFallback }: Props) {
     <div className="space-y-6">
       {/* Disclaimer + data freshness */}
       <div className="flex flex-wrap items-center gap-3">
-        <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/25 bg-emerald-300/[0.08] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-100">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 shadow-[0_0_14px_rgba(52,211,153,0.9)]" />
+        <span className="inline-flex items-center gap-2 rounded-full border border-emerald-600/25 bg-emerald-300/[0.08] px-3 py-1.5 text-[11px] font-semibold text-emerald-800">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
           Simulation only · virtual money · no broker
         </span>
         <span className="text-[11.5px] text-ink-soft">
@@ -178,11 +186,11 @@ export default function SimTradingDesk({ quotes, asOf, anyFallback }: Props) {
       <div className="card relative overflow-hidden p-5 md:p-6">
         <div className="grid gap-6 md:grid-cols-[1.1fr_1fr] md:items-center">
           <div>
-            <div className="text-[10.5px] uppercase tracking-[0.18em] text-ink-soft">Account value</div>
-            <div className="num mt-1 text-[40px] font-semibold leading-none tracking-tight text-white md:text-[52px]">
+            <div className="text-[10.5px] text-ink-soft">Account value</div>
+            <div className="num mt-1 text-[40px] font-semibold leading-none tracking-tight text-ink md:text-[52px]">
               {usd(snap.totalValue)}
             </div>
-            <div className={`mt-2 text-[15px] font-semibold ${snap.totalReturn >= 0 ? "text-brand-green" : "text-rose-300"}`}>
+            <div className={`mt-2 text-[15px] font-semibold ${snap.totalReturn >= 0 ? "text-brand-green" : "text-rose-700"}`}>
               {pct(snap.totalReturnPct)} <span className="text-ink-muted font-normal">({snap.totalReturn >= 0 ? "+" : ""}{usd(snap.totalReturn)} vs {usd(data.state.startingCapital)} start)</span>
             </div>
           </div>
@@ -216,7 +224,7 @@ export default function SimTradingDesk({ quotes, asOf, anyFallback }: Props) {
           <MetricCard
             label="Best position"
             value={bookSummary.bestPosition ? pct(bookSummary.bestPosition.unrealizedPct) : "—"}
-            tone="positive"
+            tone={bookSummary.bestPosition ? signedTone(bookSummary.bestPosition.unrealizedPct) : "default"}
             hint={bookSummary.bestPosition?.symbol}
           />
           <MetricCard
@@ -227,6 +235,66 @@ export default function SimTradingDesk({ quotes, asOf, anyFallback }: Props) {
         </div>
       )}
 
+      {/* Realized trading stats — decision quality on closed trades, distinct
+          from the open-book analytics above. Appears once a trade is closed. */}
+      {tradeSummary.closedTrades > 0 && (
+        <div className="space-y-2">
+          <div className="text-[11px] text-ink-soft">
+            Realized trading stats · {tradeSummary.closedTrades} closed trade{tradeSummary.closedTrades === 1 ? "" : "s"}
+          </div>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <MetricCard
+              label="Win rate"
+              termId="winrate"
+              value={pctPlain(tradeSummary.winRate)}
+              tone={tradeSummary.winRate >= 0.5 ? "positive" : "default"}
+              hint={`${tradeSummary.wins}W · ${tradeSummary.losses}L`}
+            />
+            <MetricCard
+              label="Profit factor"
+              termId="profitfactor"
+              value={
+                tradeSummary.profitFactor !== null
+                  ? num(tradeSummary.profitFactor, 2)
+                  : tradeSummary.grossProfit > 0
+                    ? "∞"
+                    : "—"
+              }
+              tone={
+                tradeSummary.profitFactor === null
+                  ? tradeSummary.grossProfit > 0
+                    ? "positive"
+                    : "default"
+                  : tradeSummary.profitFactor >= 1
+                    ? "positive"
+                    : "negative"
+              }
+              hint={`${usd(tradeSummary.grossProfit)} won · ${usd(tradeSummary.grossLoss)} lost`}
+            />
+            <MetricCard
+              label="Expectancy / trade"
+              termId="expectancy"
+              value={usd(tradeSummary.expectancy)}
+              tone={tradeSummary.expectancy >= 0 ? "positive" : "negative"}
+              hint="Avg realized per closed trade"
+            />
+            <MetricCard
+              label="Avg win / loss"
+              value={`${usd(tradeSummary.avgWin)} / ${usd(tradeSummary.avgLoss)}`}
+              hint={
+                tradeSummary.bestTrade && tradeSummary.worstTrade
+                  ? `Best ${usd(tradeSummary.bestTrade.realized)} ${tradeSummary.bestTrade.symbol} · Worst ${usd(tradeSummary.worstTrade.realized)} ${tradeSummary.worstTrade.symbol}`
+                  : undefined
+              }
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Sector exposure — a single-name desk can still be one concentrated
+          bet; this shows the invested book grouped by sector. */}
+      {sectorExposure.length > 0 && <SectorExposureCard exposure={sectorExposure} />}
+
       <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
         {/* Holdings */}
         <div className="card p-5">
@@ -235,7 +303,7 @@ export default function SimTradingDesk({ quotes, asOf, anyFallback }: Props) {
             <button
               type="button"
               onClick={reset}
-              className="rounded-lg border border-line bg-white/[0.04] px-3 py-1.5 text-[11.5px] text-ink-muted transition-colors hover:text-ink"
+              className="rounded-lg border border-line bg-ink/[0.04] px-3 py-1.5 text-[11.5px] text-ink-muted transition-colors hover:text-ink"
             >
               Reset book
             </button>
@@ -247,7 +315,7 @@ export default function SimTradingDesk({ quotes, asOf, anyFallback }: Props) {
             <div className="mt-4 overflow-x-auto">
               <table className="w-full min-w-[640px] text-[12.5px]">
                 <thead>
-                  <tr className="border-b border-line text-left text-[10.5px] uppercase tracking-[0.14em] text-ink-soft">
+                  <tr className="border-b border-line text-left text-[10.5px] text-ink-soft">
                     <th className="pb-2 pr-3 font-medium">Symbol</th>
                     <th className="pb-2 pr-3 text-right font-medium">Shares</th>
                     <th className="pb-2 pr-3 text-right font-medium">Avg cost</th>
@@ -269,7 +337,7 @@ export default function SimTradingDesk({ quotes, asOf, anyFallback }: Props) {
                       <td className="py-2.5 pr-3 text-right num text-ink-muted">{money2(p.avgCost)}</td>
                       <td className="py-2.5 pr-3 text-right num text-ink">{money2(p.lastPrice)}</td>
                       <td className="py-2.5 pr-3 text-right num text-ink">{usd(p.marketValue)}</td>
-                      <td className={`py-2.5 pr-3 text-right num ${p.unrealizedPnl >= 0 ? "text-brand-green" : "text-rose-300"}`}>
+                      <td className={`py-2.5 pr-3 text-right num ${p.unrealizedPnl >= 0 ? "text-brand-green" : "text-rose-700"}`}>
                         {usd(p.unrealizedPnl)}
                         <span className="ml-1 text-[11px] opacity-80">({pct(p.unrealizedPct)})</span>
                       </td>
@@ -278,7 +346,7 @@ export default function SimTradingDesk({ quotes, asOf, anyFallback }: Props) {
                         <button
                           type="button"
                           onClick={() => sellPosition(p.symbol, p.shares)}
-                          className="rounded-lg border border-rose-300/30 bg-rose-400/10 px-2.5 py-1 text-[11px] font-medium text-rose-100 transition-colors hover:bg-rose-400/20"
+                          className="rounded-lg border border-rose-600/30 bg-rose-400/10 px-2.5 py-1 text-[11px] font-medium text-rose-800 transition-colors hover:bg-rose-400/20"
                         >
                           Sell
                         </button>
@@ -299,14 +367,14 @@ export default function SimTradingDesk({ quotes, asOf, anyFallback }: Props) {
             <button
               type="button"
               onClick={() => { setSide("buy"); setError(null); }}
-              className={`h-9 rounded-lg border text-[13px] font-semibold transition-colors ${side === "buy" ? "border-emerald-300/45 bg-emerald-300/15 text-emerald-100" : "border-line bg-white/[0.04] text-ink-muted hover:text-ink"}`}
+              className={`h-9 rounded-lg border text-[13px] font-semibold transition-colors ${side === "buy" ? "border-emerald-600/45 bg-emerald-300/15 text-emerald-800" : "border-line bg-ink/[0.04] text-ink-muted hover:text-ink"}`}
             >
               Buy
             </button>
             <button
               type="button"
               onClick={() => { setSide("sell"); setError(null); }}
-              className={`h-9 rounded-lg border text-[13px] font-semibold transition-colors ${side === "sell" ? "border-rose-300/45 bg-rose-400/15 text-rose-100" : "border-line bg-white/[0.04] text-ink-muted hover:text-ink"}`}
+              className={`h-9 rounded-lg border text-[13px] font-semibold transition-colors ${side === "sell" ? "border-rose-600/45 bg-rose-400/15 text-rose-800" : "border-line bg-ink/[0.04] text-ink-muted hover:text-ink"}`}
             >
               Sell
             </button>
@@ -314,11 +382,11 @@ export default function SimTradingDesk({ quotes, asOf, anyFallback }: Props) {
 
           <form onSubmit={submitOrder} className="mt-4 space-y-3">
             <label className="block">
-              <span className="text-[11px] uppercase tracking-[0.14em] text-ink-soft">Symbol</span>
+              <span className="text-[11px] text-ink-soft">Symbol</span>
               <select
                 value={symbol}
                 onChange={(e) => { setSymbol(e.target.value); setError(null); }}
-                className="mt-1 h-10 w-full rounded-xl border border-line bg-white/[0.04] px-3 text-[13px] text-ink focus:border-blue-400/45 focus:outline-none"
+                className="mt-1 h-10 w-full rounded-md border border-line bg-ink/[0.04] px-3 text-[13px] text-ink focus:border-accent/45 focus:outline-none"
               >
                 {quotes.map((q) => (
                   <option key={q.symbol} value={q.symbol}>
@@ -329,7 +397,7 @@ export default function SimTradingDesk({ quotes, asOf, anyFallback }: Props) {
             </label>
 
             <label className="block">
-              <span className="text-[11px] uppercase tracking-[0.14em] text-ink-soft">Shares</span>
+              <span className="text-[11px] text-ink-soft">Shares</span>
               <div className="mt-1 flex items-center gap-2">
                 <input
                   type="number"
@@ -339,19 +407,19 @@ export default function SimTradingDesk({ quotes, asOf, anyFallback }: Props) {
                   value={qtyStr}
                   onChange={(e) => { setQtyStr(e.target.value); setError(null); }}
                   placeholder="0"
-                  className="h-10 w-full rounded-xl border border-line bg-white/[0.04] px-3 text-[13px] text-ink focus:border-blue-400/45 focus:outline-none"
+                  className="h-10 w-full rounded-md border border-line bg-ink/[0.04] px-3 text-[13px] text-ink focus:border-accent/45 focus:outline-none"
                 />
                 <button
                   type="button"
                   onClick={setMax}
-                  className="h-10 shrink-0 rounded-xl border border-line bg-white/[0.04] px-3 text-[12px] text-ink-muted transition-colors hover:text-ink"
+                  className="h-10 shrink-0 rounded-md border border-line bg-ink/[0.04] px-3 text-[12px] text-ink-muted transition-colors hover:text-ink"
                 >
                   Max
                 </button>
               </div>
             </label>
 
-            <div className="rounded-xl border border-line bg-white/[0.02] px-3 py-2.5 text-[12px] text-ink-muted">
+            <div className="rounded-md border border-line bg-ink/[0.02] px-3 py-2.5 text-[12px] text-ink-muted">
               <div className="flex items-center justify-between">
                 <span>Price</span>
                 <span className="num text-ink">{money2(price)}</span>
@@ -367,14 +435,14 @@ export default function SimTradingDesk({ quotes, asOf, anyFallback }: Props) {
             </div>
 
             {error && (
-              <div className="rounded-xl border border-rose-300/35 bg-rose-400/10 px-3 py-2 text-[12.5px] text-rose-100">
+              <div className="rounded-md border border-rose-600/35 bg-rose-400/10 px-3 py-2 text-[12.5px] text-rose-800">
                 {error}
               </div>
             )}
 
             <button
               type="submit"
-              className={`h-11 w-full rounded-xl border text-[14px] font-semibold transition-colors ${side === "buy" ? "border-emerald-300/40 bg-emerald-300/15 text-emerald-100 hover:bg-emerald-300/25" : "border-rose-300/40 bg-rose-400/15 text-rose-100 hover:bg-rose-400/25"}`}
+              className={`h-11 w-full rounded-md border text-[14px] font-semibold transition-colors ${side === "buy" ? "border-emerald-600/40 bg-emerald-300/15 text-emerald-800 hover:bg-emerald-300/25" : "border-rose-600/40 bg-rose-400/15 text-rose-800 hover:bg-rose-400/25"}`}
             >
               {side === "buy" ? "Buy" : "Sell"} {symbol}
             </button>
@@ -389,13 +457,13 @@ export default function SimTradingDesk({ quotes, asOf, anyFallback }: Props) {
           <div className="mt-3 space-y-1.5">
             {data.state.trades.slice(0, 20).map((t) => (
               <div key={t.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-line/50 py-1.5 text-[12.5px]">
-                <span className={`w-10 shrink-0 font-semibold ${t.side === "buy" ? "text-emerald-200" : "text-rose-200"}`}>
+                <span className={`w-10 shrink-0 font-semibold ${t.side === "buy" ? "text-emerald-700" : "text-rose-700"}`}>
                   {t.side === "buy" ? "BUY" : "SELL"}
                 </span>
                 <span className="num font-medium text-ink">{num(t.shares, 0)} {t.symbol}</span>
                 <span className="num text-ink-muted">@ {money2(t.price)}</span>
                 {t.side === "sell" && (
-                  <span className={`num ${t.realized >= 0 ? "text-brand-green" : "text-rose-300"}`}>
+                  <span className={`num ${t.realized >= 0 ? "text-brand-green" : "text-rose-700"}`}>
                     realized {usd(t.realized)}
                   </span>
                 )}
@@ -409,10 +477,54 @@ export default function SimTradingDesk({ quotes, asOf, anyFallback }: Props) {
   );
 }
 
+// On-brand, visually distinct palette; the sorted exposure assigns colors by
+// rank so the largest sector is always the first hue.
+const SECTOR_COLORS = ["#8a93a3", "#17794a", "#a15c07", "#be185d", "#8a93a3", "#1d4f91", "#b42318", "#4d7c0f"];
+const OTHER_COLOR = "#8a93a3";
+const colorForRank = (index: number) => SECTOR_COLORS[index] ?? OTHER_COLOR;
+
+function SectorExposureCard({ exposure }: { exposure: SectorExposure[] }) {
+  const top = exposure[0];
+  return (
+    <div className="card p-5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-[15px] font-semibold text-ink">Sector exposure</h2>
+        <span className="text-[11.5px] text-ink-soft">
+          {exposure.length === 1
+            ? "Single sector — fully concentrated"
+            : `${top.sector} largest at ${(top.weight * 100).toFixed(0)}% of the book`}
+        </span>
+      </div>
+
+      {/* Segmented allocation bar — each slice is a sector's share of invested value. */}
+      <div className="mt-4 flex h-3 w-full overflow-hidden rounded-full bg-ink/[0.04]" role="img" aria-label="Invested value by sector">
+        {exposure.map((e, i) => (
+          <div
+            key={e.sector}
+            style={{ width: `${e.weight * 100}%`, backgroundColor: colorForRank(i) }}
+            title={`${e.sector} — ${(e.weight * 100).toFixed(1)}%`}
+          />
+        ))}
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2">
+        {exposure.map((e, i) => (
+          <div key={e.sector} className="flex items-center gap-2 text-[12px]">
+            <span className="h-2.5 w-2.5 shrink-0 rounded-sm" style={{ backgroundColor: colorForRank(i) }} />
+            <span className="text-ink">{e.sector}</span>
+            <span className="num text-ink-muted">{(e.weight * 100).toFixed(1)}%</span>
+            <span className="num text-ink-soft">({usd(e.marketValue)})</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function Sparkline({ points, up }: { points: number[]; up: boolean }) {
   if (points.length < 2) {
     return (
-      <div className="grid h-[120px] place-items-center rounded-xl border border-line bg-white/[0.02] text-[12px] text-ink-soft">
+      <div className="grid h-[120px] place-items-center rounded-md border border-line bg-ink/[0.02] text-[12px] text-ink-soft">
         Your account-value line appears here after your first trade.
       </div>
     );
@@ -430,7 +542,7 @@ function Sparkline({ points, up }: { points: number[]; up: boolean }) {
   const line = coords.map((c, i) => `${i === 0 ? "M" : "L"}${c[0].toFixed(1)} ${c[1].toFixed(1)}`).join(" ");
   const area = `${line} L${w} ${h} L0 ${h} Z`;
   return (
-    <div className={up ? "text-brand-green" : "text-rose-300"}>
+    <div className={up ? "text-brand-green" : "text-rose-700"}>
       <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className="h-[120px] w-full" role="img" aria-label="Account value over time">
         <path d={area} fill="currentColor" opacity={0.1} />
         <path d={line} fill="none" stroke="currentColor" strokeWidth={2} vectorEffect="non-scaling-stroke" />

@@ -62,9 +62,11 @@ export const UNIVERSE: UniverseConstituent[] = [
   // Energy
   { symbol: "XOM", name: "Exxon Mobil", sector: "Energy", kind: "stock" },
   { symbol: "CVX", name: "Chevron", sector: "Energy", kind: "stock" },
-  // Industrials
+  // Industrials (incl. electrical equipment / AI power-chain exposure)
   { symbol: "CAT", name: "Caterpillar", sector: "Industrials", kind: "stock" },
   { symbol: "HON", name: "Honeywell", sector: "Industrials", kind: "stock" },
+  { symbol: "ETN", name: "Eaton", sector: "Industrials", kind: "stock" },
+  { symbol: "VRT", name: "Vertiv", sector: "Industrials", kind: "stock" },
   // Utilities
   { symbol: "NEE", name: "NextEra Energy", sector: "Utilities", kind: "stock" },
   { symbol: "DUK", name: "Duke Energy", sector: "Utilities", kind: "stock" },

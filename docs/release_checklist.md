@@ -21,7 +21,7 @@ npm test
 npm run build
 ```
 
-If market-data fixtures changed, also document why `npm run fixture:refresh` was run and what changed in the fixture.
+If market-data fixtures changed, also document why `npm run fixture:refresh` was run and what changed in the fixture, and walk the review steps in [fixture_refresh.md](fixture_refresh.md).
 
 ## Security review
 

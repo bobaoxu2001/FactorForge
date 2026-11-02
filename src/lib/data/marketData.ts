@@ -2,6 +2,7 @@ import type { HistoricalPriceResult, PriceRange } from "@/types/market";
 import { DEFAULT_SYMBOLS } from "@/data/watchlist";
 import fixtureSnapshot from "@/__fixtures__/yahoo-snapshot.json";
 import { fetchHistoricalPricesComposite } from "./providers/composite";
+import { priceFreshness } from "./freshness";
 
 const LIVE_DATA_WAIT_MS = 2_000;
 const WATCHLIST_PRICE_CACHE_MAX_AGE_MS = 5 * 60 * 1000;
@@ -97,20 +98,28 @@ async function getWatchlistPricesUncached(range: PriceRange): Promise<Record<str
   return Object.fromEntries(results.map((result) => [result.symbol, result]));
 }
 
-function buildSnapshotPrices(waitMs: number): HistoricalPriceResult[] {
+export function buildSnapshotPrices(waitMs: number, now: Date = new Date()): HistoricalPriceResult[] {
   const snapshot = fixtureSnapshot as Record<string, HistoricalPriceResult>;
   return DEFAULT_SYMBOLS.map((symbol) => {
     const result = snapshot[symbol];
     if (!result) throw new Error(`Missing committed Yahoo snapshot for ${symbol}`);
+    // Real data, but possibly old: surface the age instead of presenting the
+    // last committed bar as current.
+    const { ageDays, stale } = priceFreshness(result.quality.lastDate, now);
+    const ageNote = stale
+      ? ` STALE: last bar ${result.quality.lastDate} is ${ageDays} days old — refresh the fixture (npm run fixture:refresh).`
+      : "";
     return {
       ...result,
       provider: "Yahoo Finance chart API snapshot",
-      message: `Committed real Yahoo snapshot used after live provider exceeded ${Math.round(waitMs / 1000)}s demo wait budget; coverage dates remain visible.`,
+      message: `Committed real Yahoo snapshot used after live provider exceeded ${Math.round(waitMs / 1000)}s demo wait budget; coverage dates remain visible.${ageNote}`,
       status: "ok",
       isFallback: false,
       quality: {
         ...result.quality,
         source: "yahoo",
+        ageDays,
+        stale,
       },
     };
   });

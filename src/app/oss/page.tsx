@@ -93,7 +93,7 @@ export default function OssPage() {
               Current work focuses on better extension points, provider test coverage, release automation, export options, route-level search, accessibility, and more strategy edge-case tests. The backlog is scoped as future maintainer issues, not adoption claims.
             </p>
           </div>
-          <Link href="https://github.com/bobaoxu2001/FactorForge" className="rounded-xl border border-line bg-white/[0.04] px-3 py-2 text-[13px] text-ink-muted hover:text-ink">
+          <Link href="https://github.com/bobaoxu2001/FactorForge" className="rounded-md border border-line bg-ink/[0.04] px-3 py-2 text-[13px] text-ink-muted hover:text-ink">
             GitHub repository
           </Link>
         </div>
@@ -105,10 +105,10 @@ export default function OssPage() {
 function SignalCard({ icon: Icon, title, detail }: { icon: React.ComponentType<{ className?: string }>; title: string; detail: string }) {
   return (
     <div className="card p-4">
-      <div className="grid h-10 w-10 place-items-center rounded-xl border border-cyan-300/20 bg-cyan-300/10">
-        <Icon className="h-5 w-5 text-cyan-200" />
+      <div className="grid h-10 w-10 place-items-center rounded-md border border-accent/20 bg-accent/10">
+        <Icon className="h-5 w-5 text-accent" />
       </div>
-      <h2 className="mt-4 text-[15px] font-semibold text-white">{title}</h2>
+      <h2 className="mt-4 text-[15px] font-semibold text-ink">{title}</h2>
       <p className="mt-2 text-[12.5px] leading-relaxed text-ink-muted">{detail}</p>
     </div>
   );

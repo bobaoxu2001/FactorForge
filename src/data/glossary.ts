@@ -138,6 +138,16 @@ export const GLOSSARY: GlossaryEntry[] = [
     example: "Two strategies both return 10%, but the calmer one has the higher Sharpe — and is usually the better bet.",
   },
   {
+    id: "deflated-sharpe",
+    term: "Deflated Sharpe ratio",
+    aliases: ["deflated sharpe", "dsr", "selection bias", "multiple testing"],
+    category: "Returns & Risk",
+    level: "intermediate",
+    plain: "The chance a strategy's Sharpe reflects real skill after accounting for how many versions were tried before picking the best one.",
+    why: "Try enough rules or symbols and one will look great by luck. Deflating asks whether the winner beats what the luckiest of N skill-less tries would score.",
+    example: "The best of 30 coin-flip strategies over 3 years typically shows a Sharpe near 1.2 by chance alone, so a 1.3 Sharpe winner proves little.",
+  },
+  {
     id: "winrate",
     term: "Win rate",
     aliases: ["win rate", "hit rate"],
@@ -154,6 +164,16 @@ export const GLOSSARY: GlossaryEntry[] = [
     level: "intermediate",
     plain: "Total money made on winning trades divided by total money lost on losing ones.",
     why: "Above 1 means the wins outweigh the losses. The bigger, the better.",
+  },
+  {
+    id: "expectancy",
+    term: "Expectancy",
+    aliases: ["expectancy", "per-trade expectancy", "average trade"],
+    category: "Returns & Risk",
+    level: "intermediate",
+    plain: "The average profit or loss you can expect from a single closed trade.",
+    why: "It rolls win rate and win/loss size into one number — a positive expectancy means the approach makes money on average, even if plenty of individual trades lose.",
+    example: "Ten closed trades that netted +$500 total have an expectancy of +$50 per trade.",
   },
 
   // ---- Strategy -----------------------------------------------------------

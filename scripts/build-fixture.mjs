@@ -37,7 +37,7 @@ const DEFAULT_SYMBOLS = [
   "JPM", "BAC", "V",                 // Financials
   "JNJ", "UNH", "PFE",               // Health Care
   "XOM", "CVX",                      // Energy
-  "CAT", "HON",                      // Industrials
+  "CAT", "HON", "ETN", "VRT",        // Industrials
   "NEE", "DUK",                      // Utilities
   "AMT", "O",                        // Real Estate
   "SPY", "QQQ",                      // Broad-market ETFs
@@ -47,10 +47,17 @@ const OUT_PATH = path.join(process.cwd(), "src", "__fixtures__", "yahoo-snapshot
 const CONCURRENCY = 4;
 const isFinite = (value) => typeof value === "number" && Number.isFinite(value);
 
+// Yahoo geo-blocks some networks; honor the shell's proxy settings the way
+// curl does. undici is a transitive dependency — import lazily, only when a
+// proxy is configured, so proxy-less environments (CI runners) never need it.
+const proxyUrl = process.env.https_proxy ?? process.env.HTTPS_PROXY ?? null;
+const dispatcher = proxyUrl ? new (await import("undici")).ProxyAgent(proxyUrl) : undefined;
+
 async function fetchOne(symbol) {
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=${RANGE}&interval=1d&events=history&includeAdjustedClose=true`;
   const response = await fetch(url, {
     headers: { "user-agent": "factorforge-fixture-builder/0.1" },
+    dispatcher,
   });
   if (!response.ok) throw new Error(`${symbol}: HTTP ${response.status}`);
   const payload = await response.json();

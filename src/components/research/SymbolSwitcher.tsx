@@ -29,7 +29,7 @@ export default function SymbolSwitcher({
   return (
     <div className="card p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">
+        <div className="text-[11px] text-ink-soft">
           Backtest universe · {options.length} symbols
         </div>
         <div className="text-[11px] text-ink-soft">ranked by research score</div>
@@ -48,16 +48,16 @@ export default function SymbolSwitcher({
               scroll={false}
               aria-current={isActive ? "true" : undefined}
               className={[
-                "group flex min-w-[112px] flex-col rounded-xl border px-3 py-2 transition-colors",
+                "group flex min-w-[112px] flex-col rounded-md border px-3 py-2 transition-colors",
                 isActive
-                  ? "border-blue-300/60 bg-blue-300/10"
-                  : "border-line bg-white/[0.02] hover:border-blue-300/30 hover:bg-white/[0.04]",
+                  ? "border-accent/60 bg-accent/10"
+                  : "border-line bg-ink/[0.02] hover:border-accent/30 hover:bg-ink/[0.04]",
               ].join(" ")}
             >
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[13px] font-semibold text-ink">{option.symbol}</span>
                 {option.isBest && (
-                  <span className="rounded-full border border-cyan-300/30 bg-cyan-300/10 px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-cyan-200">
+                  <span className="rounded-full border border-accent/30 bg-accent/10 px-1.5 py-0.5 text-[9px] tracking-wider text-accent">
                     best
                   </span>
                 )}

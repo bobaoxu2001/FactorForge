@@ -4,8 +4,8 @@ import { pct } from "@/lib/utils/format";
 
 function MomentumGlyph({ m }: { m: number | null }) {
   if (m === null) return <Minus className="h-3 w-3 text-ink-soft" />;
-  if (m > 0.001) return <ArrowUpRight className="h-3 w-3 text-emerald-300" />;
-  if (m < -0.001) return <ArrowDownRight className="h-3 w-3 text-rose-300" />;
+  if (m > 0.001) return <ArrowUpRight className="h-3 w-3 text-emerald-700" />;
+  if (m < -0.001) return <ArrowDownRight className="h-3 w-3 text-rose-700" />;
   return <Minus className="h-3 w-3 text-ink-soft" />;
 }
 
@@ -26,7 +26,7 @@ export default function ProxyBasket({
   return (
     <div>
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-soft">{title}</span>
+        <span className="text-[10px] font-semibold text-ink-soft">{title}</span>
         {coverage && (
           <span className="num text-[10.5px] text-ink-soft">
             {coverage.inUniverse}/{coverage.total} in research universe
@@ -40,9 +40,9 @@ export default function ProxyBasket({
             <span
               key={p.symbol}
               title={`${p.name} · ${p.role} proxy · 20d ${pct(live.momentum20d ?? 0)}`}
-              className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white/[0.045] px-2.5 py-1 text-[11px] font-medium text-ink"
+              className="inline-flex items-center gap-1.5 rounded-full border border-line bg-ink/[0.045] px-2.5 py-1 text-[11px] font-medium text-ink"
             >
-              <span className="num font-semibold text-white">{p.symbol}</span>
+              <span className="num font-semibold text-ink">{p.symbol}</span>
               <MomentumGlyph m={live.momentum20d} />
             </span>
           ) : (
@@ -52,7 +52,7 @@ export default function ProxyBasket({
               className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-line/80 bg-transparent px-2.5 py-1 text-[11px] text-ink-soft"
             >
               <span className="num font-semibold text-ink-muted">{p.symbol}</span>
-              <span className="text-[8.5px] uppercase tracking-[0.12em] text-ink-soft">ref</span>
+              <span className="text-[8.5px] text-ink-soft">ref</span>
             </span>
           );
         })}

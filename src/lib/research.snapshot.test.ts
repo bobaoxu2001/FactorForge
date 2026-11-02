@@ -15,7 +15,7 @@ function loadFixture(): Record<string, HistoricalPriceResult> {
 }
 
 describe("research pipeline snapshot (real Yahoo data)", () => {
-  // The full pipeline (5 strategies × ~28 symbols = ~140 backtests, plus factor
+  // The full pipeline (5 strategies × ~30 symbols = ~150 backtests, plus factor
   // returns and concentration) is real compute. Build it ONCE and share it across
   // the invariant tests instead of rebuilding per-test — faster and avoids the
   // default 5s per-test timeout on the larger universe.

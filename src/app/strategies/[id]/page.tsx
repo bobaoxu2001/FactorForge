@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BrainCircuit, FlaskConical, ListChecks, ShieldAlert } from "lucide-react";
@@ -16,7 +17,7 @@ import StressDiagnosticsPanel from "@/components/research/StressDiagnosticsPanel
 import StrategyIntelPanel from "@/components/research/StrategyIntelPanel";
 import SelloffMemoBlock from "@/components/research/SelloffMemoBlock";
 import { buildStrategyIntel } from "@/lib/quant/strategyIntel";
-import { evaluateWalkForward } from "@/lib/quant/walkForward";
+import { evaluateRollingWalkForward, evaluateWalkForward } from "@/lib/quant/walkForward";
 import { attributeFactors } from "@/lib/quant/factorAttribution";
 import { scoreBacktest } from "@/lib/quant/radar";
 import { buildStrategyStressDiagnostics } from "@/lib/quant/marketStress";
@@ -25,7 +26,7 @@ import { generateStrategyExplanation } from "@/lib/ai/strategyExplainer";
 import { getResearchDataset, runStrategyAcrossSymbols } from "@/lib/research";
 import SymbolSwitcher from "@/components/research/SymbolSwitcher";
 import PlainEnglish from "@/components/learn/PlainEnglish";
-import { num, pct, pctPlain, usd } from "@/lib/utils/format";
+import { num, pct, pctPlain, signedTone, usd } from "@/lib/utils/format";
 
 // One-line, jargon-free description of what each strategy family is trying to do.
 const STRATEGY_TYPE_PLAIN: Record<string, string> = {
@@ -39,6 +40,15 @@ export const revalidate = 60 * 60;
 
 export function generateStaticParams() {
   return STRATEGY_CATALOG.map((strategy) => ({ id: strategy.id }));
+}
+
+export function generateMetadata({ params }: { params: { id: string } }): Metadata {
+  const definition = STRATEGY_CATALOG.find((s) => s.id === params.id);
+  if (!definition) return {};
+  return {
+    title: definition.name,
+    description: definition.description,
+  };
 }
 
 export default async function StrategyDetailPage({
@@ -63,9 +73,11 @@ export default async function StrategyDetailPage({
   const active = requested ?? best;
   const result = active.result;
   const isDefaultSymbol = active.symbol === best.symbol;
+  const selection = dataset.selectionBias[definition.id];
 
   const explanation = await generateStrategyExplanation(result);
   const walkForward = evaluateWalkForward(result);
+  const rollingWalkForward = evaluateRollingWalkForward(result);
   const factorAttribution = attributeFactors(result.equityCurve, dataset.factorReturns, dataset.factorBenchmarkSymbol);
   // Stress diagnostics for the currently-viewed symbol (recomputed because the
   // user can switch off the showcase pick). Base score uses the same radar scorer.
@@ -105,15 +117,27 @@ export default async function StrategyDetailPage({
       </PlainEnglish>
 
       {/* Selection-bias disclaimer — turns a hidden methodological assumption into a visible product feature. */}
-      <section className="rounded-2xl border border-amber-300/30 bg-amber-300/[0.06] p-4">
+      <section className="rounded-lg border border-amber-600/30 bg-amber-300/[0.06] p-4">
         <div className="flex items-start gap-3">
-          <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" />
+          <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />
           <div className="text-[12.5px] leading-relaxed text-ink-muted">
-            <span className="font-medium text-amber-100">Selection-bias notice. </span>
+            <span className="font-medium text-amber-800">Selection-bias notice. </span>
             Headline metrics default to <span className="font-medium text-ink">{best.symbol}</span> — the symbol where
             this rule scored highest across the {runs.length}-name watchlist. That is a deliberate <em>showcase</em> pick,
             not a survivorship-bias-free result, so the default numbers are optimistic by construction. Switch symbols
             below to see how the same rule behaves elsewhere.
+            {selection && (
+              <span className="mt-1.5 block">
+                <span className="font-medium text-amber-800">Quantified: </span>
+                the luckiest of {selection.trials} skill-less runs would reach a Sharpe of about{" "}
+                <span className="num text-ink">{num(selection.luckThreshold)}</span>. {best.symbol}&apos;s Sharpe of{" "}
+                <span className="num text-ink">{num(selection.sharpe)}</span> gives a{" "}
+                <span className="num font-medium text-ink">{selection.dsr === null ? "n/a" : `${Math.round(selection.dsr * 100)}%`}</span>{" "}
+                probability of real skill after that haircut (deflated Sharpe;{" "}
+                {selection.survives ? "clears" : "below"} the 95% bar
+                {selection.psr !== null && <>, vs {Math.round(selection.psr * 100)}% before accounting for the pick</>}).
+              </span>
+            )}
             {!isDefaultSymbol && (
               <span className="ml-1 text-ink">
                 Currently viewing <span className="font-medium">{active.symbol}</span> (rank {runs.indexOf(active) + 1} of {runs.length}).
@@ -137,28 +161,28 @@ export default async function StrategyDetailPage({
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1.2fr_0.8fr]">
         <div className="card p-5">
           <div className="flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-xl border border-cyan-300/25 bg-cyan-300/10">
-              <BrainCircuit className="h-5 w-5 text-cyan-200" />
+            <div className="grid h-10 w-10 place-items-center rounded-md border border-accent/25 bg-accent/10">
+              <BrainCircuit className="h-5 w-5 text-accent" />
             </div>
             <div>
               <div className="section-label">AI Strategy Thesis</div>
-              <h2 className="mt-1 text-[20px] font-semibold text-white">{result.strategyName}</h2>
+              <h2 className="mt-1 text-[20px] font-semibold text-ink">{result.strategyName}</h2>
             </div>
           </div>
           <p className="mt-4 text-[14px] leading-relaxed text-ink-muted">{explanation.thesis}</p>
-          <div className="mt-4 rounded-2xl border border-line bg-white/[0.035] p-4">
-            <div className="text-[11px] uppercase tracking-[0.18em] text-ink-soft">Model Reasoning Summary</div>
+          <div className="mt-4 rounded-lg border border-line bg-ink/[0.035] p-4">
+            <div className="text-[11px] text-ink-soft">Model Reasoning Summary</div>
             <p className="mt-2 text-[13px] leading-relaxed text-ink-muted">{explanation.modelReasoning}</p>
           </div>
         </div>
         <div className="card p-5">
           <div className="section-label">AI Confidence Score</div>
           <div className="mt-3 flex items-end justify-between">
-            <div className="num text-[54px] font-semibold leading-none text-white">{explanation.confidenceScore}</div>
+            <div className="num text-[54px] font-semibold leading-none text-ink">{explanation.confidenceScore}</div>
             <StatusBadge status={`${explanation.confidenceLevel} confidence`} />
           </div>
-          <div className="mt-4 h-2 rounded-full bg-white/[0.06]">
-            <div className="h-2 rounded-full bg-gradient-to-r from-blue-400 to-cyan-300" style={{ width: `${explanation.confidenceScore}%` }} />
+          <div className="mt-4 h-2 rounded-full bg-ink/[0.06]">
+            <div className="h-2 rounded-full bg-gradient-to-r from-accent to-accent" style={{ width: `${explanation.confidenceScore}%` }} />
           </div>
           <p className="mt-4 text-[12.5px] leading-relaxed text-ink-muted">
             {explanation.source === "deepseek"
@@ -169,15 +193,15 @@ export default async function StrategyDetailPage({
       </section>
 
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <MetricCard label="Total return" value={pct(result.metrics.totalReturn)} tone="positive" termId="return" />
-        <MetricCard label="Annualized" value={pct(result.metrics.annualizedReturn)} tone="positive" termId="annualized" />
+        <MetricCard label="Total return" value={pct(result.metrics.totalReturn)} tone={signedTone(result.metrics.totalReturn)} termId="return" />
+        <MetricCard label="Annualized" value={pct(result.metrics.annualizedReturn)} tone={signedTone(result.metrics.annualizedReturn)} termId="annualized" />
         <MetricCard label="Benchmark" value={pct(result.metrics.benchmarkReturn)} termId="benchmark" />
-        <MetricCard label="Excess" value={pct(result.metrics.excessReturn)} tone="accent" />
+        <MetricCard label="Excess" value={pct(result.metrics.excessReturn)} tone={signedTone(result.metrics.excessReturn)} />
         <MetricCard label="Max drawdown" value={pct(result.metrics.maxDrawdown)} termId="drawdown" />
         <MetricCard label="Sharpe" value={num(result.metrics.sharpe)} termId="sharpe" />
         <MetricCard label="Win rate" value={pctPlain(result.metrics.winRate)} termId="winrate" />
         <MetricCard label="Trades" value={String(result.metrics.tradeCount)} />
-        <MetricCard label="Profit factor" value={num(result.metrics.profitFactor)} tone={result.metrics.profitFactor >= 1 ? "positive" : "negative"} />
+        <MetricCard label="Profit factor" value={result.metrics.profitFactor === null ? "n/a" : num(result.metrics.profitFactor)} hint={result.metrics.profitFactor === null ? "no losing trades" : undefined} tone={result.metrics.profitFactor === null ? "default" : result.metrics.profitFactor >= 1 ? "positive" : "negative"} />
         <MetricCard label="Avg holding" value={`${num(result.metrics.averageHoldingDays, 0)}d`} />
       </section>
 
@@ -194,10 +218,10 @@ export default async function StrategyDetailPage({
         <div className="space-y-5">
           <StrategySignalPanel result={result} />
           <div className="card p-5">
-            <div className="text-[11px] uppercase tracking-wider text-ink-soft">AI Research Memo</div>
+            <div className="text-[11px] tracking-wider text-ink-soft">AI Research Memo</div>
             <p className="mt-2 text-[13px] leading-relaxed text-ink">{explanation.summary}</p>
             <p className="mt-2 text-[13px] leading-relaxed text-ink-muted">{explanation.whyItWorks}</p>
-            <p className="mt-2 text-[13px] leading-relaxed text-rose-200">{explanation.keyRisks}</p>
+            <p className="mt-2 text-[13px] leading-relaxed text-rose-700">{explanation.keyRisks}</p>
             <p className="mt-2 text-[13px] leading-relaxed text-brand-blue">{explanation.researchFollowUp}</p>
           </div>
         </div>
@@ -211,7 +235,7 @@ export default async function StrategyDetailPage({
       </section>
 
       <section>
-        <WalkForwardPanel split={walkForward} />
+        <WalkForwardPanel split={walkForward} rolling={rollingWalkForward} />
       </section>
 
       <section>
@@ -231,7 +255,7 @@ export default async function StrategyDetailPage({
       </section>
 
       <section className="card p-5">
-        <div className="text-[11px] uppercase tracking-wider text-ink-soft">Backtest assumptions</div>
+        <div className="text-[11px] tracking-wider text-ink-soft">Backtest assumptions</div>
         <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
           <MetricCard label="Execution" value="next open" />
           <MetricCard label="Position size" value={pct(result.assumptions.positionFraction)} />
@@ -244,9 +268,9 @@ export default async function StrategyDetailPage({
       </section>
 
       <section className="card overflow-x-auto">
-        <div className="border-b border-line px-4 py-3 text-[11px] uppercase tracking-wider text-ink-soft">Trades</div>
+        <div className="border-b border-line px-4 py-3 text-[11px] tracking-wider text-ink-soft">Trades</div>
         <table className="w-full min-w-[760px] text-[13px]">
-          <thead className="border-b border-line text-[11px] uppercase tracking-wider text-ink-soft">
+          <thead className="border-b border-line text-[11px] tracking-wider text-ink-soft">
             <tr>
               <th className="px-4 py-3 text-left">Entry</th>
               <th className="px-4 py-3 text-left">Exit</th>
@@ -280,8 +304,8 @@ function ResearchPanel({ icon: Icon, title, items }: { icon: React.ComponentType
   return (
     <div className="card p-5">
       <div className="flex items-center gap-3">
-        <div className="grid h-9 w-9 place-items-center rounded-xl border border-blue-300/20 bg-blue-300/10">
-          <Icon className="h-4 w-4 text-blue-200" />
+        <div className="grid h-9 w-9 place-items-center rounded-md border border-accent/20 bg-accent/10">
+          <Icon className="h-4 w-4 text-accent" />
         </div>
         <div className="panel-title">{title}</div>
       </div>

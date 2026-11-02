@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { BrainCircuit, Database, LineChart, Network, Target } from "lucide-react";
 import StatusBadge from "@/components/badges/StatusBadge";
 import MetricCard from "@/components/cards/MetricCard";
@@ -11,6 +12,12 @@ import { pearson } from "@/lib/quant/indicators";
 import { pct, pctPlain, num } from "@/lib/utils/format";
 
 export const revalidate = 60 * 60;
+
+export const metadata: Metadata = {
+  title: "Factor Discovery",
+  description:
+    "Momentum, volatility, trend, and liquidity factors computed across the research universe, with factor-return correlations.",
+};
 
 function regimeLabel(corr: number): string {
   const a = Math.abs(corr);
@@ -84,10 +91,10 @@ export default async function FactorsPage() {
       <section className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
         {factorGroups.map(({ title, detail, Icon }) => (
           <div key={title} className="card p-4">
-            <div className="grid h-10 w-10 place-items-center rounded-xl border border-cyan-300/20 bg-cyan-300/10">
-              <Icon className="h-5 w-5 text-cyan-200" />
+            <div className="grid h-10 w-10 place-items-center rounded-md border border-accent/20 bg-accent/10">
+              <Icon className="h-5 w-5 text-accent" />
             </div>
-            <h2 className="mt-4 text-[15px] font-semibold text-white">{title}</h2>
+            <h2 className="mt-4 text-[15px] font-semibold text-ink">{title}</h2>
             <p className="mt-2 text-[12.5px] leading-relaxed text-ink-muted">{detail}</p>
           </div>
         ))}
@@ -96,7 +103,7 @@ export default async function FactorsPage() {
       <section>
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 className="text-[18px] font-semibold text-white">Factor Breakdown Under Stress</h2>
+            <h2 className="text-[18px] font-semibold text-ink">Factor Breakdown Under Stress</h2>
             <p className="mt-0.5 text-[12px] text-ink-soft">
               Per-group condition, direction, stress impact, and an AI-style read under the current{" "}
               <span className="text-ink">{marketStress.regime}</span> regime (stress score {marketStress.stressScore}/100). Research only.
@@ -118,8 +125,8 @@ export default async function FactorsPage() {
               "Volatility remains controlled enough for continuation rules, but crowding risk rises when volume confirmation weakens.",
               "Trend factors are best used as admission gates before ranking strategy candidates by drawdown and Sharpe.",
             ].map((hypothesis, index) => (
-              <div key={hypothesis} className="rounded-2xl border border-line bg-white/[0.035] p-4">
-                <div className="text-[10px] uppercase tracking-[0.18em] text-ink-soft">Hypothesis {index + 1}</div>
+              <div key={hypothesis} className="rounded-lg border border-line bg-ink/[0.035] p-4">
+                <div className="text-[10px] text-ink-soft">Hypothesis {index + 1}</div>
                 <p className="mt-2 text-[12.5px] leading-relaxed text-ink-muted">{hypothesis}</p>
               </div>
             ))}
@@ -133,11 +140,11 @@ export default async function FactorsPage() {
               <div key={label}>
                 <div className="mb-1 flex justify-between text-[12px]">
                   <span className="text-ink-muted">{label}</span>
-                  <span className="num text-white">{num(value)} · {regimeLabel(value)}</span>
+                  <span className="num text-ink">{num(value)} · {regimeLabel(value)}</span>
                 </div>
-                <div className="h-2 rounded-full bg-white/[0.06]">
+                <div className="h-2 rounded-full bg-ink/[0.06]">
                   <div
-                    className={`h-2 rounded-full ${value < 0 ? "bg-gradient-to-r from-rose-300 to-amber-300" : "bg-gradient-to-r from-cyan-300 to-blue-400"}`}
+                    className={`h-2 rounded-full ${value < 0 ? "bg-gradient-to-r from-rose-300 to-amber-300" : "bg-gradient-to-r from-accent to-accent"}`}
                     style={{ width: `${Math.min(100, Math.abs(value) * 100)}%` }}
                   />
                 </div>
@@ -153,7 +160,7 @@ export default async function FactorsPage() {
 
       <div className="card overflow-x-auto">
         <table className="w-full min-w-[920px] text-[13px]">
-          <thead className="border-b border-line text-[11px] uppercase tracking-wider text-ink-soft">
+          <thead className="border-b border-line text-[11px] tracking-wider text-ink-soft">
             <tr>
               <th className="px-4 py-3 text-left">Symbol</th>
               <th className="px-4 py-3 text-right">Mom 20d</th>

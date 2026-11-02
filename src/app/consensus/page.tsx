@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import MetricCard from "@/components/cards/MetricCard";
 import StatusBadge from "@/components/badges/StatusBadge";
@@ -9,6 +10,12 @@ import MethodologyCallout from "@/components/research/MethodologyCallout";
 import { getResearchDataset } from "@/lib/research";
 
 export const revalidate = 60 * 60;
+
+export const metadata: Metadata = {
+  title: "Multi-Strategy Consensus",
+  description:
+    "Which names are held by more than one independent strategy right now — cross-strategy agreement as a research overlay. No broker, no live orders.",
+};
 
 export default async function ConsensusPage() {
   const { signalConsensus } = await getResearchDataset();
@@ -42,7 +49,7 @@ export default async function ConsensusPage() {
       <section className="card p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <div className="text-[11px] uppercase tracking-[0.16em] text-ink-soft">Scan summary</div>
+            <div className="text-[11px] text-ink-soft">Scan summary</div>
             <h2 className="mt-1 text-[20px] font-semibold text-ink">Cross-strategy agreement</h2>
             <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-ink-muted">{verdict}</p>
           </div>
@@ -86,14 +93,14 @@ export default async function ConsensusPage() {
             <article key={pick.symbol} className="card p-5">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="grid h-12 w-12 place-items-center rounded-2xl border border-blue-400/35 bg-blue-400/10 text-[15px] font-semibold text-blue-100">
+                  <div className="grid h-12 w-12 place-items-center rounded-lg border border-accent/35 bg-accent/10 text-[15px] font-semibold text-accent">
                     {pick.agreeCount}×
                   </div>
                   <div>
                     <div className="text-[18px] font-semibold text-ink">{pick.symbol}</div>
                     <div className="mt-1 flex flex-wrap gap-1.5">
                       {pick.strategyTypes.map((type) => (
-                        <span key={type} className="chip border-line bg-white/[0.04] text-ink-muted">{type}</span>
+                        <span key={type} className="chip border-line bg-ink/[0.04] text-ink-muted">{type}</span>
                       ))}
                     </div>
                   </div>
@@ -105,12 +112,12 @@ export default async function ConsensusPage() {
 
               <div className="mt-4 space-y-2">
                 {pick.legs.map((leg) => (
-                  <div key={leg.strategyId} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-white/[0.035] p-3">
+                  <div key={leg.strategyId} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line bg-ink/[0.035] p-3">
                     <div>
                       <Link href={`/strategies/${leg.strategyId}`} className="text-[13px] font-medium text-ink hover:text-brand-blue">
                         {leg.strategyName}
                       </Link>
-                      <div className="text-[11px] uppercase tracking-wider text-ink-soft">{leg.type}</div>
+                      <div className="text-[11px] tracking-wider text-ink-soft">{leg.type}</div>
                     </div>
                     <div className="text-[12px] text-ink-muted">{leg.recentSignal}</div>
                     <div className="num text-[13px] text-ink">{leg.score}</div>

@@ -22,8 +22,8 @@ export default function EmptyState({ title, message, icon: Icon = Compass, hint,
   return (
     <div className="card grid min-h-[180px] place-items-center border-dashed p-8 text-center">
       <div className="max-w-xl">
-        <div className="mx-auto grid h-11 w-11 place-items-center rounded-2xl border border-cyan-300/25 bg-cyan-300/[0.08] shadow-[0_0_22px_-6px_rgba(34,211,238,0.7)]">
-          <Icon className="h-5 w-5 text-cyan-200" />
+        <div className="mx-auto grid h-11 w-11 place-items-center rounded-lg border border-accent/25 bg-accent/[0.08]">
+          <Icon className="h-5 w-5 text-accent" />
         </div>
         <div className="mt-4 text-[15px] font-semibold text-ink">{title}</div>
         <p className="mt-2 text-[13px] leading-relaxed text-ink-muted">{message}</p>
@@ -33,7 +33,7 @@ export default function EmptyState({ title, message, icon: Icon = Compass, hint,
         {action && (
           <Link
             href={action.href}
-            className="mt-5 inline-flex items-center gap-2 rounded-full border border-cyan-300/30 bg-cyan-300/[0.08] px-4 py-2 text-[12.5px] font-medium text-cyan-100 transition-colors hover:border-cyan-300/55 hover:bg-cyan-300/[0.14]"
+            className="mt-5 inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/[0.08] px-4 py-2 text-[12.5px] font-medium text-accent transition-colors hover:border-accent/55 hover:bg-accent/[0.14]"
           >
             {action.label}
             <span aria-hidden>→</span>

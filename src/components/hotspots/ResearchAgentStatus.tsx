@@ -2,9 +2,9 @@ import { CheckCircle2, CircleDashed, PlugZap } from "lucide-react";
 import type { AgentStep, HotspotAgentReport } from "@/lib/agents/types";
 
 const STATUS_META: Record<AgentStep["status"], { label: string; chip: string; Icon: typeof CheckCircle2 }> = {
-  complete: { label: "Live data", chip: "border-emerald-400/35 bg-emerald-500/12 text-emerald-200", Icon: CheckCircle2 },
-  demo: { label: "Template", chip: "border-cyan-300/30 bg-cyan-400/[0.08] text-cyan-100", Icon: CircleDashed },
-  "not-connected": { label: "Not connected", chip: "border-amber-300/35 bg-amber-400/10 text-amber-100", Icon: PlugZap },
+  complete: { label: "Live data", chip: "border-emerald-600/35 bg-emerald-500/12 text-emerald-700", Icon: CheckCircle2 },
+  demo: { label: "Template", chip: "border-accent/30 bg-accent/[0.08] text-accent", Icon: CircleDashed },
+  "not-connected": { label: "Not connected", chip: "border-amber-600/35 bg-amber-400/10 text-amber-800", Icon: PlugZap },
 };
 
 /**
@@ -24,8 +24,8 @@ export default function ResearchAgentStatus({ report }: { report: HotspotAgentRe
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="chip border-amber-300/35 bg-amber-400/10 text-amber-100">{dataSource.engine}</span>
-          <span className="chip border-line bg-white/[0.04] text-ink-soft">
+          <span className="chip border-amber-600/35 bg-amber-400/10 text-amber-800">{dataSource.engine}</span>
+          <span className="chip border-line bg-ink/[0.04] text-ink-soft">
             News API: {dataSource.newsConnected ? "connected" : "not connected"}
           </span>
         </div>
@@ -36,7 +36,7 @@ export default function ResearchAgentStatus({ report }: { report: HotspotAgentRe
           const meta = STATUS_META[step.status];
           const Icon = meta.Icon;
           return (
-            <li key={step.id} className="rounded-2xl border border-line bg-white/[0.025] p-3.5">
+            <li key={step.id} className="rounded-lg border border-line bg-ink/[0.025] p-3.5">
               <div className="flex items-center justify-between">
                 <span className="num text-[11px] font-semibold text-ink-soft">{String(i + 1).padStart(2, "0")}</span>
                 <span className={`chip ${meta.chip}`}>
@@ -44,7 +44,7 @@ export default function ResearchAgentStatus({ report }: { report: HotspotAgentRe
                   {meta.label}
                 </span>
               </div>
-              <div className="mt-2 text-[13px] font-semibold text-white">{step.label}</div>
+              <div className="mt-2 text-[13px] font-semibold text-ink">{step.label}</div>
               <p className="mt-1 text-[11.5px] leading-relaxed text-ink-soft">{step.detail}</p>
             </li>
           );
@@ -53,11 +53,11 @@ export default function ResearchAgentStatus({ report }: { report: HotspotAgentRe
 
       <div className="mt-5 grid grid-cols-1 gap-3 border-t border-line pt-4 text-[12px] leading-relaxed text-ink-muted md:grid-cols-2">
         <p>
-          <span className="font-medium text-white">Catalyst engine. </span>
+          <span className="font-medium text-ink">Catalyst engine. </span>
           {dataSource.note}
         </p>
         <p>
-          <span className="font-medium text-white">Market data. </span>
+          <span className="font-medium text-ink">Market data. </span>
           {dataSource.marketDataNote}
         </p>
       </div>

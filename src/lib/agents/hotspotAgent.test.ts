@@ -112,3 +112,76 @@ describe("buildHotspotReport", () => {
     expect(strengths).toEqual(sorted);
   });
 });
+
+describe("AI value-chain themes (power / optics / cooling)", () => {
+  it("configures all three bottleneck-migration themes", () => {
+    const ids = report().themes.map((t) => t.id);
+    for (const id of ["ai-power-grid", "optical-interconnect", "thermal-liquid-cooling"]) {
+      expect(ids, `theme ${id} missing`).toContain(id);
+    }
+  });
+
+  it("gives the power theme a live in-universe read and keeps pure-plays reference-only", () => {
+    const power = report().themes.find((t) => t.id === "ai-power-grid")!;
+    const nee = power.proxies.find((p) => p.symbol === "NEE")!;
+    const gev = power.proxies.find((p) => p.symbol === "GEV")!;
+    expect(nee.inUniverse).toBe(true);
+    expect(nee.live).not.toBeNull();
+    expect(gev.inUniverse).toBe(false);
+    expect(gev.live).toBeNull();
+    expect(power.dataCoverage.inUniverse).toBeGreaterThanOrEqual(3);
+  });
+
+  it("carries the shared-downstream (capex-pause correlation) warning on every AI-chain theme", () => {
+    const themes = report().themes;
+    for (const id of ["ai-power-grid", "optical-interconnect", "thermal-liquid-cooling"]) {
+      const theme = themes.find((t) => t.id === id)!;
+      const text = theme.riskFlags.join(" ").toLowerCase();
+      expect(text, `${id} must warn about the single AI-capex demand source`).toContain("capex");
+    }
+  });
+
+  it("carries the regulatory-exception finding on the power theme (IPP premium unwind)", () => {
+    const power = report().themes.find((t) => t.id === "ai-power-grid")!;
+    expect(power.riskFlags.join(" ").toLowerCase()).toContain("regulat");
+    expect(power.researchNote.toLowerCase()).toContain("only where regulation permits");
+    expect(power.catalysts.some((c) => c.label.toLowerCase().includes("ratepayer"))).toBe(true);
+  });
+
+  it("flags optics as already re-rated rather than an undiscovered bottleneck", () => {
+    const optics = report().themes.find((t) => t.id === "optical-interconnect")!;
+    expect(optics.riskFlags.join(" ").toLowerCase()).toContain("already re-rated");
+    expect(optics.catalystSummary.toLowerCase()).toContain("already");
+  });
+});
+
+describe("humanoid robotics theme (option-type, narrative stage)", () => {
+  it("is configured and labeled honestly as pre-revenue / milestone-driven", () => {
+    const theme = report().themes.find((t) => t.id === "humanoid-robotics")!;
+    expect(theme).toBeTruthy();
+    const flags = theme.riskFlags.join(" ").toLowerCase();
+    expect(flags).toContain("revenue is approximately zero");
+    expect(flags).toContain("option-type");
+    expect(theme.researchNote.toLowerCase()).toContain("option logic");
+    // It must never claim cycle-style order evidence.
+    expect(theme.catalystSummary.toLowerCase()).toContain("not a cycle trade");
+  });
+
+  it("keeps in-universe adjacents live and pure-plays reference-only", () => {
+    const theme = report().themes.find((t) => t.id === "humanoid-robotics")!;
+    const tsla = theme.proxies.find((p) => p.symbol === "TSLA")!;
+    const amba = theme.proxies.find((p) => p.symbol === "AMBA")!;
+    expect(tsla.inUniverse).toBe(true);
+    expect(tsla.live).not.toBeNull();
+    expect(amba.inUniverse).toBe(false);
+    expect(amba.live).toBeNull();
+  });
+
+  it("is excluded from the AI-capex shared-downstream group (separate demand curve)", () => {
+    // The capex-pause warning test iterates the three AI-chain themes only;
+    // robotics prices a demand curve that has not arrived. Its sentiment
+    // coupling to the AI complex is still declared as a risk flag.
+    const theme = report().themes.find((t) => t.id === "humanoid-robotics")!;
+    expect(theme.riskFlags.join(" ").toLowerCase()).toContain("ai-complex sentiment");
+  });
+});

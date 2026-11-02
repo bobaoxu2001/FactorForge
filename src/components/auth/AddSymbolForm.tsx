@@ -41,7 +41,7 @@ export default function AddSymbolForm({ entryCount }: { entryCount: number }) {
           required
           maxLength={8}
           placeholder="e.g. AAPL"
-          className="h-10 w-40 rounded-xl border border-line bg-white/[0.04] px-3 text-[13px] uppercase text-ink focus:border-blue-400/45 focus:outline-none"
+          className="h-10 w-40 rounded-md border border-line bg-ink/[0.04] px-3 text-[13px] text-ink focus:border-accent/45 focus:outline-none"
         />
         <SubmitButton />
         <span className="text-[11.5px] text-ink-soft">
@@ -49,12 +49,12 @@ export default function AddSymbolForm({ entryCount }: { entryCount: number }) {
         </span>
       </form>
       {!dismissed && state.error && (
-        <div className="mt-3 rounded-xl border border-rose-300/35 bg-rose-400/10 px-3 py-2 text-[12.5px] text-rose-100">
+        <div className="mt-3 rounded-md border border-rose-600/35 bg-rose-400/10 px-3 py-2 text-[12.5px] text-rose-800">
           {state.error}
         </div>
       )}
       {!dismissed && state.added && (
-        <div className="mt-3 rounded-xl border border-emerald-300/30 bg-emerald-400/10 px-3 py-2 text-[12.5px] text-emerald-100">
+        <div className="mt-3 rounded-md border border-emerald-600/30 bg-emerald-400/10 px-3 py-2 text-[12.5px] text-emerald-800">
           Added {state.added} to your watchlist.
         </div>
       )}
@@ -68,7 +68,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="h-10 rounded-xl border border-cyan-300/35 bg-cyan-300/10 px-4 text-[13px] font-semibold text-cyan-100 hover:bg-cyan-300/20 disabled:opacity-50"
+      className="h-10 rounded-md border border-accent/35 bg-accent/10 px-4 text-[13px] font-semibold text-accent hover:bg-accent/20 disabled:opacity-50"
     >
       {pending ? "Adding…" : "Add"}
     </button>
