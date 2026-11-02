@@ -461,12 +461,12 @@ export const FREIGHT_PROJECT: ResearchProjectConfig = {
     },
     {
       id: "H6",
-      title: "Recovery already priced",
-      statement: "Valuations of the focus names already sit in the upper part of their own history, and the shares have outperformed the market.",
-      stance: "bearish",
-      marketNarrative: "What matters is not whether freight recovers but whether the price already assumes it.",
+      title: "Elevated valuation & relative strength",
+      statement: "The focus names have elevated trailing multiples relative to their own history and have outperformed SPY. These are diagnostic proxies; investor expectations are not directly measured.",
+      stance: "neutral",
+      marketNarrative: "Historical multiples and relative share-price performance provide context; identifying the recovery implied by current prices requires explicit forward assumptions.",
       tests: [
-        { kind: "company-metric", id: "H6-T1", description: "Current EV/EBITDA is at or above the 75th percentile of its own 5-year point-in-time history", metric: "evEbitdaPercentile", tickers: ["KNX", "JBHT", "CHRW"], op: ">", threshold: 0.75, supportsWhenTrue: true },
+        { kind: "company-metric", id: "H6-T1", description: "Current EV/EBITDA is above the 75th percentile of its own 5-year filing-date history (using the unrounded percentile)", metric: "evEbitdaPercentile", tickers: ["KNX", "JBHT", "CHRW"], op: ">", threshold: 0.75, supportsWhenTrue: true },
         { kind: "company-metric", id: "H6-T2", description: "6-month total return beats SPY", metric: "relativeReturn6m", tickers: ["KNX", "JBHT", "CHRW"], op: ">", threshold: 0, supportsWhenTrue: true },
       ],
       triggers: [],
