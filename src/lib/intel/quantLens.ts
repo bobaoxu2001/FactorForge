@@ -40,6 +40,7 @@ export interface StrategyRunSummary {
   type: string;
   totalReturn: number;
   benchmarkReturn: number;
+  excessReturn: number;
   sharpe: number;
   maxDrawdown: number;
   tradeCount: number;
@@ -52,6 +53,7 @@ export interface QuantLens {
   runs: StrategyRunSummary[];
   best: StrategyRunSummary | null;
   years: number;
+  period: { start: string; end: string };
   nullExpectedMaxSharpe: number;
   bestSharpeAfterHaircut: number | null;
   notes: string[];
@@ -71,6 +73,7 @@ export function buildQuantLens(stock: PriceFixture, benchmark: PriceFixture): Qu
       type: definition.type,
       totalReturn: r.metrics.totalReturn,
       benchmarkReturn: r.metrics.benchmarkReturn,
+      excessReturn: r.metrics.excessReturn,
       sharpe: r.metrics.sharpe,
       maxDrawdown: r.metrics.maxDrawdown,
       tradeCount: r.metrics.tradeCount,
@@ -93,6 +96,7 @@ export function buildQuantLens(stock: PriceFixture, benchmark: PriceFixture): Qu
     runs,
     best,
     years,
+    period: { start: market.prices[0]?.date ?? "", end: market.prices.at(-1)?.date ?? "" },
     nullExpectedMaxSharpe: nullMax,
     bestSharpeAfterHaircut: best ? best.sharpe - nullMax : null,
     notes: [

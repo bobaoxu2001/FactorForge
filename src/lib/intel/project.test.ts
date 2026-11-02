@@ -4,9 +4,11 @@ import macro from "@/__fixtures__/research/freight/macro.json";
 import companies from "@/__fixtures__/research/freight/companies.json";
 import prices from "@/__fixtures__/research/freight/prices.json";
 import { FREIGHT_PROJECT } from "@/data/research/projects/freight";
+import { buildValuation } from "./companies";
 import { applyStaleness, validateEvidence } from "./evidence";
 import { buildMemoSections, memoMeta, memoToMarkdown } from "./memo";
 import { getResearchProject } from "./project";
+import type { CompanyFixture, PriceFixture } from "./snapshot";
 import type { Evidence } from "./types";
 
 const NOW = new Date("2026-11-01T12:00:00Z");
@@ -115,11 +117,23 @@ describe("hypotheses and value chain", () => {
     expect(view.valueChain.relationships.some((r) => r.status === "hypothetical")).toBe(true);
   });
 
-  it("uses point-in-time fundamentals for historical multiples", () => {
+  it("does not let future filings change earlier historical multiples", () => {
     for (const c of view.companies) {
-      for (const h of c.valuation?.history ?? []) {
-        const row = c.quarters.find((q) => q.end === h.fundamentalsThrough)!;
-        expect(row.availableFrom <= h.date, `${c.ticker} ${h.date}`).toBe(true);
+      const history = c.valuation!.history;
+      const raw = (companies.companies as unknown as Record<string, CompanyFixture>)[c.ticker].metrics;
+      const price = (prices.prices as unknown as Record<string, PriceFixture>)[c.ticker];
+      // Reconstruct first/middle/last history points from snapshots with every
+      // later raw fact physically removed. Aggregate row dates cannot prove
+      // that all four quarters of each valuation denominator were public.
+      for (const h of [history[0], history[Math.floor(history.length / 2)], history[history.length - 1]]) {
+        const rawThen = Object.fromEntries(Object.entries(raw).map(([key, metric]) => [key, { ...metric, points: metric.points.filter((p) => p.filed <= h.date) }]));
+        const priceThen = { ...price, rows: price.rows.filter((r) => r[0] <= h.date) };
+        const then = buildValuation(rawThen, priceThen)!;
+        expect(h.fundamentalsThrough, `${c.ticker} ${h.date}`).toBe(then.fundamentalsThrough);
+        expect(h.pe).toBe(then.current.pe);
+        expect(h.evToEbitda).toBe(then.current.evToEbitda);
+        expect(h.evToSales).toBe(then.current.evToSales);
+        expect(h.fcfYield).toBe(then.current.fcfYield);
       }
     }
   });

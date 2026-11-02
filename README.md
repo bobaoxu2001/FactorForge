@@ -7,7 +7,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Vitest](https://img.shields.io/badge/tests-passing-22c55e?logo=vitest&logoColor=white)](#testing)
 
-**Live demo:** [factor-forge-ashy.vercel.app](https://factor-forge-ashy.vercel.app/) (currently deployed from `main`, which predates the research platform described here; see [Deployment](#deployment)).
+**Live demo:** [factor-forge-ashy.vercel.app](https://factor-forge-ashy.vercel.app/). The research platform is deployed on `main`; individual preview URLs are immutable snapshots of earlier builds.
 
 > Independent research software for educational and research use. **Not investment advice.** FactorForge is not affiliated with, or endorsed by, any company, data provider or research firm it cites. It places no trades and has no order-execution path. Backtests are in-sample research tools, not performance records.
 
@@ -49,10 +49,10 @@ See [`docs/PROJECT_AUDIT.md`](docs/PROJECT_AUDIT.md) for the audit that motivate
 | Copilot | `/copilot` | Grounded research copilot (14 workflows) with a citation validator |
 
 **What the committed snapshot (built 2026-11-01) shows.** These are computed findings, not opinions. They change when the snapshot is refreshed.
-- Headline truckload pricing is up strongly year over year (BLS PPI), but it rose *less* than its historical diesel sensitivity implies: the fuel-adjusted residual is negative. The pricing "recovery" looks like fuel-surcharge pass-through, not a linehaul rate cycle. Diesel's move is outside the model's training range, so read the sign, not the size.
+- Headline truckload pricing is up strongly year over year (BLS PPI), but the residual versus its historical diesel relationship is negative. This weakens the case for an underlying rate recovery; it does not identify fuel pass-through causally or directly measure ex-fuel rates. Diesel is outside the training range, reducing confidence in both the sign and magnitude. Matched-period ex-fuel rates and shipment counts are the next test.
 - Volume measures are flat to mixed (tonnage, Cass shipments, Freight TSI, rail carloads).
 - Truck-transportation payrolls are still slightly down year over year: slow capacity attrition.
-- Margin changes diverge by company rather than by business model. The focus names have underperformed SPY over six months and are not at valuation extremes.
+- Margin changes differ by company, but mixed reporting periods, segments and business mix limit a business-model comparison. The focus names have underperformed SPY over six months; neither relative returns nor historical multiple percentiles establish what recovery the market already expects.
 - No interviews have been conducted, so the memo is honestly labelled **"Research draft — incomplete verification"**. The primary-research page is a plan, not fabricated findings.
 
 ## Research platform: data sources
@@ -489,7 +489,7 @@ docker run -p 3000:3000 -e SESSION_PASSWORD="$(openssl rand -hex 32)" factorforg
 
 ### Deploy to Vercel
 
-> **Research platform deployment notes.** The research pages are statically generated from the committed snapshot at build time and need no runtime secrets. `/api/research/copilot` is a serverless function: it works without `DEEPSEEK_API_KEY` (deterministic answers), and per-IP throttling is per instance unless Upstash/Vercel KV is configured. Research notes never reach the server (browser storage), so a public demo exposes no private notes. The current public deployment runs `main`; this branch must be merged and redeployed to show the research platform.
+> **Research platform deployment notes.** The research pages are statically generated from the committed snapshot at build time and need no runtime secrets. `/api/research/copilot` is a serverless function: it works without `DEEPSEEK_API_KEY` (deterministic answers), and per-IP throttling is per instance unless Upstash/Vercel KV is configured. Research notes never reach the server (browser storage), so a public demo exposes no private notes. The public deployment includes the research platform. Confirm the deployment commit before sharing an older preview URL.
 
 
 FactorForge can be deployed as a public Vercel demo with the default build command:

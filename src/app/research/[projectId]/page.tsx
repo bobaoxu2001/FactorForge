@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import QualityPanel from "@/components/intel/QualityPanel";
+import ResearchBrief from "@/components/intel/ResearchBrief";
 import { Sparkline } from "@/components/intel/charts";
 import { CitedText, EvidenceLinks, fmt, FreshnessDot, Note, OutcomeBadge, Panel, textTone, TriggerBadge } from "@/components/intel/ui";
 import { variantView } from "@/lib/intel/memo";
@@ -26,6 +27,7 @@ export default function ProjectOverviewPage({ params }: { params: { projectId: s
 
   return (
     <div className="space-y-5">
+      <ResearchBrief view={view} />
       <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
         <Panel eyebrow="Core investment question" title="What we are trying to find out">
           <p className="text-[14px] leading-relaxed text-ink">{view.config.researchQuestion}</p>

@@ -71,10 +71,10 @@ function rawVariantView(view: ResearchProjectView): string[] {
   const exFuel = h2?.tests.find((t) => t.id === "H2-T2");
   if (priceHeadline?.outcome === "supports" && exFuel?.outcome === "contradicts" && tl?.latest) {
     out.push(
-      `Headline truckload pricing is rising (${pct(tl.latest.actual)} YoY), but ${Math.abs(tl.latest.residual * 100).toFixed(1)}pp less than its historical diesel sensitivity implies. On this evidence the price "recovery" is a fuel-cost pass-through, not a linehaul rate cycle${cite("EV-CALC-ppi-truckload-FUEL")}.${tl.extrapolation ? " Diesel's YoY move is outside the model's training range, so treat the size of the gap as indicative." : ""}`,
+      `Headline truckload PPI is rising (${pct(tl.latest.actual)} YoY), but is ${Math.abs(tl.latest.residual * 100).toFixed(1)}pp below the YoY change implied by its historical diesel sensitivity${cite("EV-CALC-ppi-truckload-FUEL")}. Working view: this weakens the case for a broad underlying rate recovery. The residual does not isolate fuel-surcharge pass-through; volume, freight mix and contract-reset timing are competing explanations.${tl.extrapolation ? " Diesel's YoY move is outside the model's training range, which reduces confidence in this signal." : ""} Sustained gains in matched ex-fuel spot and contract rates would challenge this view; shipment volumes would help distinguish demand-led recovery from capacity-driven pricing. Those rate feeds are not connected.`,
     );
-  } else if (exFuel?.outcome === "supports") {
-    out.push(`Truckload pricing is rising by more than diesel explains${cite("EV-CALC-ppi-truckload-FUEL")}, consistent with an underlying rate recovery.`);
+  } else if (exFuel?.outcome === "supports" && tl?.latest) {
+    out.push(`Truckload PPI's YoY change is ${pp(tl.latest.residual)} above the change implied by its historical diesel sensitivity${cite("EV-CALC-ppi-truckload-FUEL")}. This is consistent with firmer underlying rates, but the residual also captures freight mix, contract timing and model error. Confirm it against matched ex-fuel rate and shipment-volume data before treating it as a rate recovery.${tl.extrapolation ? " Diesel's YoY move is outside the model's training range, which reduces confidence in this signal." : ""}`);
   }
   if (h1) {
     out.push(
@@ -85,9 +85,12 @@ function rawVariantView(view: ResearchProjectView): string[] {
           : `Volume evidence is flat to mixed: ${[kpiLine(view, "truck-tonnage"), kpiLine(view, "cass-shipments"), kpiLine(view, "freight-tsi")].filter(Boolean).join("; ")}. This does not yet confirm a demand-led recovery.`,
     );
   }
-  if (h3?.overall === "supports") out.push(`Capacity appears to be contracting slowly, which is the precondition for a rate cycle, but payroll data exclude owner-operators${cite(...h3.supportingEvidenceIds.slice(0, 1))}.`);
-  if (h5?.overall === "contradicts") out.push(`Margin gains are not concentrated in asset-based truckload as a recovery playbook would expect. Results diverge by company (see H5), so stock selection matters more than sector exposure${cite(...h5.contradictingEvidenceIds.slice(0, 3))}.`);
-  if (h6?.overall === "contradicts") out.push(`Equities do not look priced for a recovery: the focus names have underperformed SPY over six months and valuations are not at historical extremes${cite(...h6.contradictingEvidenceIds.slice(0, 4))}. A genuine ex-fuel rate inflection would therefore be a variant positive. It is not yet visible in the data.`);
+  if (h3?.overall === "supports") out.push(`Truck-transportation payrolls suggest slow labour-capacity contraction${cite(...h3.supportingEvidenceIds.slice(0, 1))}. Payrolls exclude owner-operators and do not measure fleet capacity or utilisation directly. Check operating-authority exits, fleet counts and utilisation before inferring a tightening freight market.`);
+  if (h5?.overall === "contradicts") {
+    const periods = [...new Set(view.companies.map((c) => c.latest?.label).filter((label): label is string => Boolean(label)))];
+    out.push(`Observed margin changes do not establish a broad asset-based truckload operating-leverage advantage${cite(...h5.contradictingEvidenceIds.slice(0, 3))}.${periods.length > 1 ? ` The peer table mixes ${periods.join(" and ")}, so the group comparison is provisional.` : ""} Company mix, acquisitions, fuel recovery and contract timing can affect the result. Re-run the comparison on matched quarters and segment-level operating metrics before attributing the differences to business model.`);
+  }
+  if (h6?.overall === "contradicts") out.push(`The H6 screens do not support the claim that a recovery is already priced in${cite(...h6.contradictingEvidenceIds.slice(0, 4))}. Relative share-price returns and trailing valuation percentiles do not identify investor expectations. Earnings expectations, business mix and discount rates remain alternative explanations. Compare the recovery assumptions implied by the current price with forward earnings estimates before claiming a market expectations gap; no consensus estimates are connected.`);
   return out;
 }
 
@@ -215,8 +218,10 @@ export function buildMemoSections(view: ResearchProjectView): MemoSection[] {
     "Major Risks",
     [
       ...view.hypotheses.filter((h) => h.overall === "contradicts" || h.overall === "mixed").map((h) => `${h.title} (${h.id}) is ${OUTCOME_WORD[h.overall]}: ${h.tests.filter((t) => t.outcome !== "supports").map((t) => `${t.description}: ${t.detail}`).join(" ")}`),
-      "Fuel surcharge lag: a reversal in diesel would reduce reported revenue quickly while surcharge revenue resets with a lag.",
-      "Model risk: the fuel-adjusted residual depends on a linear historical fuel sensitivity.",
+      "Fuel surcharge timing: diesel changes can affect reported revenue and margins at different times, depending on contract terms and recovery lags.",
+      "Model risk: the fuel-adjusted residual depends on a linear historical fuel sensitivity and also captures omitted variables and model error. It is not a causal estimate of fuel pass-through or an observed ex-fuel freight rate.",
+      "Comparability risk: company and business-model comparisons use each filer's latest available quarter; different reporting periods, segment mix and acquisitions can confound the group result.",
+      "Expectations risk: trailing multiples and relative returns do not establish what recovery assumptions investors have already priced in; forward consensus estimates are unavailable.",
     ],
   );
 
@@ -231,6 +236,9 @@ export function buildMemoSections(view: ResearchProjectView): MemoSection[] {
 
   const failing = view.quality.filter((q) => q.state !== "pass");
   add("next-actions", "Next Research Actions", [
+    "Test underlying pricing: compare matched ex-fuel spot and contract rates with shipment volumes over multiple releases. This can challenge the diesel-residual working view; the required rate feeds are not connected.",
+    "Reconcile operating leverage: compare the same reporting quarters and segment-level volumes, yields and margins, separating acquisitions, fuel recovery and business mix before attributing a group difference to asset intensity.",
+    "Test the expectations gap: compare the revenue growth and margins implied by current prices with forward earnings estimates and management guidance. Relative share-price returns alone cannot answer whether recovery is priced in.",
     ...config.missingData.map((m) => `${m.name}: ${m.requirement}`),
     ...config.stakeholders.slice(0, 3).map((s) => `Channel checks with ${s.label.toLowerCase()} to test ${s.hypothesisIds.join(", ")}.`),
     ...failing.map((q) => `Resolve quality check "${q.label}": ${q.detail}`),

@@ -44,13 +44,13 @@ export default function ResearchHomePage() {
               <KeyFinding className="mt-6">
                 {headline.name} is {headline.actual >= 0 ? "up" : "down"} {fmt.pctPlain(Math.abs(headline.actual))} on a year ago, but that is{" "}
                 <Highlight>
-                  {Math.abs(headline.residual * 100).toFixed(1)} percentage points {headline.residual < 0 ? "less" : "more"} than diesel prices alone would imply
+                  {Math.abs(headline.residual * 100).toFixed(1)} percentage points {headline.residual < 0 ? "below" : "above"} its historical relationship with diesel would predict
                 </Highlight>
                 .
               </KeyFinding>
             )}
             <p className="mt-5 max-w-[62ch] text-[15px] leading-relaxed text-ink-muted">
-              {view.config.subtitle}. Built from SEC filings, FRED macro series and daily prices, with data as of {view.snapshot.builtAt.slice(0, 10)}.
+              {view.config.subtitle}. Built from SEC filings, FRED macro series and daily prices; snapshot refreshed {view.snapshot.builtAt.slice(0, 10)}. The residual is a statistical comparison, not a measured ex-fuel rate or a causal estimate.
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3">
               <Link href={`/research/${pid}`} className="inline-flex items-center gap-2 rounded-md bg-accent px-4 py-2.5 text-[14px] font-medium text-paper transition-colors hover:bg-ink">

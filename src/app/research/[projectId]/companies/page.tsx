@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { EvidenceLinks, fmt, Note, Panel, textTone } from "@/components/intel/ui";
-import { ordinal } from "@/lib/intel/companies";
+import CompanyComparison, { type CompanyComparisonRow } from "@/components/intel/CompanyComparison";
+import ResearchBrief from "@/components/intel/ResearchBrief";
+import { EvidenceLinks, Note, Panel } from "@/components/intel/ui";
 import { getResearchProject } from "@/lib/intel/project";
 
 export const revalidate = 3600;
@@ -12,68 +12,46 @@ export default function CompaniesPage({ params }: { params: { projectId: string 
   if (!view) notFound();
   const pid = view.config.id;
   const rows = view.companies;
+  const comparisonRows: CompanyComparisonRow[] = rows.map((company) => {
+    const latest = company.latest;
+    const ttm = company.latestTtm;
+    const netDebt = ttm?.debt && ttm.cash !== null ? ttm.debt.total - ttm.cash : null;
+    const ebitda = ttm?.ttmEbitda;
+    return {
+      ticker: company.ticker,
+      name: company.name,
+      businessModel: company.coverage.businessModel,
+      focus: company.coverage.focus,
+      quarter: latest?.label ?? null,
+      ttmQuarter: ttm?.label ?? null,
+      metrics: {
+        revenueYoY: latest?.revenueYoY ?? null,
+        operatingMargin: latest?.operatingMargin ?? null,
+        marginChange: latest?.operatingMarginYoYChange ?? null,
+        fuelShare: latest?.fuelShare ?? null,
+        freeCashFlow: ttm?.ttmFreeCashFlow ?? null,
+        capexIntensity: company.capexIntensity,
+        leverage: netDebt !== null && ebitda != null && ebitda > 0 ? netDebt / ebitda : null,
+        roic: company.roicApprox?.value ?? null,
+        evToEbitda: company.valuation?.current.evToEbitda ?? null,
+        historicalPercentile: company.valuation?.percentiles.evToEbitda ?? null,
+        pe: company.valuation?.current.pe ?? null,
+        relativeReturn6m: company.priceStats?.relativeReturn6m ?? null,
+        volatility1y: company.priceStats?.volatility1y ?? null,
+        maxDrawdown1y: company.priceStats?.maxDrawdown1y ?? null,
+      },
+    };
+  });
   const concentration = (ticker: string) => view.config.excerptClaims.find((c) => c.ticker === ticker && c.subject === "Customer concentration");
 
   return (
     <div className="space-y-5">
-      <Panel eyebrow="Stage 04 · Competitive intelligence" title="Peer comparison: same metrics, same definitions" source="SEC EDGAR XBRL company facts; Yahoo Finance prices; FactorForge calculation.">
+      <ResearchBrief view={view} />
+      <Panel eyebrow="Stage 04 · Competitive intelligence" title="Peer comparison: operating results, valuation and risk" source="SEC EDGAR XBRL company facts; Yahoo Finance prices; FactorForge calculation.">
         <p className="mb-3 max-w-4xl text-[12.5px] leading-relaxed text-ink-muted">
-          Every figure is computed from SEC XBRL filings (first-reported, point-in-time) and Yahoo prices. Business models differ, so compare margin <em>changes</em> rather than levels across groups. There is no composite &ldquo;competitive score&rdquo;: rankings would need a weighting nobody can justify from this data.
+          Figures come from SEC XBRL filings and Yahoo prices. Start with operating performance, then test valuation and risk. Business models differ: compare margin <em>changes</em> and matching reporting periods before interpreting relative performance. There is no composite competitive score.
         </p>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[1100px] text-left text-[12px]">
-            <thead className="text-[10px] text-ink-soft">
-              <tr>
-                <th className="py-2 pr-3">Company</th>
-                <th className="py-2 pr-3">Latest Q</th>
-                <th className="py-2 pr-3 text-right">Rev YoY</th>
-                <th className="py-2 pr-3 text-right">Op. margin</th>
-                <th className="py-2 pr-3 text-right">Δ YoY</th>
-                <th className="py-2 pr-3 text-right">Fuel / rev</th>
-                <th className="py-2 pr-3 text-right">TTM FCF</th>
-                <th className="py-2 pr-3 text-right">Capex / rev</th>
-                <th className="py-2 pr-3 text-right">Net debt / EBITDA</th>
-                <th className="py-2 pr-3 text-right">ROIC*</th>
-                <th className="py-2 pr-3 text-right">EV/EBITDA</th>
-                <th className="py-2 pr-3 text-right">Hist. pct</th>
-                <th className="py-2 pr-3 text-right">P/E</th>
-                <th className="py-2 pr-3 text-right">6m vs SPY</th>
-              </tr>
-            </thead>
-            <tbody className="divide-soft">
-              {rows.map((c) => {
-                const l = c.latest;
-                const t = c.latestTtm;
-                const netDebt = t?.debt && t.cash !== null ? t.debt.total - t.cash : null;
-                const leverage = netDebt !== null && t?.ttmEbitda ? netDebt / t.ttmEbitda : null;
-                return (
-                  <tr key={c.ticker} className="table-row">
-                    <td className="py-2 pr-3">
-                      <Link href={`/research/${pid}/companies/${c.ticker}`} className="font-medium text-ink hover:text-accent">{c.ticker}</Link>
-                      <div className="text-[10.5px] text-ink-soft">{c.coverage.businessModel}{c.coverage.focus ? " · focus" : ""}</div>
-                    </td>
-                    <td className="py-2 pr-3 text-ink-muted">{l?.label}</td>
-                    <td className={`py-2 pr-3 text-right ${textTone(l?.revenueYoY)}`}>{fmt.pct(l?.revenueYoY)}</td>
-                    <td className="py-2 pr-3 text-right text-ink-muted">{fmt.pctPlain(l?.operatingMargin)}</td>
-                    <td className={`py-2 pr-3 text-right ${textTone(l?.operatingMarginYoYChange)}`}>{fmt.pp(l?.operatingMarginYoYChange)}</td>
-                    <td className="py-2 pr-3 text-right text-ink-muted">{l?.fuelShare === null ? "n/t" : fmt.pctPlain(l?.fuelShare)}</td>
-                    <td className="py-2 pr-3 text-right text-ink-muted">{fmt.usdM(t?.ttmFreeCashFlow)}</td>
-                    <td className="py-2 pr-3 text-right text-ink-muted">{fmt.pctPlain(c.capexIntensity)}</td>
-                    <td className="py-2 pr-3 text-right text-ink-muted">{leverage === null ? "n/a" : `${leverage.toFixed(1)}×`}</td>
-                    <td className="py-2 pr-3 text-right text-ink-muted">{fmt.pctPlain(c.roicApprox?.value)}</td>
-                    <td className="py-2 pr-3 text-right text-ink">{fmt.x(c.valuation?.current.evToEbitda)}</td>
-                    <td className="py-2 pr-3 text-right text-ink-muted">{c.valuation?.percentiles.evToEbitda != null ? ordinal(c.valuation.percentiles.evToEbitda * 100) : "—"}</td>
-                    <td className="py-2 pr-3 text-right text-ink-muted">{fmt.x(c.valuation?.current.pe)}</td>
-                    <td className={`py-2 pr-3 text-right ${textTone(c.priceStats?.relativeReturn6m)}`}>{fmt.pp(c.priceStats?.relativeReturn6m)}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-        <p className="mt-2 text-[11px] leading-relaxed text-ink-soft">
-          n/t = not tagged in XBRL (brokers report purchased transportation, not fuel). n/m = not meaningful (negative or missing denominator). *ROIC ≈ TTM operating income × (1 − tax) ÷ (debt + equity − cash); goodwill-heavy balance sheets depress it. Hist. pct = current EV/EBITDA&apos;s percentile within the company&apos;s own 5-year month-end, point-in-time history.
-        </p>
+        <CompanyComparison projectId={pid} companies={comparisonRows} />
       </Panel>
 
       <div className="grid gap-4 lg:grid-cols-2">
