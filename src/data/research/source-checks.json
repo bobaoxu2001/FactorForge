@@ -1,0 +1,31 @@
+[
+  {
+    "id": "EV-WERN-Q2-RECONCILIATION",
+    "projectId": "freight",
+    "subject": "Werner Q2 2026 GAAP / adjusted margin reconciliation",
+    "claim": "Werner reported Q2 2026 GAAP operating margin of 1.8% versus 8.8%, while its non-GAAP adjusted margin rose to 3.0% from 2.2%. Management principally attributed the GAAP operating-income decline to $53.6m of prior-year favorable liability reversals not recurring. These are company disclosures, not an independent causal estimate.",
+    "excerpt": "Segment cross-check: adjusted TTS operating income rose to $32.3m from $12.8m; adjusted Logistics operating income fell to a $2.7m loss from $5.9m income. FirstFleet was acquired in January 2026. GAAP and non-GAAP peer margins are not interchangeable; retain the all-GAAP main comparison and do not substitute only Werner's adjusted result.",
+    "location": "July 28, 2026 earnings release: consolidated results; TTS and Logistics sections; GAAP-to-non-GAAP reconciliation",
+    "source": {
+      "id": "WERN:2026Q2:IR",
+      "title": "Werner Q2 2026 results and GAAP / non-GAAP reconciliation",
+      "publisher": "Werner Enterprises Investor Relations",
+      "url": "https://investor.werner.com/news-and-events/press-releases/news-details/2026/Werner-Enterprises-Reports-Second-Quarter-2026-Results/default.aspx",
+      "sourceType": "company-release",
+      "retrievedAt": "2026-11-03T06:17:00.000Z",
+      "publishedAt": "2026-07-28"
+    },
+    "origin": "public-secondary",
+    "status": "verified",
+    "confidence": "medium",
+    "confidenceRationale": "Reported values and management explanation checked against the company's dated release and reconciliation. Adjusted definitions and acquisition mix require separate peer review; source matching does not validate a causal explanation.",
+    "observationPeriod": { "start": "2026-04-01", "end": "2026-06-30" },
+    "publishedAt": "2026-07-28",
+    "retrievedAt": "2026-11-03T06:17:00.000Z",
+    "kpiIds": [],
+    "tickers": ["WERN"],
+    "hypothesisIds": ["H4", "H5"],
+    "stance": { "H4": "context", "H5": "context" },
+    "stanceReasons": { "H4": "Reported margin pressure is not itself fuel attribution; the issuer identifies a prior-year liability-reversal effect.", "H5": "Company-specific reconciliation challenges interpreting the negative GAAP peer mean as broad operating-leverage falsification." }
+  }
+]

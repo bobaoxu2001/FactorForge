@@ -1,1 +1,1 @@
-{"projectId":"freight","builtAt":"2026-11-01T04:58:18.276Z","builder":"scripts/build-research-snapshot.mjs","secUserAgent":"supplied via SEC_EDGAR_USER_AGENT (not recorded)","counts":{"fredSeries":12,"fredExcluded":0,"companies":7,"priceSymbols":9}}
+{"projectId":"freight","builtAt":"2026-11-03T06:18:11.535Z","builder":"scripts/build-research-snapshot.mjs","secUserAgent":"supplied via SEC_EDGAR_USER_AGENT (not recorded)","counts":{"fredSeries":12,"fredExcluded":0,"companies":7,"priceSymbols":9}}

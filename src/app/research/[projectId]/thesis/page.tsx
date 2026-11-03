@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PeerSensitivity from "@/components/intel/PeerSensitivity";
 import { notFound } from "next/navigation";
 import { EvidenceLinks, fmt, Note, OutcomeBadge, Panel, textTone, TriggerBadge } from "@/components/intel/ui";
 import { dailyReturnMap, decomposeReturn, marketSectorAttribution } from "@/lib/intel/attribution";
@@ -68,9 +69,10 @@ export default function ThesisPage({ params, searchParams }: { params: { project
               <ul className="mt-2 space-y-1 text-[12px]">
                 {h.tests.map((t) => (
                   <li key={t.id} className="flex flex-wrap items-center gap-2">
-                    <OutcomeBadge outcome={t.outcome} />
+                    {t.sensitivity || t.diagnosticOnly ? <span className="chip border-line text-ink-muted">{t.diagnosticOnly ? "diagnostic" : "mean rule"}: {t.outcome === "supports" ? "met" : t.outcome === "contradicts" ? "not met" : "unavailable"}</span> : <OutcomeBadge outcome={t.outcome} />}
                     <span className="text-ink-muted">{t.description}: <span className="text-ink">{t.detail}</span></span>
                     <EvidenceLinks ids={t.evidenceIds} projectId={pid} max={4} />
+                    {t.sensitivity && <><PeerSensitivity test={t} /><EvidenceLinks ids={["EV-WERN-Q2-RECONCILIATION"]} projectId={pid} /></>}
                   </li>
                 ))}
               </ul>

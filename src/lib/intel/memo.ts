@@ -1,6 +1,7 @@
 import { pct } from "@/lib/utils/format";
 import { ordinal, scenarioResults, type CompanyView } from "./companies";
 import { pp } from "./evidence";
+import { buildResearchBrief } from "./researchBrief";
 import type { ResearchProjectView } from "./project";
 import { MEMO_STATUS_LABEL } from "./quality";
 import type { HypothesisView, MemoSection, MemoStatus, TestOutcome } from "./types";
@@ -67,14 +68,12 @@ function rawVariantView(view: ResearchProjectView): string[] {
   const h6 = hyp(view, "H6");
   const tl = view.residuals.find((r) => r.kpiId === "ppi-truckload");
   const out: string[] = [];
-  const priceHeadline = h2?.tests.find((t) => t.id === "H2-T1");
-  const exFuel = h2?.tests.find((t) => t.id === "H2-T2");
-  if (priceHeadline?.outcome === "supports" && exFuel?.outcome === "contradicts" && tl?.latest) {
-    out.push(
-      `Headline truckload PPI is rising (${pct(tl.latest.actual)} YoY), but is ${Math.abs(tl.latest.residual * 100).toFixed(1)}pp below the YoY change implied by its historical diesel sensitivity${cite("EV-CALC-ppi-truckload-FUEL")}. Working view: this weakens the case for a broad underlying rate recovery. The residual does not isolate fuel-surcharge pass-through; volume, freight mix and contract-reset timing are competing explanations.${tl.extrapolation ? " Diesel's YoY move is outside the model's training range, which reduces confidence in this signal." : ""} Sustained gains in matched ex-fuel spot and contract rates would challenge this view; shipment volumes would help distinguish demand-led recovery from capacity-driven pricing. Those rate feeds are not connected.`,
-    );
-  } else if (exFuel?.outcome === "supports" && tl?.latest) {
-    out.push(`Truckload PPI's YoY change is ${pp(tl.latest.residual)} above the change implied by its historical diesel sensitivity${cite("EV-CALC-ppi-truckload-FUEL")}. This is consistent with firmer underlying rates, but the residual also captures freight mix, contract timing and model error. Confirm it against matched ex-fuel rate and shipment-volume data before treating it as a rate recovery.${tl.extrapolation ? " Diesel's YoY move is outside the model's training range, which reduces confidence in this signal." : ""}`);
+  const linehaul = view.kpis.find((k) => k.kpi.id === "cass-linehaul")?.latest;
+  if (linehaul?.yoy != null && h2) {
+    out.push(`Direct ex-fuel evidence: Cass linehaul ${linehaul.value.toFixed(1)}, ${pct(linehaul.yoy)} YoY${linehaul.change != null ? ` and ${pct(linehaul.change)} MoM` : ""} (${linehaul.date.slice(0, 7)})${cite("EV-KPI-cass-linehaul")}. This is a dry-van invoice sample combining spot and contract business, by processing month. It supports observed rate improvement, not a demand-led cause or durable industry-wide recovery.`);
+  }
+  if (tl?.latest) {
+    out.push(`Headline truckload PPI ${pct(tl.latest.actual)} YoY; residual ${pp(tl.latest.residual)} relative to its historical diesel sensitivity${cite("EV-CALC-ppi-truckload-FUEL")}. The residual measures deviation from a historical fit and does not isolate fuel-surcharge pass-through. Positive direct ex-fuel rate growth can coexist with a negative residual. Freight mix, contract-reset timing and model error remain relevant.${tl.extrapolation ? " Diesel is outside the model's training range, reducing confidence." : ""} Use matched spot/contract and volume data to test breadth and mechanism; separate licensed rate feeds are not connected.`);
   }
   if (h1) {
     out.push(
@@ -86,9 +85,11 @@ function rawVariantView(view: ResearchProjectView): string[] {
     );
   }
   if (h3?.overall === "supports") out.push(`Truck-transportation payrolls suggest slow labour-capacity contraction${cite(...h3.supportingEvidenceIds.slice(0, 1))}. Payrolls exclude owner-operators and do not measure fleet capacity or utilisation directly. Check operating-authority exits, fleet counts and utilisation before inferring a tightening freight market.`);
-  if (h5?.overall === "contradicts") {
+  if (h5) {
     const test = h5.tests.find((item) => item.period);
-    out.push(`Observed margin changes do not establish a broad asset-based truckload operating-leverage advantage${cite(...h5.contradictingEvidenceIds)}.${test?.period ? ` The peer test uses common ${test.period}, including each company's actual period end in the calculation detail.` : ""} Company mix, acquisitions, fuel recovery and contract timing can affect the result. Matched quarters improve comparability; segment-level operating metrics are still needed before attributing the differences to business model.`);
+    out.push(`The operating-leverage advantage is ${h5.overall}: ${test?.detail ?? "peer data unavailable"}${cite(...(test?.evidenceIds ?? []))} The peer test uses common ${test?.period ?? "unavailable period"}. Matched quarters improve comparability; company mix, acquisitions and accounting adjustments still limit attribution. All companies remain in the main result.`);
+    const check = view.evidence.find((e) => e.id === "EV-WERN-Q2-RECONCILIATION");
+    if (check) out.push(`Werner source check: ${check.claim} ${check.excerpt}${cite(check.id)}`);
   }
   if (h6?.overall === "contradicts") out.push(`The H6 screens' elevated-valuation and relative-strength conditions are not jointly met${cite(...h6.contradictingEvidenceIds.slice(0, 4))}. Relative share-price returns and trailing valuation percentiles do not identify investor expectations. Earnings expectations, business mix and discount rates remain alternative explanations. Compare the recovery assumptions implied by the current price with forward earnings estimates before claiming a market expectations gap; no consensus estimates are connected.`);
   return out;
@@ -109,9 +110,11 @@ export function buildMemoSections(view: ResearchProjectView): MemoSection[] {
     sections.push({ id, title, body, evidenceIds, limitation });
 
   const summary = view.hypotheses.map((h) => `${h.id} ${h.title}: ${OUTCOME_WORD[h.overall]}`).join("; ");
+  const brief = buildResearchBrief(view);
   add("executive-summary", "Executive Summary", [
-    `Status: ${MEMO_STATUS_LABEL[view.memoStatus]}. As of ${view.asOf}; data snapshot built ${view.snapshot.builtAt.slice(0, 10)}.`,
-    ...variantView(view).slice(0, 3),
+    `Status: ${MEMO_STATUS_LABEL[view.memoStatus]}. Research edition ${view.revision?.id ?? view.asOf}; analysis as of ${view.asOf}; snapshot assembled ${view.snapshot.builtAt.slice(0, 10)}. Component refresh dates are disclosed separately.`,
+    brief.conclusion,
+    ...brief.observations.map((o) => `${o.finding}${cite(...o.evidenceIds)}`),
     `Hypothesis scorecard: ${summary}.`,
   ]);
 
@@ -142,6 +145,15 @@ export function buildMemoSections(view: ResearchProjectView): MemoSection[] {
   );
 
   add("variant-view", "Differentiated or Variant View", variantView(view));
+  const peerTest = hyp(view, "H5")?.tests.find((t) => t.sensitivity);
+  if (peerTest?.sensitivity) {
+    const s = peerTest.sensitivity;
+    add("peer-sensitivity", "Operating Leverage: Rule and Sensitivity", [
+      `${peerTest.detail} Group A: ${s.groupA.members.map((r) => `${r.ticker} ${pp(r.value)}`).join(", ")}; Group B: ${s.groupB.members.map((r) => `${r.ticker} ${pp(r.value)}`).join(", ")}.`,
+      ...s.leaveOneOut.map((r) => `Sensitivity only, omit ${r.omitted}: group A mean ${pp(r.meanA)}, group B mean ${pp(r.meanB)}, spread ${pp(r.spread)}; mean rule ${r.passes ? "met" : "not met"}.`),
+      "The main comparison retains all five companies on consolidated GAAP margins. Leave-one-out and medians diagnose concentration; they do not justify dropping an inconvenient peer or mixing one firm's adjusted results into a GAAP sample.",
+    ], [...peerTest.evidenceIds, "EV-WERN-Q2-RECONCILIATION"]);
+  }
 
   const evidenceLine = (id: string) => {
     const e = view.evidence.find((v) => v.id === id);
@@ -220,7 +232,7 @@ export function buildMemoSections(view: ResearchProjectView): MemoSection[] {
       ...view.hypotheses.filter((h) => h.overall === "contradicts" || h.overall === "mixed").map((h) => `${h.title} (${h.id}) is ${OUTCOME_WORD[h.overall]}: ${h.tests.filter((t) => t.outcome !== "supports").map((t) => `${t.description}: ${t.detail}`).join(" ")}`),
       "Fuel surcharge timing: diesel changes can affect reported revenue and margins at different times, depending on contract terms and recovery lags.",
       "Model risk: the fuel-adjusted residual depends on a linear historical fuel sensitivity and also captures omitted variables and model error. It is not a causal estimate of fuel pass-through or an observed ex-fuel freight rate.",
-      "Comparability risk: company and business-model comparisons use each filer's latest available quarter; different reporting periods, segment mix and acquisitions can confound the group result.",
+      "Comparability risk: H4 financial peer screens and H5 use a common reporting quarter with dated evidence. Company profiles and valuation use latest available filings and can cover different reporting periods. Segment mix, acquisitions and accounting adjustments still confound business-model interpretation.",
       "Expectations risk: trailing multiples and relative returns do not establish what recovery assumptions investors have already priced in; forward consensus estimates are unavailable.",
     ],
   );
@@ -236,7 +248,7 @@ export function buildMemoSections(view: ResearchProjectView): MemoSection[] {
 
   const failing = view.quality.filter((q) => q.state !== "pass");
   add("next-actions", "Next Research Actions", [
-    "Test underlying pricing: compare matched ex-fuel spot and contract rates with shipment volumes over multiple releases. This can challenge the diesel-residual working view; the required rate feeds are not connected.",
+    "Test pricing durability: the direct Cass ex-fuel index is connected. Compare matched ex-fuel spot and contract rates with shipment volumes over further releases; separate demand growth from capacity contraction. Disaggregated licensed feeds remain unconnected.",
     "Reconcile operating leverage: compare the same reporting quarters and segment-level volumes, yields and margins, separating acquisitions, fuel recovery and business mix before attributing a group difference to asset intensity.",
     "Test the expectations gap: compare the revenue growth and margins implied by current prices with forward earnings estimates and management guidance. Relative share-price returns alone cannot answer whether recovery is priced in.",
     ...config.missingData.map((m) => `${m.name}: ${m.requirement}`),
@@ -253,8 +265,9 @@ export function buildMemoSections(view: ResearchProjectView): MemoSection[] {
 
   add("limitations", "As-of Date and Data Limitations", [
     `As of ${view.asOf}. Snapshot built ${view.snapshot.builtAt}; refreshed by ${view.snapshot.builder}.`,
+    `Fixed edition ${view.revision?.id ?? view.asOf}; information cutoff ${view.revision?.informationCutoff ?? view.snapshot.builtAt}. Component retrievals: macro ${view.componentDates?.macro ?? "unavailable"}, SEC ${view.componentDates?.companies ?? "unavailable"}, prices ${view.componentDates?.prices ?? "unavailable"}, direct Cass ${view.componentDates?.directSources ?? "unavailable"}. Macro history is the retrieved vintage, not a historical release-vintage reconstruction.`,
     "No spot/contract rate feed, no tender-rejection data, no consensus estimates, no earnings-call transcripts.",
-    "No primary research recorded unless shown in your workspace. AI-generated text is not evidence.",
+    "No primary research recorded unless shown in your workspace. AI-generated and template-generated text are work product, not independent evidence.",
     ...view.companies.flatMap((c) => c.dataGaps.map((g) => `${c.ticker}: ${g}`)),
   ]);
 

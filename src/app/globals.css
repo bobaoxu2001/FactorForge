@@ -146,6 +146,11 @@ article:target {
   *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }
 
+/* The recruiter brief has its own compact title and reading links. */
+body:has(.writing-sample) .research-project-header,
+body:has(.writing-sample) nav[aria-label="Research stages"] { display: none; }
+body:has(.writing-sample) .research-project-layout > * { margin-top: 0; }
+
 @media print {
   @page { size: A4; margin: 11mm; }
   body:has(.writing-sample) { background: white; }
@@ -158,7 +163,7 @@ article:target {
   body:has(.writing-sample) .writing-sample-actions { display: none !important; }
   body:has(.writing-sample) #main-content { margin: 0; padding: 0; }
   .writing-sample { max-width: none; border: 0; padding: 0; }
-  .writing-sample h2 { margin-top: 10px; font-size: 23pt; }
+  .writing-sample h1 { margin-top: 10px; font-size: 23pt; }
   .writing-sample section, .writing-sample li { break-inside: avoid; }
   .writing-sample p, .writing-sample li { font-size: 9pt; line-height: 1.35; }
   .writing-sample h3 { font-size: 10pt; }

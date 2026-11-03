@@ -9,6 +9,7 @@ Only public case-study data is requested; browser notes are never read.
 """
 import argparse
 import html
+import hashlib
 import json
 from datetime import datetime, timezone
 from pathlib import Path
@@ -60,37 +61,40 @@ def main():
 
     header = Table([[paragraph("<b>FACTORFORGE</b>", "label"), paragraph("Allen Xu | Independent research writing sample", "muted")]], colWidths=[width * 0.33, width * 0.67])
     header.setStyle(TableStyle([("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 7)]))
-    story += [header, HRFlowable(width="100%", thickness=0.7, color=line), Spacer(1, 12)]
+    story += [header, HRFlowable(width="100%", thickness=0.7, color=line), Spacer(1, 9)]
     story.append(Paragraph(escape(sample["title"]), ParagraphStyle("title", fontName="Times-Bold", fontSize=23, leading=25, textColor=ink, spaceAfter=5)))
-    story.append(paragraph(f'Data snapshot {escape(sample["snapshotBuiltAt"][:10])} | Analysis as of {escape(sample["asOfUtc"])} UTC', "muted"))
-    story.append(Spacer(1, 10))
+    story.append(paragraph(f'Analysis as of {escape(sample["asOfUtc"])} UTC | Edition {escape(sample["researchVersion"])}', "muted"))
+    story.append(paragraph('Public-source research sample | Primary fieldwork proposed', "muted"))
+    story.append(Spacer(1, 7))
     story.append(Paragraph(escape(sample["conclusion"]), ParagraphStyle("conclusion", fontName="Times-Roman", fontSize=16, leading=18, textColor=blue, spaceAfter=7)))
-    story.append(paragraph(escape(sample["question"])))
-    story.append(Spacer(1, 8))
+    story.append(Spacer(1, 4))
     for observation in sample["observations"]:
         refs = " ".join(f'[{number}]' for number in observation["references"])
         story.append(KeepTogether([
             paragraph(escape(observation["label"]), "label"),
             paragraph(f'{escape(observation["finding"])} <font color="#1d4f91">{refs}</font>'),
             paragraph(escape(observation["interpretation"]), "muted"),
-            Spacer(1, 9),
+            Spacer(1, 6),
         ]))
-    story += [HRFlowable(width="100%", thickness=0.5, color=line), Spacer(1, 8)]
+    story += [HRFlowable(width="100%", thickness=0.5, color=line), Spacer(1, 6)]
     story.append(paragraph("Alternative explanations", "label"))
     for item in sample["alternativeExplanations"]:
         story.append(paragraph(f'&#8226; {escape(item)}', "muted"))
-    story += [Spacer(1, 8), paragraph("What I would investigate next", "label")]
+    story += [Spacer(1, 6), paragraph("What I would investigate next", "label")]
     for index, item in enumerate(sample["nextChecks"], 1):
         story.append(paragraph(f'{index}. <b>{escape(item["question"])}.</b> {escape(item["test"])}', "muted"))
         story.append(Spacer(1, 3))
-    story += [Spacer(1, 7), HRFlowable(width="100%", thickness=0.5, color=line), Spacer(1, 7), paragraph("Sources | links lead to the original series or filing", "label")]
+    story += [Spacer(1, 6), paragraph("Project contribution & AI assistance", "label"), paragraph(escape(sample["contribution"]), "muted"), paragraph(escape(sample["aiAssistance"]), "muted")]
+    story += [Spacer(1, 4), HRFlowable(width="100%", thickness=0.5, color=line), Spacer(1, 4), paragraph("Sources | links lead to the original series or filing", "label")]
     source_cells = [paragraph(f'[{source["number"]}] <link href="{html.escape(source["url"], quote=True)}" color="#1d4f91">{escape(source["title"])}</link>', "source") for source in sample["sources"]]
     source_rows = [source_cells[index:index + 2] for index in range(0, len(source_cells), 2)]
     if len(source_rows[-1]) == 1:
         source_rows[-1].append("")
     source_table = Table(source_rows, colWidths=[width / 2, width / 2], hAlign="LEFT")
     source_table.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 12), ("TOPPADDING", (0, 0), (-1, -1), 1), ("BOTTOMPADDING", (0, 0), (-1, -1), 3)]))
-    story += [source_table, Spacer(1, 7), paragraph(escape(sample["scope"]), "scope")]
+    dates = sample.get("componentDates") or {}
+    refresh_dates = ' | '.join(f'{label} retrieved {escape(dates.get(key, "unavailable")[:10])}' for key, label in [("macro", "Macro"), ("companies", "SEC"), ("prices", "Prices")])
+    story += [source_table, Spacer(1, 7), paragraph(escape(sample["scope"]), "scope"), Spacer(1, 3), paragraph(f'Fixed information cutoff: {escape(sample["informationCutoff"])}. {refresh_dates}. Observation periods shown above.', "scope")]
     doc = SimpleDocTemplate(str(target), pagesize=A4, rightMargin=38, leftMargin=38, topMargin=30, bottomMargin=30, title=sample["title"], author=sample["author"], subject="Independent public-data research writing sample")
     doc.build(story)
     reader = PdfReader(target)
@@ -104,7 +108,7 @@ def main():
     public.mkdir(parents=True, exist_ok=True)
     public_target = public / "freight-research-sample.pdf"
     public_target.write_bytes(target.read_bytes())
-    metadata = {"snapshotBuiltAt": sample["snapshotBuiltAt"], "path": "/research-samples/freight-research-sample.pdf", "preparedAt": datetime.now(timezone.utc).isoformat()}
+    metadata = {"snapshotBuiltAt": sample["snapshotBuiltAt"], "researchVersion": sample["researchVersion"], "contentHash": sample["contentHash"], "pdfSha256": hashlib.sha256(target.read_bytes()).hexdigest(), "path": "/research-samples/freight-research-sample.pdf", "preparedAt": datetime.now(timezone.utc).isoformat()}
     (ROOT / "src" / "data" / "research" / "sample-export.json").write_text(json.dumps(metadata, indent=2) + "\n")
     (output / "writing-sample-source.json").write_text(json.dumps(sample, indent=2) + "\n")
     print(json.dumps({"pdf": str(target), "pages": 1, "words": len(extracted.split()), "linked_sources": len(sample["sources"]), "public_copy": str(public_target)}))

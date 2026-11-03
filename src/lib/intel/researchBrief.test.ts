@@ -17,7 +17,8 @@ describe("research brief evidence boundaries", () => {
     const residual = view.residuals.find((item) => item.kpiId === "ppi-truckload")!.latest!;
     expect(pricing.finding).toContain(`${(residual.residual * 100).toFixed(1)}pp`);
     expect(pricing.finding).toContain(residual.date.slice(0, 7));
-    expect(pricing.interpretation).toMatch(/not a direct measure.*causal/);
+    expect(pricing.interpretation).toContain("not observed rate growth");
+    expect(pricing.interpretation).toContain("demand versus capacity effects remain unresolved");
   });
 
   it("does not manufacture findings when the source evidence is missing", () => {
@@ -29,7 +30,7 @@ describe("research brief evidence boundaries", () => {
 
   it("keeps reported changes separate from mechanism and market-expectation claims", () => {
     const brief = buildResearchBrief(view);
-    expect(brief.nextChecks.map((item) => item.test).join(" ")).toMatch(/same period.*common quarter.*cannot reveal market expectations/);
+    expect(brief.nextChecks.map((item) => item.test).join(" ")).toMatch(/matched.*common quarter.*cannot reveal market expectations/);
     const company = view.companies.find((item) => item.ticker === "KNX")!;
     const reading = buildCompanyBrief(company, view);
     expect(reading[0].finding).toContain(company.latest!.label);

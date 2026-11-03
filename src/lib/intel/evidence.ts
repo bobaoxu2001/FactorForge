@@ -329,7 +329,7 @@ export function validateEvidence(items: Evidence[]): string[] {
     if (seen.has(item.id)) issues.push(`Duplicate evidence id ${item.id}`);
     seen.add(item.id);
     if (item.origin === "public-secondary" && !item.source.url) issues.push(`${item.id}: public evidence without a source URL`);
-    if ((item.origin === "ai-generated" || item.origin === "hypothesis") && (item.status === "verified" || item.status === "partially-verified")) {
+    if ((item.origin === "ai-generated" || item.origin === "template-generated" || item.origin === "hypothesis") && (item.status === "verified" || item.status === "partially-verified")) {
       issues.push(`${item.id}: ${item.origin} content cannot be marked ${item.status}`);
     }
     if (item.origin === "user-primary" && item.status === "verified" && !item.source.documentRef) {

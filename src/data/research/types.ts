@@ -53,6 +53,8 @@ export type HypothesisTest =
       threshold: number;
       /** When the comparison holds, does that support the hypothesis? */
       supportsWhenTrue: boolean;
+      /** A model diagnostic or headline context, not a direct test of the economic claim. */
+      diagnosticOnly?: boolean;
     }
   | {
       kind: "company-group-spread";

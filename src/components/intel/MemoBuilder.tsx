@@ -35,9 +35,9 @@ export default function MemoBuilder({ projectId, meta, sections, status }: { pro
       <div className="card flex flex-wrap items-center justify-between gap-3 p-4 print:hidden">
         <div>
           <div className="text-[11px] text-ink-soft">Memo status</div>
-          <div className="text-[15px] font-semibold text-amber-800">{MEMO_STATUS_LABEL[status]}</div>
+          <div className="text-[15px] font-semibold text-accent">{MEMO_STATUS_LABEL[status]}</div>
           <div className="text-[11.5px] text-ink-muted">
-            {interviews > 0 ? `${interviews} interview(s) in your workspace. Cite them in your edits; they stay unverified unless documented.` : "No primary research recorded, so this cannot become an evidence-backed report."}
+            {interviews > 0 ? `${interviews} interview(s) in your workspace. Cite and corroborate them separately.` : "Public-source findings and calculations are available. Primary fieldwork is proposed; no interviews are completed."}
             {Object.keys(edits).length > 0 && ` · ${Object.keys(edits).length} section(s) edited by you.`}
           </div>
         </div>

@@ -49,7 +49,7 @@ export default function ProjectOverviewPage({ params }: { params: { projectId: s
               ["companies", "Competitive intel", `${view.companies.length} companies from SEC XBRL (point-in-time)`],
               ["primary", "Primary research", "Channel-check plan ready. No interviews recorded on the server; yours stay in this browser."],
               ["thesis", "Thesis & decision", `${view.hypotheses.filter((h) => h.overall !== "insufficient-data").length} of ${view.hypotheses.length} public-data screens evaluated; ${triggered.length} trigger(s) fired. Direct validation incomplete.`],
-              ["memo", "Memo", "19-section memo, editable and exportable"],
+              ["memo", "Memo", "Public-source memo with peer sensitivity, editable and exportable"],
             ].map(([slug, label, status]) => (
               <li key={slug}>
                 <Link href={`/research/${pid}/${slug}`} className="flex items-start justify-between gap-3 rounded-lg border border-line bg-ink/[0.02] px-3 py-2 transition-colors hover:border-accent/35">
@@ -71,7 +71,7 @@ export default function ProjectOverviewPage({ params }: { params: { projectId: s
           ))}
         </ul>
         <div className="mt-3">
-          <Note tone="warn">Interpretation generated deterministically from the hypothesis tests below. It is a research draft, not a recommendation, and has no primary-research verification yet.</Note>
+          <Note>Source-linked interpretation from the research screens below. Calculations, economic interpretation and proposed fieldwork have separate evidence limits; primary interviews are not included.</Note>
         </div>
       </Panel>
 

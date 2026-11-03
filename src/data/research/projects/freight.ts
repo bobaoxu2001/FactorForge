@@ -17,10 +17,10 @@ export const FREIGHT_PROJECT: ResearchProjectConfig = {
   subtitle: "A channel-check research framework for freight demand, pricing, and transportation equities",
   industry: "U.S. Trucking & Freight Transportation",
   researchQuestion:
-    "Are U.S. freight conditions recovering on volume and underlying pricing, or is the improvement in reported revenue and price indices mostly fuel-cost pass-through? Which business models benefit, and how much is already reflected in valuations?",
+    "Ex-fuel U.S. dry-van truckload rates have improved. Is the rebound supported by broad, durable shipment growth or mainly tighter capacity, and how does it convert into profit across business models? What further evidence would distinguish these explanations?",
   objectives: [
     "Separate volume, pricing, fuel and capacity signals using public, attributable series.",
-    "Test whether pricing strength survives a fuel adjustment.",
+    "Read direct ex-fuel linehaul rates alongside headline prices and a diesel-regression diagnostic.",
     "Compare how asset-based carriers, intermodal and non-asset brokers convert the cycle into margin.",
     "Locate current valuations within each company's own point-in-time history.",
     "Define what primary research (channel checks) would confirm or refute the thesis, and what would invalidate it.",
@@ -28,6 +28,22 @@ export const FREIGHT_PROJECT: ResearchProjectConfig = {
   createdAt: "2026-11-01",
   fuelKpiId: "diesel",
   kpis: [
+    {
+      id: "cass-linehaul",
+      name: "Cass Truckload Linehaul Index",
+      definition: "U.S. dry-van per-mile truckload rates excluding fuel and accessorial charges; Cass client invoices combine spot and contract business.",
+      category: "pricing",
+      units: "Index Jan 2005=100",
+      frequency: "monthly",
+      seasonalAdjustment: "NSA",
+      timing: "coincident",
+      timingRationale: "Tracks invoice processing months rather than the underlying shipment dates.",
+      collectionMethod: "Selected observations extracted from Cass's official historical workbook and checked against its September 2026 report. YoY and MoM are recomputed from published levels.",
+      comparabilityNotes: ["Excludes fuel and accessorial charges.", "Cass client dry-van sample; blends spot and contract rates, with invoice-processing lag and mix effects.", "Report provides no separate seasonally adjusted monthly comparison; the workbook's generic seasonal-adjustment caption is not used to assert one.", "Only September 2025–September 2026 levels are included; no long-history regression is fitted to this short extract."],
+      sourceSeriesId: "CASS_LINEHAUL",
+      publicationLagDays: 20,
+      recoveryDirection: "up",
+    },
     {
       id: "truck-tonnage",
       name: "Truck tonnage",
@@ -395,20 +411,20 @@ export const FREIGHT_PROJECT: ResearchProjectConfig = {
     {
       id: "H2",
       title: "Pricing ex-fuel is firming",
-      statement: "Truckload pricing is rising by more than fuel costs alone explain, i.e., underlying linehaul rates are recovering.",
+      statement: "Cass's observed ex-fuel dry-van linehaul index is rising. Breadth across spot and contract markets, durability and the demand-versus-capacity contribution remain open.",
       stance: "bullish",
       marketNarrative: "Rising freight price indices are often read as a rate cycle turning, but they can also reflect fuel surcharges.",
       tests: [
-        { kind: "kpi-threshold", id: "H2-T1", description: "Truckload PPI YoY (latest) is positive (headline pricing)", kpiId: "ppi-truckload", metric: "yoy", op: ">", threshold: 0, supportsWhenTrue: true },
-        { kind: "kpi-threshold", id: "H2-T2", description: "Fuel-adjusted truckload PPI residual is positive (pricing beyond what diesel explains)", kpiId: "ppi-truckload", metric: "fuelResidual", op: ">", threshold: 0, supportsWhenTrue: true },
-        { kind: "kpi-threshold", id: "H2-T3", description: "Fuel-adjusted Cass cost-per-shipment residual is positive", kpiId: "cass-implied-rate", metric: "fuelResidual", op: ">", threshold: 0, supportsWhenTrue: true },
+        { kind: "kpi-threshold", id: "H2-T1", description: "Headline context: Truckload PPI YoY is positive", kpiId: "ppi-truckload", metric: "yoy", op: ">", threshold: 0, supportsWhenTrue: true, diagnosticOnly: true },
+        { kind: "kpi-threshold", id: "H2-T2", description: "Model diagnostic: truckload PPI residual relative to historical diesel relationship is positive", kpiId: "ppi-truckload", metric: "fuelResidual", op: ">", threshold: 0, supportsWhenTrue: true, diagnosticOnly: true },
+        { kind: "kpi-threshold", id: "H2-T3", description: "Model diagnostic: Cass cost-per-shipment diesel residual is positive", kpiId: "cass-implied-rate", metric: "fuelResidual", op: ">", threshold: 0, supportsWhenTrue: true, diagnosticOnly: true },
+        { kind: "kpi-threshold", id: "H2-T4", description: "Direct evidence: Cass ex-fuel linehaul index YoY is positive", kpiId: "cass-linehaul", metric: "yoy", op: ">", threshold: 0, supportsWhenTrue: true },
       ],
       triggers: [
-        { kind: "kpi-latest", id: "H2-X1", description: "Fuel-adjusted truckload PPI residual turns negative", kpiId: "ppi-truckload", metric: "fuelResidual", op: "<", threshold: 0 },
+        { kind: "kpi-latest", id: "H2-X1", description: "Cass ex-fuel linehaul YoY turns negative", kpiId: "cass-linehaul", metric: "yoy", op: "<", threshold: 0 },
       ],
       missingEvidence: [
         "Spot vs contract truckload linehaul rates ex-fuel (DAT/Truckstop, licensed)",
-        "Cass Truckload Linehaul Index (not hosted on FRED)",
         "Carrier-disclosed revenue per loaded mile ex-fuel (in earnings releases, not XBRL)",
       ],
     },
@@ -474,7 +490,7 @@ export const FREIGHT_PROJECT: ResearchProjectConfig = {
     },
   ],
   openQuestions: [
-    "How much of the YoY increase in truckload PPI and carrier revenue is fuel surcharge versus linehaul rate?",
+    "Why are direct ex-fuel linehaul rates improving while volume measures remain mixed: demand, capacity contraction, contract resets or client mix?",
     "Are small carriers exiting faster because of the diesel spike, and is that visible in FMCSA authority data?",
     "Will 2027 contract bid season reset rates higher, and by how much versus spot?",
     "Do lean business inventories translate into restocking freight in the next two quarters?",

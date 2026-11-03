@@ -20,7 +20,7 @@ export default function QualityPanel({ checks, projectId, compact = false }: { c
   const probabilitySets = ready ? Object.values(state.scenarioProbabilities).filter((p) => Object.values(p.probabilities).every((v) => v !== null)).length : 0;
   const adjusted = checks.map((c) => {
     if (c.id === "primary-research" && interviews > 0) {
-      return { ...c, state: interviews >= 3 ? ("pass" as const) : ("warn" as const), detail: `${interviews} user-provided primary research record(s) in your workspace. Unverified unless you attach a document reference.` };
+      return { ...c, state: "warn" as const, detail: `${interviews} user-provided primary research record(s) in your workspace. Counts alone do not validate a thesis; corroboration and conflicting accounts still require review.` };
     }
     if (c.id === "valuation-assumptions" && probabilitySets > 0) {
       return { ...c, state: probabilitySets >= 3 ? ("pass" as const) : ("warn" as const), detail: `${probabilitySets} company scenario set(s) with justified probabilities in your workspace.` };

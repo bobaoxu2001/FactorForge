@@ -23,6 +23,7 @@ const ORIGIN_STYLE: Record<EvidenceOrigin, { label: string; cls: string }> = {
   "public-secondary": { label: "public source", cls: "border-accent/35 bg-accent/10 text-accent" },
   "user-primary": { label: "your primary research", cls: "border-violet-600/40 bg-violet-400/10 text-violet-800" },
   "ai-generated": { label: "AI-generated · not evidence", cls: "border-dashed border-amber-600/45 bg-transparent text-amber-800" },
+  "template-generated": { label: "Template-generated · not evidence", cls: "border-dashed border-accent/40 bg-transparent text-accent" },
   hypothesis: { label: "hypothesis", cls: "border-dashed border-ink/25 bg-transparent text-ink-soft" },
 };
 

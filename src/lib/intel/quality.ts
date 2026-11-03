@@ -35,7 +35,7 @@ export function runQualityChecks(input: QualityInputs): QualityCheck[] {
     detail: `${official} of ${evidence.length} evidence items come from official statistics or SEC filings (${Math.round(share * 100)}%). The rest are industry data, market data or calculations.`,
   });
 
-  const thin = hypotheses.filter((h) => h.supportingEvidenceIds.length + h.contradictingEvidenceIds.length < 2);
+  const thin = hypotheses.filter((h) => new Set(h.tests.flatMap((test) => test.evidenceIds)).size < 2);
   checks.push({
     id: "evidence-coverage",
     label: "Evidence coverage per hypothesis",
@@ -96,11 +96,11 @@ export function runQualityChecks(input: QualityInputs): QualityCheck[] {
   checks.push({
     id: "primary-research",
     label: "Primary research",
-    state: input.primaryResearchCount >= 3 ? "pass" : input.primaryResearchCount > 0 ? "warn" : "fail",
+    state: "warn",
     detail:
       input.primaryResearchCount === 0
-        ? "No user-provided interviews or channel checks are recorded. Only a channel-check plan exists, and conclusions rest on public data alone."
-        : `${input.primaryResearchCount} user-provided primary research record(s). These are unverified unless you attach a document reference.`,
+        ? "Primary fieldwork proposed; 0 completed interviews. Public statistics, company disclosures and transparent calculations support this public-source sample; interview validation remains open."
+        : `${input.primaryResearchCount} user-provided primary research record(s). Counts do not establish corroboration or verification; review source documentation, coverage and conflicting accounts.`,
   });
 
   const unverifiedClaims = evidence.filter((e) => e.source.sourceType === "sec-filing" && e.status !== "verified");
@@ -110,7 +110,7 @@ export function runQualityChecks(input: QualityInputs): QualityCheck[] {
     state: unverifiedClaims.length === 0 ? "pass" : "warn",
     detail:
       unverifiedClaims.length === 0
-        ? "Every value-chain and business-model claim matched a sentence in the latest 10-K."
+        ? "Configured business-description excerpts matched the retrieved filings; the additional Werner reconciliation was checked against its dated company release. Matching does not establish causality."
         : `${unverifiedClaims.length} claim(s) could not be matched to the latest 10-K text.`,
   });
 
@@ -126,28 +126,25 @@ export function runQualityChecks(input: QualityInputs): QualityCheck[] {
     id: "licensing",
     label: "Data licensing recorded",
     state: licences.length === 0 ? "pass" : "warn",
-    detail: licences.length === 0 ? "Every series records its FRED licence label; copyrighted series are cited where they are shown." : `Missing licence label: ${licences.map((k) => k.kpi.id).join(", ")}.`,
+    detail: licences.length === 0 ? "Every series records its source/licence label; copyrighted observations are attributed where shown." : `Missing licence label: ${licences.map((k) => k.kpi.id).join(", ")}.`,
   });
 
   return checks;
 }
 
 /**
- * Memo status from the checks:
- *   evidence-backed               no failed checks, primary research present, every hypothesis decided
- *   draft-incomplete-verification public evidence tests every hypothesis but something fails (e.g. no primary research)
- *   exploratory                   anything less
+ * Public-source evidence has value without fieldwork. Passing screens or an
+ * interview count cannot promote a document to a generally verified report.
  */
 export function classifyMemo(checks: QualityCheck[], hypotheses: HypothesisView[]): MemoStatus {
   const failed = checks.filter((c) => c.state === "fail").map((c) => c.id);
-  const allDecided = hypotheses.every((h) => h.overall !== "insufficient-data");
-  if (failed.length === 0 && allDecided) return "evidence-backed";
   const coreOk = !failed.includes("evidence-coverage") && !failed.includes("testability") && !failed.includes("source-quality");
-  return coreOk && hypotheses.some((h) => h.overall !== "insufficient-data") ? "draft-incomplete-verification" : "exploratory";
+  return coreOk && hypotheses.some((h) => h.overall !== "insufficient-data") ? "public-source" : "exploratory";
 }
 
 export const MEMO_STATUS_LABEL: Record<MemoStatus, string> = {
   exploratory: "Exploratory research note",
+  "public-source": "Public-source research sample · Primary fieldwork proposed",
   "draft-incomplete-verification": "Research draft — incomplete verification",
   "evidence-backed": "Evidence-backed research report",
 };

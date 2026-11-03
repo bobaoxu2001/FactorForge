@@ -52,6 +52,6 @@ export interface CopilotResponse {
   retrieved: Array<{ id: string; claim: string; publisher: string; status: string; origin: string }>;
   warnings: string[];
   /** Work product of this request is AI/template generated and is never evidence. */
-  origin: "ai-generated";
+  origin: "ai-generated" | "template-generated";
 }
 

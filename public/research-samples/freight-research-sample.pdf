@@ -29,61 +29,90 @@ endobj
 <<
 /A <<
 /S /URI /Type /Action /URI (https://fred.stlouisfed.org/series/TRUCKD11)
->> /Border [ 0 0 0 ] /Rect [ 54.564 222.4698 126.3764 231.5898 ] /Subtype /Link /Type /Annot
+>> /Border [ 0 0 0 ] /Rect [ 54.564 184.0698 126.3764 193.1898 ] /Subtype /Link /Type /Annot
 >>
 endobj
 7 0 obj
 <<
 /A <<
 /S /URI /Type /Action /URI (https://fred.stlouisfed.org/series/FRGSHPUSM649NCIS)
->> /Border [ 0 0 0 ] /Rect [ 314.2018 222.4698 418.109 231.5898 ] /Subtype /Link /Type /Annot
+>> /Border [ 0 0 0 ] /Rect [ 314.2018 184.0698 418.109 193.1898 ] /Subtype /Link /Type /Annot
 >>
 endobj
 8 0 obj
 <<
 /A <<
 /S /URI /Type /Action /URI (https://fred.stlouisfed.org/series/TSIFRGHT)
->> /Border [ 0 0 0 ] /Rect [ 54.564 208.9698 181.2788 218.0898 ] /Subtype /Link /Type /Annot
+>> /Border [ 0 0 0 ] /Rect [ 54.564 170.5698 181.2788 179.6898 ] /Subtype /Link /Type /Annot
 >>
 endobj
 9 0 obj
 <<
 /A <<
-/S /URI /Type /Action /URI (https://fred.stlouisfed.org/series/PCU484121484121)
->> /Border [ 0 0 0 ] /Rect [ 314.2018 208.9698 493.2882 218.0898 ] /Subtype /Link /Type /Annot
+/S /URI /Type /Action /URI (https://www.cassinfo.com/freight-audit-payment/cass-transportation-indexes/september-2026)
+>> /Border [ 0 0 0 ] /Rect [ 314.2018 170.5698 481.4778 179.6898 ] /Subtype /Link /Type /Annot
 >>
 endobj
 10 0 obj
 <<
 /A <<
-/S /URI /Type /Action /URI (https://fred.stlouisfed.org/series/GASDESW)
->> /Border [ 0 0 0 ] /Rect [ 54.564 195.4698 128.892 204.5898 ] /Subtype /Link /Type /Annot
+/S /URI /Type /Action /URI (https://fred.stlouisfed.org/series/PCU484121484121)
+>> /Border [ 0 0 0 ] /Rect [ 54.564 157.0698 233.6504 166.1898 ] /Subtype /Link /Type /Annot
 >>
 endobj
 11 0 obj
 <<
 /A <<
-/S /URI /Type /Action /URI (https://www.sec.gov/Archives/edgar/data/1492691/000149269126000069/knx-20260930.htm)
->> /Border [ 0 0 0 ] /Rect [ 314.2018 195.4698 486.9574 204.5898 ] /Subtype /Link /Type /Annot
+/S /URI /Type /Action /URI (https://fred.stlouisfed.org/series/GASDESW)
+>> /Border [ 0 0 0 ] /Rect [ 314.2018 157.0698 388.5298 166.1898 ] /Subtype /Link /Type /Annot
 >>
 endobj
 12 0 obj
 <<
 /A <<
-/S /URI /Type /Action /URI (https://www.sec.gov/Archives/edgar/data/728535/000143774926033365/jbht20260930_10q.htm)
->> /Border [ 0 0 0 ] /Rect [ 54.564 181.9698 232.8068 191.0898 ] /Subtype /Link /Type /Annot
+/S /URI /Type /Action /URI (https://www.sec.gov/Archives/edgar/data/1492691/000149269126000059/knx-20260630.htm)
+>> /Border [ 0 0 0 ] /Rect [ 54.564 143.5698 227.3196 152.6898 ] /Subtype /Link /Type /Annot
 >>
 endobj
 13 0 obj
 <<
 /A <<
-/S /URI /Type /Action /URI (https://www.sec.gov/Archives/edgar/data/1043277/000104327726000043/chrw-20260930.htm)
->> /Border [ 0 0 0 ] /Rect [ 314.2018 181.9698 482.2986 191.0898 ] /Subtype /Link /Type /Annot
+/S /URI /Type /Action /URI (https://www.sec.gov/Archives/edgar/data/1692063/000169206326000039/sndr-20260630.htm)
+>> /Border [ 0 0 0 ] /Rect [ 314.2018 143.5698 459.5062 152.6898 ] /Subtype /Link /Type /Annot
 >>
 endobj
 14 0 obj
 <<
-/Annots [ 6 0 R 7 0 R 8 0 R 9 0 R 10 0 R 11 0 R 12 0 R 13 0 R ] /Contents 18 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 17 0 R /Resources <<
+/A <<
+/S /URI /Type /Action /URI (https://www.sec.gov/Archives/edgar/data/793074/000079307426000140/wern-20260630.htm)
+>> /Border [ 0 0 0 ] /Rect [ 54.564 130.0698 201.1224 139.1898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+15 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://www.sec.gov/Archives/edgar/data/1043277/000104327726000031/chrw-20260630.htm)
+>> /Border [ 0 0 0 ] /Rect [ 318.4274 130.0698 486.5242 139.1898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+16 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://www.sec.gov/Archives/edgar/data/853816/000119312526322966/d144668d10q.htm)
+>> /Border [ 0 0 0 ] /Rect [ 58.7896 116.5698 196.912 125.6898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+17 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://investor.werner.com/news-and-events/press-releases/news-details/2026/Werner-Enterprises-Reports-Second-Quarter-2026-Results/default.aspx)
+>> /Border [ 0 0 0 ] /Rect [ 318.4274 116.5698 526.2494 125.6898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+18 0 obj
+<<
+/Annots [ 6 0 R 7 0 R 8 0 R 9 0 R 10 0 R 11 0 R 12 0 R 13 0 R 14 0 R 15 0 R 
+  16 0 R 17 0 R ] /Contents 22 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 21 0 R /Resources <<
 /Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
 >> /Rotate 0 
   /Trans <<
@@ -91,31 +120,31 @@ endobj
 >> /Type /Page
 >>
 endobj
-15 0 obj
+19 0 obj
 <<
-/PageMode /UseNone /Pages 17 0 R /Type /Catalog
+/PageMode /UseNone /Pages 21 0 R /Type /Catalog
 >>
 endobj
-16 0 obj
+20 0 obj
 <<
-/Author (Allen Xu) /CreationDate (D:20261103020118+08'00') /Creator (\(unspecified\)) /Keywords () /ModDate (D:20261103020118+08'00') /Producer (ReportLab PDF Library - \(opensource\)) 
+/Author (Allen Xu) /CreationDate (D:20261103150532+08'00') /Creator (\(unspecified\)) /Keywords () /ModDate (D:20261103150532+08'00') /Producer (ReportLab PDF Library - \(opensource\)) 
   /Subject (Independent public-data research writing sample) /Title (Is the U.S. Freight Recovery Real?) /Trapped /False
 >>
 endobj
-17 0 obj
+21 0 obj
 <<
-/Count 1 /Kids [ 14 0 R ] /Type /Pages
+/Count 1 /Kids [ 18 0 R ] /Type /Pages
 >>
 endobj
-18 0 obj
+22 0 obj
 <<
-/Filter [ /ASCII85Decode /FlateDecode ] /Length 2845
+/Filter [ /ASCII85Decode /FlateDecode ] /Length 3487
 >>
 stream
-Gatm=>BAOW'7KVYfU'l3D8_KZ;U%SLET/>0-&J`tg8Xs7PE:Hd(PNtXCSj>q3t"q#D-a6=MC5iK&AVcLm+J_<74,`"rB8G^?B49"QPN^^N@/8IL.gQ6l1Oi<bF-mEl%Bb(No>Yd&2Q"Jl@Eu%[[q:"\b=TJPCdD$@9H?5HXo+u-o>3b4?rK*TNu(!\8;@*cEO6A,9q#*2*>2hE-ZmeIXcM9rp&[ucY34eNPFYi52p@aT+tI_j-uf]>K=07ItVY@h[M+l>h=NM419:$D(Q+J!c2WiQJV<t9gqg,eFYE-bnDfJpm+u\$72E%T$aj.Q-?/%U26EY/^$=AZI!aQ9?Zfd?XgVn7c0aSToX[().@2?SjUN=o^J!GIQksJjGZ2W0^QUHnOlL+4')'mDWSo+Y1):X*4_@MP%!%8$hmbSrjh-V`[MDN%f=1^!qB;g2&#W(\2NQV'QQ78kXre46Bj!JLshph`eP#."2ik1o%sQA.]O[jGr/U/U*A@!rLmd39a^t`c_GTYUnUCW1"hN=oP&\mcq%q^jJ*lJ2!WhF/?TrX?*\ipI+Vhb&s5V.1/(,'PLc#\g6Jm(a,*ik,,)%#2O/#(''#)0^?9o3P_4s:8"=BVl(#c1Z46H[]"#fp!5?P)g/&!'Ojg$qlV%jb6T%c;9NO>104g*7c`&>g4H(5IbtH:(3/_=-<TZ_QiV]NSLqM:hXH,@!l'R#RA"b;$<0aV";N#W6j"nq)V2!O%/F)Kd-i,rhaN*%=a]p6C3YA?c>EOi#XIa4NB#Tq=)G`(7dS`KT$N!Rr&[MWrml"K?BcZGJ*X&h<])*,cGAP1nHCX?b5E4l.)D;=i1>O!8+"V;TS2+4`h-Rnk6A5X(ZB"CP.e5]j$6#@fq]5W<r(/gLSPNj:oBZWd+;1J^EmA)noRg_6*^2I@Vq,Z=/u)ZkfX6Y%>*KC8?maP'/d=\t0XnJG8<<66-Op'\rhdGHr-/-(j<uYuoh*rC6tA=EYh_tUmRoSg:_ZuO+fc>,0osJU&e*U%aH4o>">Q%u>(YfhBKSX>_/lH+'6I,L+t"%$niCji\O_t)Y7ae$i"qnT.uKFZ9G-2IXL"li"(Z*l13be$78^+OAge=TW_7>n6G1,#h"#^2$W*?g$#(??rm4K[6(;,++/Wm]ns^bm(5UOs%rVL"TLJ/S0'b9l&Y.h$#j-4+ScYYp!W8,aY\-j6"UrBa$%aJOp'D96ind3&0gKj^;XZ;1@G>K^$ES)>aYZPGdnj'@:iVTuXATf/o+kJc"OC.bk\qCSpHtfc@SA:!p5%_,<g^#hS-WGs:qB79oW">:T@C\V/0r.J1H`aRP%dP!&BPSCc83@d!-LfgM#llATGQsYI)VomRAk/*6ftr+@.l&FpQse;TE6AMZ-42";)q(qN+Yut2ZCNK4J9(?aH)?^3)$^J?G7<GSM[\^He5'O2clW`d-R;3G1`C6%+ouY4i%*e+Q.fa_`TC+04k:YCH3'$bd(.be$<(VZSn[OCmcNc+\X!n%/N]T6SHAbC8kC=_sF?K7jTtB29`_0KLu6Kk@p/>'_$_+;ai1"W)5CO:+Olj1eN[2:f?N$@cUU2Z<BmHRMSUo*^ma.\=IQHLAD;bB:Q'$E,B6['F&%DZ23qRG+Ma/bT"Fdqt6%LS?SXW4&N8;64Y+6JOP21.gY>OAG*T6]pZNO+cobO$N#q>^CCZlPXB<)jr":e$MCB..[36^Rjp/3']tDbq'Lf/'L(^r2+2CXQXqN\2Co.\&6J->1`X9fhOVjukIhj[^/c==Dl<n)cllo!BF2"VNjY,!*kBpc+R>9U\t!n<D#/Z0F2R6b5*(Ia.48-TT4_"iDeWA(.5q\DfIa!@^g,Yr#E<8jEB$SK=4De`LL6?S)`"Ij@CE^pHn^:prJ!u^D52N\>BN3G72=ONFd7\@Y9![McYI<HU88!8D@9agRN"@(Tats=lO-TJJr5d`BSmn3f414r_SL)?V&E.0$6YaGKk?aU%uqlW=L'uRgU[")O?GoM:RW*n%O]#/J`"t<Sl"(uBYGq;A!r3,SXRhAq6fqq8d`(\h;:c#mQpn8e4>[g6r`<)-MQFIKUG*eWE!=)B3C?-^XNiVl`qo'\/h.TW*O)gj>>JR%+:0r.TLZ=aj;l8-Q`lp_;:LLgRRWsE:Ut!iiBSgk"/`IZ"/VT[&1J)I'2n)72?;97Omm5&#7SYD&:A8^M*r1QGoEoHs>*#lR6_6=GnQOHQ&&e=XZ.d=\NpdT#af0_\k+,gnK4$6lWOq8/6^IofWP)muh1l/BU'*\m3pM&rjil9iFnPTmCS5h,f>JDsq8&mJ6\fI6q(E]AYq*JgJ1nL29*3?5Ib+f)u$cMX-h-Pl#:<29#ZcZ"_Z]2r-:DOblc(kU3JTlrj)u\(NCOGmDKO&_fKam,^)+_g`$RHqj.,C2PY2`pMm2KDUe5KA#,&n=:[aXd/Sl<pJG3p#V2lnjg8t?O#o*f-JC!R@2>4Aq&;'dsh%_ct`:lX80=_9)_+"D'Y<GO$D(198o>@RZ$DAXA_Pa=uXb;\D?^OL_&s1,CI)"=,d^(N`%j*YC*ccQ#&JWUiuT)f_J1cp_[<jj^\`FQ9"jK08!L@L#u*]3OH\VNcn00I;jl4mu3S;]rCUpko4I-2W$N&rW_g=4%4B&QPaWL\ghS@(?+r47>\=,??u8G*-9.$G._kUpO[`aUubb:El6IT+VhBGb%r^NqQC2E]f&RZ*S&%dKa.M$(Ch'P&hCSO"!s7*h^li2:2@QKU\>^1d9Ql6r=l'8/rM-%di,=7g^j.^nfUEj\KWrVeY\i&R]PZ"%`2M@_D`8TLKs"#%fKuiAb`rumVoJoXX?b7S?9%e^KH2?42_Mtr?(a'k*>~>endstream
+Gatm>gN)%<&q0LUoZQYX)\L(1T_,IbPpNUmZ"$FK3S?A&,@F'&NE^@qUoJh?SfWD).?P=8^b/4nAh_]_Qd_iOYfOb49E0rKU45u'jcr9#:"'t_Y2Rh$8%P5)q#,osc#c8Z6H=&^8VfG^@-W;`raL#RWUI6eghB[5hI0NP'A+?DN]@D?QOM1NI66ZD=AQDcJ>Ob2[:s*'mAbo]l]/-n0;^s>?i>*FqXQ_:I\H!jH*7bR^Y[9D/Aq#&8\_B;>Fn'q[XmlO()a:@5`d#@]'ZpAKe*85[1#]HH_)K<URrM%KAL.D/0o[T23kJ1U5Tk0=/oG8F/hW3,k?e&+!+#;]$R9bpq8;bh&Subqn`Ver!URO6eh,N1+&lRYB9a>7AauuaYO%:%Qkh_,]pA&j^>dmj!!%3gshk(Q5,Qkfq&TE=FpJM6nPN=*3pU9M;9*09h"_AdRW?;TW:tjq4aa%)<FLo52_>irjC?A/;RdShHH!A%$ZV0Ti)V^MK/u:gA]a1`hl*FV\cSkAIJ\&)9l>^a6O&ldQT(Y2)3l0-%4\+-7Tp8GuI1Qm6Rl;5goD'8d0;r;_j3uo(":GAR=G_N":h\pL6<)ncOC5"NSNTfcIpTbLc<?>5HG>nZ7iZQ(jQZ/]:PM8g3+j`b-R\[`h0f6Es3Q(69+HY8!"LG.pg_9P)c>0V]tQnnb2G<5uqO'DfGPpOo,T9YUIYqbbA?@#.n\&-kY0]a[*Z>28]$gaOo@n<3,E'4-)VHc(k5e$=hE;OqHgQqJ>BNrMS`jM0()OnMj4r;>@g?&5MTC8$M!&6.'OQ8.'a2;q]=R%0HdX,=QkL%bNc=Y<\WdkQg;pI5u]LA>@1KCnqfIF@=\lSn[j`lIoBTV>-/YeE,R/;FtK4,SPBEN]KX;6?.aI\9:KJmC/ur02J!=e7)c"'(<4!,."^$UbusPmU.1/kN=:c"+r^'Y'[R!0I\JbIL[C)<9KSM,Ie?Cdf)i=_%@8hHS/;)A\abS#Z(.8u8JT;BBpoDrUJ*Gs&I)*X6Rt]>^'AdN=^qEt*1]T@WE[44m)'-5WCJYa0'X-ZEBO7dG<#[-p`_pp^(R9j`Y"3%P[b$b_&i#587ka.L1iY\#Xco9_7(<[quTZM*R?&JW4X>0jgf$[;=6nIN4<B8=RU6b;n?"cTO0<O!Ll]Zfj0L";6V9[46g5htbe;C"#BZFj7=IB&KO5GHdNQV)A!%fmheJS@.B!5gTmT4k.JD\3P2E4oth^34Rm"e8d.+@HF,UjgE<?R"V\/g&)+m&mX*Y#4<SJ[6**EKEH2XBqF!+p+H=+[.)ILkoP@,3g?P=ITl#aWPbu/>#K9So+4JIlmjHEX%L@#;L:^VhN25T](i*!)4LIcOI/9OQ#fIemsMAT:`kG&;)uB'eMg3QdmP`nEsr/J#atmkiU^%CC["fs7g\]rJnmK@2=P_D^A)1A>2SUAek;]-_<%dp#d47q^?.q-JSDPB>XC-+#3l6-,aGJO(Ikmc3oqd0S3O_f\h9A_djK$)r\(edZ?ZOqs,B`;^2;;.-!p3Q/]t7<99>HkCr'aM1eS`f4&3hmbrNb8X>bq[G[g0[(h\6i\+#+,="9tPi-%^)Bl.XBcg*#pK30n!X7ktju3HA8i_>#b6.Tt>EuG]Qb75_P0*c+Y1`bBOs'_]U(2?`D3YhFk9!Aunnp$H/8$H]FET05nGtN\i5$g^4fd35P9Ful!Pf1t'dg.a^[gEYm<[]oL[KFc_iCiHaSR.nR0LLmTMj#4FRII8jC]tKkR)!Pddpj)&fY\ATjt5*C8t:Vrl@p-Js=U`r.^C]i08fCT^sef_&MM_j!t\Sa8%\"p+h^[+=QC^A-#^(cEIfJ(30qsL4^]-)I<g7dI3'p>-C*BEnOJ4eWp]PaVa8'nEn)1`RM7a0!J6FW*""45S["F5`Bcd#?fRYAQH4cqV.Z*UE[I:j^A;q_*1o^q!PAfm*e;NoS2f)-Aaa@6>eYn"(q,<4t*55=dBP+-*%,o(:0JoRR/'QRrS[:/[=F0UT2i-VY@-P\Ca(FUA7.%o^k;@NY\kI2LB+Qa?'QWo9@@T#T-dnX=<,OAT,9mBIfs/'gm5`7d_*_a-JR0=jr=Vopj&ark?P'Z!>0f<6b+H2.(O`%dF0h[_XeDW;,qt"qfU\V)W8'm*c)=gfXct[IgZJ2f_U;TnS_eM,=%<69,.YOK`.0TY93KH.&K$Oh7?c&)<aiM<R(,3M$b^)VVK@Wu@?!(*7s#e]nY)?Ru>ho&^i78`s*.)-j7d./U[:mYb7h7'_`&2a@PQ6isXb]53b7Dp/'ZrdL=qFc0B.R7+36L5%hWLQ0rca'-HqC1jQJlLBHBC3d<kVfk&1!8L4QM&LKdpOp=`32pIEDAbQTR`P=Cnna*\^'nh5k2%8202_&.D1uUA&9ip`^+](2>j>uJ:q)F-S\NYL)Zk&q-NsMLi%\J`PNWNRH`\Q&h4Cd=EjJY_8ihNa`2K&"2^'jf9SC2/KZk\!*c7(j=5ZSGPAJmTlgcdeEGB!TLXd""E>'ep&Dlml$#S)ED0-5ua2*64lg'G4Xe;$)/[8>LraY?1?#l\n9ru8*9SYR/fIk'K-;'q?2np`Sj.?$85b@VPe(@#HDgFdo?:.;UIr/#R.!B)a8def`#"gVNFmnH;U17Fc7?K!XD`W9>bd=>A!EGsLZLZ9P'i9,!m4NYh^an)mX2]RkCSBM&2:n^5m8:K04sR%2Q(;aHqU'&(0"NT`+*"Ne/`JH,WOC'n^2C\C#rW7ef@e<+ejkFg(tnj<E]c;>OB8f)Q"o0ag=k*r'L"nP3S\G&8/i1jb6'&T$bI%*0k&`_.l=O[0`:+^"SXUB/TKOjm'Q*&DDb4^*6e+a&gms?Q-qi_8rXOccEA#SP\sNmik=oOj9:0mko:l/2ta'BX*6h.h.)_^DFOQ7,.Lf[)FJnf:jNNIjbD"\D7e)DDW)V2D\0AI"tsen`m[G+e^(!97qRRh"T8)-k:JCO8c0f.o'qH@[:Sie8DkrPd,%P59QJ@n`!_S:mtXS$>eIUGZR=UHRH"h)0gH=/BH,C9fUa(XjoJ6i*c[(,BTYljNKW.4d/iMoKm0U#_W0YekT#d2jDJ`W]&]q'AqVXRQeW`P5=XmiMU,#Ek5iTtO$VCnXi`-gbGVuUf7t7CPk(C(6pE"]rWo5&fI5tgCeCRSak;H5r0W`%3R+SK^?Qs9:"YdTP1`reh(GXeH-*rZpG0V4j%%[Os,F++j2HVC@qTDoW]+9Y.GC*sFG7%!DMgaKEipAR3sHW,R7XR(\GslLn=S9cB`Co9D8)RC=Rf)0)ec9(Eu<r;>!Gsf+2;FifQQ9*XiJ.#(Q#"%geQ:lE#Sl?9#Js\$WK2nnYGtA\&6Yf4WDn[p_L=Ol.8$?i,e!tBWlRVjO$+TVAW;1=8_gn6I53XD8hI&3hOYl2dStARf9:'T:.19:%Ni=^#^j_:5:<$/m"1`^:*S;h-=:Q)R?s;\?agK\um9%fs"Z@G8^-(Q;=)Gdu45._"I":~>endstream
 endobj
 xref
-0 19
+0 23
 0000000000 65535 f 
 0000000061 00000 n 
 0000000122 00000 n 
@@ -126,25 +155,29 @@ xref
 0000000751 00000 n 
 0000000953 00000 n 
 0000001146 00000 n 
-0000001348 00000 n 
-0000001540 00000 n 
-0000001776 00000 n 
-0000002013 00000 n 
-0000002250 00000 n 
-0000002520 00000 n 
-0000002590 00000 n 
-0000002919 00000 n 
-0000002980 00000 n 
+0000001387 00000 n 
+0000001588 00000 n 
+0000001783 00000 n 
+0000002017 00000 n 
+0000002254 00000 n 
+0000002488 00000 n 
+0000002725 00000 n 
+0000002957 00000 n 
+0000003254 00000 n 
+0000003555 00000 n 
+0000003625 00000 n 
+0000003954 00000 n 
+0000004015 00000 n 
 trailer
 <<
 /ID 
-[<5b10ff8e267c585a03ea8c94fbe5c00d><5b10ff8e267c585a03ea8c94fbe5c00d>]
+[<8c0223b696bce9e6e63213aec6cf307f><8c0223b696bce9e6e63213aec6cf307f>]
 % ReportLab generated PDF document -- digest (opensource)
 
-/Info 16 0 R
-/Root 15 0 R
-/Size 19
+/Info 20 0 R
+/Root 19 0 R
+/Size 23
 >>
 startxref
-5917
+7594
 %%EOF

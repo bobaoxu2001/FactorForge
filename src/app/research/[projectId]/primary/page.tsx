@@ -56,7 +56,7 @@ export default function PrimaryResearchPage({ params }: { params: { projectId: s
         </div>
       </Panel>
 
-      <Panel eyebrow="Interview guides" title="Question templates by stakeholder" actions={<OriginChip origin="ai-generated" />}>
+      <Panel eyebrow="Interview guides" title="Question templates by stakeholder" actions={<OriginChip origin="template-generated" />}>
         <p className="mb-3 text-[12px] text-ink-muted">Template-generated from the project hypotheses. Questions are work product, not evidence. Ask the Copilot for a tailored guide.</p>
         <div className="grid items-start gap-3 lg:grid-cols-2">
           {guides.map((g) => (

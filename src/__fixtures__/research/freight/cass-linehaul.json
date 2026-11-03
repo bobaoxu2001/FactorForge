@@ -1,0 +1,81 @@
+{
+  "provider": "Cass",
+  "id": "CASS_LINEHAUL",
+  "url": "https://www.cassinfo.com/freight-audit-payment/cass-transportation-indexes/september-2026",
+  "csvUrl": "https://www.cassinfo.com/hubfs/Cass%20Indexes%20Historical%20Data.xlsx",
+  "retrievedAt": "2026-11-03T06:18:55.023479+00:00",
+  "title": "Cass Truckload Linehaul Index \u2014 September 2026",
+  "units": "Index Jan 2005=100",
+  "seasonalAdjustment": "NSA",
+  "frequency": "Monthly",
+  "source": "Cass Information Systems",
+  "release": "Cass September 2026 freight report",
+  "updated": null,
+  "nextRelease": null,
+  "notes": "Selected 13 monthly levels from official TL LH Index worksheet, date column B, level column C. Excludes fuel and accessorials; mixes spot/contract dry-van invoices, by processing month. Report gives no separate SA comparison; generic workbook SA caption is not relied on. Method: https://www.cassinfo.com/freight-audit-payment/cass-transportation-indexes/truckload-linehaul-index",
+  "licenseUrl": "https://www.cassinfo.com/copyrights",
+  "licenseLabel": "Copyright Cass Information Systems; selected public observations cited for this research sample. No licensed rate feed.",
+  "dateModified": null,
+  "excluded": null,
+  "observations": [
+    [
+      "2025-09-01",
+      140.6
+    ],
+    [
+      "2025-10-01",
+      142.1
+    ],
+    [
+      "2025-11-01",
+      142.2
+    ],
+    [
+      "2025-12-01",
+      143.6
+    ],
+    [
+      "2026-01-01",
+      146
+    ],
+    [
+      "2026-02-01",
+      146.3
+    ],
+    [
+      "2026-03-01",
+      145.6
+    ],
+    [
+      "2026-04-01",
+      150.2
+    ],
+    [
+      "2026-05-01",
+      150.8
+    ],
+    [
+      "2026-06-01",
+      149.4
+    ],
+    [
+      "2026-07-01",
+      152.9
+    ],
+    [
+      "2026-08-01",
+      153.9
+    ],
+    [
+      "2026-09-01",
+      154.8
+    ]
+  ],
+  "extraction": {
+    "method": "Official workbook selected-cell extraction; levels checked against September report",
+    "sha256": "30e2fe34effcf2ad6ce66ef38349ac20746654be4e6cd6c9b078ab8baf42d977",
+    "sheet": "TL LH Index",
+    "columns": "B=date, C=level",
+    "coverage": "2025-09 through 2026-09"
+  }
+}

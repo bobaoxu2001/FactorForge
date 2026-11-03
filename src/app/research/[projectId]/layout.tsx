@@ -30,11 +30,11 @@ export default function ResearchProjectLayout({ children, params }: { children: 
     { slug: "companies", label: "Competitive intel", step: "04", status: `${view.companies.length} cos` },
     { slug: "primary", label: "Primary research", step: "05", status: "plan" },
     { slug: "thesis", label: "Thesis & decision", step: "06", status: `${decided}/${view.hypotheses.length} public-data screens evaluated; direct validation incomplete` },
-    { slug: "memo", label: "Memo", step: "07", status: view.memoStatus === "evidence-backed" ? "evidence-backed" : "draft" },
+    { slug: "memo", label: "Memo", step: "07", status: "public-source sample" },
     { slug: "copilot", label: "Copilot", step: "AI" },
   ];
   return (
-    <div className="space-y-6">
+    <div className="research-project-layout space-y-6">
       <header className="research-project-header relative pt-1">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div className="min-w-0 flex-1">
@@ -49,11 +49,12 @@ export default function ResearchProjectLayout({ children, params }: { children: 
           <dl className="grid shrink-0 grid-cols-2 border border-line bg-paper text-[12.5px] xl:max-w-[400px]">
             <div className="border-r border-line px-3 py-2">
               <dt className="text-ink-soft">Status</dt>
-              <dd className={`mt-0.5 font-semibold ${view.memoStatus === "evidence-backed" ? "text-emerald-700" : "text-amber-800"}`}>{MEMO_STATUS_LABEL[view.memoStatus]}</dd>
+              <dd className={`mt-0.5 font-semibold ${view.memoStatus === "public-source" ? "text-accent" : "text-amber-800"}`}>{MEMO_STATUS_LABEL[view.memoStatus]}</dd>
             </div>
             <div className="px-3 py-2" title={`Snapshot built ${view.snapshot.builtAt}`}>
-              <dt className="text-ink-soft">Snapshot refreshed</dt>
-              <dd className="num mt-0.5 font-semibold text-ink">{view.snapshot.builtAt.slice(0, 10)}</dd>
+              <dt className="text-ink-soft">Research edition</dt>
+              <dd className="num mt-0.5 font-semibold text-ink">{view.asOf} · {view.revision?.id.split("-").at(-1) ?? "fixed snapshot"}</dd>
+              <span className="text-[11px] text-ink-muted">Macro {view.componentDates?.macro.slice(0, 10)} · SEC / prices {view.componentDates?.companies.slice(0, 10)}</span>
             </div>
             <div className="border-r border-t border-line px-3 py-2">
               <dt className="text-ink-soft">Prices through</dt>

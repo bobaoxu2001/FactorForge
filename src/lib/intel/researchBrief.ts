@@ -19,9 +19,8 @@ export function buildResearchBrief(view: ResearchProjectView) {
     .map((id) => view.kpis.find((item) => item.kpi.id === id))
     .filter((item): item is NonNullable<typeof item> => item?.latest?.yoy != null && known.has(`EV-KPI-${item.kpi.id}`));
   const fuel = view.residuals.find((item) => item.kpiId === "ppi-truckload");
-  const focus = view.companies.filter((company) => company.coverage.focus && company.latest?.operatingMarginYoYChange != null && known.has(`EV-${company.ticker}-OM`));
-  const h1 = view.hypotheses.find((item) => item.id === "H1");
-  const h2 = view.hypotheses.find((item) => item.id === "H2");
+  const linehaul = view.kpis.find((item) => item.kpi.id === "cass-linehaul")?.latest;
+  const peer = view.hypotheses.find((item) => item.id === "H5")?.tests.find((item) => item.sensitivity);
   const observations: BriefObservation[] = [];
 
   if (volume.length) {
@@ -32,31 +31,33 @@ export function buildResearchBrief(view: ResearchProjectView) {
       evidenceIds: cite(volume.map((item) => `EV-KPI-${item.kpi.id}`)),
     });
   }
-  if (fuel?.latest && known.has("EV-CALC-ppi-truckload-FUEL")) {
+  if (linehaul?.yoy != null && known.has("EV-KPI-cass-linehaul")) {
     observations.push({
       label: "02 · Pricing",
-      finding: `Truckload PPI ${pct(fuel.latest.actual)} YoY; residual ${pp(fuel.latest.residual)} relative to its historical diesel relationship (${fuel.latest.date.slice(0, 7)}).`,
-      interpretation: `The residual is a statistical comparison, not a direct measure of ex-fuel rates or a causal fuel decomposition.${fuel.extrapolation ? " Diesel is outside the training range, making this estimate especially uncertain." : " Direct ex-fuel rate evidence is still needed."}`,
-      evidenceIds: ["EV-CALC-ppi-truckload-FUEL"],
+      finding: `Cass ex-fuel linehaul ${linehaul.value.toFixed(1)}, ${pct(linehaul.yoy)} YoY${linehaul.change != null ? ` and ${pct(linehaul.change)} MoM` : ""} (${linehaul.date.slice(0, 7)}).${fuel?.latest && known.has("EV-CALC-ppi-truckload-FUEL") ? ` Truckload PPI ${pct(fuel.latest.actual)} YoY; diesel-model residual ${pp(fuel.latest.residual)} (${fuel.latest.date.slice(0, 7)}).` : ""}`,
+      interpretation: "Direct ex-fuel rate growth and a negative model residual can coexist: the residual is deviation from a historical fit, not observed rate growth. Cass blends spot/contract dry-van invoices by processing month; demand versus capacity effects remain unresolved.",
+      evidenceIds: cite(["EV-KPI-cass-linehaul", "EV-CALC-ppi-truckload-FUEL"]),
     });
   }
-  if (focus.length) {
+  if (peer?.sensitivity && peer.evidenceIds.every((id) => known.has(id))) {
+    const stats = peer.sensitivity;
+    const withoutWerner = stats.leaveOneOut.find((item) => item.omitted === "WERN");
     observations.push({
       label: "03 · Company conversion",
-      finding: focus.map((company) => `${company.ticker} operating-margin change ${pp(company.latest!.operatingMarginYoYChange!)} YoY (${company.latest!.label})`).join("; ") + ".",
-      interpretation: "Check whether revenue growth converts into profit. Mix, acquisitions and cost timing are rival explanations; consolidated results alone do not identify pricing power.",
-      evidenceIds: cite(focus.map((company) => `EV-${company.ticker}-OM`)),
+      finding: `${peer.period} GAAP margin changes: ${stats.groupA.members.map((r) => `${r.ticker} ${pp(r.value)}`).join(", ")}. Mean ${pp(stats.groupA.mean)}, median ${pp(stats.groupA.median)}${withoutWerner ? `; mean excluding WERN ${pp(withoutWerner.meanA)}` : ""}.`,
+      interpretation: `The negative mean is WERN-sensitive, so operating leverage is mixed.${known.has("EV-WERN-Q2-RECONCILIATION") ? " Werner's adjusted margin rose 0.8pp; its release identifies prior-year liability reversals. Retain all peers and GAAP inputs; review adjusted definitions and segment mix separately." : " Review company-specific adjustments and segment mix before attributing a mechanism."}`,
+      evidenceIds: cite([...peer.evidenceIds, "EV-WERN-Q2-RECONCILIATION"]),
     });
   }
 
   return {
-    conclusion: h1?.overall === "supports" && h2?.overall === "supports"
-      ? "Volume and pricing indicators are improving; the mechanism still needs testing."
+    conclusion: linehaul?.yoy != null && linehaul.yoy > 0 && known.has("EV-KPI-cass-linehaul")
+      ? "Ex-fuel rates have improved; a broad, demand-led freight recovery remains unconfirmed."
       : observations.length ? "A demand-led freight recovery is not yet established." : "More public evidence is needed before forming a recovery view.",
     framing: "Working hypothesis: separate shipment demand, fuel-sensitive headline prices and company-level profit conversion before drawing an investment conclusion.",
     observations,
     nextChecks: [
-      { question: "Is pricing improving beyond fuel?", test: "Compare ex-fuel contract and spot rates with shipment counts over the same period. A sustained rise in both would strengthen the recovery case." },
+      { question: "Will direct rate gains persist?", test: "Track Cass linehaul alongside matched spot/contract rates and shipment counts over further releases, separating demand growth from capacity contraction." },
       { question: "Is the margin change operational?", test: "Reconcile segment volumes, yield, mix and fuel-surcharge timing from earnings releases. Recheck peers on a common quarter before attributing differences to business models." },
       { question: "What does the price already assume?", test: "Compare current valuation with explicit margin and growth scenarios. Relative stock returns and historical multiples alone cannot reveal market expectations." },
     ],

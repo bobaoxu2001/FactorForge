@@ -3,7 +3,7 @@ import { pct } from "@/lib/utils/format";
 import { buildMemoSections, variantView } from "./memo";
 import { getResearchProject, type ResearchProjectView } from "./project";
 
-const view = getResearchProject("freight", new Date("2026-11-01T12:00:00Z"))!;
+const view = getResearchProject("freight")!;
 
 describe("evidence-bounded research interpretation", () => {
   it("preserves the observed pricing numbers without treating the residual as a causal fuel decomposition", () => {
@@ -11,12 +11,13 @@ describe("evidence-bounded research interpretation", () => {
     const pricing = variantView(view).find((p) => p.includes("historical diesel sensitivity"))!;
 
     expect(pricing).toContain(pct(residual.actual));
-    expect(pricing).toContain(`${Math.abs(residual.residual * 100).toFixed(1)}pp`);
+    expect(pricing).toContain(`${(residual.residual * 100).toFixed(1)}pp`);
     expect(pricing).toContain("[EV-CALC-ppi-truckload-FUEL]");
     expect(pricing).toContain("does not isolate fuel-surcharge pass-through");
     expect(pricing).toContain("contract-reset timing");
-    expect(pricing).toContain("would challenge this view");
-    expect(pricing).toContain("rate feeds are not connected");
+    expect(pricing).toContain("Positive direct ex-fuel rate growth can coexist with a negative residual");
+    expect(pricing).toContain("separate licensed rate feeds are not connected");
+    expect(variantView(view).join(" ")).toContain("Cass linehaul 154.8");
     expect(pricing).not.toContain('the price "recovery" is a fuel-cost pass-through');
   });
 
@@ -37,7 +38,7 @@ describe("evidence-bounded research interpretation", () => {
 
     expect(pricing).toContain("+3.1pp");
     expect(pricing).toContain("model error");
-    expect(pricing).toContain("Confirm it against matched ex-fuel rate");
+    expect(pricing).toContain("Use matched spot/contract and volume data");
     expect(pricing).toContain("outside the model's training range");
     expect(pricing).not.toContain("more than diesel explains");
   });

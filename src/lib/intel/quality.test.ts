@@ -18,11 +18,11 @@ const hyp = (overall: HypothesisView["overall"]): HypothesisView => ({
 });
 
 describe("classifyMemo", () => {
-  it("is evidence-backed only with no failures and every hypothesis decided", () => {
-    expect(classifyMemo([check("primary-research", "pass")], [hyp("supports")])).toBe("evidence-backed");
+  it("does not promote a report to verified from a passed interview-count check", () => {
+    expect(classifyMemo([check("primary-research", "pass")], [hyp("supports")])).toBe("public-source");
   });
-  it("is a draft when primary research is missing but core checks pass", () => {
-    expect(classifyMemo([check("primary-research", "fail"), check("source-quality", "pass")], [hyp("mixed")])).toBe("draft-incomplete-verification");
+  it("recognizes public-source evidence when fieldwork is missing but core checks pass", () => {
+    expect(classifyMemo([check("primary-research", "fail"), check("source-quality", "pass")], [hyp("mixed")])).toBe("public-source");
   });
   it("is exploratory when core evidence is missing", () => {
     expect(classifyMemo([check("testability", "fail")], [hyp("insufficient-data")])).toBe("exploratory");

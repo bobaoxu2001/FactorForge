@@ -14,7 +14,7 @@ export default function MemoPage({ params }: { params: { projectId: string } }) 
     <div className="space-y-4">
       <Panel eyebrow="Stage 07 · Investor research memo" title="Memo builder">
         <p className="max-w-4xl text-[12.5px] leading-relaxed text-ink-muted">
-          Nineteen sections assembled from the project&apos;s computed evidence. Each citation links to its source in the Evidence Explorer. Status follows the research-quality checks: without recorded primary research the memo is a draft with incomplete verification, whatever the public data says.
+          Public-source findings, calculations and interpretation, with a separate peer-sensitivity section. Each citation links to its dated evidence. Primary fieldwork is proposed; interview validation remains open without discounting the evidence from public statistics and company disclosures.
         </p>
       </Panel>
       <MemoBuilder projectId={view.config.id} meta={memoMeta(view)} sections={buildMemoSections(view)} status={view.memoStatus} />

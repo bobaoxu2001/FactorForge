@@ -68,12 +68,15 @@ export function evaluateTest(test: HypothesisTest, ctx: ThesisContext): KpiTestR
     const { value, evidenceIds } = kpiValue(ctx, test.kpiId, test.metric);
     if (value === null) return { id: test.id, description: test.description, outcome: "insufficient-data", detail: "Series or calculation unavailable.", evidenceIds };
     const holds = compare(value, test.op, test.threshold);
+    const outcome = holds === test.supportsWhenTrue ? "supports" : "contradicts";
     return {
       id: test.id,
       description: test.description,
-      outcome: holds === test.supportsWhenTrue ? "supports" : "contradicts",
+      outcome,
+      diagnosticOnly: test.diagnosticOnly,
       detail: `Observed ${fmtMetric(test.metric, value)} (threshold ${test.op} ${fmtMetric(test.metric, test.threshold)}).`,
       evidenceIds,
+      evidenceRelations: evidenceIds.map((evidenceId) => ({ evidenceId, stance: test.diagnosticOnly ? "context" : outcome, reason: test.diagnosticOnly ? "Model/headline context. A diesel residual measures deviation from a historical fit, not the level or growth of observed ex-fuel rates." : `${outcome === "supports" ? "Directionally consistent with" : "Directionally against"} the stated screen; this observation alone does not identify a causal mechanism.` })),
     };
   }
   if (test.kind === "company-metric") {
@@ -90,7 +93,8 @@ export function evaluateTest(test: HypothesisTest, ctx: ThesisContext): KpiTestR
     const outcome: TestOutcome = passing.length === usable.length ? "supports" : passing.length === 0 ? "contradicts" : "mixed";
     const detail = (matched ? `Common ${matched.label}: ` : "") + usable.map((r) => `${r.ticker} ${fmtMetric(test.metric, r.value as number)}`).join(" · ") + (usable.length < reads.length ? ` (no data: ${reads.filter((r) => r.value === null).map((r) => r.ticker).join(", ")})` : "");
     if (matched && evidenceIds.length !== usable.length) return { id: test.id, description: test.description, outcome: "insufficient-data", detail: "The common-quarter calculation is missing its dated source evidence.", evidenceIds: [], period: matched.label };
-    return { id: test.id, description: test.description, outcome, detail, evidenceIds, period: matched?.label };
+    return { id: test.id, description: test.description, outcome, detail, evidenceIds, period: matched?.label,
+      evidenceRelations: usable.filter((r) => r.evidenceId && evidenceIds.includes(r.evidenceId)).map((r) => ({ evidenceId: r.evidenceId!, stance: compare(r.value!, test.op, test.threshold) === test.supportsWhenTrue ? "supports" : "contradicts", reason: `${r.ticker} ${fmtMetric(test.metric, r.value!)}: ${compare(r.value!, test.op, test.threshold) === test.supportsWhenTrue ? "directionally consistent with" : "directionally against"} this screen. Cause unassigned; reconcile fuel recovery, business mix and other costs before attribution.` })) };
   }
   const matched = findCommonQuarter([...new Set([...test.groupA, ...test.groupB])].map((ticker) => ctx.companies.get(ticker)), [test.metric]);
   if (!matched) return { id: test.id, description: test.description, outcome: "insufficient-data", detail: "No common reporting quarter with this metric for every company in both peer groups.", evidenceIds: [] };
@@ -105,13 +109,37 @@ export function evaluateTest(test: HypothesisTest, ctx: ThesisContext): KpiTestR
   if (evidenceIds.length !== new Set([...a.ids, ...b.ids]).size) return { id: test.id, description: test.description, outcome: "insufficient-data", detail: "The common-quarter calculation is missing its dated source evidence.", evidenceIds: [], period: matched.label };
   if (a.mean === null || b.mean === null) return { id: test.id, description: test.description, outcome: "insufficient-data", detail: "One of the peer groups has no data.", evidenceIds };
   const spread = a.mean - b.mean;
+  const members = (tickers: string[]) => tickers.map((ticker) => ({ ticker, value: companyMetric(ctx.companies.get(ticker), test.metric, periodRows.get(ticker)).value! }));
+  const mean = (rows: Array<{ value: number }>) => rows.reduce((sum, row) => sum + row.value, 0) / rows.length;
+  const stats = (rows: ReturnType<typeof members>) => {
+    const sorted = rows.map((r) => r.value).sort((x, y) => x - y);
+    const mid = Math.floor(sorted.length / 2);
+    return { members: rows, mean: mean(rows), median: sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2 };
+  };
+  const groupA = stats(members(test.groupA));
+  const groupB = stats(members(test.groupB));
+  const passes = spread > test.threshold;
+  const leaveOneOut = (["A", "B"] as const).flatMap((group) => {
+    const rows = group === "A" ? groupA.members : groupB.members;
+    if (rows.length < 2) return [];
+    return rows.map((row) => {
+      const reduced = mean(rows.filter((r) => r.ticker !== row.ticker));
+      const meanA = group === "A" ? reduced : groupA.mean;
+      const meanB = group === "B" ? reduced : groupB.mean;
+      return { omitted: row.ticker, group, meanA, meanB, spread: meanA - meanB, passes: meanA - meanB > test.threshold };
+    });
+  });
+  const unstable = leaveOneOut.some((r) => r.passes !== passes) || (groupA.median - groupB.median > test.threshold) !== passes;
   return {
     id: test.id,
     description: test.description,
-    outcome: spread > test.threshold ? "supports" : "contradicts",
-    detail: `Common ${matched.label}; quarter ends ${matched.rows.map(({ company, row }) => `${company.ticker} ${row.end}`).join(", ")}. Group A mean ${fmtMetric(test.metric, a.mean)} (n=${a.n}) vs group B ${fmtMetric(test.metric, b.mean)} (n=${b.n}); spread ${pp(spread)}.`,
+    outcome: passes ? "supports" : "contradicts",
+    interpretationOutcome: unstable ? "mixed" : passes ? "supports" : "contradicts",
+    sensitivity: { groupA, groupB, spread, threshold: test.threshold, leaveOneOut, unstable },
+    detail: `Common ${matched.label}. Group A mean ${fmtMetric(test.metric, a.mean)} (n=${a.n}), median ${fmtMetric(test.metric, groupA.median)}; group B mean ${fmtMetric(test.metric, b.mean)} (n=${b.n}), median ${fmtMetric(test.metric, groupB.median)}; spread ${pp(spread)}. ${passes ? "Mean rule met." : "Mean rule not met."} ${unstable ? "The sign changes under median or leave-one-out checks: sample-sensitive, not a broad falsification of operating leverage." : "This is a small descriptive peer screen, not a causal test."}`,
     evidenceIds,
     period: matched.label,
+    evidenceRelations: evidenceIds.map((evidenceId) => ({ evidenceId, stance: "context", reason: "Input to a peer-group comparison. The group mean's outcome is not the direction of this individual company's evidence." })),
   };
 }
 
@@ -156,7 +184,7 @@ export function evaluateTrigger(trigger: TriggerConfig, hypothesisId: string, ct
 }
 
 export function overallOutcome(tests: KpiTestResult[]): TestOutcome {
-  const decided = tests.filter((t) => t.outcome !== "insufficient-data");
+  const decided = tests.filter((t) => !t.diagnosticOnly && t.outcome !== "insufficient-data").map((t) => ({ ...t, outcome: t.interpretationOutcome ?? t.outcome }));
   if (decided.length === 0) return "insufficient-data";
   if (decided.every((t) => t.outcome === "supports")) return "supports";
   if (decided.every((t) => t.outcome === "contradicts")) return "contradicts";
@@ -169,9 +197,10 @@ export function evaluateHypotheses(hypotheses: HypothesisConfig[], ctx: ThesisCo
     const supporting = new Set<string>();
     const contradicting = new Set<string>();
     for (const t of tests) {
-      // Mixed company tests contribute the evidence to both sides; the detail says which name is which.
-      if (t.outcome === "supports" || t.outcome === "mixed") t.evidenceIds.forEach((id) => supporting.add(id));
-      if (t.outcome === "contradicts" || t.outcome === "mixed") t.evidenceIds.forEach((id) => contradicting.add(id));
+      for (const relation of t.evidenceRelations ?? []) {
+        if (relation.stance === "supports") supporting.add(relation.evidenceId);
+        if (relation.stance === "contradicts") contradicting.add(relation.evidenceId);
+      }
     }
     return {
       id: h.id,
@@ -194,13 +223,15 @@ export function applyStances(evidence: Evidence[], hypotheses: HypothesisView[])
   const byId = new Map(evidence.map((e) => [e.id, { ...e, stance: { ...e.stance }, hypothesisIds: [...e.hypothesisIds] }]));
   for (const h of hypotheses) {
     for (const t of h.tests) {
-      const stance: Stance = t.outcome === "supports" ? "supports" : t.outcome === "contradicts" ? "contradicts" : "context";
-      for (const id of t.evidenceIds) {
-        const item = byId.get(id);
+      for (const relation of t.evidenceRelations ?? t.evidenceIds.map((evidenceId) => ({ evidenceId, stance: "context" as Stance, reason: "Context only; no individual direction established." }))) {
+        const item = byId.get(relation.evidenceId);
         if (!item) continue;
         if (!item.hypothesisIds.includes(h.id)) item.hypothesisIds.push(h.id);
         // Never overwrite a decided stance with "context".
-        if (!item.stance[h.id] || item.stance[h.id] === "context") item.stance[h.id] = stance;
+        if (!item.stance[h.id] || item.stance[h.id] === "context") {
+          item.stance[h.id] = relation.stance;
+          item.stanceReasons = { ...item.stanceReasons, [h.id]: relation.reason };
+        }
       }
     }
   }
