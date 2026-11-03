@@ -1,4 +1,4 @@
-import { buildResearchBrief } from "./researchBrief";
+import { buildResearchBrief, type BriefTextPart } from "./researchBrief";
 import { createHash } from "node:crypto";
 import type { ResearchProjectView } from "./project";
 
@@ -17,14 +17,16 @@ export function buildWritingSample(view: ResearchProjectView) {
     }
     return sources[index].number;
   };
-  const observations = brief.observations.map((observation) => ({
-    ...observation,
-    references: [...new Set([...observation.evidenceIds, ...(observation.label.includes("Pricing") ? ["EV-KPI-diesel"] : [])]
-      .map(sourceNumber).filter((number): number is number => number !== null))],
-  }));
+  const citeParts = (parts?: BriefTextPart[]) => parts?.map((part) => ({ text: part.text, references: [...new Set((part.evidenceIds ?? []).map(sourceNumber).filter((number): number is number => number !== null))] }));
+  const observations = brief.observations.map((observation) => {
+    const references = [...new Set([...observation.evidenceIds, ...(observation.label.includes("Pricing") ? ["EV-KPI-diesel"] : [])]
+      .map(sourceNumber).filter((number): number is number => number !== null))];
+    return { ...observation, references, findingParts: citeParts(observation.findingParts), interpretationParts: citeParts(observation.interpretationParts) };
+  });
   const sample = {
     title: view.config.title,
     author: "Allen Xu",
+    authorRole: "Project lead & researcher",
     projectId: view.config.id,
     question: view.config.researchQuestion,
     conclusion: brief.conclusion,
@@ -44,8 +46,8 @@ export function buildWritingSample(view: ResearchProjectView) {
       { question: "Challenge the view in calls", test: "Ask private shippers, fleet owners and brokers about comparable operations, then cross-check first-hand observations and disagreements. Fieldwork is planned, not completed." },
     ],
     sources,
-    contribution: "Project work: research framing, indicator selection, data preparation, calculations and source tracing in a reproducible workbench. Revision: direct Cass evidence changed the pricing judgment; peer sensitivity narrowed the operating-leverage claim.",
-    aiAssistance: "AI assisted source lookup, implementation and drafting. User-supplied review prompted this revision; no interviews or independent analyst verification of every source are claimed.",
+    contribution: "I led and carried out this project end to end, owning the research question, indicator selection, data workflow, evidence assessment and final conclusions. Following review, I revised the analysis to incorporate direct rate evidence and peer sensitivity checks.",
+    aiAssistance: "I used AI as a tool for source discovery, coding and drafting. Research design, evidence assessment and final conclusions remained my responsibility. No primary interviews have been completed; source checks are selective and do not constitute a full independent audit.",
     scope: "Independent public-data writing sample. No primary interviews are included. Observation periods differ; source figures and statistical proxies do not establish causality. No consensus expectations or investment recommendation is asserted.",
   };
   return { ...sample, contentHash: createHash("sha256").update(JSON.stringify(sample)).digest("hex") };

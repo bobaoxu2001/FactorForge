@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { getResearchProject } from "./project";
 import { buildWritingSample } from "./writingSample";
 
-const view = getResearchProject("freight", new Date("2026-11-03T00:00:00Z"))!;
+const view = getResearchProject("freight")!;
 
 describe("public writing sample", () => {
   it("connects every observation to its original source and includes both residual inputs", () => {
@@ -23,5 +23,22 @@ describe("public writing sample", () => {
     expect(sample.observations).toEqual([]);
     expect(sample.sources).toEqual([]);
     expect(sample.conclusion).toContain("More public evidence");
+  });
+
+  it("places each company's filing beside its value and the adjusted disclosure beside its interpretation", () => {
+    const sample = buildWritingSample(view);
+    const company = sample.observations.find((observation) => observation.label.includes("Company conversion"))!;
+    expect(company.findingParts!.map((part) => part.text).join("")).toBe(company.finding);
+    expect(company.interpretationParts!.map((part) => part.text).join("")).toBe(company.interpretation);
+    for (const ticker of ["KNX", "SNDR", "WERN"]) {
+      const part = company.findingParts!.find((part) => part.text.includes(`${ticker} `) && part.references.length)!;
+      expect(part.references).toHaveLength(1);
+      const url = sample.sources.find((source) => source.number === part.references[0])!.url;
+      expect(url).toBe(view.evidence.find((item) => item.id === `EV-${ticker}-OM-2026-06-30`)!.source.url);
+    }
+    const disclosure = company.interpretationParts!.find((part) => part.references.length)!;
+    expect(sample.sources.find((source) => source.number === disclosure.references[0])!.url).toBe(view.evidence.find((item) => item.id === "EV-WERN-Q2-RECONCILIATION")!.source.url);
+    expect(new Set([...company.findingParts!, ...company.interpretationParts!].flatMap((part) => part.references))).toEqual(new Set(company.references));
+    expect(company.references).toHaveLength(4);
   });
 });

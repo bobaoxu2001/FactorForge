@@ -59,7 +59,17 @@ def main():
     def paragraph(text, style="body"):
         return Paragraph(text, styles[style])
 
-    header = Table([[paragraph("<b>FACTORFORGE</b>", "label"), paragraph("Allen Xu | Independent research writing sample", "muted")]], colWidths=[width * 0.33, width * 0.67])
+    def cited_text(text, references=(), parts=None):
+        chunks = parts if parts is not None else [{"text": text, "references": references}]
+        result = []
+        for part in chunks:
+            result.append(escape(part["text"]))
+            refs = " ".join(f'[{number}]' for number in part.get("references", []))
+            if refs:
+                result.append(f' <font color="#1d4f91">{refs}</font>')
+        return "".join(result)
+
+    header = Table([[paragraph("<b>FACTORFORGE</b>", "label"), paragraph(f'{escape(sample["author"])} | {escape(sample["authorRole"])}', "muted")]], colWidths=[width * 0.33, width * 0.67])
     header.setStyle(TableStyle([("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 7)]))
     story += [header, HRFlowable(width="100%", thickness=0.7, color=line), Spacer(1, 9)]
     story.append(Paragraph(escape(sample["title"]), ParagraphStyle("title", fontName="Times-Bold", fontSize=23, leading=25, textColor=ink, spaceAfter=5)))
@@ -69,11 +79,10 @@ def main():
     story.append(Paragraph(escape(sample["conclusion"]), ParagraphStyle("conclusion", fontName="Times-Roman", fontSize=16, leading=18, textColor=blue, spaceAfter=7)))
     story.append(Spacer(1, 4))
     for observation in sample["observations"]:
-        refs = " ".join(f'[{number}]' for number in observation["references"])
         story.append(KeepTogether([
             paragraph(escape(observation["label"]), "label"),
-            paragraph(f'{escape(observation["finding"])} <font color="#1d4f91">{refs}</font>'),
-            paragraph(escape(observation["interpretation"]), "muted"),
+            paragraph(cited_text(observation["finding"], observation["references"], observation.get("findingParts"))),
+            paragraph(cited_text(observation["interpretation"], parts=observation.get("interpretationParts")), "muted"),
             Spacer(1, 6),
         ]))
     story += [HRFlowable(width="100%", thickness=0.5, color=line), Spacer(1, 6)]
@@ -84,7 +93,7 @@ def main():
     for index, item in enumerate(sample["nextChecks"], 1):
         story.append(paragraph(f'{index}. <b>{escape(item["question"])}.</b> {escape(item["test"])}', "muted"))
         story.append(Spacer(1, 3))
-    story += [Spacer(1, 6), paragraph("Project contribution & AI assistance", "label"), paragraph(escape(sample["contribution"]), "muted"), paragraph(escape(sample["aiAssistance"]), "muted")]
+    story += [Spacer(1, 6), paragraph("Project leadership & AI tools", "label"), paragraph(escape(sample["contribution"]), "muted"), paragraph(escape(sample["aiAssistance"]), "muted")]
     story += [Spacer(1, 4), HRFlowable(width="100%", thickness=0.5, color=line), Spacer(1, 4), paragraph("Sources | links lead to the original series or filing", "label")]
     source_cells = [paragraph(f'[{source["number"]}] <link href="{html.escape(source["url"], quote=True)}" color="#1d4f91">{escape(source["title"])}</link>', "source") for source in sample["sources"]]
     source_rows = [source_cells[index:index + 2] for index in range(0, len(source_cells), 2)]

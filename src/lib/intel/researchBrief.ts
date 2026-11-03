@@ -1,11 +1,18 @@
 import type { CompanyView } from "./companies";
 import type { ResearchProjectView } from "./project";
 
+export interface BriefTextPart {
+  text: string;
+  evidenceIds?: string[];
+}
+
 export interface BriefObservation {
   label: string;
   finding: string;
   interpretation: string;
   evidenceIds: string[];
+  findingParts?: BriefTextPart[];
+  interpretationParts?: BriefTextPart[];
 }
 
 const pct = (value: number) => `${value >= 0 ? "+" : ""}${(value * 100).toFixed(1)}%`;
@@ -42,11 +49,23 @@ export function buildResearchBrief(view: ResearchProjectView) {
   if (peer?.sensitivity && peer.evidenceIds.every((id) => known.has(id))) {
     const stats = peer.sensitivity;
     const withoutWerner = stats.leaveOneOut.find((item) => item.omitted === "WERN");
+    const findingParts: BriefTextPart[] = [
+      { text: `${peer.period} GAAP operating-margin changes, YoY: ` },
+      ...stats.groupA.members.map((r, index) => ({ text: `${index ? ", " : ""}${r.ticker} ${pp(r.value)}`, evidenceIds: peer.evidenceIds.filter((id) => id.startsWith(`EV-${r.ticker}-OM-`)) })),
+      { text: `. Mean ${pp(stats.groupA.mean)}, median ${pp(stats.groupA.median)}${withoutWerner ? `; mean excluding WERN ${pp(withoutWerner.meanA)}` : ""}.` },
+    ];
+    const interpretationParts: BriefTextPart[] = [
+      { text: "The negative mean is WERN-sensitive, so operating leverage is mixed." },
+      ...(known.has("EV-WERN-Q2-RECONCILIATION") ? [{ text: " Werner's company-reported adjusted operating margin rose 0.8pp YoY; its release identifies prior-year liability reversals.", evidenceIds: ["EV-WERN-Q2-RECONCILIATION"] }] : [{ text: " Review company-specific adjustments before attributing a mechanism." }]),
+      { text: " Retain all peers and GAAP inputs; review adjusted definitions and segment mix separately." },
+    ];
     observations.push({
       label: "03 · Company conversion",
-      finding: `${peer.period} GAAP margin changes: ${stats.groupA.members.map((r) => `${r.ticker} ${pp(r.value)}`).join(", ")}. Mean ${pp(stats.groupA.mean)}, median ${pp(stats.groupA.median)}${withoutWerner ? `; mean excluding WERN ${pp(withoutWerner.meanA)}` : ""}.`,
-      interpretation: `The negative mean is WERN-sensitive, so operating leverage is mixed.${known.has("EV-WERN-Q2-RECONCILIATION") ? " Werner's adjusted margin rose 0.8pp; its release identifies prior-year liability reversals. Retain all peers and GAAP inputs; review adjusted definitions and segment mix separately." : " Review company-specific adjustments and segment mix before attributing a mechanism."}`,
-      evidenceIds: cite([...peer.evidenceIds, "EV-WERN-Q2-RECONCILIATION"]),
+      finding: findingParts.map((part) => part.text).join(""),
+      interpretation: interpretationParts.map((part) => part.text).join(""),
+      evidenceIds: cite([...findingParts, ...interpretationParts].flatMap((part) => part.evidenceIds ?? [])),
+      findingParts,
+      interpretationParts,
     });
   }
 
