@@ -33,7 +33,7 @@ import type { EquityPoint } from "@/types/backtest";
 import type { HistoricalPriceResult } from "@/types/market";
 import type { RadarCandidate } from "@/types/strategy";
 
-export const revalidate = 60 * 60;
+export const revalidate = 3600;
 
 export const metadata = {
   title: "Quant overview",

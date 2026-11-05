@@ -1,12 +1,15 @@
 import { describe, expect, it } from "vitest";
 import manifest from "@/__fixtures__/research/freight/manifest.json";
 import macro from "@/__fixtures__/research/freight/macro.json";
+import cassLinehaul from "@/__fixtures__/research/freight/cass-linehaul.json";
 import companies from "@/__fixtures__/research/freight/companies.json";
 import prices from "@/__fixtures__/research/freight/prices.json";
 import { FREIGHT_PROJECT } from "@/data/research/projects/freight";
+import { buildValuation } from "./companies";
 import { applyStaleness, validateEvidence } from "./evidence";
 import { buildMemoSections, memoMeta, memoToMarkdown } from "./memo";
 import { getResearchProject } from "./project";
+import type { CompanyFixture, MacroSeriesFixture, PriceFixture } from "./snapshot";
 import type { Evidence } from "./types";
 
 const NOW = new Date("2026-11-01T12:00:00Z");
@@ -14,11 +17,18 @@ const view = getResearchProject("freight", NOW)!;
 
 describe("research snapshot drift guards", () => {
   it("covers every configured KPI series with licensed, dated observations", () => {
-    const series = new Map(macro.series.map((s) => [s.id, s]));
+    const fixtures = [...macro.series, cassLinehaul] as unknown as MacroSeriesFixture[];
+    const series = new Map(fixtures.map((s) => [s.id, s]));
     for (const kpi of FREIGHT_PROJECT.kpis) {
       const s = series.get(kpi.sourceSeriesId!);
       expect(s, kpi.id).toBeDefined();
       expect(s!.excluded).toBeNull();
+      if (s!.provider === "Cass") {
+        expect(s!.observations).toHaveLength(13);
+        expect(s!.url).toMatch(/^https:\/\/www\.cassinfo\.com\//);
+        expect(s!.licenseLabel).toContain("Copyright Cass");
+        continue;
+      }
       expect(s!.observations.length).toBeGreaterThan(24);
       expect(s!.licenseLabel).toMatch(/Public Domain|Copyrighted: Citation Required/i);
       expect(s!.url).toMatch(/^https:\/\/fred\.stlouisfed\.org\/series\//);
@@ -99,11 +109,12 @@ describe("evidence integrity", () => {
 });
 
 describe("hypotheses and value chain", () => {
-  it("derives stances from test outcomes, never both supporting and contradicting from one decided test", () => {
+  it("uses individual evidence relationships and keeps diagnostic/group inputs contextual", () => {
     for (const h of view.hypotheses) {
-      for (const t of h.tests.filter((x) => x.outcome === "supports")) {
-        for (const id of t.evidenceIds) expect(view.evidence.find((e) => e.id === id)?.stance[h.id]).toBe("supports");
+      for (const t of h.tests) {
+        for (const relation of t.evidenceRelations ?? []) expect(view.evidence.find((e) => e.id === relation.evidenceId)?.stance[h.id]).toBe(relation.stance);
       }
+      expect(h.supportingEvidenceIds.filter((id) => h.contradictingEvidenceIds.includes(id))).toEqual([]);
     }
   });
 
@@ -115,11 +126,23 @@ describe("hypotheses and value chain", () => {
     expect(view.valueChain.relationships.some((r) => r.status === "hypothetical")).toBe(true);
   });
 
-  it("uses point-in-time fundamentals for historical multiples", () => {
+  it("does not let future filings change earlier historical multiples", () => {
     for (const c of view.companies) {
-      for (const h of c.valuation?.history ?? []) {
-        const row = c.quarters.find((q) => q.end === h.fundamentalsThrough)!;
-        expect(row.availableFrom <= h.date, `${c.ticker} ${h.date}`).toBe(true);
+      const history = c.valuation!.history;
+      const raw = (companies.companies as unknown as Record<string, CompanyFixture>)[c.ticker].metrics;
+      const price = (prices.prices as unknown as Record<string, PriceFixture>)[c.ticker];
+      // Reconstruct first/middle/last history points from snapshots with every
+      // later raw fact physically removed. Aggregate row dates cannot prove
+      // that all four quarters of each valuation denominator were public.
+      for (const h of [history[0], history[Math.floor(history.length / 2)], history[history.length - 1]]) {
+        const rawThen = Object.fromEntries(Object.entries(raw).map(([key, metric]) => [key, { ...metric, points: metric.points.filter((p) => p.filed <= h.date) }]));
+        const priceThen = { ...price, rows: price.rows.filter((r) => r[0] <= h.date) };
+        const then = buildValuation(rawThen, priceThen)!;
+        expect(h.fundamentalsThrough, `${c.ticker} ${h.date}`).toBe(then.fundamentalsThrough);
+        expect(h.pe).toBe(then.current.pe);
+        expect(h.evToEbitda).toBe(then.current.evToEbitda);
+        expect(h.evToSales).toBe(then.current.evToSales);
+        expect(h.fcfYield).toBe(then.current.fcfYield);
       }
     }
   });
@@ -127,10 +150,10 @@ describe("hypotheses and value chain", () => {
 
 describe("memo", () => {
   const sections = buildMemoSections(view);
-  it("has the 19 institutional sections in order", () => {
-    expect(sections).toHaveLength(19);
+  it("retains the memo structure and adds the peer sensitivity section", () => {
     expect(sections[0].title).toBe("Executive Summary");
-    expect(sections[18].title).toBe("As-of Date and Data Limitations");
+    expect(sections.at(-1)!.title).toBe("As-of Date and Data Limitations");
+    expect(sections.some((s) => s.id === "peer-sensitivity")).toBe(true);
   });
   it("cites only evidence that exists", () => {
     const ids = new Set(view.evidence.map((e) => e.id));
@@ -141,7 +164,7 @@ describe("memo", () => {
   it("is honest about its status without primary research", () => {
     expect(view.memoStatus).not.toBe("evidence-backed");
     const md = memoToMarkdown(memoMeta(view), sections, view.memoStatus, { "variant-view": "Analyst text" });
-    expect(md).toMatch(/Status:\*\* Research draft|Status:\*\* Exploratory/);
+    expect(md).toMatch(/Status:\*\* Public-source research sample/);
     expect(md).toMatch(/Not investment advice/);
     expect(md).toMatch(/Edited by analyst/);
   });

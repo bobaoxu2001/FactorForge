@@ -10,7 +10,7 @@ import MethodologyCallout from "@/components/research/MethodologyCallout";
 import { getResearchDataset } from "@/lib/research";
 import type { PickTier, StockPick } from "@/lib/quant/stockPicks";
 
-export const revalidate = 60 * 60;
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Quant Screen",

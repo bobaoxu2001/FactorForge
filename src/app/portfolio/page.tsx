@@ -11,7 +11,7 @@ import { getResearchDataset } from "@/lib/research";
 import { concentrationLevel } from "@/lib/quant/signalConcentration";
 import { num, pct, pctPlain, signedTone } from "@/lib/utils/format";
 
-export const revalidate = 60 * 60;
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Model Portfolio",

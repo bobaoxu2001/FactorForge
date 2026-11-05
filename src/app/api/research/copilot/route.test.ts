@@ -29,7 +29,7 @@ describe("POST /api/research/copilot", () => {
     const res = await call({ projectId: "freight", task: "question", question: "diesel truckload pricing" });
     const body = await res.json();
     expect(body.source).toBe("deterministic");
-    expect(body.origin).toBe("ai-generated");
+    expect(body.origin).toBe("template-generated");
     expect(body.facts.length).toBeGreaterThan(0);
     const retrieved = new Set(body.retrieved.map((r: { id: string }) => r.id));
     for (const f of body.facts) for (const id of f.evidenceIds) expect(id).toMatch(/^EV-/);
@@ -50,6 +50,18 @@ describe("POST /api/research/copilot", () => {
     expect(body.source).toBe("deepseek");
     expect(body.facts.map((f: { text: string }) => f.text)).toEqual(["Diesel is up sharply year over year."]);
     expect(body.unsupported).toHaveLength(2);
+  });
+
+  it("preserves computed evidence directions even when live AI is configured", async () => {
+    deepseek.configured = true;
+    deepseek.response = { facts: [{ text: "Contradicts H4: Werner margins declined", evidenceIds: ["EV-WERN-OM-2026-06-30"] }] };
+    const body = await (await call({ projectId: "freight", task: "evidence-check", hypothesisId: "H4" })).json();
+    expect(body.source).toBe("deterministic");
+    expect(body.origin).toBe("template-generated");
+    expect(body.facts.some((f: { text: string }) => f.text.includes("Direction consistent with H4") && f.text.includes("Werner"))).toBe(true);
+    expect(body.facts.some((f: { text: string }) => f.text.includes("Contradicts H4: Werner"))).toBe(false);
+    const retrieved = new Set(body.retrieved.map((r: { id: string }) => r.id));
+    for (const row of [...body.facts, ...body.calculations]) for (const id of row.evidenceIds) expect(retrieved.has(id)).toBe(true);
   });
 
   it("never forwards notes with MNPI language to the model", async () => {

@@ -33,7 +33,7 @@ function Block({ title, items, projectId, tone }: { title: string; items: Statem
   );
 }
 
-/** Grounded research copilot UI. Output is always typed as AI-generated work product. */
+/** Generated work product carries its actual AI or template origin. */
 export default function CopilotPanel({ projectId, hypotheses, tickers, stakeholders, llmConfigured }: Props) {
   const { dispatch } = useWorkspace();
   const [task, setTask] = useState<CopilotTask>("research-plan");
@@ -78,7 +78,7 @@ export default function CopilotPanel({ projectId, hypotheses, tickers, stakehold
       ...answer.missing.map((s) => `MISSING: ${s.text}`),
       ...answer.followUps.map((f) => `FOLLOW-UP: ${f}`),
     ].join("\n");
-    const error = dispatch({ type: "draft/save", draft: { id: newId("draft"), projectId, origin: "ai-generated", task, title: COPILOT_TASKS.find((t) => t.id === task)?.label ?? task, body, createdAt: new Date().toISOString() } });
+    const error = dispatch({ type: "draft/save", draft: { id: newId("draft"), projectId, origin: answer.origin, task, title: COPILOT_TASKS.find((t) => t.id === task)?.label ?? task, body, createdAt: new Date().toISOString() } });
     setSaved(!error);
   };
 
@@ -89,7 +89,7 @@ export default function CopilotPanel({ projectId, hypotheses, tickers, stakehold
       <div className="card space-y-3 p-4">
         <div className="flex items-center justify-between">
           <h3 className="text-[14px] font-semibold text-ink">Ask the research copilot</h3>
-          <span className={`chip ${llmConfigured ? "border-emerald-600/35 text-emerald-700" : "border-amber-600/35 text-amber-800"}`}>{llmConfigured ? "LLM + citation guard" : "deterministic mode"}</span>
+          <span className={`chip ${llmConfigured ? "border-emerald-600/35 text-emerald-700" : "border-amber-600/35 text-amber-800"}`}>{llmConfigured ? "Live AI · citation checks" : "Demo · source-linked templates"}</span>
         </div>
         <label className="block text-[11px] text-ink-soft">Workflow
           <select value={task} onChange={(e) => setTask(e.target.value as CopilotTask)} className={`${input} mt-1 w-full`}>
@@ -139,7 +139,7 @@ export default function CopilotPanel({ projectId, hypotheses, tickers, stakehold
         ) : (
           <>
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2"><OriginChip origin="ai-generated" /><span className="text-[11.5px] text-ink-soft">{answer.source === "deepseek" ? "DeepSeek, citation-validated" : "deterministic answer from project evidence"}</span></div>
+              <div className="flex items-center gap-2"><OriginChip origin={answer.origin} /><span className="text-[11.5px] text-ink-muted">{answer.source === "deepseek" ? "DeepSeek · citation IDs checked; claim support requires review" : "Source-linked rules and templates"}</span></div>
               <button onClick={saveDraft} className="text-[12px] text-accent hover:text-ink">{saved ? "Saved to workspace drafts" : "Save as draft"}</button>
             </div>
             {answer.warnings.length > 0 && <div className="space-y-1 rounded-md border border-amber-600/25 bg-amber-300/[0.06] p-2 text-[11.5px] text-amber-800/90">{answer.warnings.map((w) => <div key={w}>• {w}</div>)}</div>}

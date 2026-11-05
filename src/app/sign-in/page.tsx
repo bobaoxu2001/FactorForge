@@ -12,11 +12,12 @@ export const metadata: Metadata = {
     "Sign in to your FactorForge research account. Accounts store saved research preferences and watchlists only.",
 };
 
-export default function SignInPage({
-  searchParams,
+export default async function SignInPage({
+  searchParams: searchParamsPromise,
 }: {
-  searchParams?: { next?: string; area?: string };
+  searchParams?: Promise<{ next?: string; area?: string }>;
 }) {
+  const searchParams = (await searchParamsPromise) ?? {};
   // Without a writable database there are no accounts to sign in to. Protected
   // routes redirect here with an `area`, so the notice also explains why that
   // page is gated in the public demo.

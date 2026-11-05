@@ -151,7 +151,7 @@ export default function PrimaryResearchWorkspace({ projectId, stakeholders }: { 
               </li>
             ))}
           </ul>
-          <div className="text-[11.5px] text-ink-muted">Research confidence from primary sources: <span className="text-ink">{interviews.length === 0 ? "none: no interviews yet" : interviews.length < 3 ? "low: single or few sources" : agreement.some((a) => a.agreement === "disagree") ? "contested: sources disagree on at least one theme" : "moderate: several sources, no disagreement detected"}</span></div>
+          <div className="text-[12px] text-ink-muted">Fieldwork coverage: <span className="text-ink">{interviews.length === 0 ? "proposed; no completed interviews" : agreement.some((a) => a.agreement === "disagree") ? "recorded accounts contain disagreements requiring review" : "records available; corroboration and coverage still require review"}</span></div>
           <div className="flex flex-wrap gap-2 text-[12px]">
             <button onClick={exportJson} className="rounded-lg border border-line px-3 py-1.5 text-ink-muted hover:text-ink">Export workspace (JSON)</button>
             <button onClick={() => fileRef.current?.click()} className="rounded-lg border border-line px-3 py-1.5 text-ink-muted hover:text-ink">Import…</button>
@@ -175,7 +175,7 @@ export default function PrimaryResearchWorkspace({ projectId, stakeholders }: { 
 
       <section className="space-y-2">
         <h3 className="text-[14px] font-semibold text-ink">Your interviews ({interviews.length})</h3>
-        {interviews.length === 0 && <div className="card border-dashed p-5 text-center text-[12.5px] text-ink-soft">No primary research recorded. The memo will stay a draft with incomplete verification until real channel checks are added.</div>}
+        {interviews.length === 0 && <div className="card border-dashed p-5 text-center text-[13px] text-ink-muted">Primary fieldwork proposed; 0 completed interviews. Public-source analysis is available. Add only interviews actually conducted, then review documentation, coverage and corroboration.</div>}
         {analyses.map(({ id, record, analysis }) => {
           const contradictions = contradictionsWithHypotheses(analysis);
           return (

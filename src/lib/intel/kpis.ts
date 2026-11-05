@@ -17,10 +17,10 @@ import type { KpiDefinition, KpiSeriesView, SeriesPoint } from "./types";
 /** FRED-hosted source → display publisher. Comes from the scraped FRED page, not typed by hand. */
 function sourceRefFor(series: MacroSeriesFixture | undefined, kpi: KpiDefinition): KpiSeriesView["source"] {
   return {
-    id: `FRED:${series?.id ?? kpi.id}`,
+    id: `${series?.provider ?? "FRED"}:${series?.id ?? kpi.id}`,
     seriesId: series?.id ?? kpi.id,
     title: series?.title ?? kpi.name,
-    publisher: series ? `${series.source ?? "Source agency"} via FRED (Federal Reserve Bank of St. Louis)` : "Derived in FactorForge",
+    publisher: series?.provider === "Cass" ? "Cass Information Systems (direct public release)" : series ? `${series.source ?? "Source agency"} via FRED (Federal Reserve Bank of St. Louis)` : "Derived in FactorForge",
     url: series?.url,
     sourceType: series?.source?.includes("Cass") ? "industry-dataset" : "government-dataset",
     licence: series?.licenseLabel ?? undefined,

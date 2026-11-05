@@ -12,7 +12,7 @@ import { getResearchDataset } from "@/lib/research";
 import { buildPreviewStressReport, buildStressInsightCards } from "@/lib/quant/marketStress";
 import { pct, pctPlain, num } from "@/lib/utils/format";
 
-export const revalidate = 60 * 60;
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "AI Market Intelligence",
@@ -20,7 +20,8 @@ export const metadata: Metadata = {
     "A market memo generated from deterministic factor payloads — regime, breadth, and drawdown pressure, with a stress research mode.",
 };
 
-export default async function AIMarketPage({ searchParams }: { searchParams?: { demo?: string } }) {
+export default async function AIMarketPage({ searchParams: searchParamsPromise }: { searchParams?: Promise<{ demo?: string }> }) {
+  const searchParams = (await searchParamsPromise) ?? {};
   const dataset = await getResearchDataset();
   const { factors, marketSummary, metadata } = dataset;
   // Clearly-labeled illustrative stress preview. Live by default; ?demo=stress

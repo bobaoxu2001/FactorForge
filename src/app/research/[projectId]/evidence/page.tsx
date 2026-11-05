@@ -7,7 +7,9 @@ import { getResearchProject } from "@/lib/intel/project";
 export const revalidate = 3600;
 export const metadata = { title: "Evidence explorer" };
 
-export default function EvidencePage({ params, searchParams }: { params: { projectId: string }; searchParams: { id?: string } }) {
+export default async function EvidencePage({ params: paramsPromise, searchParams: searchParamsPromise }: { params: Promise<{ projectId: string }>; searchParams: Promise<{ id?: string }> }) {
+  const params = await paramsPromise;
+  const searchParams = (await searchParamsPromise) ?? {};
   const view = getResearchProject(params.projectId);
   if (!view) notFound();
   const memoCitations: Record<string, string[]> = {};
@@ -21,7 +23,7 @@ export default function EvidencePage({ params, searchParams }: { params: { proje
     <div className="space-y-4">
       <Panel eyebrow="Stage 02 · Research evidence" title="Evidence explorer">
         <p className="max-w-4xl text-[12.5px] leading-relaxed text-ink-muted">
-          Every claim the project relies on, traced to its source. Data-derived items come from FRED and SEC XBRL; business descriptions are verbatim 10-K sentences; calculations are labelled partially verified because they depend on method choices.
+          Claims trace to FRED, SEC XBRL, the direct Cass release/workbook and a dated Werner company release. Business descriptions match retrieved 10-K excerpts. “Verified” describes a source match; it does not establish causality or fieldwork validation. Calculations retain their method-dependent limits, and each hypothesis relationship is assessed separately.
           By source type: {Object.entries(byOrigin).map(([k, v]) => `${k} ${v}`).join(" · ")}.
         </p>
         {view.evidenceIssues.length > 0 && <div className="mt-2"><Note tone="danger">Integrity issues: {view.evidenceIssues.join("; ")}</Note></div>}

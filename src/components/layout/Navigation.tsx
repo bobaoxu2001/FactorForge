@@ -47,6 +47,7 @@ const sections: NavSection[] = [
     label: "Research",
     items: [
       { href: "/research/freight", label: "Freight case study", icon: Truck },
+      { href: "/research/freight/sample", label: "One-page research brief", icon: FileText },
       { href: "/research/freight/companies", label: "Company research", icon: LibraryBig },
       { href: "/research/freight/evidence", label: "Evidence explorer", icon: FileSearch },
       { href: "/research/freight/memo", label: "Research memo", icon: FileText },
@@ -103,6 +104,7 @@ export default function Navigation({ persistenceAvailable = true }: { persistenc
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState("");
+  const researchPage = pathname.startsWith("/research/");
 
   // Cached server HTML and the visitor's browser can be on different days.
   // Fill the local date after hydration so the initial render stays consistent.
@@ -112,23 +114,16 @@ export default function Navigation({ persistenceAvailable = true }: { persistenc
 
   return (
     <>
-      <aside className="fixed inset-y-0 left-0 z-50 hidden w-[256px] flex-col border-r border-line bg-paper px-4 py-6 lg:flex">
+      <aside className="app-navigation fixed inset-y-0 left-0 z-50 hidden w-[256px] flex-col border-r border-line bg-paper px-4 py-6 lg:flex">
         <Brand />
         <nav className="mt-7 min-h-0 flex-1 space-y-0.5 overflow-y-auto pr-1">
           {startItems.map((item) => (
             <DesktopNavLink key={item.href} item={item} pathname={pathname} />
           ))}
-          {sections.map((section) => (
-            <div key={section.label} className="pt-5">
-              <div className="px-3 pb-1.5 text-[12px] font-semibold text-ink-soft">
-                {section.label}
-              </div>
-              <div className="space-y-0.5">
-                {section.items.map((item) => (
-                  <DesktopNavLink key={item.href} item={item} pathname={pathname} />
-                ))}
-              </div>
-            </div>
+          {sections.map((section) => section.label === "Research" ? (
+            <div key={section.label} className="pt-5"><div className="px-3 pb-1.5 text-[12px] font-semibold text-ink-soft">{section.label}</div><div className="space-y-0.5">{section.items.map((item) => <DesktopNavLink key={item.href} item={item} pathname={pathname} />)}</div></div>
+          ) : (
+            <details key={section.label} open={!researchPage} className="pt-4"><summary className="cursor-pointer px-3 py-1.5 text-[12px] font-semibold text-ink-soft">{section.label}</summary><div className="mt-1 space-y-0.5">{section.items.map((item) => <DesktopNavLink key={item.href} item={item} pathname={pathname} />)}</div></details>
           ))}
         </nav>
         <div className="mt-4 shrink-0 border-t border-line pt-4">
@@ -142,7 +137,7 @@ export default function Navigation({ persistenceAvailable = true }: { persistenc
         </div>
       </aside>
 
-      <header className="sticky top-0 z-40 border-b border-line bg-paper/95 backdrop-blur lg:ml-[256px]">
+      <header className="app-navigation sticky top-0 z-40 border-b border-line bg-paper/95 backdrop-blur lg:ml-[256px]">
         <div className="flex h-14 items-center justify-between gap-4 px-4 md:px-8">
           <button
             type="button"
@@ -178,21 +173,14 @@ export default function Navigation({ persistenceAvailable = true }: { persistenc
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <nav className="mt-8 space-y-0.5">
+            <nav className="mt-8 max-h-[calc(100dvh-100px)] space-y-0.5 overflow-y-auto">
               {startItems.map((item) => (
                 <MobileNavLink key={item.href} item={item} onNavigate={() => setOpen(false)} />
               ))}
-              {sections.map((section) => (
-                <div key={section.label} className="pt-5">
-                  <div className="px-3 pb-1.5 text-[12px] font-semibold text-ink-soft">
-                    {section.label}
-                  </div>
-                  <div className="space-y-0.5">
-                    {section.items.map((item) => (
-                      <MobileNavLink key={item.href} item={item} onNavigate={() => setOpen(false)} />
-                    ))}
-                  </div>
-                </div>
+              {sections.map((section) => section.label === "Research" ? (
+                <div key={section.label} className="pt-5"><div className="px-3 pb-1.5 text-[12px] font-semibold text-ink-soft">{section.label}</div>{section.items.map((item) => <MobileNavLink key={item.href} item={item} onNavigate={() => setOpen(false)} />)}</div>
+              ) : (
+                <details key={section.label} open={!researchPage} className="pt-4"><summary className="cursor-pointer px-3 py-1.5 text-[12px] font-semibold text-ink-soft">{section.label}</summary>{section.items.map((item) => <MobileNavLink key={item.href} item={item} onNavigate={() => setOpen(false)} />)}</details>
               ))}
             </nav>
           </div>

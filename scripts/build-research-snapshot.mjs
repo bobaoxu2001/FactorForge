@@ -24,7 +24,7 @@
  * Run:
  *   SEC_EDGAR_USER_AGENT="FactorForge research you@example.com" npm run research:refresh
  */
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const PROJECT_ID = "freight";
@@ -34,7 +34,8 @@ const FACT_START = "2018-01-01";
 const FILINGS_START = "2021-01-01";
 
 const SEC_UA = process.env.SEC_EDGAR_USER_AGENT?.trim();
-if (!SEC_UA || !/@/.test(SEC_UA)) {
+const macroOnly = process.argv.includes("--macro-only");
+if (!macroOnly && (!SEC_UA || !/@/.test(SEC_UA))) {
   console.error(
     "[research] SEC_EDGAR_USER_AGENT must be set to a descriptive User-Agent with a contact email " +
       '(e.g. "FactorForge research you@example.com"). SEC rejects anonymous requests.',
@@ -490,6 +491,15 @@ async function main() {
     console.log(`  ${id}: ${s.excluded ? `EXCLUDED (${s.licenseLabel})` : `${s.observations.length} obs → ${s.observations.at(-1)?.[0]}`} · ${s.licenseLabel ?? "licence n/a"}`);
     series.push(s);
     await sleep(250);
+  }
+
+  if (macroOnly) {
+    // Retain the SEC/price component dates; a macro refresh is not a full refresh.
+    const prior = JSON.parse(await readFile(path.join(OUT_DIR, "manifest.json"), "utf8"));
+    await writeFile(path.join(OUT_DIR, "macro.json"), JSON.stringify({ retrievedAt, series }) + "\n");
+    await writeFile(path.join(OUT_DIR, "manifest.json"), JSON.stringify({ ...prior, builtAt: retrievedAt, counts: { ...prior.counts, fredSeries: series.filter((s) => !s.excluded).length, fredExcluded: series.filter((s) => s.excluded).length } }) + "\n");
+    console.log("[research] refreshed macro component only; SEC and price dates retained.");
+    return;
   }
 
   console.log(`[research] SEC EDGAR: ${COMPANIES.length} companies`);

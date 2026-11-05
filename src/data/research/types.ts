@@ -53,6 +53,8 @@ export type HypothesisTest =
       threshold: number;
       /** When the comparison holds, does that support the hypothesis? */
       supportsWhenTrue: boolean;
+      /** A model diagnostic or headline context, not a direct test of the economic claim. */
+      diagnosticOnly?: boolean;
     }
   | {
       kind: "company-group-spread";
@@ -127,6 +129,20 @@ export interface StakeholderCategory {
   cautions: string[];
 }
 
+export interface FieldworkPlan {
+  purpose: string;
+  cohorts: Array<{
+    stakeholderId: string;
+    targetInterviews: number;
+    role: string;
+    recruitment: string;
+    coverage: string;
+    question: string;
+    crossCheck: string;
+  }>;
+  protocol: string[];
+}
+
 export interface MissingDataSource {
   id: string;
   name: string;
@@ -157,6 +173,8 @@ export interface ResearchProjectConfig {
   hypotheses: HypothesisConfig[];
   openQuestions: string[];
   stakeholders: StakeholderCategory[];
+  /** Proposed fieldwork only; these targets are never counted as interviews. */
+  fieldworkPlan?: FieldworkPlan;
   missingData: MissingDataSource[];
   complianceNotes: string[];
 }

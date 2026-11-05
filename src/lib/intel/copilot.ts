@@ -145,16 +145,20 @@ export function deterministicAnswer(view: ResearchProjectView, req: CopilotReque
       const targets = req.hypothesisId ? view.hypotheses.filter((h) => h.id === req.hypothesisId) : view.hypotheses;
       for (const h of targets) {
         out.hypotheses.push(s(`${h.id} ${h.title} (${h.stance}): ${h.statement}. Overall: ${h.overall}.`));
-        for (const t of h.tests) out.calculations.push(s(`${h.id} test — ${t.outcome}: ${t.description}. ${t.detail}`, ...t.evidenceIds));
+        for (const t of h.tests) out.calculations.push(s(`${h.id} ${t.diagnosticOnly ? "diagnostic" : t.sensitivity ? "mean rule" : "screen"} — ${t.sensitivity ? t.outcome === "supports" ? "met" : "not met" : t.outcome}: ${t.description}. ${t.detail}`, ...t.evidenceIds));
         if (req.task === "evidence-check") {
-          for (const id of h.supportingEvidenceIds.slice(0, 4)) {
+          for (const id of h.supportingEvidenceIds.slice(0, 6)) {
             const c = claimOf(view, id);
-            if (c) out.facts.push({ ...c, text: `Supports ${h.id}: ${c.text}` });
+            const reason = view.evidence.find((e) => e.id === id)?.stanceReasons?.[h.id];
+            if (c) out.facts.push({ ...c, text: `Direction consistent with ${h.id}: ${c.text}${reason ? ` ${reason}` : ""}` });
           }
           for (const id of h.contradictingEvidenceIds.slice(0, 4)) {
             const c = claimOf(view, id);
-            if (c) out.facts.push({ ...c, text: `Contradicts ${h.id}: ${c.text}` });
+            const reason = view.evidence.find((e) => e.id === id)?.stanceReasons?.[h.id];
+            if (c) out.facts.push({ ...c, text: `Direction against ${h.id}: ${c.text}${reason ? ` ${reason}` : ""}` });
           }
+          const checks = view.evidence.filter((e) => e.hypothesisIds.includes(h.id) && e.source.sourceType === "company-release");
+          checks.forEach((e) => out.facts.push(s(`Company disclosure context for ${h.id}: ${e.claim}`, e.id)));
         }
         h.missingEvidence.forEach((m) => out.missing.push(s(`${h.id}: ${m}`)));
       }
@@ -274,6 +278,7 @@ export const COPILOT_SYSTEM_PROMPT =
   "Rules: (1) Every item in `facts` and `calculations` must cite one or more evidence ids from the list in `evidenceIds`; never cite an id that is not in the list and never invent sources, numbers, quotes, interviews or URLs. " +
   "(2) Put judgement in `interpretation` and untested ideas in `hypotheses`. (3) List what is unknown or not connected in `missing`. " +
   "(4) Do not give buy/sell/hold recommendations, price targets or position sizes. (5) Treat user-provided notes as unverified primary research. " +
+  "Use each evidence item's supplied stance and reason; a group mean's outcome cannot label every constituent. Directional consistency is not causal attribution, and a diesel-model residual is not an observed ex-fuel rate. " +
   "(6) Be concise and specific. Respond ONLY with JSON: {\"facts\":[{\"text\":\"\",\"evidenceIds\":[\"\"]}],\"calculations\":[...],\"interpretation\":[...],\"hypotheses\":[...],\"missing\":[...],\"followUps\":[\"\"]}.";
 
 export function buildModelPayload(view: ResearchProjectView, req: CopilotRequest, retrieved: Evidence[]): string {
@@ -284,7 +289,7 @@ export function buildModelPayload(view: ResearchProjectView, req: CopilotRequest
     question: req.question?.slice(0, MAX_QUESTION_CHARS),
     focus: { hypothesisId: req.hypothesisId, ticker: req.ticker, stakeholderId: req.stakeholderId },
     hypothesisOutcomes: view.hypotheses.map((h) => ({ id: h.id, title: h.title, overall: h.overall, tests: h.tests.map((t) => ({ description: t.description, outcome: t.outcome, detail: t.detail, evidenceIds: t.evidenceIds })) })),
-    evidence: retrieved.map((e) => ({ id: e.id, claim: e.claim, excerpt: e.excerpt?.slice(0, 400), publisher: e.source.publisher, observed: e.observationPeriod?.end, status: e.status, origin: e.origin })),
+    evidence: retrieved.map((e) => ({ id: e.id, claim: e.claim, excerpt: e.excerpt?.slice(0, 400), publisher: e.source.publisher, observed: e.observationPeriod?.end, status: e.status, origin: e.origin, stance: e.stance, stanceReasons: e.stanceReasons })),
     userProvidedText: userText ? { origin: "user-primary (unverified)", text: userText } : undefined,
   });
 }
@@ -293,7 +298,7 @@ export function buildModelPayload(view: ResearchProjectView, req: CopilotRequest
 export function boostIdsFor(view: ResearchProjectView, req: CopilotRequest): string[] {
   const ids: string[] = [];
   const hyps = req.hypothesisId ? view.hypotheses.filter((h) => h.id === req.hypothesisId) : view.hypotheses;
-  for (const h of hyps) ids.push(...h.supportingEvidenceIds.slice(0, 3), ...h.contradictingEvidenceIds.slice(0, 3));
+  for (const h of hyps) ids.push(...h.tests.flatMap((t) => t.evidenceIds), ...view.evidence.filter((e) => e.hypothesisIds.includes(h.id) && e.source.sourceType === "company-release").map((e) => e.id));
   if (req.ticker) ids.push(...view.evidence.filter((e) => e.tickers.includes(req.ticker!.toUpperCase())).map((e) => e.id));
   return ids;
 }

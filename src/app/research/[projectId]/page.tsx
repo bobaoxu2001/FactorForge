@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import QualityPanel from "@/components/intel/QualityPanel";
+import ResearchBrief from "@/components/intel/ResearchBrief";
 import { Sparkline } from "@/components/intel/charts";
 import { CitedText, EvidenceLinks, fmt, FreshnessDot, Note, OutcomeBadge, Panel, textTone, TriggerBadge } from "@/components/intel/ui";
 import { variantView } from "@/lib/intel/memo";
@@ -9,14 +10,16 @@ import { getResearchProject } from "@/lib/intel/project";
 
 export const revalidate = 3600;
 
-export function generateMetadata({ params }: { params: { projectId: string } }): Metadata {
+export async function generateMetadata({ params: paramsPromise }: { params: Promise<{ projectId: string }> }): Promise<Metadata> {
+  const params = await paramsPromise;
   const view = getResearchProject(params.projectId);
   return { title: view ? view.config.title : "Research project", description: view?.config.subtitle };
 }
 
 const HEADLINE_KPIS = ["truck-tonnage", "cass-shipments", "ppi-truckload", "cass-implied-rate", "diesel", "truck-employment", "inventory-sales", "ip-manufacturing"];
 
-export default function ProjectOverviewPage({ params }: { params: { projectId: string } }) {
+export default async function ProjectOverviewPage({ params: paramsPromise }: { params: Promise<{ projectId: string }> }) {
+  const params = await paramsPromise;
   const view = getResearchProject(params.projectId);
   if (!view) notFound();
   const pid = view.config.id;
@@ -26,6 +29,7 @@ export default function ProjectOverviewPage({ params }: { params: { projectId: s
 
   return (
     <div className="space-y-5">
+      <ResearchBrief view={view} />
       <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
         <Panel eyebrow="Core investment question" title="What we are trying to find out">
           <p className="text-[14px] leading-relaxed text-ink">{view.config.researchQuestion}</p>
@@ -46,8 +50,8 @@ export default function ProjectOverviewPage({ params }: { params: { projectId: s
               ["kpis", "KPI trends", `${view.kpis.length} series; ${view.kpis.filter((k) => k.freshness === "fresh").length} fresh, ${view.kpis.filter((k) => k.latest?.anomaly).length} flagged anomalies`],
               ["companies", "Competitive intel", `${view.companies.length} companies from SEC XBRL (point-in-time)`],
               ["primary", "Primary research", "Channel-check plan ready. No interviews recorded on the server; yours stay in this browser."],
-              ["thesis", "Thesis & decision", `${view.hypotheses.filter((h) => h.overall !== "insufficient-data").length} of ${view.hypotheses.length} hypotheses tested; ${triggered.length} invalidation trigger(s) fired`],
-              ["memo", "Memo", "19-section memo, editable and exportable"],
+              ["thesis", "Thesis & decision", `${view.hypotheses.filter((h) => h.overall !== "insufficient-data").length} of ${view.hypotheses.length} public-data screens evaluated; ${triggered.length} trigger(s) fired. Direct validation incomplete.`],
+              ["memo", "Memo", "Public-source memo with peer sensitivity, editable and exportable"],
             ].map(([slug, label, status]) => (
               <li key={slug}>
                 <Link href={`/research/${pid}/${slug}`} className="flex items-start justify-between gap-3 rounded-lg border border-line bg-ink/[0.02] px-3 py-2 transition-colors hover:border-accent/35">
@@ -69,7 +73,7 @@ export default function ProjectOverviewPage({ params }: { params: { projectId: s
           ))}
         </ul>
         <div className="mt-3">
-          <Note tone="warn">Interpretation generated deterministically from the hypothesis tests below. It is a research draft, not a recommendation, and has no primary-research verification yet.</Note>
+          <Note>Source-linked interpretation from the research screens below. Calculations, economic interpretation and proposed fieldwork have separate evidence limits; primary interviews are not included.</Note>
         </div>
       </Panel>
 

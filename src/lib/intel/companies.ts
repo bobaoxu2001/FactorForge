@@ -205,17 +205,41 @@ function buildRows(metrics: Record<MetricKey, MetricSeries>): QuarterRow[] {
     const ocf = flow("operatingCashFlow");
     const capex = flow("capex");
     const fuel = flow("fuelExpense");
-    const t = (key: FlowKey) => ttm(metrics[key].quarters, end);
+    const netIncome = flow("netIncome");
+    const t = (key: FlowKey) => {
+      const quarters = metrics[key].quarters;
+      const value = ttm(quarters, end);
+      // A TTM value depends on all four filings, not just its final quarter.
+      // Derived quarters already carry the latest date of their YTD inputs.
+      if (value !== null) {
+        const index = quarters.findIndex((q) => q.end === end);
+        used.push(...quarters.slice(index - 3, index + 1));
+      }
+      return value;
+    };
     const ttmRevenue = t("revenue");
     const ttmOI = t("operatingIncome");
     const ttmDA = t("depreciationAmortization");
     const ttmOcf = t("operatingCashFlow");
     const ttmCapex = t("capex");
+    const ttmNetIncome = t("netIncome");
+    const ttmInterest = t("interestExpense");
+    const ttmTax = t("incomeTax");
+    const ttmPretax = t("pretaxIncome");
     const cashQ = instantAsOf(metrics.cash.quarters, end, 10);
     const equityQ = instantAsOf(metrics.equity.quarters, end, 10);
     if (cashQ) used.push(cashQ);
     if (equityQ) used.push(equityQ);
     const sharesQ = valueOf(metrics.dilutedShares, end);
+    if (sharesQ) used.push(sharesQ);
+    const debt = composeDebt(debtInputs, end);
+    for (const component of debt?.components ?? []) {
+      for (const series of Object.values(debtInputs)) {
+        if (series.concept !== component.concept) continue;
+        const q = valueOf(series, component.asOf);
+        if (q) used.push(q);
+      }
+    }
     return {
       end,
       label: quarterLabel(end),
@@ -226,7 +250,7 @@ function buildRows(metrics: Record<MetricKey, MetricSeries>): QuarterRow[] {
       operatingMargin: ratio(oi, rev),
       operatingMarginYoYChange: null,
       operatingRatio: oi !== null && rev ? 1 - oi / rev : null,
-      netIncome: flow("netIncome"),
+      netIncome,
       ebitda: oi !== null && da !== null ? oi + da : null,
       fuelShare: ratio(fuel, rev),
       fuelShareYoYChange: null,
@@ -240,17 +264,17 @@ function buildRows(metrics: Record<MetricKey, MetricSeries>): QuarterRow[] {
       ttmOperatingIncome: ttmOI,
       ttmOperatingMargin: ratio(ttmOI, ttmRevenue),
       ttmEbitda: ttmOI !== null && ttmDA !== null ? ttmOI + ttmDA : null,
-      ttmNetIncome: t("netIncome"),
+      ttmNetIncome,
       ttmFreeCashFlow: sub(ttmOcf, ttmCapex),
       ttmOperatingCashFlow: ttmOcf,
       ttmCapex,
-      ttmInterest: t("interestExpense"),
-      ttmTax: t("incomeTax"),
-      ttmPretax: t("pretaxIncome"),
+      ttmInterest,
+      ttmTax,
+      ttmPretax,
       ttmDA,
       cash: cashQ?.value ?? null,
       equity: equityQ?.value ?? null,
-      debt: composeDebt(debtInputs, end),
+      debt,
       dilutedShares: sharesQ?.value ?? null,
     };
   });
@@ -263,6 +287,17 @@ function buildRows(metrics: Record<MetricKey, MetricSeries>): QuarterRow[] {
     row.ttmRevenueYoY = row.ttmRevenue !== null && p.ttmRevenue ? row.ttmRevenue / p.ttmRevenue - 1 : null;
     row.operatingMarginYoYChange = sub(row.operatingMargin, p.operatingMargin);
     row.fuelShareYoYChange = sub(row.fuelShare, p.fuelShare);
+    const priorInputs = ["revenue", "operatingIncome", "fuelExpense"].flatMap((key) => {
+      const q = valueOf(metrics[key as FlowKey], p.end);
+      return q ? [q] : [];
+    });
+    if (row.ttmRevenueYoY !== null) {
+      const quarters = metrics.revenue.quarters;
+      const index = quarters.findIndex((q) => q.end === p.end);
+      priorInputs.push(...quarters.slice(index - 3, index + 1));
+    }
+    row.availableFrom = priorInputs.reduce((max, q) => q.filed > max ? q.filed : max, row.availableFrom);
+    row.revised ||= priorInputs.some((q) => q.revised);
   }
   return rows;
 }
@@ -330,9 +365,27 @@ function monthEndIndices(rows: PriceFixture["rows"]): number[] {
   return out;
 }
 
-function valuationAt(rowsKnown: QuarterRow[], cover: MetricSeries, prices: PriceFixture, index: number) {
+function metricsKnownAt(raw: CompanyFixture["metrics"], asOf: string): Record<MetricKey, MetricSeries> {
+  return Object.fromEntries([...FLOW_METRICS, ...BALANCE_METRICS].map((key) => {
+    const metric = raw[key];
+    // Filter BEFORE quarterisation: a later direct 3-month tag must not
+    // displace the YTD-derived value that was available at the historical date.
+    return [key, toMetricSeries(key, metric ? { ...metric, points: metric.points.filter((p) => p.filed <= asOf) } : undefined)];
+  })) as Record<MetricKey, MetricSeries>;
+}
+
+function valuationAt(rawMetrics: CompanyFixture["metrics"], prices: PriceFixture, index: number) {
   const [date, , , , close] = prices.rows[index];
-  const row = [...rowsKnown].reverse().find((r) => r.availableFrom <= date && r.ttmRevenue !== null);
+  const metrics = metricsKnownAt(rawMetrics, date);
+  const rowsKnown = buildRows(metrics);
+  // Every input in these rows is known by `date`. A missing earnings/cash-flow
+  // input leaves only its dependent multiple unavailable, rather than hiding
+  // the entire quarter behind one aggregate release date.
+  const row = [...rowsKnown].reverse().find((r) => r.ttmRevenue !== null);
+  const hasCoverShares = metrics.sharesOutstandingCover.quarters.length > 0;
+  const cover = hasCoverShares
+    ? metrics.sharesOutstandingCover
+    : { ...metrics.dilutedShares, quarters: metrics.dilutedShares.quarters.filter((q) => q.derivation === "reported-3m") };
   const sharesQ = sharesKnownAt(cover, date);
   if (!row || !sharesQ) return null;
   const shares = sharesOnDate(sharesQ.value, sharesQ.end, date, prices.splits);
@@ -347,19 +400,17 @@ function valuationAt(rowsKnown: QuarterRow[], cover: MetricSeries, prices: Price
     ttmFcf: row.ttmFreeCashFlow,
     equity: row.equity,
   });
-  return { date, close, raw, shares, sharesAsOf: sharesQ.end, row, multiples };
+  return { date, close, raw, shares, sharesAsOf: sharesQ.end, sharesSource: hasCoverShares ? "cover-page" as const : "weighted-diluted" as const, row, multiples };
 }
 
 export function buildValuation(
-  rows: QuarterRow[],
-  cover: MetricSeries,
+  raw: CompanyFixture["metrics"],
   prices: PriceFixture,
-  sharesSource: ValuationView["sharesSource"] = "cover-page",
 ): ValuationView | null {
-  if (prices.rows.length === 0 || cover.quarters.length === 0) return null;
+  if (prices.rows.length === 0) return null;
   const history: ValuationPoint[] = [];
   for (const index of monthEndIndices(prices.rows)) {
-    const v = valuationAt(rows, cover, prices, index);
+    const v = valuationAt(raw, prices, index);
     if (!v) continue;
     history.push({
       date: v.date,
@@ -370,7 +421,7 @@ export function buildValuation(
       fcfYield: v.multiples.fcfYield,
     });
   }
-  const current = valuationAt(rows, cover, prices, prices.rows.length - 1);
+  const current = valuationAt(raw, prices, prices.rows.length - 1);
   if (!current) return null;
   const pick = (k: keyof Omit<ValuationPoint, "date" | "fundamentalsThrough">) => history.map((h) => h[k]);
   const pct = (k: "pe" | "evToEbitda" | "evToSales", v: number | null) => (v === null ? null : percentileOf(pick(k), v));
@@ -380,7 +431,7 @@ export function buildValuation(
     rawPrice: current.raw,
     shares: current.shares,
     sharesAsOf: current.sharesAsOf,
-    sharesSource,
+    sharesSource: current.sharesSource,
     fundamentalsThrough: current.row.end,
     current: current.multiples,
     history,
@@ -458,19 +509,14 @@ export function buildCompanyView(
   sector: PriceFixture | undefined,
   asOf: string,
 ): CompanyView {
-  const metrics = Object.fromEntries(
-    [...FLOW_METRICS, ...BALANCE_METRICS].map((key) => [key, toMetricSeries(key, fixture.metrics[key])]),
-  ) as Record<MetricKey, MetricSeries>;
+  const metrics = metricsKnownAt(fixture.metrics, asOf);
   const rows = buildRows(metrics);
   const latest = rows.at(-1) ?? null;
   const latestTtm = [...rows].reverse().find((r) => r.ttmRevenue !== null) ?? null;
   // Dual-class filers may not tag a single cover-page share count; fall back to
   // weighted diluted shares (as instants at each quarter end) and say so.
   const coverShares = metrics.sharesOutstandingCover.quarters.length > 0;
-  const sharesSeries: MetricSeries = coverShares
-    ? metrics.sharesOutstandingCover
-    : { ...metrics.dilutedShares, quarters: metrics.dilutedShares.quarters.filter((q) => q.derivation === "reported-3m") };
-  const valuation = prices ? buildValuation(rows, sharesSeries, prices, coverShares ? "cover-page" : "weighted-diluted") : null;
+  const valuation = prices ? buildValuation(fixture.metrics, prices) : null;
 
   const dataGaps: string[] = [];
   for (const key of ["fuelExpense", "interestExpense", "capex", "depreciationAmortization", "pretaxIncome"] as const) {

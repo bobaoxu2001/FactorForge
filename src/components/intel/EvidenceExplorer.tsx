@@ -154,7 +154,7 @@ export default function EvidenceExplorer({ projectId, evidence, hypotheses, memo
               {Object.entries(selected.stance).length === 0
                 ? "Not used by a hypothesis test"
                 : Object.entries(selected.stance).map(([h, s]) => (
-                    <span key={h} className={`mr-2 ${s === "supports" ? "text-emerald-700" : s === "contradicts" ? "text-rose-700" : "text-ink-muted"}`}>{h}: {s}</span>
+                    <div key={h} className="mb-2"><span className={s === "supports" ? "text-emerald-700" : s === "contradicts" ? "text-rose-700" : "text-ink-muted"}>{h}: {s === "supports" ? "direction consistent" : s === "contradicts" ? "direction against" : "context"}</span>{selected.stanceReasons?.[h] && <p className="mt-0.5 text-[12px] leading-relaxed text-ink-muted">{selected.stanceReasons[h]}</p>}</div>
                   ))}
             </dd>
             <dt className="text-ink-soft">Related</dt>

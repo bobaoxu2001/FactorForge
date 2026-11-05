@@ -8,6 +8,7 @@ import type { SplitEvent } from "./valuation";
  */
 
 export interface MacroSeriesFixture {
+  provider?: "FRED" | "Cass";
   id: string;
   url: string;
   csvUrl: string;
@@ -80,6 +81,7 @@ export interface PriceFixture {
 }
 
 export interface ResearchSnapshot {
+  revision?: { id: string; date: string; informationCutoff: string };
   manifest: {
     projectId: string;
     builtAt: string;

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import DcfCalculator from "@/components/intel/DcfCalculator";
 import ScenarioPanel from "@/components/intel/ScenarioPanel";
+import { CompanyResearchBrief } from "@/components/intel/ResearchBrief";
 import { TimeSeriesChart } from "@/components/intel/charts";
 import { EvidenceLinks, fmt, KeyValues, Note, Panel, Stat, textTone, toneOf } from "@/components/intel/ui";
 import { ordinal, scenarioBase, scenarioResults } from "@/lib/intel/companies";
@@ -19,13 +20,15 @@ export function generateStaticParams() {
   return listProjectIds().flatMap((projectId) => PROJECT_CONFIGS[projectId].companies.map((c) => ({ projectId, ticker: c.ticker })));
 }
 
-export function generateMetadata({ params }: { params: { projectId: string; ticker: string } }): Metadata {
+export async function generateMetadata({ params: paramsPromise }: { params: Promise<{ projectId: string; ticker: string }> }): Promise<Metadata> {
+  const params = await paramsPromise;
   return { title: `${params.ticker.toUpperCase()} company research` };
 }
 
 const DERIVATION_MARK: Record<string, string> = { "ytd-difference": "†", "fy-minus-9m": "‡" };
 
-export default function CompanyPage({ params }: { params: { projectId: string; ticker: string } }) {
+export default async function CompanyPage({ params: paramsPromise }: { params: Promise<{ projectId: string; ticker: string }> }) {
+  const params = await paramsPromise;
   const view = getResearchProject(params.projectId);
   if (!view) notFound();
   const c = getCompany(view, params.ticker);
@@ -91,7 +94,11 @@ export default function CompanyPage({ params }: { params: { projectId: string; t
         )}
       </Panel>
 
-      <Panel eyebrow="Company overview" title="What the latest 10-K says (verbatim)">
+      <CompanyResearchBrief company={c} view={view} />
+
+      <Panel eyebrow="Company overview" title="Business context from the latest 10-K">
+        <details>
+          <summary className="cursor-pointer text-[13px] font-medium text-accent">Read {Math.min(topics.length, 10)} source excerpts · filed {c.annualReport?.filed}</summary>
         <div className="grid gap-2 md:grid-cols-2">
           {topics.slice(0, 10).map((topic) => {
             const e = c.excerpts.find((x) => x.topic === topic)!;
@@ -103,6 +110,7 @@ export default function CompanyPage({ params }: { params: { projectId: string; t
             );
           })}
         </div>
+        </details>
         <p className="mt-2 text-[11px] text-ink-soft">Short excerpts from {c.annualReport?.form} filed {c.annualReport?.filed}, selected by keyword to orient the reader. Read the full filing for context.</p>
       </Panel>
 
@@ -215,6 +223,7 @@ export default function CompanyPage({ params }: { params: { projectId: string; t
 
       {dcfDefaults && valuation && (
         <Panel eyebrow="Intrinsic value framing" title="DCF (free cash flow to the firm)">
+          <p className="mb-4 max-w-[100ch] text-[12.5px] leading-relaxed text-ink-muted">Use the gap between models to examine assumptions. The scenarios above apply a historical multiple to next-year EBITDA; this simplified DCF discounts after-tax EBIT less net reinvestment over an explicit forecast and terminal period. Working-capital changes are excluded. Margin, reinvestment and WACC assumptions can therefore produce very different values; neither output is a validated price target.</p>
           <DcfCalculator defaults={dcfDefaults} price={valuation.rawPrice} />
         </Panel>
       )}
@@ -263,13 +272,13 @@ export default function CompanyPage({ params }: { params: { projectId: string; t
           </div>
           <div className="mt-3 overflow-x-auto">
             <table className="w-full min-w-[700px] text-right text-[12px]">
-              <thead className="text-[10px] text-ink-soft"><tr><th className="py-2 text-left">Strategy (backtest)</th><th>Return</th><th>vs SPY B&amp;H</th><th>Sharpe</th><th>Max DD</th><th>Trades</th><th>Win rate</th><th>Now</th></tr></thead>
+              <thead className="text-[10px] text-ink-soft"><tr><th scope="col" className="py-2 text-left">Strategy (backtest)</th><th scope="col">Return</th><th scope="col">Excess vs SPY (pp)</th><th scope="col">Sharpe</th><th scope="col">Max DD</th><th scope="col">Trades</th><th scope="col">Win rate</th><th scope="col">Now</th></tr></thead>
               <tbody className="divide-soft text-ink-muted">
                 {lens.runs.map((r) => (
                   <tr key={r.id} className="table-row">
                     <td className="py-1.5 text-left text-ink">{r.name}<span className="ml-1 text-[10.5px] text-ink-soft">{r.type}</span></td>
                     <td className={textTone(r.totalReturn)}>{fmt.pct(r.totalReturn)}</td>
-                    <td className="text-ink-muted">{fmt.pct(r.benchmarkReturn)}</td>
+                    <td className={textTone(r.excessReturn)}>{fmt.pp(r.excessReturn)}</td>
                     <td>{r.sharpe.toFixed(2)}</td>
                     <td>{fmt.pctPlain(r.maxDrawdown, 0)}</td>
                     <td>{r.tradeCount}</td>
@@ -280,6 +289,7 @@ export default function CompanyPage({ params }: { params: { projectId: string; t
               </tbody>
             </table>
           </div>
+          <p className="mt-2 text-[12px] leading-relaxed text-ink-soft">Backtest window: {lens.period.start} → {lens.period.end}. Each row&apos;s excess return is its cumulative strategy return minus the SPY buy-and-hold return over that run&apos;s aligned dates; it is not annualised alpha.</p>
           <div className="mt-3 grid gap-2 sm:grid-cols-3">
             <Stat label="Best backtest Sharpe" value={lens.best ? lens.best.sharpe.toFixed(2) : "—"} hint={lens.best?.name} />
             <Stat label={`Luck-only max of ${lens.runs.length}`} value={lens.nullExpectedMaxSharpe.toFixed(2)} hint="expected max Sharpe under no skill" />

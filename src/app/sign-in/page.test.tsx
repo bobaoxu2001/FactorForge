@@ -22,25 +22,25 @@ const setAvailable = (value: boolean) =>
 afterEach(() => cleanup());
 beforeEach(() => vi.clearAllMocks());
 
-describe("SignInPage", () => {
-  it("shows the demo-mode notice when persistence is unavailable", () => {
+describe("SignInPage", async () => {
+  it("shows the demo-mode notice when persistence is unavailable", async () => {
     setAvailable(false);
-    const { container } = render(SignInPage({ searchParams: {} }));
+    const { container } = render(await SignInPage({ searchParams: Promise.resolve({}) }));
     expect(screen.getByText(/Sign-in is disabled in the public demo/i)).toBeInTheDocument();
     expect(container.querySelector('input[name="password"]')).toBeNull();
     expect(screen.queryByText(/Persistence layer unavailable/i)).toBeNull();
   });
 
-  it("passes protected-route context through from a redirected protected page", () => {
+  it("passes protected-route context through from a redirected protected page", async () => {
     setAvailable(false);
-    render(SignInPage({ searchParams: { next: "/my-watchlist", area: "watchlist" } }));
+    render(await SignInPage({ searchParams: Promise.resolve({ next: "/my-watchlist", area: "watchlist" }) }));
     expect(screen.getByText(/requires saved-preference storage \(personal watchlists\)/i)).toBeInTheDocument();
     expect(screen.getByText(/read-only for safety/i)).toBeInTheDocument();
   });
 
-  it("renders the sign-in form when persistence is available", () => {
+  it("renders the sign-in form when persistence is available", async () => {
     setAvailable(true);
-    const { container } = render(SignInPage({ searchParams: {} }));
+    const { container } = render(await SignInPage({ searchParams: Promise.resolve({}) }));
     expect(container.querySelector('input[name="username"]')).not.toBeNull();
     expect(screen.queryByText(/Sign-in is disabled in the public demo/i)).toBeNull();
   });

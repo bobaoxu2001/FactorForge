@@ -91,7 +91,9 @@ export async function POST(request: Request) {
 
   // Notes containing possible MNPI, or text without explicit opt-in, never reach the model.
   const textTask = req.task === "notes-analysis" || req.task === "kpi-extract";
-  const useModel = isDeepseekConfigured() && retrieved.length > 0 && !(textTask && screen.blockAi) && req.task !== "interview-guide";
+  // Reproducible screen directions and arithmetic come from the research engine.
+  const templateTask = req.task === "interview-guide" || req.task === "evidence-check" || req.task === "hypotheses";
+  const useModel = isDeepseekConfigured() && retrieved.length > 0 && !(textTask && screen.blockAi) && !templateTask;
   if (useModel) {
     const raw = await callDeepseekJson<unknown>({
       messages: [
@@ -114,6 +116,7 @@ export async function POST(request: Request) {
   const response: CopilotResponse = {
     ...base,
     source: "deterministic",
+    origin: "template-generated",
     facts: deterministic.facts,
     calculations: deterministic.calculations,
     interpretation: deterministic.interpretation,
@@ -121,6 +124,7 @@ export async function POST(request: Request) {
     missing: deterministic.missing,
     followUps: deterministic.followUps,
     unsupported: [],
+    retrieved: [...new Map([...retrieved, ...view.evidence.filter((e) => [...deterministic.facts, ...deterministic.calculations].some((s) => s.evidenceIds.includes(e.id)))].map((e) => [e.id, { id: e.id, claim: e.claim, publisher: e.source.publisher, status: e.status, origin: e.origin }])).values()],
   };
   return NextResponse.json(response);
 }

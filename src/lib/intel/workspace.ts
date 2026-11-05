@@ -36,7 +36,7 @@ export interface InterviewRecord {
 export interface SavedDraft {
   id: string;
   projectId: string;
-  origin: "ai-generated";
+  origin: "ai-generated" | "template-generated";
   task: string;
   title: string;
   body: string;
@@ -110,7 +110,7 @@ export function workspaceReducer(state: WorkspaceState, action: WorkspaceAction)
     case "interview/delete":
       return { ...state, interviews: state.interviews.filter((r) => r.id !== action.id) };
     case "draft/save":
-      if (action.draft.origin !== "ai-generated") throw new WorkspaceValidationError("Saved drafts are AI-generated work product.");
+      if (action.draft.origin !== "ai-generated" && action.draft.origin !== "template-generated") throw new WorkspaceValidationError("Saved drafts are AI or template-generated work product.");
       return { ...state, drafts: [action.draft, ...state.drafts.filter((d) => d.id !== action.draft.id)].slice(0, 50) };
     case "draft/delete":
       return { ...state, drafts: state.drafts.filter((d) => d.id !== action.id) };
@@ -162,7 +162,7 @@ export function migrateWorkspace(input: unknown): WorkspaceState {
         }
       })
     : [];
-  const drafts = Array.isArray(raw.drafts) ? raw.drafts.filter((d) => d && d.origin === "ai-generated" && typeof d.body === "string") : [];
+  const drafts = Array.isArray(raw.drafts) ? raw.drafts.filter((d) => d && (d.origin === "ai-generated" || d.origin === "template-generated") && typeof d.body === "string") : [];
   const obj = <T>(value: unknown): Record<string, T> => (value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, T>) : {});
   return {
     version: WORKSPACE_VERSION,

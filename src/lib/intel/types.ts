@@ -13,6 +13,7 @@
 export type SourceType =
   | "sec-xbrl"
   | "sec-filing"
+  | "company-release"
   | "government-dataset"
   | "industry-dataset"
   | "market-data"
@@ -22,7 +23,7 @@ export type SourceType =
   | "analyst-hypothesis";
 
 /** What kind of thing an evidence item is. Drives what it may be used for. */
-export type EvidenceOrigin = "public-secondary" | "user-primary" | "ai-generated" | "hypothesis";
+export type EvidenceOrigin = "public-secondary" | "user-primary" | "ai-generated" | "template-generated" | "hypothesis";
 
 export type VerificationStatus = "verified" | "partially-verified" | "unverified" | "contradicted" | "stale";
 
@@ -66,6 +67,7 @@ export interface Evidence {
   tickers: string[];
   hypothesisIds: string[];
   stance: Record<string, Stance>;
+  stanceReasons?: Record<string, string>;
 }
 
 // ── Time series & KPIs ──────────────────────────────────────────────────────
@@ -211,6 +213,20 @@ export interface KpiTestResult {
   outcome: TestOutcome;
   detail: string;
   evidenceIds: string[];
+  /** Common reporting quarter for a financial peer comparison. */
+  period?: string;
+  diagnosticOnly?: boolean;
+  /** A descriptive screen can fail while the broader hypothesis remains mixed. */
+  interpretationOutcome?: TestOutcome;
+  evidenceRelations?: Array<{ evidenceId: string; stance: Stance; reason: string }>;
+  sensitivity?: {
+    groupA: { members: Array<{ ticker: string; value: number }>; mean: number; median: number };
+    groupB: { members: Array<{ ticker: string; value: number }>; mean: number; median: number };
+    spread: number;
+    threshold: number;
+    leaveOneOut: Array<{ omitted: string; group: "A" | "B"; meanA: number; meanB: number; spread: number; passes: boolean }>;
+    unstable: boolean;
+  };
 }
 
 export type TriggerState = "holding" | "triggered" | "insufficient-data";
@@ -270,7 +286,7 @@ export interface QualityCheck {
   detail: string;
 }
 
-export type MemoStatus = "exploratory" | "draft-incomplete-verification" | "evidence-backed";
+export type MemoStatus = "exploratory" | "public-source" | "draft-incomplete-verification" | "evidence-backed";
 
 export interface MemoSection {
   id: string;

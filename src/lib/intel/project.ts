@@ -1,6 +1,9 @@
 import "server-only";
 import manifest from "@/__fixtures__/research/freight/manifest.json";
 import macro from "@/__fixtures__/research/freight/macro.json";
+import cassLinehaul from "@/__fixtures__/research/freight/cass-linehaul.json";
+import revision from "@/data/research/revision.json";
+import sourceChecks from "@/data/research/source-checks.json";
 import companiesFixture from "@/__fixtures__/research/freight/companies.json";
 import pricesFixture from "@/__fixtures__/research/freight/prices.json";
 import { RESEARCH_PROJECTS } from "@/data/research/projects";
@@ -16,8 +19,8 @@ import type { Evidence, HypothesisView, KpiSeriesView, MemoStatus, QualityCheck,
 
 /**
  * Server-side assembly of a research project from its config + committed
- * snapshot. Pure apart from reading the bundled fixtures; memoised per day
- * because freshness depends on the calendar.
+ * snapshot. Published editions pin their cutoff and freshness date; explicit
+ * dates remain available for analysis tests.
  */
 
 export interface Catalyst {
@@ -34,6 +37,8 @@ export interface Catalyst {
 export interface ResearchProjectView {
   config: ResearchProjectConfig;
   asOf: string;
+  revision?: { id: string; date: string; informationCutoff: string };
+  componentDates?: { macro: string; companies: string; prices: string; directSources: string };
   snapshot: { builtAt: string; ageDays: number; builder: string };
   kpis: KpiSeriesView[];
   residuals: FuelResidualAnalysis[];
@@ -52,8 +57,9 @@ export interface ResearchProjectView {
 
 const SNAPSHOTS: Record<string, ResearchSnapshot> = {
   freight: {
+    revision,
     manifest,
-    macro: macro as ResearchSnapshot["macro"],
+    macro: { ...macro, series: [...macro.series, cassLinehaul] } as ResearchSnapshot["macro"],
     companies: companiesFixture as unknown as ResearchSnapshot["companies"],
     prices: pricesFixture as unknown as ResearchSnapshot["prices"],
   },
@@ -76,6 +82,13 @@ function parseReleaseDate(text: string | null): string | null {
 }
 
 export function buildProjectView(config: ResearchProjectConfig, snapshot: ResearchSnapshot, now: Date): ResearchProjectView {
+  if (snapshot.revision) {
+    const cutoff = Date.parse(snapshot.revision.informationCutoff);
+    const retrievals = [snapshot.manifest.builtAt, snapshot.macro.retrievedAt, snapshot.companies.retrievedAt, snapshot.prices.retrievedAt, ...snapshot.macro.series.map((s) => s.retrievedAt)];
+    if (!Number.isFinite(cutoff) || retrievals.some((date) => !Number.isFinite(Date.parse(date)) || Date.parse(date) > cutoff)) {
+      throw new Error("Research sources are newer than the fixed edition cutoff. Publish a new research edition and regenerate its PDF.");
+    }
+  }
   const asOf = now.toISOString().slice(0, 10);
   const kpis = buildKpiViews(config, snapshot.macro.series, now);
   const kpiById = new Map(kpis.map((k) => [k.kpi.id, k]));
@@ -112,7 +125,8 @@ export function buildProjectView(config: ResearchProjectConfig, snapshot: Resear
     evidenceIds: new Set(rawEvidence.map((e) => e.id)),
   };
   const hypotheses = evaluateHypotheses(config.hypotheses, ctx);
-  const evidence = applyStances(rawEvidence, hypotheses);
+  const checkedEvidence = (sourceChecks as Evidence[]).filter((item) => item.projectId === config.id && item.retrievedAt <= now.toISOString());
+  const evidence = applyStances([...rawEvidence, ...checkedEvidence], hypotheses);
 
   const claimEvidence = (ids: string[]) => ids.map((id) => resolvedClaims.get(id)).filter((r) => r?.found).map((r) => r!.evidenceId);
   const relationships: Relationship[] = config.valueChain.relationships.map((r) => {
@@ -148,6 +162,8 @@ export function buildProjectView(config: ResearchProjectConfig, snapshot: Resear
   return {
     config,
     asOf,
+    revision: snapshot.revision,
+    componentDates: { macro: snapshot.macro.retrievedAt, companies: snapshot.companies.retrievedAt, prices: snapshot.prices.retrievedAt, directSources: cassLinehaul.retrievedAt },
     snapshot: { builtAt, ageDays: Math.max(0, Math.floor((now.getTime() - Date.parse(builtAt)) / 86_400_000)), builder: snapshot.manifest.builder },
     kpis,
     residuals,
@@ -167,14 +183,16 @@ export function buildProjectView(config: ResearchProjectConfig, snapshot: Resear
 
 const cache = new Map<string, ResearchProjectView>();
 
-export function getResearchProject(projectId: string, now: Date = new Date()): ResearchProjectView | null {
+export function getResearchProject(projectId: string, now?: Date): ResearchProjectView | null {
   const config = PROJECT_CONFIGS[projectId];
   const snapshot = SNAPSHOTS[projectId];
   if (!config || !snapshot) return null;
-  const key = `${projectId}::${now.toISOString().slice(0, 10)}`;
+  // A published work sample is a fixed research edition, not a visitor-clock date.
+  const effectiveNow = now ?? new Date(snapshot.revision?.informationCutoff ?? snapshot.manifest.builtAt);
+  const key = `${projectId}::${effectiveNow.toISOString()}`;
   const hit = cache.get(key);
   if (hit) return hit;
-  const view = buildProjectView(config, snapshot, now);
+  const view = buildProjectView(config, snapshot, effectiveNow);
   cache.clear();
   cache.set(key, view);
   return view;

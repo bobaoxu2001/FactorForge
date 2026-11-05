@@ -7,14 +7,15 @@ import { getResearchProject } from "@/lib/intel/project";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Research copilot" };
 
-export default function CopilotPage({ params }: { params: { projectId: string } }) {
+export default async function CopilotPage({ params: paramsPromise }: { params: Promise<{ projectId: string }> }) {
+  const params = await paramsPromise;
   const view = getResearchProject(params.projectId);
   if (!view) notFound();
   return (
     <div className="space-y-4">
-      <Panel eyebrow="AI research copilot" title="A disciplined analyst, not a stock picker">
+      <Panel eyebrow="AI research copilot" title="Research assistance grounded in this case study">
         <p className="max-w-4xl text-[12.5px] leading-relaxed text-ink-muted">
-          The copilot retrieves this project&apos;s evidence and answers only from it. With <code className="text-accent">DEEPSEEK_API_KEY</code> set, a model writes the answer and a validator strips any fact that does not cite retrieved evidence. Without a key, deterministic handlers answer from the same evidence. Either way the output is AI-generated work product and never becomes evidence.
+          {isDeepseekConfigured() ? "Live AI is available for supported workflows, with retrieved evidence and citation checks. A citation check confirms the reference exists; an analyst still needs to check that it supports the statement." : "This public demo uses source-linked templates and rules to demonstrate the research workflow. Live model generation is not enabled. You can explore the same evidence, compare views and generate an interview guide."} Outputs are labelled as work product and remain separate from source evidence. No measured time-saving or accuracy improvement is claimed.
         </p>
       </Panel>
       <CopilotPanel

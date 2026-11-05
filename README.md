@@ -7,7 +7,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Vitest](https://img.shields.io/badge/tests-passing-22c55e?logo=vitest&logoColor=white)](#testing)
 
-**Live demo:** [factor-forge-ashy.vercel.app](https://factor-forge-ashy.vercel.app/) (currently deployed from `main`, which predates the research platform described here; see [Deployment](#deployment)).
+**Live demo:** [Freight research case study](https://factor-forge-ashy.vercel.app/research/freight). Start with the [one-page research brief](https://factor-forge-ashy.vercel.app/research/freight/sample). Share the stable production domain; immutable deployment URLs can require Vercel authentication.
 
 > Independent research software for educational and research use. **Not investment advice.** FactorForge is not affiliated with, or endorsed by, any company, data provider or research firm it cites. It places no trades and has no order-execution path. Backtests are in-sample research tools, not performance records.
 
@@ -25,7 +25,7 @@ Select industry → understand the value chain → explore companies → inspect
 Design rules enforced in code and tests:
 
 - **Every number traces to a dated, attributable source**: SEC EDGAR XBRL facts with accession numbers, FRED series with their licence and release dates, Yahoo prices.
-- **Every claim states what kind of thing it is**: public evidence, *your* primary research, AI-generated work product, or hypothesis. AI output can never be marked verified.
+- **Every claim states what kind of thing it is**: public evidence, *your* primary research, AI-generated work product, source-linked template output, or hypothesis. Generated work product can never be marked verified.
 - **No invented precision**: no composite AI scores. Quality checks are pass/warn/fail with reasons. Scenario probabilities stay blank until an analyst writes a justification.
 - **Point-in-time integrity**: historical valuation uses only fundamentals filed by each date; restatements are surfaced, not silently applied.
 
@@ -38,22 +38,25 @@ See [`docs/PROJECT_AUDIT.md`](docs/PROJECT_AUDIT.md) for the audit that motivate
 | Stage | Route | What it does |
 |---|---|---|
 | Overview | `/research/freight` | Research question, workflow status, computed variant view, hypothesis scorecard, KPI monitor, catalysts, quality checks |
+| Writing sample | `/sample` | Short public-data research note with observed evidence, rival explanations, next checks and original-source links; downloadable one-page PDF |
 | Industry map | `/industry` | Interactive value-chain graph. 12 of 14 relationships are **verified** against verbatim 10-K sentences; the others are marked inferred or hypothetical |
-| Evidence | `/evidence` | Evidence Explorer: filter ~95 items by origin, status and hypothesis; trace any claim to its SEC filing or FRED series; see where the memo cites it |
-| KPIs | `/kpis` | 13 freight KPIs (BTS/ATA tonnage, Cass, BLS PPIs, EIA diesel, BLS payrolls, Fed IP, Census) with full metadata, freshness vs release cadence, ≥2σ anomaly flags, an out-of-sample **fuel-adjusted pricing residual**, and a lead-lag explorer with split-half stability and a holdout test |
-| Competitive intel | `/companies` | KNX, JBHT, CHRW (+ ODFL, SNDR, WERN, LSTR): growth, margins, FCF, leverage, ROIC, point-in-time valuation percentiles. No composite score |
+| Evidence | `/evidence` | Filter dated observations by origin, status and hypothesis, including the actual quarters used in peer tests; trace claims to SEC filings or FRED series and see memo citations |
+| KPIs | `/kpis` | 14 freight KPIs, including direct Cass ex-fuel linehaul rates, with metadata, freshness, anomaly flags, a historical diesel-regression diagnostic and lead-lag analysis. The Cass extract contains 13 observed months and is not fitted to a long-history regression |
+| Competitive intel | `/companies` | Default common-quarter operating comparison; switch to latest-filed context, valuation or risk. Figures link to the selected quarter's evidence; no composite score |
 | Company research | `/companies/[ticker]` | Quarterly table with derivation markers, TTM cash flow, debt by XBRL component, 5-year PIT multiples, bull/base/bear scenarios, sensitivity grid, interactive DCF, filings & estimated earnings dates, market/sector attribution, and the quant lens with a multiple-testing haircut |
-| Primary research | `/primary` | Channel-check plan (stakeholders × hypotheses), interview guides, compliance safeguards, and a private workspace for **your** interview notes with MNPI/PII screening, theme and indicator extraction, contradiction detection and cross-source comparison |
+| Primary research | `/primary` | Proposed nine-call sourcing and coverage plan, neutral interview guides, cross-checks, and a private workspace for **your** actual interview notes. Planned calls never count as completed interviews |
 | Thesis & decision | `/thesis` | Hypothesis tests, invalidation triggers (monitored), scenario ranges, correlation/liquidity context, and a look-ahead-free outcome review (market vs sector vs residual) |
-| Memo | `/memo` | 19-section institutional memo with live citations, status (*exploratory / draft–incomplete verification / evidence-backed*), editable sections, Markdown export |
+| Memo | `/memo` | Source-linked research memo with a dedicated peer sensitivity section, public-source/fieldwork status, editable sections and Markdown export |
 | Copilot | `/copilot` | Grounded research copilot (14 workflows) with a citation validator |
 
-**What the committed snapshot (built 2026-11-01) shows.** These are computed findings, not opinions. They change when the snapshot is refreshed.
-- Headline truckload pricing is up strongly year over year (BLS PPI), but it rose *less* than its historical diesel sensitivity implies: the fuel-adjusted residual is negative. The pricing "recovery" looks like fuel-surcharge pass-through, not a linehaul rate cycle. Diesel's move is outside the model's training range, so read the sign, not the size.
+**Fixed research edition `freight-2026-11-03-r3`.** This editorial revision clarifies Allen Xu's project leadership, AI's supporting role, operating-margin definitions and citation placement; the research cutoff is unchanged. Macro data were refreshed Nov 3; the SEC/price components retain their Nov 1 retrieval dates. `src/data/research/revision.json` pins the information cutoff and analysis date. These are reproducible observations plus bounded interpretations, not live data or historical macro-vintage reconstructions.
+- Cass's September 2026 direct ex-fuel linehaul index is 154.8 (+10.1% YoY, +0.6% MoM). Its 13 selected monthly levels come from the official workbook, with a workbook hash and extraction notes. A negative truckload-PPI diesel residual can coexist with positive observed ex-fuel growth: the residual is deviation from a historical fit, not a direct rate or causal decomposition. The remaining questions are breadth, durability and demand versus capacity effects.
 - Volume measures are flat to mixed (tonnage, Cass shipments, Freight TSI, rail carloads).
-- Truck-transportation payrolls are still slightly down year over year: slow capacity attrition.
-- Margin changes diverge by company rather than by business model. The focus names have underperformed SPY over six months and are not at valuation extremes.
-- No interviews have been conducted, so the memo is honestly labelled **"Research draft — incomplete verification"**. The primary-research page is a plan, not fabricated findings.
+- The three-month average payroll YoY signal is negative. This is a labour-capacity proxy; fleet counts, exits and utilisation are still missing.
+- Financial peer tests use a shared reporting quarter and date-specific evidence. Segments and business mix still limit a business-model interpretation. The focus names have underperformed SPY over six months; neither relative returns nor historical multiple percentiles establish what recovery the market already expects.
+- H5 retains every peer in the common Q2 2026 GAAP screen. The asset-based mean margin change is about −1.7pp, median +0.7pp, and mean excluding Werner +0.9pp. All five leave-one-out checks are displayed. The mean rule fails, while the broader operating-leverage hypothesis is mixed and sample-sensitive. Werner's dated release and GAAP/non-GAAP reconciliation are separately cited; its adjusted result is not substituted into the GAAP peer average.
+- **Public-source research sample · Primary fieldwork proposed** accurately describes the scope. Zero completed interviews does not invalidate public-source evidence; interview counts alone cannot promote the report to verified. Deterministic Copilot output and saved drafts carry a template-generated label, and individual evidence direction is independent of group outcomes.
+- Web and one-page PDF use the same content model and pinned edition. The download guard matches both edition and a SHA-256 content fingerprint; changed observations or interpretation require regeneration before the link reappears.
 
 ## Research platform: data sources
 
@@ -61,10 +64,14 @@ See [`docs/PROJECT_AUDIT.md`](docs/PROJECT_AUDIT.md) for the audit that motivate
 |---|---|---|
 | **SEC EDGAR** XBRL `companyfacts` + `submissions` + latest 10-K text | Quarterly financials (point-in-time, restatement-aware), filing index, 8-K Item 2.02 earnings dates, verbatim business-description excerpts | Public; fair-access policy requires a contact User-Agent (`SEC_EDGAR_USER_AGENT`, builder only, never stored) |
 | **FRED** (St. Louis Fed) series + series pages | Freight KPIs from BTS, BLS, EIA, Census, Federal Reserve and Cass Information Systems; units, frequency, release, last-updated and next-release dates | Licence captured per series. "Pre-approval required" series are excluded automatically. Cass data are copyrighted and shown with citation, as FRED's terms require |
+| **Cass direct release / workbook** | Selected 13 monthly ex-fuel linehaul index levels; recomputed YoY/MoM; report and methodology links | Dated extract in `cass-linehaul.json`, copyright attribution, workbook hash and cell-selection notes; not a licensed spot/contract feed |
+| **Werner IR release** | Q2 2026 consolidated and segment GAAP/non-GAAP cross-check | Dated issuer disclosure in `source-checks.json`; management's explanation is identified as such |
 | **Yahoo Finance** chart API | Daily OHLCV + split events for valuation (raw price reconstructed) and returns | Unofficial keyless endpoint, research use |
 | **DeepSeek** (optional) | Copilot prose under a citation validator | `DEEPSEEK_API_KEY`; deterministic fallback otherwise |
 
 Snapshots live in `src/__fixtures__/research/<project>/` and are rebuilt by `npm run research:refresh` (and weekly in CI when the `SEC_EDGAR_USER_AGENT` secret is set). Not connected, and shown as explicit gaps: spot/contract rate feeds, tender rejections, Class 8 orders, consensus estimates, earnings-call transcripts (all licensed), and FMCSA authority data (public; adapter not built).
+
+`node scripts/build-research-snapshot.mjs --macro-only` refreshes FRED without replacing the SEC or price components. The direct Cass extract is maintained separately. Before publishing another research edition, update its fixed cutoff, regenerate the PDF, and review source changes; component retrieval dates must not imply a full refresh.
 
 ## Research methodology safeguards
 
@@ -72,12 +79,17 @@ Snapshots live in `src/__fixtures__/research/<project>/` and are rebuilt by `npm
 - **One XBRL concept per metric per company**, chosen by recent coverage and displayed. Debt is a shown sum of named components, with known exclusions.
 - **Freshness**: each KPI is fresh/lagging/stale against its release cadence and publication lag. The price fixture flags itself stale when old.
 - **Comparability**: YoY by calendar period, never by array offset. NSA series are read YoY only. Lead-lag is labelled in-sample with a split-half stability check and a holdout test (lag chosen on the first two-thirds, tested on later months), and correlation is never called predictive.
+- **Financial peer periods**: every requested company must have the metric in a common quarter, with end dates within 14 days for 52/53-week filers. Otherwise the test reports insufficient data. It never substitutes an unmatched latest quarter or silently drops a peer. Date-specific evidence is required before a peer verdict is published.
 - **Fuel-adjusted residual**: OLS fitted only on data before a 12-month holdout, with an extrapolation warning.
 - **Valuation**: positive-denominator multiples only (negative-earnings P/E is "n/m", not cheap). Scenarios are anchored to each company's own 5-year history. Expected return is computed only from a complete, justified probability set.
 - **Backtests**: labelled backtest vs simulated vs actual (actual is not supported). The best-of-N Sharpe is shown next to the expected maximum Sharpe of N skill-less strategies.
 - **Attribution**: daily OLS on SPY and IYT−SPY. Outcome review estimates betas *before* the thesis date.
 - **Primary research**: user notes stay in the browser, are screened for emails, phones, IDs and MNPI language, and contact details are redacted on save. Notes with possible MNPI are never sent to an AI model.
 - **Copilot grounding**: every fact or calculation must cite an evidence ID that was retrieved for that request, or it is moved to "unsupported".
+
+### Refreshing the one-page PDF
+
+The web brief and its public JSON source at `/research/freight/sample/data` share the same computed observations. After a data or writing-sample change, run the app locally, then `python3 scripts/export-writing-sample.py --url http://127.0.0.1:3126/research/freight/sample/data` (requires ReportLab and pypdf for local authoring). The exporter validates one page, copies the PDF into `public/research-samples/`, and records its edition plus content fingerprint. The download button is hidden if either no longer matches. Keep the PDF, original-source citations, and public-data/fieldwork limits together when sharing.
 
 ---
 
@@ -489,7 +501,7 @@ docker run -p 3000:3000 -e SESSION_PASSWORD="$(openssl rand -hex 32)" factorforg
 
 ### Deploy to Vercel
 
-> **Research platform deployment notes.** The research pages are statically generated from the committed snapshot at build time and need no runtime secrets. `/api/research/copilot` is a serverless function: it works without `DEEPSEEK_API_KEY` (deterministic answers), and per-IP throttling is per instance unless Upstash/Vercel KV is configured. Research notes never reach the server (browser storage), so a public demo exposes no private notes. The current public deployment runs `main`; this branch must be merged and redeployed to show the research platform.
+> **Research platform deployment notes.** The research pages are statically generated from the committed snapshot at build time and need no runtime secrets. `/api/research/copilot` is a serverless function: it works without `DEEPSEEK_API_KEY` (deterministic answers), and per-IP throttling is per instance unless Upstash/Vercel KV is configured. Research notes never reach the server (browser storage), so a public demo exposes no private notes. The public deployment includes the research platform. Confirm the deployment commit before sharing an older preview URL.
 
 
 FactorForge can be deployed as a public Vercel demo with the default build command:

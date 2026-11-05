@@ -46,9 +46,9 @@ function safeInternalRedirect(value: FormDataEntryValue | null): string {
   return raw;
 }
 
-function currentClientIp(): string | null {
+async function currentClientIp(): Promise<string | null> {
   try {
-    const h = headers();
+    const h = await headers();
     return clientIpFromHeaders(h.get("x-forwarded-for"), h.get("x-real-ip"));
   } catch {
     return null;
@@ -70,7 +70,7 @@ async function rateLimitMessage(action: string, username: string): Promise<strin
   // Per-IP ceiling across all usernames, so a username-spray that stays under
   // the per-username cap is still bounded. Skip (fail open) when the IP is
   // unknown rather than collapse every client into one shared bucket.
-  const ip = currentClientIp();
+  const ip = await currentClientIp();
   if (ip) {
     const byIp = await checkRateLimit(`${action}:ip:${ip}`, AUTH_IP_LIMIT, AUTH_WINDOW_MS);
     if (!byIp.allowed) return `Too many attempts. Try again in ${byIp.retryAfterSeconds}s.`;

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef } from "react";
 
 export interface Stage {
   slug: string;
@@ -18,9 +19,21 @@ export interface Stage {
 export default function StageNav({ projectId, stages }: { projectId: string; stages: Stage[] }) {
   const pathname = usePathname();
   const base = `/research/${projectId}`;
+  const listRef = useRef<HTMLOListElement>(null);
+  const activeRef = useRef<HTMLAnchorElement>(null);
+  useEffect(() => {
+    const list = listRef.current;
+    const active = activeRef.current;
+    if (!list || !active) return;
+    const listBounds = list.getBoundingClientRect();
+    const activeBounds = active.getBoundingClientRect();
+    if (activeBounds.left < listBounds.left || activeBounds.right > listBounds.right) {
+      list.scrollLeft += activeBounds.left - listBounds.left - (list.clientWidth - activeBounds.width) / 2;
+    }
+  }, [pathname]);
   return (
     <nav aria-label="Research stages" className="sticky top-14 z-30 -mx-4 border-b border-line bg-bg/95 px-4 backdrop-blur md:-mx-8 md:px-8">
-      <ol className="flex gap-5 overflow-x-auto text-[13.5px]">
+      <ol ref={listRef} className="flex gap-5 overflow-x-auto text-[13.5px]">
         {stages.map((stage) => {
           const href = stage.slug ? `${base}/${stage.slug}` : base;
           const active = stage.slug ? pathname.startsWith(href) : pathname === base;
@@ -28,6 +41,7 @@ export default function StageNav({ projectId, stages }: { projectId: string; sta
             <li key={stage.slug || "overview"} className="shrink-0">
               <Link
                 href={href}
+                ref={active ? activeRef : undefined}
                 aria-current={active ? "page" : undefined}
                 title={stage.status}
                 className={`-mb-px flex items-center gap-1.5 border-b-2 py-3 transition-colors ${
