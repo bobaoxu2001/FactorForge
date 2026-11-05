@@ -44,6 +44,6 @@
     "vitest": "^4.1.7"
   },
   "overrides": {
-    "postcss": "$postcss"
+    "postcss": "8.5.32"
   }
 }
