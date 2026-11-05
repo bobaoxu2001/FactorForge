@@ -20,13 +20,15 @@ export function generateStaticParams() {
   return listProjectIds().flatMap((projectId) => PROJECT_CONFIGS[projectId].companies.map((c) => ({ projectId, ticker: c.ticker })));
 }
 
-export function generateMetadata({ params }: { params: { projectId: string; ticker: string } }): Metadata {
+export async function generateMetadata({ params: paramsPromise }: { params: Promise<{ projectId: string; ticker: string }> }): Promise<Metadata> {
+  const params = await paramsPromise;
   return { title: `${params.ticker.toUpperCase()} company research` };
 }
 
 const DERIVATION_MARK: Record<string, string> = { "ytd-difference": "†", "fy-minus-9m": "‡" };
 
-export default function CompanyPage({ params }: { params: { projectId: string; ticker: string } }) {
+export default async function CompanyPage({ params: paramsPromise }: { params: Promise<{ projectId: string; ticker: string }> }) {
+  const params = await paramsPromise;
   const view = getResearchProject(params.projectId);
   if (!view) notFound();
   const c = getCompany(view, params.ticker);

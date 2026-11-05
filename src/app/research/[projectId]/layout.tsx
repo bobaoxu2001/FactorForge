@@ -12,7 +12,8 @@ export function generateStaticParams() {
   return listProjectIds().map((projectId) => ({ projectId }));
 }
 
-export default function ResearchProjectLayout({ children, params }: { children: ReactNode; params: { projectId: string } }) {
+export default async function ResearchProjectLayout({ children, params: paramsPromise }: { children: ReactNode; params: Promise<{ projectId: string }> }) {
+  const params = await paramsPromise;
   const view = getResearchProject(params.projectId);
   if (!view) notFound();
   const verified = view.valueChain.relationships.filter((r) => r.status === "verified").length;

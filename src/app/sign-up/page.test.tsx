@@ -24,19 +24,19 @@ const setAvailable = (value: boolean) =>
 afterEach(() => cleanup());
 beforeEach(() => vi.clearAllMocks());
 
-describe("SignUpPage", () => {
-  it("shows the demo-mode notice and no credential form when persistence is unavailable", () => {
+describe("SignUpPage", async () => {
+  it("shows the demo-mode notice and no credential form when persistence is unavailable", async () => {
     setAvailable(false);
-    const { container } = render(SignUpPage({ searchParams: {} }));
+    const { container } = render(await SignUpPage({ searchParams: Promise.resolve({}) }));
     expect(screen.getByText(/Account creation is disabled in the public demo/i)).toBeInTheDocument();
     expect(container.querySelector('input[name="password"]')).toBeNull();
     expect(screen.queryByText(/Persistence layer unavailable/i)).toBeNull();
     expect(screen.getByRole("link", { name: /Continue exploring public demo/i })).toHaveAttribute("href", "/");
   });
 
-  it("renders the account form when persistence is available", () => {
+  it("renders the account form when persistence is available", async () => {
     setAvailable(true);
-    const { container } = render(SignUpPage({ searchParams: {} }));
+    const { container } = render(await SignUpPage({ searchParams: Promise.resolve({}) }));
     expect(container.querySelector('input[name="username"]')).not.toBeNull();
     expect(container.querySelector('input[name="password"]')).not.toBeNull();
     expect(screen.queryByText(/Account creation is disabled in the public demo/i)).toBeNull();

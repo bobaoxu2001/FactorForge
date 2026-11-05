@@ -36,13 +36,14 @@ const STRATEGY_TYPE_PLAIN: Record<string, string> = {
   rotation: "a “rotation” strategy — it leans toward steadier, lower-volatility names and rotates as conditions change.",
 };
 
-export const revalidate = 60 * 60;
+export const revalidate = 3600;
 
 export function generateStaticParams() {
   return STRATEGY_CATALOG.map((strategy) => ({ id: strategy.id }));
 }
 
-export function generateMetadata({ params }: { params: { id: string } }): Metadata {
+export async function generateMetadata({ params: paramsPromise }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const params = await paramsPromise;
   const definition = STRATEGY_CATALOG.find((s) => s.id === params.id);
   if (!definition) return {};
   return {
@@ -52,12 +53,14 @@ export function generateMetadata({ params }: { params: { id: string } }): Metada
 }
 
 export default async function StrategyDetailPage({
-  params,
-  searchParams,
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
 }: {
-  params: { id: string };
-  searchParams: { symbol?: string };
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ symbol?: string }>;
 }) {
+  const params = await paramsPromise;
+  const searchParams = (await searchParamsPromise) ?? {};
   const dataset = await getResearchDataset();
   const definition = STRATEGY_CATALOG.find((s) => s.id === params.id);
   if (!definition) notFound();

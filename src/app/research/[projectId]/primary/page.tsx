@@ -7,7 +7,8 @@ import { getResearchProject } from "@/lib/intel/project";
 export const revalidate = 3600;
 export const metadata = { title: "Primary research" };
 
-export default function PrimaryResearchPage({ params }: { params: { projectId: string } }) {
+export default async function PrimaryResearchPage({ params: paramsPromise }: { params: Promise<{ projectId: string }> }) {
+  const params = await paramsPromise;
   const view = getResearchProject(params.projectId);
   if (!view) notFound();
   const { config } = view;

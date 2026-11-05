@@ -13,7 +13,8 @@ function CitedSampleText({ text, parts, references = [] }: { text: string; parts
   return <>{(parts ?? [{ text, references }]).map((part, index) => <Fragment key={index}>{part.text}{part.references.length > 0 && <span className="text-[12px] text-accent"> {part.references.map((number) => <a key={number} href={`#sample-source-${number}`}>[{number}]</a>)}</span>}</Fragment>)}</>;
 }
 
-export default function WritingSamplePage({ params }: { params: { projectId: string } }) {
+export default async function WritingSamplePage({ params: paramsPromise }: { params: Promise<{ projectId: string }> }) {
+  const params = await paramsPromise;
   const view = getResearchProject(params.projectId);
   if (!view) notFound();
   const sample = buildWritingSample(view);

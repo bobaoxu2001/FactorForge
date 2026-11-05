@@ -11,7 +11,7 @@ import ModelPortfolioCard from "@/components/research/ModelPortfolioCard";
 import SelectionBiasPanel from "@/components/research/SelectionBiasPanel";
 import { getResearchDataset } from "@/lib/research";
 
-export const revalidate = 60 * 60;
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Strategy Research Lab",
@@ -20,10 +20,11 @@ export const metadata: Metadata = {
 };
 
 export default async function StrategiesPage({
-  searchParams,
+  searchParams: searchParamsPromise,
 }: {
-  searchParams?: { status?: string; symbol?: string; q?: string };
+  searchParams?: Promise<{ status?: string; symbol?: string; q?: string }>;
 }) {
+  const searchParams = (await searchParamsPromise) ?? {};
   const { radarCandidates, marketStress, stressDiagnostics, modelPortfolio, selectionBias } = await getResearchDataset();
   const enrichedCandidates = radarCandidates.map((candidate) => ({
     candidate,

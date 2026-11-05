@@ -12,11 +12,12 @@ export const metadata: Metadata = {
     "Create a FactorForge research account. Accounts store saved research preferences and watchlists only.",
 };
 
-export default function SignUpPage({
-  searchParams,
+export default async function SignUpPage({
+  searchParams: searchParamsPromise,
 }: {
-  searchParams?: { next?: string; area?: string };
+  searchParams?: Promise<{ next?: string; area?: string }>;
 }) {
+  const searchParams = (await searchParamsPromise) ?? {};
   // No writable database (e.g. the public Vercel demo) → account creation can't
   // work. Show an honest demo-mode notice instead of letting the form submit
   // into a "Persistence layer unavailable" error.

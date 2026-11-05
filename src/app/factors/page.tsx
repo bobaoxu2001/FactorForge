@@ -11,7 +11,7 @@ import { getResearchDataset } from "@/lib/research";
 import { pearson } from "@/lib/quant/indicators";
 import { pct, pctPlain, num } from "@/lib/utils/format";
 
-export const revalidate = 60 * 60;
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Factor Discovery",

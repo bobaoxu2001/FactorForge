@@ -9,7 +9,7 @@ import MethodologyCallout from "@/components/research/MethodologyCallout";
 import { getResearchDataset } from "@/lib/research";
 import { formatImpact } from "@/lib/agents/scenarioForecast";
 
-export const revalidate = 60 * 60;
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Market Hotspots",

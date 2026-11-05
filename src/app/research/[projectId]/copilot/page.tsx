@@ -7,7 +7,8 @@ import { getResearchProject } from "@/lib/intel/project";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Research copilot" };
 
-export default function CopilotPage({ params }: { params: { projectId: string } }) {
+export default async function CopilotPage({ params: paramsPromise }: { params: Promise<{ projectId: string }> }) {
+  const params = await paramsPromise;
   const view = getResearchProject(params.projectId);
   if (!view) notFound();
   return (

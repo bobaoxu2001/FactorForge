@@ -7,7 +7,9 @@ import { getResearchProject } from "@/lib/intel/project";
 export const revalidate = 3600;
 export const metadata = { title: "Evidence explorer" };
 
-export default function EvidencePage({ params, searchParams }: { params: { projectId: string }; searchParams: { id?: string } }) {
+export default async function EvidencePage({ params: paramsPromise, searchParams: searchParamsPromise }: { params: Promise<{ projectId: string }>; searchParams: Promise<{ id?: string }> }) {
+  const params = await paramsPromise;
+  const searchParams = (await searchParamsPromise) ?? {};
   const view = getResearchProject(params.projectId);
   if (!view) notFound();
   const memoCitations: Record<string, string[]> = {};

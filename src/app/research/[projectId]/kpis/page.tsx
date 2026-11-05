@@ -9,7 +9,9 @@ import { getResearchProject } from "@/lib/intel/project";
 export const revalidate = 3600;
 export const metadata = { title: "KPI trends" };
 
-export default function KpiPage({ params, searchParams }: { params: { projectId: string }; searchParams: { kpi?: string } }) {
+export default async function KpiPage({ params: paramsPromise, searchParams: searchParamsPromise }: { params: Promise<{ projectId: string }>; searchParams: Promise<{ kpi?: string }> }) {
+  const params = await paramsPromise;
+  const searchParams = (await searchParamsPromise) ?? {};
   const view = getResearchProject(params.projectId);
   if (!view) notFound();
   const pid = view.config.id;

@@ -11,7 +11,7 @@ import SelectionBiasPanel from "@/components/research/SelectionBiasPanel";
 import { getResearchDataset } from "@/lib/research";
 import { num, pct } from "@/lib/utils/format";
 
-export const revalidate = 60 * 60;
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Strategy Radar",

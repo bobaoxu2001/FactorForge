@@ -9,7 +9,8 @@ import type { CompanyView, QuarterRow } from "@/lib/intel/companies";
 export const revalidate = 3600;
 export const metadata = { title: "Competitive intelligence" };
 
-export default function CompaniesPage({ params }: { params: { projectId: string } }) {
+export default async function CompaniesPage({ params: paramsPromise }: { params: Promise<{ projectId: string }> }) {
+  const params = await paramsPromise;
   const view = getResearchProject(params.projectId);
   if (!view) notFound();
   const pid = view.config.id;

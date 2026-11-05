@@ -16,7 +16,9 @@ function shiftMonths(date: string, months: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-export default function ThesisPage({ params, searchParams }: { params: { projectId: string }; searchParams: { since?: string } }) {
+export default async function ThesisPage({ params: paramsPromise, searchParams: searchParamsPromise }: { params: Promise<{ projectId: string }>; searchParams: Promise<{ since?: string }> }) {
+  const params = await paramsPromise;
+  const searchParams = (await searchParamsPromise) ?? {};
   const view = getResearchProject(params.projectId);
   if (!view) notFound();
   const pid = view.config.id;

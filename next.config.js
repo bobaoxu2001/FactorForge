@@ -47,9 +47,8 @@ const nextConfig = {
   // fails to load at runtime and the whole persistence layer (cache, auth,
   // watchlists) silently degrades to "unavailable". Keep it external so the
   // real require() resolves the prebuilt binary.
-  experimental: {
-    serverComponentsExternalPackages: ["better-sqlite3"],
-  },
+  serverExternalPackages: ["better-sqlite3"],
+  outputFileTracingRoot: __dirname,
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

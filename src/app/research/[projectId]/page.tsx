@@ -10,14 +10,16 @@ import { getResearchProject } from "@/lib/intel/project";
 
 export const revalidate = 3600;
 
-export function generateMetadata({ params }: { params: { projectId: string } }): Metadata {
+export async function generateMetadata({ params: paramsPromise }: { params: Promise<{ projectId: string }> }): Promise<Metadata> {
+  const params = await paramsPromise;
   const view = getResearchProject(params.projectId);
   return { title: view ? view.config.title : "Research project", description: view?.config.subtitle };
 }
 
 const HEADLINE_KPIS = ["truck-tonnage", "cass-shipments", "ppi-truckload", "cass-implied-rate", "diesel", "truck-employment", "inventory-sales", "ip-manufacturing"];
 
-export default function ProjectOverviewPage({ params }: { params: { projectId: string } }) {
+export default async function ProjectOverviewPage({ params: paramsPromise }: { params: Promise<{ projectId: string }> }) {
+  const params = await paramsPromise;
   const view = getResearchProject(params.projectId);
   if (!view) notFound();
   const pid = view.config.id;
