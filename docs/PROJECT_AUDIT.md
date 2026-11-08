@@ -169,3 +169,15 @@ Missing for the target vision: industry taxonomy and value chain, company financ
 | **P4** | Quant integration: company quant lens (strategy runs, multiple-testing haircut, market/sector attribution), scenario valuation, portfolio context | Done for coverage names |
 | **P5** | Featured case study "Is the U.S. Freight Recovery Real?" | Done |
 | Later | Optional dark mode; DB-backed multi-user research projects; more industries with data adapters; earnings-call transcripts (licensing); consensus estimates (needs a licensed provider); gate radar admission on the deflated Sharpe; rolling-origin lead-lag tests | Roadmap |
+
+## Addendum (2026-11-08): event-intelligence audit
+
+Before the event layer was built, the codebase was re-audited for reusable parts. Findings:
+
+- The provenance model, snapshot pattern, point-in-time helpers, `StageNav` and UI primitives were reusable.
+- The freight thesis and memo modules were project-specific, so their patterns were reused rather than their code.
+- The hotspot scenario engine's probabilities are template priors, so it was not used for forecasting.
+- The quant price snapshot ends in July 2026, so the event layer has its own snapshot.
+- There was no event model, claim-level verification, event-window measurement, forecast record or thesis revision history.
+
+See `docs/EVENT_INTELLIGENCE.md` §0 for the full table and the integration plan that followed.

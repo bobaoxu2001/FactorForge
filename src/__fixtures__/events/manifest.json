@@ -1,0 +1,511 @@
+{
+ "builtAt": "2026-11-08T03:50:35.590Z",
+ "builder": "scripts/build-event-snapshot.mjs",
+ "range": "3y",
+ "providers": {
+  "prices": "Yahoo Finance chart API (keyless; close is split-adjusted, adjclose is split- and dividend-adjusted)",
+  "fundamentals": "Yahoo Finance quoteSummary (vendor-computed fields; not audited figures)"
+ },
+ "counts": {
+  "instruments": 39,
+  "pricesOk": 39,
+  "pricesCarriedOver": 0,
+  "pricesFailed": 0,
+  "fundamentalsOk": 28
+ },
+ "status": "ok",
+ "missingRequired": [],
+ "runLog": [
+  {
+   "symbol": "SPY",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "QQQ",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "^IXIC",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "SMH",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "XLU",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "CIBR",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "BTC-USD",
+   "step": "prices",
+   "status": "ok",
+   "rows": 1095,
+   "first": "2023-11-08",
+   "last": "2026-11-06",
+   "missingCloses": 1
+  },
+  {
+   "symbol": "ETH-USD",
+   "step": "prices",
+   "status": "ok",
+   "rows": 1095,
+   "first": "2023-11-08",
+   "last": "2026-11-06",
+   "missingCloses": 1
+  },
+  {
+   "symbol": "BNB-USD",
+   "step": "prices",
+   "status": "ok",
+   "rows": 1095,
+   "first": "2023-11-08",
+   "last": "2026-11-06",
+   "missingCloses": 1
+  },
+  {
+   "symbol": "XRP-USD",
+   "step": "prices",
+   "status": "ok",
+   "rows": 1095,
+   "first": "2023-11-08",
+   "last": "2026-11-06",
+   "missingCloses": 1
+  },
+  {
+   "symbol": "SOL-USD",
+   "step": "prices",
+   "status": "ok",
+   "rows": 1095,
+   "first": "2023-11-08",
+   "last": "2026-11-06",
+   "missingCloses": 1
+  },
+  {
+   "symbol": "COIN",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "HOOD",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "MSTR",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "CRCL",
+   "step": "prices",
+   "status": "ok",
+   "rows": 359,
+   "first": "2025-06-05",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "MARA",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "CRWD",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "PANW",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "ZS",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "OKTA",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "FTNT",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "S",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "NVDA",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "AMD",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "AVGO",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "QCOM",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "MSFT",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "AMZN",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "GOOGL",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "META",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "CRWV",
+   "step": "prices",
+   "status": "ok",
+   "rows": 406,
+   "first": "2025-03-28",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "ANET",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "VRT",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "ETN",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "GEV",
+   "step": "prices",
+   "status": "ok",
+   "rows": 657,
+   "first": "2024-03-27",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "CEG",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "VST",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "DLR",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "EQIX",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "COIN",
+   "step": "fundamentals",
+   "status": "ok"
+  },
+  {
+   "symbol": "HOOD",
+   "step": "fundamentals",
+   "status": "ok"
+  },
+  {
+   "symbol": "MSTR",
+   "step": "fundamentals",
+   "status": "ok"
+  },
+  {
+   "symbol": "CRCL",
+   "step": "fundamentals",
+   "status": "ok"
+  },
+  {
+   "symbol": "MARA",
+   "step": "fundamentals",
+   "status": "ok"
+  },
+  {
+   "symbol": "CRWD",
+   "step": "fundamentals",
+   "status": "ok"
+  },
+  {
+   "symbol": "PANW",
+   "step": "fundamentals",
+   "status": "ok"
+  },
+  {
+   "symbol": "ZS",
+   "step": "fundamentals",
+   "status": "ok"
+  },
+  {
+   "symbol": "OKTA",
+   "step": "fundamentals",
+   "status": "ok"
+  },
+  {
+   "symbol": "FTNT",
+   "step": "fundamentals",
+   "status": "ok"
+  },
+  {
+   "symbol": "S",
+   "step": "fundamentals",
+   "status": "ok"
+  },
+  {
+   "symbol": "NVDA",
+   "step": "fundamentals",
+   "status": "ok"
+  },
+  {
+   "symbol": "AMD",
+   "step": "fundamentals",
+   "status": "ok"
+  },
+  {
+   "symbol": "AVGO",
+   "step": "fundamentals",
+   "status": "ok"
+  },
+  {
+   "symbol": "QCOM",
+   "step": "fundamentals",
+   "status": "ok"
+  },
+  {
+   "symbol": "MSFT",
+   "step": "fundamentals",
+   "status": "ok"
+  },
+  {
+   "symbol": "AMZN",
+   "step": "fundamentals",
+   "status": "ok"
+  },
+  {
+   "symbol": "GOOGL",
+   "step": "fundamentals",
+   "status": "ok"
+  },
+  {
+   "symbol": "META",
+   "step": "fundamentals",
+   "status": "ok"
+  },
+  {
+   "symbol": "CRWV",
+   "step": "fundamentals",
+   "status": "ok"
+  },
+  {
+   "symbol": "ANET",
+   "step": "fundamentals",
+   "status": "ok"
+  },
+  {
+   "symbol": "VRT",
+   "step": "fundamentals",
+   "status": "ok"
+  },
+  {
+   "symbol": "ETN",
+   "step": "fundamentals",
+   "status": "ok"
+  },
+  {
+   "symbol": "GEV",
+   "step": "fundamentals",
+   "status": "ok"
+  },
+  {
+   "symbol": "CEG",
+   "step": "fundamentals",
+   "status": "ok"
+  },
+  {
+   "symbol": "VST",
+   "step": "fundamentals",
+   "status": "ok"
+  },
+  {
+   "symbol": "DLR",
+   "step": "fundamentals",
+   "status": "ok"
+  },
+  {
+   "symbol": "EQIX",
+   "step": "fundamentals",
+   "status": "ok"
+  }
+ ]
+}

@@ -31,6 +31,37 @@ Design rules enforced in code and tests:
 
 See [`docs/PROJECT_AUDIT.md`](docs/PROJECT_AUDIT.md) for the audit that motivated the change and [`docs/RESEARCH_PLATFORM_ARCHITECTURE.md`](docs/RESEARCH_PLATFORM_ARCHITECTURE.md) for the design.
 
+## Event intelligence: events → evidence → exposure → forecasts that get scored
+
+The event layer (`src/lib/events`, routes `/events`, `/theses`, `/forecasts`) handles a different question than the freight case. A material event happens: what is actually verified? Who is exposed, through which mechanism? What did markets measurably do? What would change the view? Was the earlier view right? Full design and limits: [`docs/EVENT_INTELLIGENCE.md`](docs/EVENT_INTELLIGENCE.md).
+
+- **Verification is derived, never typed in.** Each claim gets RUMOR / REPORTED / CORROBORATED / CONFIRMED / DISPUTED from the sources available at a cutoff.
+  - Wire copies and AMP pages count once.
+  - Attribution and enactment need an official source read first-hand.
+  - A proposal is never shown as enacted.
+  - What kind of statement something is (fact, claim, interpretation, hypothesis, estimate) is a separate field.
+- **No hindsight.** Timestamps need explicit offsets, and day-precision sources are dated to the end of their day. `eventAsOf()` rebuilds an event from what was published by any cutoff.
+- **Market transmission is measured.**
+  - Market-model abnormal returns are measured from the first bar that closed after the event (an event after the New York close starts on the next session), with t-statistics and persistence.
+  - Windows that overlap other events are flagged.
+- **Impact map.** Event → mechanism → industry → company → expectations → valuation → price.
+  - Signs multiply along paths, conflicting paths are reported as *ambiguous*, and hypothesis-only paths don't set a direction.
+  - A measured reaction that contradicts the map is flagged, never re-explained.
+- **Forecasts on a hash-chained ledger.**
+  - Baseline: zero drift with an EWMA 80% range, relative to the benchmark, at 1/5/20/60 bars.
+  - It abstains on direction unless walk-forward testing up to the cutoff shows skill. Tests prove future prices cannot change a prediction.
+  - Scored against realized and benchmark returns, with coverage, Brier, regimes and effective-n.
+  - Backfilled records are labelled as such.
+- **Theses with immutable originals.**
+  - A thesis's history is replayed from evidence; revisions happen only when its own triggers fire, and record what the earlier view got wrong.
+  - Price moves can only prompt a review, and immaterial news is logged without effect.
+  - Live theses cannot have their past rewritten by back-dated evidence.
+
+Seeded with two real cases from public sources, each claim paraphrased and linked:
+
+- **Binance security incident, 29 Oct 2026** (`/events/binance-breach`). What failed on Binance's own account. Frozen versus replenished versus recovered (unknown). Why the FBI attribution stays unconfirmed (page unreadable). BNB fell 5.2% more than bitcoin explains, while US crypto equities' declines were within what the Nasdaq explains.
+- **AI data-center restrictions and the 5 Nov 2026 selloff** (`/events/ai-datacenter-shock`). Two enacted state pauses versus campaign promises. Power and grid names took the abnormal hit on 4 Nov, the first session after the election results. The 5 Nov decline was market-wide, with policy, earnings, positioning and financing offered as competing explanations, none proven.
+
 ## Featured case study: *Is the U.S. Freight Recovery Real?*
 
 `/research/freight`: a complete, working research project on U.S. trucking and freight.
@@ -434,6 +465,13 @@ cp .env.example .env.local   # optional: add DEEPSEEK_API_KEY for LLM memos
 npm run dev                  # http://localhost:3000
 ```
 
+Event-intelligence data (no keys needed):
+
+```bash
+npm run events:refresh    # prices + vendor fundamentals for src/data/events/instruments.json, with a run log
+npm run events:forecast   # append planned forecasts and new theses to the hash-chained ledgers (append-only)
+```
+
 Quality checks (the same set CI runs):
 
 ```bash
@@ -540,7 +578,23 @@ Security notes:
 
 ## Testing
 
-412 tests across 73 files under vitest + jsdom. The research layer added 90 tests in 12 files; the follow-up methodology pass added 12 more (Deflated Sharpe, next-open stop fills, lead-lag holdout, hotspot display helpers):
+553 tests across 89 files under vitest + jsdom (plus one ledger-writer suite that runs only under `npm run events:forecast`).
+
+The event-intelligence layer added 103 tests in 8 files. They cover:
+- Contradictory sources, and rumours versus enacted rules (lifecycle guard).
+- Time zones and DST, including events after the New York close.
+- One story syndicated by many outlets.
+- Missing and stale prices.
+- Frozen versus recovered amounts.
+- Entity-to-ticker mapping (no invented tickers).
+- Causal paths without evidence, and the map never overriding measured prices.
+- No future leakage (stored forecasts re-derived from data to their cutoff).
+- Hash-chain tamper detection, immutable theses and live-thesis prefix stability.
+- Excess return against the benchmark over the same interval.
+- Abstention without skill, and empty or blocked sources.
+- Memo citations, and UI source links.
+
+Earlier, the research layer added 90 tests in 12 files and the follow-up methodology pass added 12 more (Deflated Sharpe, next-open stop fills, lead-lag holdout, hotspot display helpers):
 
 - **Research math** — YoY matched by calendar period (gaps give null, not a wrong month), weekly YoY, trailing z-score anomalies, lead-lag recovery of a known lag with split-half stability, freshness vs cadence and publication lag, OLS and inverse-normal accuracy, expected-max-Sharpe monotonicity, market/sector beta recovery and exact return decomposition.
 - **Financial statements** — YTD differencing and FY−9M quarterisation with derivation labels, point-in-time filing dates (latest component), restatement flags, TTM gap refusal, 52/53-week labels, debt composition (convertible double-count guard, finance leases, combined tags).
