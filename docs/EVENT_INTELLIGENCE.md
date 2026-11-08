@@ -116,7 +116,7 @@ Quantities are kept on separate lines:
   - a t-statistic whose variance includes the error in estimating α and β, σ²·(L + L²/n + (ΣRm − L·R̄m)²/Sxx). On a day the benchmark itself moves 4–5%, this widens the band noticeably;
   - a placebo rank: the share of the asset's own previous 500 sessions (L-day windows) whose |CAR| was at least as large. It does not assume normal returns.
 - A move counts as significant only when |t| ≥ 1.96 **and** the placebo share is at most 5%. Each window also reports how many day-0 tests passed against how many would by chance (5% of tests).
-- Every US equity is also measured against the equal-weight S&P 500 (RSP). When the affected stocks are a large part of QQQ or SPY, the cap-weighted benchmark moves with them and absorbs the reaction; the equal-weight comparison shows how much.
+- Every US equity is also measured against the equal-weight S&P 500 (RSP), and each count is labelled with its benchmark. A stock's expected move is its estimated beta times its benchmark's move, and both differ between QQQ/SPY and RSP, so the two comparisons can disagree. Where they do, the result is reported as benchmark-sensitive; neither is treated as the true one.
 - Registered events whose reaction falls inside the 120-session estimation window are listed, with whether they themselves produced a significant reaction.
 - All of this measures association around a date. It does not establish that the event caused the move.
 - A window that runs past the data is marked incomplete, never truncated.
@@ -172,8 +172,11 @@ Ledger rules:
 Scoring (`scoreForecast`) records:
 - the realized return
 - the benchmark return over the same interval (last bar on or before each date, for mixed calendars)
-- excess return and error
-- whether the outcome fell in the range and the relative range
+- arithmetic excess return r − r_benchmark, and error
+- relative wealth return (1 + r) / (1 + r_benchmark) − 1
+- whether the outcome fell in the range, and whether the relative wealth return fell in the relative range
+
+The relative range is built from log(asset) − log(benchmark) returns and exponentiated, so it targets the relative wealth return, not the arithmetic difference. Scoring `score-v1` compared it with the arithmetic difference; `score-v2` (8 Nov 2026) compares like with like and keeps the arithmetic excess as a separate figure. Scores are derived at read time, so no stored record changes; the score carries its version, and the v1 comparison is kept beside it. For the 16 relative ranges realized so far the two rules agree; they diverge when moves are large (tests pin two such cases).
 - hit or miss on direction, when one was given
 - Brier score
 - net directional return
@@ -221,6 +224,8 @@ History is *replayed*, not stored:
 - **Backfill theses** replay on publication time and are labelled reconstructed.
 - **After the horizon** the thesis closes and is scored against its outcome rule. Evidence that arrives later is listed for the post-mortem but cannot revise the record.
 - **Cutoff check:** validation rejects a thesis that cites a claim no source had published by its cutoff.
+- **Trigger wording (from 8 Nov 2026, 10:00 UTC):** a trigger label that says "confirmed" must require CONFIRMED, and one that calls something a driver or cause, or keys on a causal hypothesis, may only prompt a review. No verification state can show that one thing drove another. Earlier theses are immutable, so they are not rejected; the rules are reported beside them.
+- **Current assessments:** a case can attach dated notes to a thesis's statement or a trigger, saying what the evidence now supports. They are shown beside the original and are not part of its hash.
 
 ## 7. The two seeded cases: what the data show (snapshot built 8 Nov 2026)
 
@@ -253,8 +258,9 @@ Policy status:
 Market reaction:
 - Neither enacted order produced a reaction beyond noise in the instruments measured (first sessions 15 Jul and 22 Sep).
 - On 4 Nov, the first session after the results, power, cooling, grid and generation names fell sharply relative to SPY: VRT −17.3%, VST −16.1%, ETN −13.5%, GEV −12.3%, CEG −8.7%. MSFT and AMZN *rose* about 6%. 9 of 18 day-0 tests pass both checks, against about 1 expected by chance, and the power and grid results hold against the equal-weight index too. CoreWeave's −11.7% against QQQ does not pass the placebo check (6.7% of its earlier days moved as much); SMH and NVDA pass against their own benchmarks but not against the equal-weight index.
-- On 5 Nov, against QQQ and SPY, no single stock moved beyond noise (0 of 19). That is benchmark contamination, not a market-wide move: against the equal-weight S&P 500, semiconductors (SMH −7.4%, NVDA −7.0%, AMD −12.3%, AVGO −8.3%), networking (ANET −8.6%) and data-center equipment (VRT −10.0%) all fell beyond noise, while the hyperscalers did not. The selloff was concentrated in AI suppliers; it only looks market-wide because those suppliers are a large part of the cap-weighted benchmarks.
-- Coverage of 5 Nov names policy, a Qualcomm miss (aggregator-sourced), positioning and financing worries. Yields fell. The engine lists these as competing explanations and does not pick one.
+- On 5 Nov the broad market fell (SPY −4.4%, QQQ −6.5%, equal-weight RSP −2.9%). The stock-level result depends on the benchmark. Against each stock's own benchmark (QQQ or SPY), 0 of 19 day-0 moves pass both checks. Against RSP, 7 of 19 do: SMH −7.4%, NVDA −7.0%, AMD −12.3%, AVGO −8.3%, ANET −8.6%, VRT −10.0% and EQIX −3.6%; the hyperscalers do not. QQQ and SPY fell further than RSP, and these stocks' estimated betas to them are high, so the moves QQQ and SPY predict are already large. The data show sensitivity to the benchmark, not where the selling came from or why.
+- Coverage of 5 Nov names policy, a Qualcomm miss, positioning and financing worries. Yields fell. The engine lists these as competing explanations and does not pick one.
+- The Qualcomm miss is reported by one aggregator only (a rumour by the engine's rules); QCOM's 9.5% fall is an observed fact, but against QQQ it is within noise, so the market check counts against, not for, a Qualcomm-specific driver. T-AI-1's statement mentions "an earnings miss" and its trigger TR-A2 is labelled "confirmed as a driver"; both are kept as published, with a dated assessment beside them. TR-A2 has not fired.
 
 **Forecasts**
 - 78 forecasts on the ledger, 77 abstaining on direction. The two newest are the first made under v2.
@@ -342,10 +348,11 @@ A second pass over the merged implementation, for statistical overconfidence and
 - Direction gate rewritten (v1 → v2, see §5). Under v1 one call passed by being a constant rule; under v2 nothing passes.
 - Interval coverage now reports nominal against empirical, with Wilson intervals on effective n, per regime and pooled with a design effect.
 - Event-study t-statistics include estimation error; a placebo rank guards against fat tails; significance needs both. Two previously "significant" moves (BTC on 29 Oct, CRWV on 4 Nov) no longer pass.
-- Equal-weight benchmark added, which reversed the reading of 5 Nov (see §7).
+- Equal-weight benchmark added. It shows the 5 Nov stock-level result is benchmark-sensitive (0 of 19 against own benchmarks, 7 of 19 against RSP; see §7).
 
 **Evidence re-read** (every readable source, 08:20–08:33 UTC)
-- Corrected and marked on the claim, with the reason: B-C14 (demand window), B-C15 (several threads, not one chain), B-C17 ("may involve"), B-C21 (campaign date), B-C23 (whose words), B-C24 (transfers, not totals), A-C04 (no month given), A-C08 ("grid officials", second-hand), A-C16 (AP figures not described as closes), A-C24 (borrowing, not "debt-financed").
+- Corrected and marked on the claim, with the reason: A-C18 (see the split below), B-C14 (demand window), B-C15 (several threads, not one chain), B-C17 ("may involve"), B-C21 (campaign date), B-C23 (whose words), B-C24 (transfers, not totals), A-C04 (no month given), A-C08 ("grid officials", second-hand), A-C16 (AP figures not described as closes), A-C24 (borrowing, not "debt-financed").
+- Split: the Qualcomm claim joined a reported miss to the price fall with "after". The fall is now an observed fact (A-C29), the miss a reported claim (A-C18), and the link the hypothesis X-A2.
 - Added: the Texas governor's signed letter to TCEQ (primary source), which also tells every other state agency to hold data-center approvals and lists no exception for applications already filed (A-C28); the president's same-day doubt about the North Korea attribution (B-C25); Binance's SAFU pledge, which differs from the "corporate reserves" wording elsewhere (B-C26).
 - Confirmed unchanged: all headline amounts (US$6.34bn affected, US$2.85bn frozen or intercepted, 98% replenished), the stablecoin freezes, publication times, and both state orders' terms.
 - Still unread: the FBI alert (403), Reuters, CNN. The North Korea attribution stays short of confirmed.

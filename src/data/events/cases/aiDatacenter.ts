@@ -277,7 +277,7 @@ export const AI_DATACENTER_CASE: ResearchCase = {
       ],
       competingExplanations: [
         { id: "X-A1", label: "Policy repricing after the midterms", epistemic: "CAUSAL_HYPOTHESIS", summary: "Winners who back pauses raised the odds that data-center construction slows.", supportedBy: ["A-C09", "A-C10", "A-C24", "MKT:W-A-ELECT:VRT"], challengedBy: ["A-C26"] },
-        { id: "X-A2", label: "Earnings and guidance", epistemic: "CAUSAL_HYPOTHESIS", summary: "Company news (a reported Qualcomm miss, late-October capex guidance) drove part of the decline.", supportedBy: ["A-C18", "A-C19", "MKT:W-A-SELL:QCOM"], challengedBy: [] },
+        { id: "X-A2", label: "Earnings and guidance", epistemic: "CAUSAL_HYPOTHESIS", summary: "Company news (a reported Qualcomm miss, late-October capex guidance) drove part of the decline.", supportedBy: ["A-C18", "A-C19"], challengedBy: ["MKT:W-A-SELL:QCOM"] },
         { id: "X-A3", label: "Positioning and profit-taking", epistemic: "CAUSAL_HYPOTHESIS", summary: "Crowded AI positions were sold into year-end by hedge funds, retail and volatility-control funds.", supportedBy: ["A-C20", "A-C21", "A-C22"], challengedBy: [] },
         { id: "X-A4", label: "Valuation and financing worries", epistemic: "CAUSAL_HYPOTHESIS", summary: "Expensive borrowing for AI construction and high multiples left little room for bad news.", supportedBy: ["A-C24"], challengedBy: [] },
         { id: "X-A5", label: "Rates", epistemic: "CAUSAL_HYPOTHESIS", summary: "A rise in yields compressed long-duration multiples.", supportedBy: [], challengedBy: ["A-C23"] },
@@ -313,7 +313,8 @@ export const AI_DATACENTER_CASE: ResearchCase = {
     { id: "A-C15", eventId: "EV-AI-SELLOFF-2026-11-05", statement: "The S&P 500 fell 4.4% on 5 Nov, its worst day since April 2025.", epistemic: "OBSERVED_FACT", topic: "Market move", citations: [{ sourceId: "A-M5", says: "SPY fell 4.4% on the day." }, { sourceId: "A-S3", says: "AP: S&P 500 fell 4.4%, worst since April 2025." }], recordedAt: READ },
     { id: "A-C16", eventId: "EV-AI-SELLOFF-2026-11-05", statement: "AP reported Nvidia down 8% and AMD down 14% on 5 Nov, without saying these were closing moves.", epistemic: "REPORTED_CLAIM", topic: "Market move", citations: [{ sourceId: "A-S3", says: "AP: Nvidia −8%, AMD −14%; the page does not say these are closing figures." }, { sourceId: "A-M5", says: "Closing data: NVDA −9.3%, AMD −17.3%; AP's figures look like an intraday update.", stance: "contradicts" }], recordedAt: READ, corrections: [{ at: REREAD, note: "AP gives 8% and 14% without \"about\" and does not call them closing moves; the claim now says so." }] },
     { id: "A-C17", eventId: "EV-AI-SELLOFF-2026-11-05", statement: "At the close, NVDA fell 9.3%, AMD 17.3%, the semiconductor ETF (SMH) 11.2% and utilities (XLU) 0.7%.", epistemic: "OBSERVED_FACT", topic: "Market move", citations: [{ sourceId: "A-M5", says: "Daily closes." }, { sourceId: "A-S4", says: "TNW: AMD −17.3%." }], recordedAt: READ },
-    { id: "A-C18", eventId: "EV-AI-SELLOFF-2026-11-05", statement: "Qualcomm fell 9.5% after missing fourth-quarter smartphone-chip estimates.", epistemic: "REPORTED_CLAIM", topic: "Drivers", citations: [{ sourceId: "A-S5", says: "Qualcomm missed Q4 smartphone-chip estimates and fell 9.5%." }], tags: ["earnings-driver"], notes: "The 9.5% decline matches closing data; the reason rests on an aggregator.", recordedAt: READ },
+    { id: "A-C18", eventId: "EV-AI-SELLOFF-2026-11-05", statement: "Tech Times reported that Qualcomm missed fourth-quarter smartphone-chip estimates.", epistemic: "REPORTED_CLAIM", topic: "Drivers", citations: [{ sourceId: "A-S5", says: "Qualcomm missed Q4 smartphone-chip estimates and fell 9.5%." }], tags: ["earnings-driver"], notes: "One aggregator, linking to a market-news page that was not read; Qualcomm's own results were not read. Whether the miss drove the share price is a hypothesis (X-A2), and QCOM's 5 Nov fall was within what its benchmark predicts (market check).", recordedAt: READ, corrections: [{ at: REREAD, note: "The claim read \"Qualcomm fell 9.5% after missing estimates\", joining a reported miss to the price move with a word that implies cause. Split: the fall is an observed fact (A-C29), the miss stays a reported claim, and the link is the hypothesis X-A2." }] },
+    { id: "A-C29", eventId: "EV-AI-SELLOFF-2026-11-05", statement: "QCOM closed 9.5% lower on 5 Nov.", epistemic: "OBSERVED_FACT", topic: "Market move", citations: [{ sourceId: "A-M5", says: "QCOM daily close, 5 Nov: −9.5%." }], notes: "Against QQQ the move is within noise (+1.8% abnormal, t = 0.5): about what a high-beta chip stock did on a −6.5% day for the Nasdaq-100.", recordedAt: REREAD },
     { id: "A-C19", eventId: "EV-AI-SELLOFF-2026-11-05", statement: "In late-October results, Microsoft lowered its full-year spending forecast to $170bn from $175bn, Alphabet kept $195–205bn, and Meta raised the bottom of its range to $135bn.", epistemic: "REPORTED_CLAIM", topic: "Drivers", citations: [{ sourceId: "A-S4", says: "Hyperscaler guidance from 28 Oct earnings." }], tags: ["capex-guidance"], notes: "Mixed: one trim, one hold, one raise. Company releases were not read.", recordedAt: READ },
     { id: "A-C20", eventId: "EV-AI-SELLOFF-2026-11-05", statement: "Nomura's Charlie McElligott attributed much of the selling to hedge funds locking in profits before year-end.", epistemic: "ANALYST_INTERPRETATION", topic: "Drivers", citations: [{ sourceId: "A-S4", says: "Relays McElligott's view via Yahoo Finance.", secondHand: true }], tags: ["positioning"], recordedAt: READ },
     { id: "A-C21", eventId: "EV-AI-SELLOFF-2026-11-05", statement: "Retail investors were net sellers of about $358m by mid-afternoon, the most since March 2020.", epistemic: "MODEL_ESTIMATE", topic: "Drivers", citations: [{ sourceId: "A-S4", says: "Vanda Research estimate.", secondHand: true }], tags: ["positioning"], recordedAt: READ },
@@ -614,6 +615,20 @@ export const AI_DATACENTER_CASE: ResearchCase = {
       heading: "Several drivers, none proven",
       body:
         "Coverage of 5 Nov names policy fears [A-C24], but also a reported Qualcomm miss [A-C18], profit-taking and retail selling [A-C20][A-C21], and stretched positioning [A-C22]. Yields fell [A-C23], which argues against a rates story. The engine records these as competing explanations and does not pick a winner, because one day of prices cannot separate drivers that arrived together.",
+    },
+  ],
+  assessments: [
+    {
+      thesisId: "T-AI-1",
+      at: REREAD,
+      target: "statement",
+      note: "The statement says the day \"carried an earnings miss\". That miss is reported by one aggregator only ([A-C18], still a rumour), Qualcomm's results were not read, and QCOM's 5 Nov fall was within what its benchmark predicts. Read it as a reported, unconfirmed miss, and its role in the selloff as a hypothesis (X-A2). The statement stays as published.",
+    },
+    {
+      thesisId: "T-AI-1",
+      at: REREAD,
+      target: "trigger:TR-A2",
+      note: "Labelled \"confirmed as a driver\", but it fires once [A-C18] is merely reported, and no verification state can show that a miss drove a move. It has not fired, because [A-C18] is still a rumour. If it does, read it as \"a reported miss coincided with the selloff\", not as a confirmed cause.",
     },
   ],
   limitations: [

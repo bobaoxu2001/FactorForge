@@ -14,12 +14,16 @@ This project follows a human-maintained changelog. There is no automated release
 - **Effective sample size** is the smaller of the overlap count and an autocorrelation-adjusted count.
 - **Event-study significance** needs both a t-statistic that includes estimation error and a placebo rank against the asset's own previous 500 sessions. BTC on 29 Oct and CRWV on 4 Nov no longer pass.
 - **Market pages** say the figures are associations, show the expected number of chance passes, and list events inside the estimation window.
-- **Ten claims corrected** after re-reading every readable source; each correction is shown on its claim with the reason.
+- **Eleven claims corrected** after re-reading every readable source; each correction is shown on its claim with the reason.
+- **Relative-range scoring (`score-v2`).** The relative range targets relative wealth return (1 + r) / (1 + r_b) − 1, which is what it is built from; it was scored against arithmetic excess r − r_b. Scores now use the same quantity, carry their version and keep the v1 comparison beside them. Arithmetic excess is still reported. No stored forecast changes.
+- **Benchmark-dependent results** are labelled by benchmark and described as benchmark-sensitive, without causal attribution.
+- **Qualcomm, 5 Nov.** The reported miss, the observed price fall and the causal link are separate items. QCOM's within-noise move now counts against a Qualcomm-specific driver.
+- **Trigger wording rules** for theses published from 8 Nov 2026, 10:00 UTC: "confirmed" needs CONFIRMED; causal labels may only prompt a review. T-AI-1 is kept as published, with a dated current assessment of its statement and of trigger TR-A2.
 
 #### Added
 
 - Interval calibration on `/forecasts`: nominal 80% against empirical coverage with Wilson intervals, by regime and pooled across instruments with a design effect.
-- Equal-weight S&P 500 (RSP) as a second benchmark for US equities. It shows the 5 Nov selloff was concentrated in AI suppliers, not market-wide.
+- Equal-weight S&P 500 (RSP) as a second benchmark for US equities, with every count labelled by benchmark. The 5 Nov stock-level result is benchmark-sensitive: 0 of 19 moves beyond noise against QQQ or SPY, 7 of 19 against RSP.
 - The Texas governor's signed letter to TCEQ as a primary source (A-C28), the president's doubt about the attribution (B-C25), and Binance's SAFU pledge (B-C26).
 - A six-step research brief for each case (`/events/<case>/brief`).
 - Phone layout for the radar, pinned instrument columns on wide tables, case names in page titles, table header scope and labels, and loading states for the event pages.

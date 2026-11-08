@@ -28,7 +28,7 @@ export default function EventRadarPage() {
     const views = c.windows.filter((w) => w.eventId === eventId).map((w) => windowView(c, w.id)).filter((v) => v !== null);
     const studies = views.flatMap((v) => v.studies);
     const sig = studies.filter((s) => s.benchmark && s.windows[0]?.significant).sort((a, b) => Math.abs(b.windows[0].abnormal!) - Math.abs(a.windows[0].abnormal!));
-    // Benchmarks themselves (no benchmark of their own) carry the market-wide move.
+    // Benchmarks themselves (no benchmark of their own) carry the broad market's move.
     const market = studies.filter((s) => !s.benchmark && s.windows[0]?.significant).sort((a, b) => Math.abs(b.windows[0].raw!) - Math.abs(a.windows[0].raw!))[0] ?? null;
     // The same stocks against the equal-weight S&P 500, which the AI names do not dominate.
     const ew = views

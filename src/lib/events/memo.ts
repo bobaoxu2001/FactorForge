@@ -1,6 +1,6 @@
 import "server-only";
 import type { ResearchCase } from "@/data/events/types";
-import { eventView, impacts, scoredForecasts, thesisViews, windowView } from "./view";
+import { benchmarkSensitivity, eventView, impacts, scoredForecasts, thesisViews, windowView } from "./view";
 import type { VerificationState } from "./types";
 
 /**
@@ -60,19 +60,21 @@ export function buildEventMemo(c: ResearchCase): MemoSection[] {
     const tested = v.studies.filter((s) => s.benchmark && s.windows[0]?.tStat != null);
     const sig = tested.filter((s) => s.windows[0].significant);
     const day0 = v.studies.find((s) => s.day0)?.day0 ?? "n/a";
-    const sigText = sig.length
-      ? `Moves beyond what the benchmark explains (both the t-test and the placebo rank): ${list(sig.map((s) => `${s.symbol} ${p1(s.windows[0].abnormal!)} vs ${s.benchmark}`))}. That is ${sig.length} of ${tested.length} tests, where chance alone would produce about ${v.day0Tests.expectedByChance.toFixed(1)}.`
-      : `No instrument moved significantly more than its benchmark explains (${tested.length} tested).`;
-    const ew = tested.map((s) => v.equalWeight[s.symbol]).filter((s) => s?.windows[0]?.significant);
-    const ewNew = ew.filter((e) => !sig.some((s) => s.symbol === e.symbol));
-    const ewText = ewNew.length
-      ? ` Against the equal-weight S&P 500 (RSP), which these names do not dominate, ${list(ewNew.map((s) => `${s.symbol} ${p1(s.windows[0].abnormal!)}`))} also fell beyond noise: the cap-weighted benchmark absorbed part of the move.`
-      : "";
+    const sensitivity = benchmarkSensitivity(v);
+    const ewText = sensitivity && v.day0TestsEqualWeight.significant !== v.day0Tests.significant ? ` ${sensitivity}` : "";
+    const names = list(sig.map((s) => `${s.symbol} ${p1(s.windows[0].abnormal!)} vs ${s.benchmark}`));
+    const sigText = ewText
+      ? sig.length
+        ? `Against their own benchmarks, beyond noise (both the t-test and the placebo rank): ${names}.`
+        : ""
+      : sig.length
+        ? `Moves beyond what the benchmark explains (both the t-test and the placebo rank): ${names}. That is ${sig.length} of ${tested.length} tests, where chance alone would produce about ${v.day0Tests.expectedByChance.toFixed(1)}.`
+        : `No instrument moved significantly more than its benchmark explains (${tested.length} tested).`;
     const overlap = v.overlaps["[0,4]"]?.length ? ` The five-session window overlaps ${list(v.overlaps["[0,4]"].map((o) => `"${o.title}" (${o.date})`))}, so multi-day figures mix events.` : "";
-    marketParas.push(`${w.label}. Day 0: ${day0}. ${sigText}${ewText}${overlap}`);
+    marketParas.push(`${w.label}. Day 0: ${day0}. ${sigText}${ewText}${overlap}`.replace(/\s+/g, " ").trim());
   }
   marketParas.push(
-    "These are associations around a date, not proof that the event caused the move. Abnormal returns use a market model fitted on 120 sessions ending ten sessions before day 0; a move counts only if its t-statistic (with estimation error) and its rank among the asset's own previous 500 sessions both say it is unusual. When the affected stocks are a large part of the benchmark (AI names in QQQ and SPY), the equal-weight comparison is the better guide.",
+    "These are associations around a date, not proof that the event caused the move. Abnormal returns use a market model fitted on 120 sessions ending ten sessions before day 0; a move counts only if its t-statistic (with estimation error) and its rank among the asset's own previous 500 sessions both say it is unusual. US stocks are measured against their own benchmark and against the equal-weight S&P 500; where the two disagree, the finding is benchmark-sensitive.",
   );
   sections.push({ title: "How the event reached markets", kind: "data", paragraphs: marketParas });
 

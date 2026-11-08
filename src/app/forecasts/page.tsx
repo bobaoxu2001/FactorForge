@@ -4,7 +4,7 @@ import { Note, Panel, Stat } from "@/components/intel/ui";
 import PageHeader from "@/components/layout/PageHeader";
 import { caseOfEvent } from "@/data/events";
 import { REGIMES, type CoverageStat } from "@/lib/events/evaluation";
-import { HORIZONS, INTERVAL_LEVEL, MODEL_HISTORY, MODEL_VERSION } from "@/lib/events/forecast";
+import { HORIZONS, INTERVAL_LEVEL, MODEL_HISTORY, MODEL_VERSION, SCORING_HISTORY, SCORING_VERSION } from "@/lib/events/forecast";
 import { EVALUATED_SYMBOLS, evaluation, evaluationFamily, integrity, pooled, scoredForecasts, type ScoredForecast } from "@/lib/events/view";
 
 export const metadata = {
@@ -48,7 +48,7 @@ function OutcomeTable({ rows, caption }: { rows: ScoredForecast[]; caption: stri
             <th scope="col" className="px-2 py-2 text-right font-medium">80% range</th>
             <th scope="col" className="px-2 py-2 text-right font-medium">Realized</th>
             <th scope="col" className="px-2 py-2 text-right font-medium">Benchmark</th>
-            <th scope="col" className="px-2 py-2 text-right font-medium">Excess</th>
+            <th scope="col" className="px-2 py-2 text-right font-medium" title="Relative wealth return: (1 + return) / (1 + benchmark return) − 1. Not the arithmetic difference.">Relative</th>
             <th scope="col" className="px-2 py-2 text-left font-medium">In range</th>
             <th scope="col" className="px-2 py-2 text-left font-medium">Direction</th>
             <th scope="col" className="px-2 py-2 text-left font-medium md:pr-6">Model</th>
@@ -67,7 +67,13 @@ function OutcomeTable({ rows, caption }: { rows: ScoredForecast[]; caption: stri
                 <td className="num px-2 py-1.5 text-right text-ink-muted">{r.prediction.interval ? `${pct(r.prediction.interval[0])} to ${pct(r.prediction.interval[1])}` : "—"}</td>
                 <td className={`num px-2 py-1.5 text-right font-medium ${tone(s.realized)}`}>{pct(s.realized)}</td>
                 <td className="num px-2 py-1.5 text-right text-ink-muted">{pct(s.benchmarkReturn)}</td>
-                <td className={`num px-2 py-1.5 text-right ${tone(s.excess)}`}>{pct(s.excess)}</td>
+                <td
+                  className={`num px-2 py-1.5 text-right ${tone(s.relative)}`}
+                  title={`Relative wealth return ${pct(s.relative)}; arithmetic excess ${pct(s.excess)}${r.prediction.relInterval ? `; relative range ${pct(r.prediction.relInterval[0])} to ${pct(r.prediction.relInterval[1])}` : ""}`}
+                >
+                  {pct(s.relative)}
+                  {s.inRelInterval !== null && <div className={`text-[11px] ${s.inRelInterval ? "text-ink-soft" : "font-medium text-rose-800"}`}>{s.inRelInterval ? "in rel. range" : "outside rel. range"}</div>}
+                </td>
                 <td className={`px-2 py-1.5 ${s.inInterval ? "text-ink" : "font-medium text-rose-800"}`}>{s.inInterval ? "yes" : "no"}</td>
                 <td className="max-w-[300px] px-2 py-1.5 text-ink-muted">
                   {r.prediction.direction === "ABSTAIN" ? "abstained" : `${r.prediction.direction.toLowerCase()} · ${s.directionHit ? "hit" : "miss"} · net ${pct(s.netDirectionalReturn)}`}
@@ -103,6 +109,8 @@ export default function ForecastScorecardPage() {
   const validated = family.filter((s) => s.directionValidated).length;
   const pools = pooled();
   const mstr = overturned[0];
+  const relScored = scored.filter((f) => f.score.inRelInterval !== null);
+  const relChanged = relScored.filter((f) => f.score.inRelInterval !== f.score.inRelIntervalV1);
   const avgRegime = (g: (typeof REGIMES)[number]) => {
     const xs = pools.map((p) => p.byRegime[g].coverage).filter((x): x is number => x !== null);
     return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null;
@@ -135,6 +143,11 @@ export default function ForecastScorecardPage() {
         Model <span className="num">{MODEL_VERSION}</span>: a random walk with an honest range. The point forecast is zero; the 80% range comes from exponentially weighted volatility (λ = 0.94) scaled by √horizon; the base rate of up-moves is shrunk toward 50%. {MODEL_HISTORY[MODEL_VERSION]} The model only ever sees bars dated on or before its cutoff; tests confirm that adding future prices changes nothing. Costs of 5 bp (ETFs), 10 bp (stocks) and 20 bp (crypto) are charged on any directional call.
       </Note>
 
+      <Note>
+        Scoring <span className="num">{SCORING_VERSION}</span>: {SCORING_HISTORY[SCORING_VERSION]} The previous rule, score-v1, compared the relative range with arithmetic excess, a different quantity.{" "}
+        {relScored.length > 0 && `Of ${relScored.length} realized relative ranges, ${relChanged.length} ${relChanged.length === 1 ? "lands" : "land"} differently under the two rules.`} Stored forecasts are unchanged; scores are recomputed from the ledger and prices.
+      </Note>
+
       {mstr && (
         <Note tone="warn">
           <strong className="font-semibold">A v1 call the current rule would not make.</strong> {mstr.record.id} called {mstr.record.prediction.direction.toLowerCase()} under {mstr.record.modelVersion}, whose gate compared the hit rate with a coin flip and tested each instrument alone. {mstr.ruleCheck!.note} The record stays on the ledger unchanged; this note sits beside it.
@@ -152,7 +165,7 @@ export default function ForecastScorecardPage() {
                 <th scope="col" className="px-2 py-2 text-left font-medium">Data to</th>
                 <th scope="col" className="px-2 py-2 text-left font-medium">Direction</th>
                 <th scope="col" className="px-2 py-2 text-right font-medium">80% range</th>
-                <th scope="col" className="px-2 py-2 text-right font-medium">vs benchmark</th>
+                <th scope="col" className="px-2 py-2 text-right font-medium" title="Relative wealth return: (1 + return) / (1 + benchmark return) − 1. Not the arithmetic difference.">Relative to benchmark</th>
                 <th scope="col" className="px-2 py-2 text-left font-medium">Realizes</th>
                 <th scope="col" className="px-2 py-2 text-left font-medium md:pr-6">Made</th>
               </tr>

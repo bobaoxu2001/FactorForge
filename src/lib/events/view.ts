@@ -5,13 +5,13 @@ import pricesFixture from "@/__fixtures__/events/prices.json";
 import forecastLedger from "@/data/events/forecast-ledger.json";
 import thesisLedger from "@/data/events/thesis-ledger.json";
 import { ALL_CLAIMS, ALL_EVENTS, ALL_SOURCES, INSTRUMENTS, RESEARCH_CASES, caseBySlug, instrument } from "@/data/events";
-import type { ResearchCase } from "@/data/events/types";
+import type { ResearchCase, ThesisAssessment } from "@/data/events/types";
 import { applyFamily, pooledCoverage, summarize, walkForward, type PooledCoverage, type WalkForwardSummary } from "./evaluation";
-import { HORIZONS, MODEL_VERSION, scoreForecast, type ForecastRecord, type ForecastScore, type Horizon } from "./forecast";
+import { HORIZONS, MODEL_VERSION, SCORING_VERSION, scoreForecast, type ForecastRecord, type ForecastScore, type Horizon } from "./forecast";
 import { companyImpacts, measuredCells, validateGraph, type CompanyImpact, type ExposureProfile } from "./impact";
 import { canonicalJson, verifyChain, type ChainCheck } from "./ledger";
-import { eventStudy, groupReactions, type EventStudy, type GroupReaction, type PriceSeries } from "./market";
-import { replayThesis, validateThesis, type MarketObservation, type ThesisReplay, type ThesisRecord } from "./thesis";
+import { eventStudy, groupReactions, returnOn, type EventStudy, type GroupReaction, type PriceSeries } from "./market";
+import { replayThesis, triggerWordingFindings, validateThesis, type MarketObservation, type ThesisReplay, type ThesisRecord } from "./thesis";
 import { barCloseInstant, firstReactionIndex, parseInstant, toIso, type MarketCalendar } from "./time";
 import type { EventRecord, EventView } from "./types";
 import { eventAsOf, validateCase, type ValidationIssue } from "./verification";
@@ -101,10 +101,14 @@ export interface WindowView {
   day0Tests: { run: number; significant: number; expectedByChance: number };
   /**
    * The same US equities measured against the equal-weight S&P 500 (RSP).
-   * When the affected names are a large share of QQQ or SPY, the cap-weighted
-   * benchmark absorbs part of the event; this shows how much.
+   * A second, differently built benchmark: where the two disagree, the
+   * result is benchmark-sensitive.
    */
   equalWeight: Record<string, EventStudy>;
+  /** The same day-0 tests against the equal-weight S&P 500, for the stocks that have one. */
+  day0TestsEqualWeight: { run: number; significant: number; expectedByChance: number };
+  /** Day-0 raw moves of the benchmarks themselves, so a reader can see how much the market moved. */
+  benchmarkMoves: Array<{ symbol: string; ret: number }>;
 }
 
 export const EQUAL_WEIGHT_BENCHMARK = "RSP";
@@ -171,9 +175,38 @@ export function windowView(c: ResearchCase, windowId: string): WindowView | null
     estimationOverlaps: longest ? estimationOverlapsFor(longest, event.id) : [],
     day0Tests: { run: tested.length, significant: tested.filter((s) => s.windows[0].significant).length, expectedByChance: tested.length * 0.05 },
     equalWeight,
+    day0TestsEqualWeight: (() => {
+      const ewTested = tested.map((s) => equalWeight[s.symbol]).filter((e) => e?.windows[0]?.tStat != null);
+      return { run: ewTested.length, significant: ewTested.filter((e) => e.windows[0].significant).length, expectedByChance: ewTested.length * 0.05 };
+    })(),
+    benchmarkMoves: (() => {
+      const d0 = longest?.day0;
+      if (!d0) return [];
+      const syms = [...new Set([...studies.map((s) => s.benchmark).filter((b): b is string => !!b), ...(Object.keys(equalWeight).length ? [EQUAL_WEIGHT_BENCHMARK] : [])])];
+      return syms.map((sym) => ({ symbol: sym, ret: series(sym) ? returnOn(series(sym)!, d0) : null })).filter((x): x is { symbol: string; ret: number } => x.ret !== null);
+    })(),
   };
   windowCache.set(key, view);
   return view;
+}
+
+const signed = (x: number) => `${x >= 0 ? "+" : "−"}${Math.abs(x * 100).toFixed(1)}%`;
+
+/**
+ * Plain statement of how much a window's result depends on the benchmark.
+ * Counts are labelled with the benchmark behind them; no cause is inferred.
+ */
+export function benchmarkSensitivity(v: WindowView): string | null {
+  const own = v.day0Tests;
+  const ew = v.day0TestsEqualWeight;
+  if (ew.run === 0) return null;
+  const owns = [...new Set(v.studies.map((s) => s.benchmark).filter(Boolean))].sort().join(" or ");
+  const moves = v.benchmarkMoves.length ? ` On day 0 the benchmarks themselves moved ${v.benchmarkMoves.map((m) => `${m.symbol} ${signed(m.ret)}`).join(", ")}.` : "";
+  const compare =
+    ew.significant === own.significant
+      ? "The two benchmarks give the same count."
+      : `${ew.significant > own.significant ? "More" : "Fewer"} moves look unusual against the equal-weight index, so the reading depends on the benchmark chosen: a stock's expected move is its estimated beta times its benchmark's move, and both differ between the two.`;
+  return `Against each stock's own benchmark (${owns}), ${own.significant} of ${own.run} day-0 moves pass both checks; against the equal-weight S&P 500 (${EQUAL_WEIGHT_BENCHMARK}), ${ew.significant} of ${ew.run} do. About ${own.expectedByChance.toFixed(1)} would pass by chance in each.${moves} ${compare} Neither comparison says why the stocks moved.`;
 }
 
 /** Day-0 tests across every window that measures an event: how many ran, how many passed both checks. */
@@ -268,7 +301,7 @@ export function scoredForecasts(): ScoredForecast[] {
     const asset = series(record.instrument);
     const score: ForecastScore = asset
       ? scoreForecast(record, asset, series(record.benchmark))
-      : { status: "not-scorable", note: "Instrument missing from the snapshot.", targetDate: null, barsRemaining: null, realized: null, benchmarkReturn: null, excess: null, error: null, inInterval: null, inRelInterval: null, directionHit: null, brier: null, netDirectionalReturn: null };
+      : { status: "not-scorable", note: "Instrument missing from the snapshot.", targetDate: null, barsRemaining: null, realized: null, benchmarkReturn: null, excess: null, relative: null, error: null, inInterval: null, inRelInterval: null, inRelIntervalV1: null, scoringVersion: SCORING_VERSION, directionHit: null, brier: null, netDirectionalReturn: null };
     return { record, score, ruleCheck: ruleCheck(record) };
   });
 }
@@ -352,6 +385,10 @@ export interface ThesisView {
   integrity: { recorded: boolean; matches: boolean };
   /** Post-horizon claims from this thesis's own case. */
   postHorizonClaims: string[];
+  /** Dated notes on parts of the thesis, from the case file. The thesis itself is unchanged. */
+  assessments: ThesisAssessment[];
+  /** What the trigger wording rules now in force would say about this thesis (binding only for later theses). */
+  ruleFindings: string[];
 }
 
 let thesisCache: ThesisView[] | null = null;
@@ -380,6 +417,8 @@ export function thesisViews(): ThesisView[] {
         outcome,
         integrity: { recorded: !!entry, matches: !!entry && entry.contentHash === thesisContentHash(t) },
         postHorizonClaims: replay.postHorizonClaims.filter((id) => c.claims.some((x) => x.id === id)),
+        assessments: (c.assessments ?? []).filter((a) => a.thesisId === t.id),
+        ruleFindings: triggerWordingFindings(t, ALL_CLAIMS),
       };
     }),
   );

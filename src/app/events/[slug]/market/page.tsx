@@ -4,7 +4,7 @@ import { pct, tone } from "@/components/events/EventUI";
 import { Note, Panel } from "@/components/intel/ui";
 import { caseBySlug, instrument } from "@/data/events";
 import type { EventStudy, WindowResult } from "@/lib/events/market";
-import { EQUAL_WEIGHT_BENCHMARK, eventReactionSummary, windowView } from "@/lib/events/view";
+import { benchmarkSensitivity, eventReactionSummary, windowView } from "@/lib/events/view";
 
 export const generateMetadata = ({ params }: { params: Promise<{ slug: string }> }) => caseMetadata(params, "Market reaction");
 
@@ -57,7 +57,6 @@ export default async function EventMarketPage({ params }: { params: Promise<{ sl
         const day0s = [...new Set(v.studies.map((s) => s.day0).filter(Boolean))];
         const hasEqualWeight = Object.keys(v.equalWeight).length > 0;
         const sigBySymbol = new Map(v.studies.map((s) => [s.symbol, s.windows[0]?.significant ?? false]));
-        const ewOnly = Object.values(v.equalWeight).filter((e) => e.windows[0]?.significant && !sigBySymbol.get(e.symbol) && v.studies.find((s) => s.symbol === e.symbol)?.benchmark);
         return (
           <section key={w.id} id={w.id} className="scroll-mt-28">
             <Panel
@@ -67,11 +66,9 @@ export default async function EventMarketPage({ params }: { params: Promise<{ sl
             >
               <div className="mb-3 space-y-2">
                 <p className="text-[13px] leading-relaxed text-ink">
-                  <span className="font-semibold">{v.day0Tests.significant}</span> of {v.day0Tests.run} benchmark-adjusted day-0 moves pass both checks. With this many tests, about {v.day0Tests.expectedByChance.toFixed(1)} would pass by chance alone
-                  {v.day0Tests.significant > 2 * v.day0Tests.expectedByChance && v.day0Tests.significant >= 2 ? ", so the cluster is unlikely to be noise." : ", so isolated hits should be read with care."}
-                  {ewOnly.length > 0 && (
+                  {benchmarkSensitivity(v) ?? (
                     <>
-                      {" "}Against the equal-weight S&amp;P 500 ({EQUAL_WEIGHT_BENCHMARK}), {ewOnly.length} more pass: {ewOnly.map((e) => e.symbol).join(", ")}. Their own benchmark moved with them and absorbed the reaction.
+                      <span className="font-semibold">{v.day0Tests.significant}</span> of {v.day0Tests.run} benchmark-adjusted day-0 moves pass both checks. With this many tests, about {v.day0Tests.expectedByChance.toFixed(1)} would pass by chance alone.
                     </>
                   )}
                 </p>

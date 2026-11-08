@@ -39,10 +39,13 @@ describe("event research memo", () => {
     });
   }
 
-  it("says when the cap-weighted benchmark absorbed the 5 Nov selloff", () => {
+  it("reports the 5 Nov result as benchmark-sensitive, with each count labelled, and infers no cause", () => {
     const ai = RESEARCH_CASES.find((c) => c.slug === "ai-datacenter-shock")!;
     const market = buildEventMemo(ai).find((s) => s.title === "How the event reached markets")!.paragraphs.join(" ");
-    expect(market).toMatch(/equal-weight S&P 500 \(RSP\)/);
-    expect(market).toMatch(/absorbed part of the move/);
+    expect(market).toMatch(/Against each stock's own benchmark \(QQQ or SPY\), 0 of 19/);
+    expect(market).toMatch(/against the equal-weight S&P 500 \(RSP\), \d+ of 19 do/);
+    expect(market).toMatch(/depends on the benchmark chosen/);
+    expect(market).toMatch(/Neither comparison says why the stocks moved/);
+    expect(market).not.toMatch(/absorbed|not market-wide|market-wide/);
   });
 });

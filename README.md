@@ -60,7 +60,7 @@ The event layer (`src/lib/events`, routes `/events`, `/theses`, `/forecasts`) ha
 Seeded with two real cases from public sources, each claim paraphrased and linked:
 
 - **Binance security incident, 29 Oct 2026** (`/events/binance-breach`). What failed on Binance's own account. Frozen versus replenished versus recovered (unknown). Why the FBI attribution stays unconfirmed (page unreadable). BNB fell 5.2% more than bitcoin explains (it passes both the t-test and the placebo check), while no US crypto equity moved beyond what the Nasdaq explains.
-- **AI data-center restrictions and the 5 Nov 2026 selloff** (`/events/ai-datacenter-shock`). Two enacted state pauses versus campaign promises. Power and grid names took the abnormal hit on 4 Nov, the first session after the election results (9 of 18 day-0 tests beyond noise, about 1 expected by chance). On 5 Nov nothing stood out against QQQ or SPY, but against the equal-weight S&P 500 semiconductors, networking and data-center equipment fell 7–12% beyond noise while hyperscalers did not: the cap-weighted benchmarks absorbed an AI-supplier selloff. Policy, earnings, positioning and financing are listed as competing explanations, none proven. Each case opens with a six-step brief (`/events/<case>/brief`).
+- **AI data-center restrictions and the 5 Nov 2026 selloff** (`/events/ai-datacenter-shock`). Two enacted state pauses versus campaign promises. Power and grid names took the abnormal hit on 4 Nov, the first session after the election results (9 of 18 day-0 tests beyond noise, about 1 expected by chance). On 5 Nov the broad market fell, and the stock-level result depends on the benchmark: 0 of 19 moves beyond noise against each stock's own benchmark (QQQ or SPY), 7 of 19 against the equal-weight S&P 500, mostly semiconductors, networking and data-center equipment. Policy, earnings, positioning and financing are listed as competing explanations, none proven. Each case opens with a six-step brief (`/events/<case>/brief`).
 
 ## Featured case study: *Is the U.S. Freight Recovery Real?*
 
@@ -578,9 +578,9 @@ Security notes:
 
 ## Testing
 
-571 tests across 90 files under vitest + jsdom (plus one ledger-writer suite that runs only under `npm run events:forecast`).
+580 tests across 90 files under vitest + jsdom (plus one ledger-writer suite that runs only under `npm run events:forecast`).
 
-The event-intelligence layer has 121 tests in 9 files. They cover:
+The event-intelligence layer has 130 tests in 9 files. They cover:
 - Contradictory sources, and rumours versus enacted rules (lifecycle guard).
 - Time zones and DST, including events after the New York close.
 - One story syndicated by many outlets.
@@ -595,6 +595,8 @@ The event-intelligence layer has 121 tests in 9 files. They cover:
 - A constant rule on a drifting asset is not credited with skill; Holm adjustment across the family; exact binomial tails; Wilson intervals; effective n under overlap.
 - Ranges that are too narrow or too wide are flagged; pooled coverage deflated for instruments that miss together.
 - Event-study variance with estimation error, and a placebo check that stops fat-tailed moves passing as significant.
+- Relative ranges scored against relative wealth return, with cases where arithmetic excess would give the opposite result.
+- Trigger labels that claim more than their condition ("confirmed", "driver") are flagged; old theses keep their wording with a dated assessment.
 - Memo citations, and UI source links.
 
 Earlier, the research layer added 90 tests in 12 files and the follow-up methodology pass added 12 more (Deflated Sharpe, next-open stop fills, lead-lag holdout, hotspot display helpers):

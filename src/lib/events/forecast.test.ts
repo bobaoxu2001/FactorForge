@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 import forecastLedger from "@/data/events/forecast-ledger.json";
 import { summarize, walkForward } from "./evaluation";
-import { HORIZONS, predict, scoreForecast, type ForecastRecord } from "./forecast";
+import { HORIZONS, SCORING_VERSION, predict, scoreForecast, type ForecastRecord } from "./forecast";
 import { appendRecord, GENESIS, verifyChain } from "./ledger";
 import type { PriceSeries } from "./market";
 import { benchmarkOf, priceSeries, scoredForecasts, series } from "./view";
@@ -96,6 +96,35 @@ describe("scoring against the right benchmark", () => {
     const rec = { dataAsOf: "2026-11-04", horizon: 1 as const, costBps: 10, prediction: { ...LEDGER[0].prediction, direction: "DOWN" as const } };
     const s = scoreForecast(rec, series("NVDA")!, series("QQQ")!);
     expect(s.netDirectionalReturn!).toBeCloseTo(-s.realized! - 0.001, 12);
+  });
+});
+
+describe("relative-range scoring (score-v2)", () => {
+  const twoBars = (symbol: string, end: number): PriceSeries => ({ symbol, calendar: "us-equity", dates: ["2026-11-02", "2026-11-03"], adj: [100, end], volume: [1, 1] });
+  const score = (assetEnd: number, benchEnd: number, rel: [number, number]) =>
+    scoreForecast({ dataAsOf: "2026-11-02", horizon: 1, costBps: 0, prediction: { ...LEDGER[0].prediction, interval: [-0.5, 0.5], relInterval: rel } }, twoBars("A", assetEnd), twoBars("B", benchEnd));
+
+  it("scores against relative wealth return when arithmetic excess would say outside", () => {
+    // +30% vs +22%: arithmetic excess 8% is outside ±7%; relative wealth return 1.30 / 1.22 − 1 = 6.6% is inside.
+    const s = score(130, 122, [-0.07, 0.07]);
+    expect(s.excess!).toBeCloseTo(0.08, 12);
+    expect(s.relative!).toBeCloseTo(1.3 / 1.22 - 1, 12);
+    expect(s.inRelInterval).toBe(true);
+    expect(s.inRelIntervalV1).toBe(false);
+    expect(s.scoringVersion).toBe(SCORING_VERSION);
+  });
+
+  it("scores against relative wealth return when arithmetic excess would say inside", () => {
+    // −20% vs −15%: arithmetic excess −5% is inside [−5.5%, +7%]; relative 0.80 / 0.85 − 1 = −5.9% is outside.
+    const s = score(80, 85, [-0.055, 0.07]);
+    expect(s.inRelInterval).toBe(false);
+    expect(s.inRelIntervalV1).toBe(true);
+  });
+
+  it("builds the relative range from log excess returns, so it brackets relative wealth return symmetrically in logs", () => {
+    const rec = LEDGER.find((r) => r.prediction.relInterval)!;
+    const [lo, hi] = rec.prediction.relInterval!;
+    expect(Math.log(1 + lo)).toBeCloseTo(-Math.log(1 + hi), 12);
   });
 });
 

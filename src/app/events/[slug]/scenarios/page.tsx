@@ -66,7 +66,7 @@ export default async function EventScenariosPage({ params }: { params: Promise<{
                 <th scope="col" className="px-2 py-2 text-left font-medium">Horizon</th>
                 <th scope="col" className="px-2 py-2 text-left font-medium">Direction</th>
                 <th scope="col" className="px-2 py-2 text-right font-medium">80% range</th>
-                <th scope="col" className="px-2 py-2 text-right font-medium">vs benchmark (80%)</th>
+                <th scope="col" className="px-2 py-2 text-right font-medium" title="Relative wealth return: (1 + return) / (1 + benchmark return) − 1. Not the arithmetic difference.">Relative to benchmark (80%)</th>
                 <th scope="col" className="px-2 py-2 text-right font-medium">Base rate up</th>
                 <th scope="col" className="px-2 py-2 text-right font-medium">Past coverage</th>
                 <th scope="col" className="px-2 py-2 text-left font-medium md:pr-6">Made</th>

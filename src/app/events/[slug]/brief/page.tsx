@@ -5,7 +5,7 @@ import { CitedProse, EvidenceRefs, OriginChip, ThesisStatusChip, VerificationChi
 import { caseBySlug, instrument } from "@/data/events";
 import { caseMetadata } from "@/lib/events/caseMetadata";
 import type { VerificationState } from "@/lib/events/types";
-import { eventView, impacts, thesisViews, windowView } from "@/lib/events/view";
+import { benchmarkSensitivity, eventView, impacts, thesisViews, windowView } from "@/lib/events/view";
 
 export const generateMetadata = ({ params }: { params: Promise<{ slug: string }> }) =>
   caseMetadata(params, "Research brief", "The case in six steps: question, industry impact, evidence, competing explanations, implications, and what would change the conclusion.");
@@ -83,11 +83,22 @@ export default async function EventBriefPage({ params }: { params: Promise<{ slu
         {views.map((v) => {
           const groups = [...new Set(v.studies.filter((s) => s.benchmark).map((s) => groupOf(s.symbol)))];
           const hasEw = Object.keys(v.equalWeight).length > 0;
+          const owns = [...new Set(v.studies.map((s) => s.benchmark).filter(Boolean))].sort().join(" or ");
+          const sensitivity = benchmarkSensitivity(v);
           return (
             <div key={v.spec.id}>
               <h3 className="text-[13px] font-medium text-ink-soft">
-                {v.spec.label} · day 0 {v.studies.find((s) => s.day0)?.day0} · {v.day0Tests.significant} of {v.day0Tests.run} beyond noise (about {v.day0Tests.expectedByChance.toFixed(1)} expected by chance)
+                {v.spec.label} · day 0 {v.studies.find((s) => s.day0)?.day0}
               </h3>
+              <p className="mt-0.5 text-[12.5px] text-ink-muted">
+                Beyond noise against own benchmark ({owns}): <span className="num font-medium text-ink">{v.day0Tests.significant} of {v.day0Tests.run}</span>
+                {hasEw && (
+                  <>
+                    {" "}· against the equal-weight S&amp;P 500 (RSP): <span className="num font-medium text-ink">{v.day0TestsEqualWeight.significant} of {v.day0TestsEqualWeight.run}</span>
+                  </>
+                )}
+                {" "}· about {v.day0Tests.expectedByChance.toFixed(1)} expected by chance
+              </p>
               <div className="-mx-4 mt-1 overflow-x-auto md:mx-0">
                 <table className="w-full min-w-[560px] text-[12.5px]" aria-label={`Day-0 reaction by group: ${v.spec.label}`}>
                   <thead className="border-b border-line text-[11.5px] text-ink-soft">
@@ -132,11 +143,12 @@ export default async function EventBriefPage({ params }: { params: Promise<{ slu
                   </tbody>
                 </table>
               </div>
+              {sensitivity && v.day0TestsEqualWeight.significant !== v.day0Tests.significant && <p className="mt-1.5 text-[12.5px] leading-relaxed text-ink-muted">{sensitivity}</p>}
             </div>
           );
         })}
         <p className="text-[12.5px] text-ink-muted">
-          Equal-weighted group means; the small figure counts members whose own move passed both significance checks. Where the stocks are a large part of their benchmark, the equal-weight column is the fairer read. These are associations around a date, not proof of cause.
+          Equal-weighted group means; the small figure counts members whose own move passed both significance checks against that benchmark. Neither benchmark is the right one: where the two disagree, the result is sensitive to the benchmark and should be read that way. These are associations around a date, not proof of cause.
         </p>
       </Step>
 
@@ -199,6 +211,22 @@ export default async function EventBriefPage({ params }: { params: Promise<{ slu
               <OriginChip origin={t.replay.thesis.origin} />
             </div>
             <p className="mt-1 text-ink-muted">{t.replay.thesis.statement}</p>
+            {t.assessments
+              .filter((a) => a.target === "statement")
+              .map((a) => (
+                <p key={a.at} className="mt-1.5 border-l-2 border-amber-600 pl-2 text-[12.5px] text-ink-muted">
+                  <span className="font-medium text-amber-900">Current assessment:</span> <CitedProse text={a.note} caseSlug={c.slug} />
+                </p>
+              ))}
+            {t.ruleFindings.length > 0 && (
+              <p className="mt-1 text-[12px] text-ink-soft">
+                {t.ruleFindings.length} trigger wording issue{t.ruleFindings.length === 1 ? "" : "s"} under current rules;{" "}
+                <Link href={`/theses#${t.replay.thesis.id}`} className="text-accent hover:underline">
+                  see the thesis
+                </Link>
+                .
+              </p>
+            )}
           </div>
         ))}
         {c.scenarios.length > 0 && (

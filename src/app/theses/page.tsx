@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { EvidenceRefs, OriginChip, ThesisStatusChip, When, pct, tone } from "@/components/events/EventUI";
+import { CitedProse, EvidenceRefs, OriginChip, ThesisStatusChip, When, pct, tone } from "@/components/events/EventUI";
 import { Note, Panel } from "@/components/intel/ui";
 import PageHeader from "@/components/layout/PageHeader";
+import { THESIS_RULES_V2_FROM } from "@/lib/events/thesis";
 import { PLATFORM_AS_OF, thesisViews } from "@/lib/events/view";
 
 export const metadata = {
@@ -54,6 +55,23 @@ export default function ThesisTrackerPage() {
                   </div>
                   <blockquote className="mt-1 border-l-2 border-accent/50 pl-3 font-serif text-[16.5px] leading-relaxed text-ink">{t.statement}</blockquote>
                   {t.originNote && <p className="mt-2 text-[12.5px] italic text-ink-muted">{t.originNote}</p>}
+                  {(v.assessments.length > 0 || v.ruleFindings.length > 0) && (
+                    <div className="mt-3 border-l-2 border-amber-600 bg-amber-50/60 px-3 py-2 text-[12.5px] leading-relaxed text-ink-muted">
+                      <div className="font-medium text-amber-900">Current assessment (the original above is unchanged)</div>
+                      <ul className="mt-1 space-y-1.5">
+                        {v.assessments.map((a) => (
+                          <li key={a.target + a.at}>
+                            <span className="font-medium text-ink">{a.target === "statement" ? "Statement" : a.target.replace("trigger:", "Trigger ")}, <When iso={a.at} precision="day" />:</span> <CitedProse text={a.note} caseSlug={v.caseSlug} />
+                          </li>
+                        ))}
+                        {v.ruleFindings.map((f) => (
+                          <li key={f}>
+                            <span className="font-medium text-ink">Trigger wording rules now in force:</span> {f}. These rules bind theses published from <When iso={THESIS_RULES_V2_FROM} precision="day" />; this one predates them and keeps its triggers.
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <div className="text-[12.5px] font-medium text-ink-soft">Assumptions</div>

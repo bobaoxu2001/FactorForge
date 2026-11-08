@@ -149,8 +149,37 @@ function sourcesForReplay(thesis: ThesisRecord, claims: Claim[], sources: Source
   return { claims: remapped, sources: [...sources, ...shadow] };
 }
 
+/**
+ * Wording rules for triggers, in force for theses published from this
+ * instant. Earlier theses are immutable, so they are not rejected; the same
+ * rules are reported beside them as a current assessment instead.
+ */
+export const THESIS_RULES_V2_FROM = "2026-11-08T10:00:00Z";
+
+/**
+ * A trigger must not claim more than its condition can show:
+ * - a label that says "confirmed" needs a CONFIRMED threshold;
+ * - a label that calls something a driver or cause asserts causation, which no
+ *   verification state of a claim can establish; it may only prompt a review;
+ * - a claim labelled a causal hypothesis cannot strengthen, weaken or invalidate.
+ */
+export function triggerWordingFindings(thesis: ThesisRecord, claims: Claim[]): string[] {
+  const byId = new Map(claims.map((c) => [c.id, c]));
+  const out: string[] = [];
+  for (const t of thesis.triggers) {
+    if (t.condition.kind === "market") continue;
+    const label = t.description.toLowerCase();
+    const threshold = t.condition.atLeast;
+    if (/\bconfirm/.test(label) && threshold !== "CONFIRMED") out.push(`${t.id}: says "confirmed" but fires at ${threshold}`);
+    if (/\b(driver|caused?|because)\b/.test(label) && t.effect !== "review") out.push(`${t.id}: treats a cause as established; whether something drove a move is a hypothesis, so this can only prompt a review`);
+    if (t.condition.kind === "claim" && byId.get(t.condition.claimId)?.epistemic === "CAUSAL_HYPOTHESIS" && t.effect !== "review") out.push(`${t.id}: keys on a causal hypothesis (${t.condition.claimId}) and may only prompt a review`);
+  }
+  return out;
+}
+
 export function validateThesis(thesis: ThesisRecord, claims: Claim[], observations: MarketObservation[], sources?: SourceRecord[]): string[] {
   const problems: string[] = [];
+  if (parseInstant(thesis.publishedAt) >= parseInstant(THESIS_RULES_V2_FROM)) problems.push(...triggerWordingFindings(thesis, claims));
   if (sources) {
     // Evidence cited at publication must have been available at the cutoff (no hindsight).
     const view = sourcesForReplay(thesis, claims, sources);
