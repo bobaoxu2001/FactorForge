@@ -26,10 +26,13 @@ export default async function EventCaseOverview({ params }: { params: Promise<{ 
   if (!c) notFound();
   const primary = eventView(c.primaryEventId);
   const theses = thesisViews().filter((t) => t.replay.thesis.caseId === c.id);
-  const short = (id: string) => c.claims.find((x) => x.id === id)?.short ?? id;
+  const named = (id: string) => {
+    const s = c.claims.find((x) => x.id === id)?.short;
+    return s ? `${s} (${id})` : id;
+  };
   const updates = [
     ...(c.currentAssessment?.changes ?? []).map((x) => ({ at: x.at, kind: "Assessment", text: x.text, href: `/events/${c.slug}/brief#what-changed` })),
-    ...c.claims.flatMap((cl) => (cl.corrections ?? []).map((x) => ({ at: x.at, kind: "Correction", text: `${short(cl.id)} (${cl.id}): ${x.note}`, href: `/events/${c.slug}/evidence#${cl.id}` }))),
+    ...c.claims.flatMap((cl) => (cl.corrections ?? []).map((x) => ({ at: x.at, kind: "Correction", text: `${named(cl.id)}: ${x.note}`, href: `/events/${c.slug}/evidence#${cl.id}` }))),
     ...theses.flatMap((t) => t.replay.revisions.map((r) => ({ at: r.at, kind: "Thesis revision", text: `${t.replay.thesis.title}: ${r.from.toLowerCase()} → ${r.to.toLowerCase()}. ${r.explanation}`, href: `/theses#${t.replay.thesis.id}` }))),
     ...theses.flatMap((t) => t.assessments.map((x) => ({ at: x.at, kind: "Thesis note", text: `${t.replay.thesis.title} (${x.target === "statement" ? "statement" : x.target.replace("trigger:", "trigger ")}): ${x.note.replace(/\[([A-Z]-C\d+)\]/g, "$1")}`, href: `/theses#${t.replay.thesis.id}` }))),
   ].sort((a, b) => b.at.localeCompare(a.at));
