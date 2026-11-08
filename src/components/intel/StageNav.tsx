@@ -10,6 +10,8 @@ export interface Stage {
   step: string;
   /** Short status computed on the server, e.g. "12/14 verified". */
   status?: string;
+  /** Secondary stages render smaller, after a divider. */
+  secondary?: boolean;
 }
 
 /**
@@ -34,11 +36,13 @@ export default function StageNav({ projectId, stages, basePath, label = "Researc
   return (
     <nav aria-label={label} className="sticky top-14 z-30 -mx-4 border-b border-line bg-bg/95 px-4 backdrop-blur md:-mx-8 md:px-8">
       <ol ref={listRef} className="flex gap-5 overflow-x-auto text-[13.5px]">
-        {stages.map((stage) => {
+        {stages.map((stage, i) => {
           const href = stage.slug ? `${base}/${stage.slug}` : base;
           const active = stage.slug ? pathname.startsWith(href) : pathname === base;
+          const firstSecondary = stage.secondary && !stages[i - 1]?.secondary;
           return (
-            <li key={stage.slug || "overview"} className="shrink-0">
+            <li key={stage.slug || "overview"} className={`flex shrink-0 items-center ${stage.secondary ? "text-[12.5px]" : ""}`}>
+              {firstSecondary && <span aria-hidden className="mr-5 h-4 w-px bg-line" />}
               <Link
                 href={href}
                 ref={active ? activeRef : undefined}
@@ -48,7 +52,7 @@ export default function StageNav({ projectId, stages, basePath, label = "Researc
                   active ? "border-accent font-semibold text-ink" : "border-transparent text-ink-muted hover:border-ink/20 hover:text-ink"
                 }`}
               >
-                <span className={`num text-[12px] ${active ? "text-accent" : "text-ink-soft"}`}>{stage.step}</span>
+                {stage.step && <span className={`num text-[12px] ${active ? "text-accent" : "text-ink-soft"}`}>{stage.step}</span>}
                 <span>{stage.label}</span>
               </Link>
             </li>

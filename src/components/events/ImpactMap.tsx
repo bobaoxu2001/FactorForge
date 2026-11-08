@@ -1,13 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
-import type { CompanyImpact, ImpactEdge, ImpactGraph, Layer } from "@/lib/events/impact";
+import { COMPARISON_LABEL, LINK_STATUS_LABEL, type CompanyImpact, type ImpactGraph, type Layer, type LinkAssessment, type PathTrace, type Sign } from "@/lib/events/impact";
 
 /**
  * Event → mechanism → industry → company → expectations → valuation → price,
- * as columns. Choosing a company traces every path from the event to it and
- * highlights the nodes and links on those paths; hypothesis-only links are
- * drawn dashed and do not count toward the net direction.
+ * as columns. Choosing a company shows one mechanism at a time: the main one
+ * first, the competing ones a click away. Each link says in words whether its
+ * evidence bears on it or only on a background fact, and what assumption
+ * carries it. Signs are a qualitative scenario aid, never an estimate.
  */
 
 const LAYER_LABEL: Record<Layer, string> = {
@@ -21,29 +23,52 @@ const LAYER_LABEL: Record<Layer, string> = {
 };
 
 const NET_LABEL: Record<CompanyImpact["net"], string> = {
-  positive: "positive",
-  negative: "negative",
-  ambiguous: "ambiguous (paths disagree)",
-  unsupported: "unsupported (hypotheses only)",
+  positive: "positive on every evidence-backed path",
+  negative: "negative on every evidence-backed path",
+  ambiguous: "evidence-backed paths disagree",
+  unsupported: "none: every path rests on at least one assumption",
 };
 
-const NET_STYLE: Record<CompanyImpact["net"], string> = {
-  positive: "text-emerald-700",
-  negative: "text-rose-700",
-  ambiguous: "text-amber-800",
-  unsupported: "text-ink-soft",
+const SCENARIO_LABEL: Record<CompanyImpact["scenario"], string> = {
+  raises: "every proposed mechanism would raise this company's business",
+  lowers: "every proposed mechanism would lower this company's business",
+  mixed: "some proposed mechanisms would raise it, others lower it",
+  none: "no proposed mechanism reaches this company",
 };
 
-const SIGN_STYLE: Record<ImpactEdge["sign"], string> = { "+": "text-emerald-700", "-": "text-rose-700", "±": "text-amber-800" };
+const PATH_SIGN: Record<Sign, string> = { "+": "would raise", "-": "would lower", "±": "either way" };
+const LINK_SIGN: Record<Sign, string> = { "+": "moves with", "-": "moves against", "±": "either way" };
 
-export default function ImpactMap({ graph, impacts, layers }: { graph: ImpactGraph; impacts: CompanyImpact[]; layers: Layer[] }) {
-  const [selected, setSelected] = useState<string | null>(impacts[0]?.nodeId ?? null);
+const STATUS_STYLE: Record<LinkAssessment["status"], string> = {
+  "direct-evidence": "border-accent/50",
+  "background-only": "border-dashed border-ink/35",
+  "no-evidence": "border-dotted border-ink/35",
+};
+
+const pct = (v: number | null) => (v === null ? "—" : `${v >= 0 ? "+" : ""}${(v * 100).toFixed(1)}%`);
+
+function pathName(p: PathTrace, byId: Map<string, { label: string }>) {
+  return p.nodes
+    .slice(1, -1)
+    .map((id) => byId.get(id)?.label ?? id)
+    .join(" → ");
+}
+
+export default function ImpactMap({ graph, impacts, layers, caseSlug, initial, mainPaths }: { graph: ImpactGraph; impacts: CompanyImpact[]; layers: Layer[]; caseSlug: string; initial?: string; mainPaths?: Record<string, string[]> }) {
+  const [selected, setSelected] = useState<string | null>(initial ?? impacts[0]?.nodeId ?? null);
+  const [pathIndex, setPathIndex] = useState(0);
   const byId = useMemo(() => new Map(graph.nodes.map((n) => [n.id, n])), [graph.nodes]);
   const impact = impacts.find((i) => i.nodeId === selected) ?? null;
-  const onPath = new Set(impact?.paths.flatMap((p) => p.nodes) ?? []);
-  const edgeKey = (a: string, b: string) => `${a}>${b}`;
-  const pathEdges = new Set(impact?.paths.flatMap((p) => p.nodes.slice(1).map((n, i) => edgeKey(p.nodes[i], n))) ?? []);
-  const edgesOnPath = graph.edges.filter((e) => pathEdges.has(edgeKey(e.from, e.to)));
+
+  // Main mechanism first, if one is designated for this company.
+  const ordered = useMemo(() => {
+    if (!impact) return [];
+    const main = mainPaths?.[impact.nodeId]?.join(">");
+    return [...impact.paths].sort((a, b) => Number(b.nodes.join(">") === main) - Number(a.nodes.join(">") === main));
+  }, [impact, mainPaths]);
+  const hasMain = !!(impact && mainPaths?.[impact.nodeId]);
+  const path = ordered[Math.min(pathIndex, ordered.length - 1)] ?? null;
+  const onPath = new Set(path?.nodes ?? []);
 
   return (
     <div>
@@ -60,16 +85,27 @@ export default function ImpactMap({ graph, impacts, layers }: { graph: ImpactGra
                     const active = onPath.has(n.id);
                     const isSelected = n.id === selected;
                     const cls = `w-full rounded-md border px-2 py-1.5 text-left text-[12px] leading-snug transition-colors ${
-                      isSelected ? "border-accent bg-accent-soft text-ink" : active ? "border-accent/50 bg-paper text-ink" : "border-line bg-panel2 text-ink-muted"
+                      isSelected ? "border-accent bg-accent-soft font-medium text-ink" : active ? "border-accent/60 bg-paper text-ink underline decoration-accent/50 underline-offset-2" : "border-line bg-panel2 text-ink-muted"
                     }`;
                     return (
                       <li key={n.id}>
                         {isCompany ? (
-                          <button type="button" className={`${cls} hover:border-accent/60`} aria-pressed={isSelected} onClick={() => setSelected(n.id)}>
+                          <button
+                            type="button"
+                            className={`${cls} hover:border-accent/60`}
+                            aria-pressed={isSelected}
+                            onClick={() => {
+                              setSelected(n.id);
+                              setPathIndex(0);
+                            }}
+                          >
                             <span className="font-semibold">{n.ticker}</span> <span>{n.label}</span>
                           </button>
                         ) : (
-                          <div className={cls}>{n.label}</div>
+                          <div className={cls}>
+                            {active && <span className="sr-only">On the selected mechanism: </span>}
+                            {n.label}
+                          </div>
                         )}
                       </li>
                     );
@@ -82,40 +118,86 @@ export default function ImpactMap({ graph, impacts, layers }: { graph: ImpactGra
 
       {impact && (
         <div className="mt-5 rounded-md border border-line p-4" aria-live="polite">
-          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <h3 className="text-[15px] font-semibold text-ink">
-              {impact.ticker} · {impact.label}
-            </h3>
-            <span className={`text-[13px] font-medium ${NET_STYLE[impact.net]}`}>Net on evidence-backed paths: {NET_LABEL[impact.net]}</span>
-          </div>
-          <p className="mt-1 text-[12.5px] text-ink-muted">Market check ({impact.marketCheck.replace("-", " ")}): {impact.marketNote}</p>
-          <ol className="mt-3 space-y-2">
-            {impact.paths.map((p) => (
-              <li key={p.nodes.join(">")} className="text-[12.5px] leading-relaxed">
-                <span className={`num mr-2 inline-block w-5 text-center font-semibold ${SIGN_STYLE[p.sign]}`}>{p.sign}</span>
-                {p.nodes.map((id, i) => (
-                  <span key={id}>
-                    {i > 0 && <span className="mx-1 text-ink-soft">→</span>}
-                    <span className={i === 0 || i === p.nodes.length - 1 ? "font-medium text-ink" : "text-ink-muted"}>{byId.get(id)?.label}</span>
-                  </span>
+          <h3 className="text-[15px] font-semibold text-ink">
+            {impact.ticker} · {impact.label}
+          </h3>
+          <dl className="mt-2 space-y-1 text-[12.5px] leading-relaxed">
+            <div>
+              <dt className="inline font-medium text-ink">Evidence-backed direction: </dt>
+              <dd className="inline text-ink-muted">{NET_LABEL[impact.net]}.</dd>
+            </div>
+            <div>
+              <dt className="inline font-medium text-ink">Scenario aid: </dt>
+              <dd className="inline text-ink-muted">{SCENARIO_LABEL[impact.scenario]}. Signs multiplied along a path show which way a mechanism would push if it held; they are not an estimate of earnings or returns.</dd>
+            </div>
+            <div>
+              <dt className="inline font-medium text-ink">Observed price response: </dt>
+              <dd className="inline text-ink-muted">
+                {impact.observed
+                  ? `${pct(impact.observed.raw)} raw and ${pct(impact.observed.abnormal)} beyond ${impact.observed.benchmark ?? "its own history"} on ${impact.observed.day0} (${impact.observed.significant ? "beyond noise" : "within noise"}).`
+                  : "not measured in this window."}{" "}
+                {COMPARISON_LABEL[impact.comparison.state]}: {impact.comparison.note}
+              </dd>
+            </div>
+          </dl>
+
+          {ordered.length > 0 && (
+            <>
+              <div className="mt-4 flex flex-wrap gap-1.5" role="group" aria-label="Mechanisms reaching this company">
+                {ordered.map((p, i) => (
+                  <button
+                    key={p.nodes.join(">")}
+                    type="button"
+                    aria-pressed={i === pathIndex}
+                    onClick={() => setPathIndex(i)}
+                    className={`rounded-md border px-2 py-1 text-left text-[12px] leading-snug ${i === pathIndex ? "border-accent bg-accent-soft font-medium text-ink" : "border-line text-ink-muted hover:border-accent/50"}`}
+                  >
+                    {i === 0 && hasMain ? "Main mechanism" : `${hasMain ? "Competing" : "Mechanism"} ${hasMain ? i : i + 1}`}: {PATH_SIGN[p.sign]} · {p.assumptions === 0 ? "evidence on every link" : `${p.assumptions} assumption${p.assumptions === 1 ? "" : "s"}`}
+                  </button>
                 ))}
-                <span className="ml-2 text-ink-soft">
-                  · {p.supported ? "evidence on every link" : "rests on a hypothesis"} · weakest link {p.weakest} · {p.horizons.join("/")} term
-                </span>
-              </li>
-            ))}
-          </ol>
-          <h4 className="mt-4 text-[12.5px] font-semibold text-ink">Links on these paths</h4>
-          <ul className="mt-1.5 space-y-1.5">
-            {edgesOnPath.map((e) => (
-              <li key={edgeKey(e.from, e.to)} className={`border-l-2 pl-2 text-[12.5px] leading-relaxed ${e.evidence.length ? "border-accent/40" : "border-dashed border-ink/25"}`}>
-                <span className={`num font-semibold ${SIGN_STYLE[e.sign]}`}>{e.sign}</span>{" "}
-                <span className="text-ink">{byId.get(e.from)?.label} → {byId.get(e.to)?.label}</span>
-                <span className="text-ink-muted">: {e.mechanism}</span>
-                <span className="text-ink-soft"> · {e.epistemic.toLowerCase().replace("_", " ")} · {e.confidence} confidence · evidence: {e.evidence.length ? e.evidence.join(", ") : "none yet"}</span>
-              </li>
-            ))}
-          </ul>
+              </div>
+              {path && (
+                <div className="mt-3">
+                  <p className="text-[13px] text-ink">
+                    <span className="font-medium">{pathName(path, byId)}</span> <span className="text-ink-muted">— {PATH_SIGN[path.sign]} {impact.ticker ?? impact.label}&apos;s business if every link held; {path.horizons.join("/")} term.</span>
+                  </p>
+                  <ol className="mt-2 space-y-2.5">
+                    {path.links.map((l) => (
+                      <li key={`${l.edge.from}>${l.edge.to}`} className={`border-l-2 pl-3 text-[12.5px] leading-relaxed ${STATUS_STYLE[l.status]}`}>
+                        <div className="text-ink">
+                          <span className="font-medium">{byId.get(l.edge.from)?.label}</span> → <span className="font-medium">{byId.get(l.edge.to)?.label}</span>{" "}
+                          <span className="text-ink-soft">({LINK_SIGN[l.edge.sign]}; {l.edge.epistemic.toLowerCase().replace(/_/g, " ")})</span>
+                        </div>
+                        <div className="text-ink-muted">{l.edge.mechanism}</div>
+                        <div className="mt-0.5 font-medium text-ink">{LINK_STATUS_LABEL[l.status]}</div>
+                        {l.edge.establishes && <div className="text-ink-muted"><span className="text-ink-soft">Evidence establishes: </span>{l.edge.establishes}</div>}
+                        {l.edge.assumption && <div className="text-ink-muted"><span className="text-ink-soft">Assumption: </span>{l.edge.assumption}</div>}
+                        {l.edge.wouldChallenge && <div className="text-ink-muted"><span className="text-ink-soft">Would challenge it: </span>{l.edge.wouldChallenge}</div>}
+                        {l.evidence.length > 0 && (
+                          <ul className="mt-1 flex flex-wrap gap-1">
+                            {l.evidence.map((e) => (
+                              <li key={e.id}>
+                                {e.exists ? (
+                                  <Link
+                                    href={e.id.startsWith("MKT:") ? `/events/${caseSlug}/market#${e.id.split(":")[1]}` : e.id.startsWith("EXP:") ? `/events/${caseSlug}/impact#exposure` : e.id.startsWith("FIG:") ? `/events/${caseSlug}/impact#fig-${e.id.slice(4)}` : `/events/${caseSlug}/evidence#${e.id}`}
+                                    className={`inline-block rounded border px-1 py-px text-[11.5px] hover:underline ${e.relevance === "direct" && e.available && e.admissible ? "border-ink/20 bg-panel2 text-ink" : "border-dashed border-ink/25 text-ink-muted"}`}
+                                  >
+                                    {e.label} — {e.available ? e.status : "not available at cutoff"} · {e.relevance === "direct" ? "bears on this link" : "background"}
+                                  </Link>
+                                ) : (
+                                  <span className="rounded border border-rose-600/40 px-1 py-px text-[11.5px] text-rose-800">unknown reference {e.id}</span>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+            </>
+          )}
         </div>
       )}
     </div>

@@ -1,99 +1,124 @@
 # Interview demo: FactorForge event research
 
-A short script for presenting the event-research workflow. Every number below comes from the committed snapshot (prices built 8 Nov 2026) and can be checked on the pages named. Where the repository cannot answer a question, the text says so and leaves it for the author to fill in.
+A short script for presenting the event-research workflow. Every number below comes from the committed data: the market snapshot built 8 Nov 2026, and Vistra's Q3 2026 release, read on 8 Nov. Each can be checked on the page named. Where the repository cannot answer a question, the text says so and leaves it for the author.
 
-**Where to run it.** Use the Vercel preview of the latest commit on PR #20 until that PR is merged. Production (`factor-forge-ashy.vercel.app`) still serves the earlier version, which has no `/brief` page. Paths below are relative to whichever host you use.
+**Where to run it.** Use the Vercel preview of the latest commit on the review PR until it is merged. Production still serves an older version that has none of the pages below. Paths are relative to whichever host you use.
 
 ---
 
 ## A. Thirty-second introduction
 
-> FactorForge is an evidence-driven equity research workbench, not a stock predictor. For a market event it keeps three things apart: what the sources establish, what prices did relative to a benchmark, and what an analyst thinks it means. Each claim carries its source and a verification state, each thesis is written once with the triggers that would change it, and forecasts are logged before the outcome and scored afterwards. The forecasts are a check on method, not evidence of an edge: no directional rule passes the skill test, so the engine abstains on direction and publishes only ranges.
+> FactorForge is an evidence-driven equity research workbench, not a stock predictor. For a market event it asks a business question, keeps three things apart (what the sources establish, what prices did, and what an analyst infers), and shows how far each inference is from the evidence. The AI case asks whether the 5 November selloff reflected a change in near-term data-center demand or a repricing of policy risk. One company, Vistra, is worked through from its own filing to the channels through which Texas restrictions could reach its economics, with the assumptions, the unknowns and the next thing to check. Forecasts exist only as a method check; no directional rule has shown skill, so none is offered.
 
 ---
 
 ## B. Three-minute demo
 
-The main thread is brief, then evidence and market, then theses. Forecasts come last, briefly, as a check on method.
+The thread is question, then business mechanism, evidence, company implications and what would change the view. Forecasts are optional at the end.
 
 | Time | Open | Say | Point at |
 |---|---|---|---|
-| 0:00–0:20 | `/events/ai-datacenter-shock/brief`, step 1 | "The question: did the 5 Nov selloff reflect a change in near-term AI-infrastructure demand, or a repricing of policy and valuation risk?" | The question, and the trigger event's verification chip (confirmed: the size of the move is in closing data). |
-| 0:20–0:55 | Brief, step 2, then **Market reaction** | "4 Nov, the first session after the election, is where the sector-specific move is: power and grid-equipment names fell roughly 9–17% beyond what their benchmark predicts while Microsoft and Amazon rose. On 5 Nov the market itself fell, and the answer depends on the benchmark." | 4 Nov: 9 of 18 day-0 tests beyond noise against each stock's own benchmark, about 1 expected by chance. 5 Nov: 0 of 19 against QQQ or SPY, 7 of 19 against the equal-weight S&P 500 (RSP). On the market page, the t-statistic and placebo rank printed under each day-0 figure. |
-| 0:55–1:35 | **Evidence & timeline** | "Every statement is a claim with a source and a state. Two state pauses are in force: New York's order and the Texas halt, both from primary documents. A widely repeated Texas grid-connection freeze rests on one aggregator, so it stays a rumour. Reuters and CNN could not be read, so they support nothing." | Claim cards A-C01, A-C05 (confirmed), A-C07 (rumour). A-C18 with its correction note: the Qualcomm claim used to join a reported miss to the price fall with "after"; it is now split into the report (A-C18, rumour) and the observed fall (A-C29). |
-| 1:35–2:05 | Brief, step 4 | "These are competing explanations, all hypotheses. One day of prices cannot separate drivers that arrive together, so none is marked as the cause." | Earnings and guidance: QCOM's market check is listed as *inconclusive*: no statistically distinguishable abnormal return against QQQ or RSP, which neither confirms nor rules out a Qualcomm-specific cause. Rates: yields fell, which is recorded against it. |
-| 2:05–2:40 | `/theses` | "A thesis is hashed when published and never edited. T-AI-1 is a worked example: it was written on 8 Nov using only sources dated by the 5 Nov close, so it is labelled backfill and is not a track record. It also has two problems: its statement says the day 'carried an earnings miss', and a trigger says 'confirmed as a driver' while firing on a merely reported claim. The original stays; a dated current assessment sits beside it." | The current-assessment box on T-AI-1, the two rule findings for TR-A2, and T-AI-2 (live), with its invalidation trigger "restrictions extend to existing load". |
-| 2:40–3:00 | `/forecasts` | "Live forecasts are logged before their outcome; backfilled ones are reconstructions shown apart. No live forecast has realized yet. Out of sample, 0 of 60 instrument–horizon direction tests beat the better constant rule after correction, so every new forecast abstains on direction." | The live/backfill split, the coverage panel (pooled one-bar coverage 80%, 95% interval 75–85%), and the skill table. |
+| 0:00–0:30 | `/events/ai-datacenter-shock/brief`, top card | "The question: did the 5 Nov selloff reflect a change in near-term AI-infrastructure demand, or a repricing of policy risk? The current view is that the evidence so far shows policy risk repriced in share prices, not a measured change in demand, and it can't yet split policy from positioning on 5 Nov. The facts underneath are confirmed; the interpretation is labelled tentative, and the card says why." | The two separate labels: underlying facts *confirmed*, interpretation *tentative*. The strongest evidence and the key uncertainty sit side by side; the uncertainty includes the benchmark sensitivity of 5 Nov. |
+| 0:30–1:10 | Brief → **Business impact**, Vistra panel | "To get from a policy to a company, I picked the most Texas-exposed name and read its own filing. Texas is 38% of Vistra's operating EBITDA for the first nine months. That's derived from disclosed segment figures, and it's exposure to Texas generation, not to the policy. About 98% of 2027 generation is hedged, so any demand effect reaches earnings mainly from 2028." | *Disclosed figures* table: period, unit, denominator, disclosed vs derived, source and dates. Texas MW and data-center revenue read *Not disclosed*, not zero. |
+| 1:10–1:45 | Business impact, channels and research tests | "Restrictions can reach Vistra six ways: lost demand, delayed revenue, relocation, pricing, cost, or only a risk premium. They can happen together. So far only the risk-premium channel has support. The price fell 16% beyond its benchmark on 4 Nov, after the election, while results and guidance two days later were up. A non-Texas generator, CEG, also fell, so the repricing may not be Texas-specific. That's written down as a test, with what would weaken it." | The *Current read* line on each channel. Hypothesis cards H-VST-3 (price check: *directionally aligned in this window; mechanism not established*) and H-VST-4 (CEG challenges it; the enacted Texas halt in September produced no distinguishable move). |
+| 1:45–2:15 | Business impact, **Impact map** | "On the map, a citation only counts if it bears directly on the link. The permit pauses are confirmed, so the first link has direct evidence. That they push data-center capex out is still an assumption, so no path to Vistra is fully evidence-backed, and the map gives no evidence-backed direction. The signs are a scenario aid: the main mechanism would lower Vistra's business, and the competing scarcity mechanism would raise it." | Main mechanism selected by default; the competing ones a click away. Each link says *direct evidence* or *assumption*, with what the evidence establishes and what would challenge it. |
+| 2:15–2:40 | **Evidence**, then back to the brief | "Every claim has a source and a state. The Texas halt comes from the governor's signed letter. The Qualcomm 'miss' is one aggregator, so it's a rumour. Vistra's figures are the company's own statements: confirmed as statements, not independently checked." | Claims A-C05, A-C18 (correction note) and A-C30. |
+| 2:40–3:00 | Brief, *What would change the view* and *Next research action* | "This view breaks if hyperscalers cut 2027 capex, if a top state enacts a moratorium, or if Texas large-load approvals stop. The next check is Vistra's results call and the PUC filings. If interviews come later, the plan lists who could know what, and every row says planned." | Then optionally `/forecasts`: live and backfilled kept apart, 0 of 60 direction tests pass, so forecasts abstain on direction. |
 
-If there are only ninety seconds, show brief steps 1, 2 and 4, then the T-AI-1 assessment on `/theses`.
+If there are only ninety seconds, use the brief's top card, the Vistra figures table and *What would change the view*.
 
 ---
 
-## C. The case in full: AI data-center restrictions and the 5 Nov selloff
+## C. The case in full
 
 **Research question.** Did the 5 Nov 2026 selloff (Nasdaq Composite −5.5%, S&P 500 −4.4%) reflect a change in near-term AI-infrastructure demand, or a repricing of policy and valuation risk?
 
-**Business mechanism, as a hypothesis.** Permit pauses on new data centers could slow new-site construction. That would reach suppliers of new capacity first: grid and power equipment (VRT, ETN, GEV), and generators priced as AI-demand proxies (CEG, VST). It would reach chip and hyperscaler revenue later, if at all, because their near-term revenue rests on capex already guided. A second, opposite channel (thesis T-AI-2): restrictions on new sites could raise the value of generation and capacity that are already connected.
+**Current assessment** (analyst, dated 8 Nov 2026, 14:00 UTC; interpretation *tentative*). The evidence so far shows policy risk repriced in share prices, not a measured change in near-term demand. It cannot yet say how much of the 5 Nov decline was policy rather than positioning or valuation.
+
+**Business mechanism (hypothesis).** Permit pauses → slower new sites → later data-center capex → slower demand growth for generation → lower value of Vistra's unhedged Texas output. Competing mechanisms: connected capacity becomes scarcer and more valuable, which would push the other way; projects move to other states; or only the risk premium changes.
 
 **What the sources establish.**
-- Two restrictions are in force, both temporary permit pauses: New York's executive order (up to a year) and Texas's halt pending an ERCOT audit. Both come from primary government documents.
-- The election raised the odds of more restrictions: candidates backing data-center pauses or tighter rules won governor races in Texas, Ohio, Georgia and Wisconsin. That is a promise, not a law. The Texas governor-elect takes office on 19 Jan 2027.
-- The size of the 5 Nov move is in closing data. Yields fell that day.
+- Two restrictions are in force, both temporary permit pauses: New York's executive order (up to a year) and Texas's halt pending an ERCOT audit. Texas's letter also tells other agencies to hold data-center approvals. All are primary government documents.
+- After the election, candidates backing pauses won governor races in Texas, Ohio, Georgia and Wisconsin. Those are promises, not laws.
+- Vistra's Q3 release (6 Nov):
+  - Texas segment Adjusted EBITDA was $1,227m in Q3, against $784m a year earlier.
+  - Texas was 38% of nine-month Ongoing Operations Adjusted EBITDA (derived: 2,124 ÷ 5,639).
+  - 2026 guidance was narrowed around a higher midpoint, and 2027 guidance was initiated at $7.7–8.5bn.
+  - About 98% of 2027 generation and 78% of 2028 is hedged.
+  - It signed a 20-year, 207 MW agreement at its Odessa plant in Texas.
+  - The release does not mention Texas policy.
 
 **What is not established.**
-- A Texas grid-connection freeze from August: one aggregator only.
-- The Qualcomm miss: one aggregator only; Qualcomm's own results were not read.
-- Positioning and flow estimates: reported analyst views and model estimates.
-- Which driver explains how much of 5 Nov. Closing data cannot separate drivers that arrived together.
-- Reuters and CNN coverage, and hyperscalers' own earnings releases: not read.
+- Whether restrictions have delayed or cancelled any project; no company has said so.
+- Whether Vistra's Texas deals need approvals that the letter holds back.
+- What the Odessa buyer will use the power for, and its start date and price.
+- Generation capacity in Texas, and revenue from data-center customers: not disclosed in the documents read.
+- Market consensus for 2027. The expectation gap is therefore *not established*: guidance is not consensus, and a price fall does not reveal what was expected.
+- Which explanation drove 5 Nov. Policy, a reported Qualcomm miss (a rumour), positioning and financing all arrived together.
 
-**Why the benchmark changes the result.** An abnormal return is the stock's move minus what its benchmark predicts, where the prediction is α plus β times the benchmark's move, fitted on 120 earlier sessions. On 5 Nov QQQ fell 6.5%, SPY 4.4% and the equal-weight RSP 2.9%. Take SMH, the semiconductor ETF, which fell about 11%. Its estimated β against SPY is 2.8, so SPY's fall "predicts" roughly −12%, and the actual move is +1.3% better than predicted: normal. Against RSP its β is 1.35, which predicts about −4%, so the same move is 7.4% worse than predicted and passes both checks. Across the 19 instruments tested, 0 pass against their own benchmark (QQQ or SPY) and 7 pass against RSP, mostly semiconductors, networking and data-center equipment. Neither benchmark is sector-neutral, and RSP still contains semiconductors. The honest reading is that the 5 Nov stock-level result is benchmark-sensitive; neither comparison says why the stocks moved. The 4 Nov result is more robust: 9 of 18 pass against own benchmarks and 7 of 18 against RSP.
+**Why benchmarks change the result.** An abnormal return is the move beyond α + β × the benchmark's move.
+- On 5 Nov QQQ fell 6.5%, SPY 4.4% and the equal-weight RSP 2.9%.
+- SMH fell about 11%. Its estimated β is 2.8 against SPY, which "predicts" about −12%, so the move looks normal. Its β is 1.35 against RSP, which predicts about −4%, so the same move is 7.4% worse than predicted.
+- Across the 19 instruments tested: 0 beyond noise against their own benchmark, 7 against RSP.
+- 4 Nov holds up under both benchmarks (9 of 18 against own benchmarks, 7 of 18 against RSP).
+- Neither benchmark is sector-neutral, and neither comparison explains why prices moved.
 
-**What would change the view.** These are T-AI-1's own triggers and the base-case invalidations:
-- weaken if hyperscalers cut 2027 capex guidance (two or more breaks the base case);
-- weaken if a top data-center state enacts a moratorium;
-- review if a federal moratorium advances, or if SMH's 20-session abnormal return falls below −15%;
-- for T-AI-2, invalidate if restrictions extend to existing load, since that removes the scarcity benefit.
+**What would change the view.**
+- Two or more hyperscalers cut 2027 capex guidance.
+- A top data-center state enacts a moratorium.
+- Evidence that Texas large-load approvals have stopped.
+- Vistra or an equipment supplier reports delayed or cancelled projects.
 
-**Next step: a channel-check plan.** This is a plan only. No interviews have been done, and the case uses no private data. Each call would be screened for material nonpublic information and limited to public or non-confidential knowledge.
-
-| Who | What to ask | Which view it tests |
-|---|---|---|
-| Data-center developers and site-selection consultants | Are projects in Texas or New York being deferred, cancelled or moved to other states? Is it permits, power, or financing that is binding? | T-AI-1 mechanism; base case |
-| Utility and ERCOT-region large-load interconnection planners (public filings first) | Has the large-load queue changed since September? Are existing interconnection agreements affected? | T-AI-2 invalidation (existing load) |
-| Electrical-equipment distributors and switchgear or UPS channel partners | Are orders being pushed out or cancelled, and are lead times shortening? | Whether the 4 Nov move in VRT, ETN and GEV reflects orders or sentiment |
-| Colocation leasing brokers | Has pricing for energized, already-connected capacity moved since the election? | T-AI-2 scarcity channel |
-| State permitting attorneys | What scope did TCEQ's compliance update set, and could a governor act without the legislature? | Open questions on the Texas halt |
-
-The freight module's `/primary` page shows how such a plan is held: planned calls never count as completed interviews, and notes are screened for personal data and MNPI.
+**Next steps.**
+- Read Vistra's Q3 results call, then check PUC and ERCOT filings for large-load approvals since 21 Sep.
+- Channel checks, planned only. None has been done; all would be compliance-screened and public or non-confidential only:
+  - a large-load interconnection planner;
+  - a PPA broker;
+  - a Texas data-center developer;
+  - a permitting attorney.
+  Each question is open, and each is tied to the hypothesis it would test.
 
 ---
 
 ## D. Likely questions
 
 **What does AI actually do in this project?**
-In the event layer shown in the demo, nothing at run time. Verification states, the event study, interval scoring and the ledgers are deterministic code, and the memo is assembled from case data. Elsewhere in the app a language model (DeepSeek, when an API key is configured) writes prose on top of deterministic results: strategy memos, the paper-trading daily review, and the freight research copilot. Numbers come from code, and the model is told to use only the payload. The copilot moves any statement that lacks a retrieved evidence ID into an "unsupported" list. Without a key, every one of these falls back to a template. The codebase itself was written with an AI coding assistant; see the next answer.
+In the event research shown here, nothing at run time.
+- Verification states, link evidence checks, event studies, scoring and the ledgers are deterministic code.
+- The assessment, channels and research tests are an analyst's dated records in the case file.
+
+Elsewhere in the app, a language model (DeepSeek, when an API key is configured) writes prose on top of deterministic results:
+- strategy memos;
+- the paper-trading daily review;
+- the freight research copilot, which moves any statement without a retrieved evidence id into an "unsupported" list.
+
+Without a key, each of these falls back to a template. The codebase itself was written with an AI coding assistant (next answer).
 
 **What did you personally design and validate?**
-*Author to complete; the repository cannot answer this.* Git history shows 73 of 98 commits co-authored with Claude, an AI coding assistant, so say that plainly and then describe the decisions you made and checked yourself. Examples, if they apply: choosing the research question, reading the sources, deciding what counts as verified, choosing the benchmarks, or reviewing the statistical tests. Do not claim work you did not do.
+*Author to complete; the repository cannot answer this.* Git history shows 78 of 103 commits co-authored with Claude, an AI coding assistant. Say that plainly, then describe the decisions you made and checked yourself: for example the research question, which sources to read, the choice of Vistra, or the rules for when evidence counts. Do not claim work you did not do.
 
 **How do you distinguish facts from hypotheses?**
-Every claim has an epistemic class (observed fact, reported claim, analyst interpretation, model estimate, causal hypothesis), and a verification state derived from its sources: confirmed, corroborated, reported, rumour or disputed. Explanations of a price move are always hypotheses. A trigger can make a thesis act on verified evidence, but a price move alone can only send a thesis to review. When a claim was worded too strongly, it is corrected with a dated note rather than silently rewritten. Qualcomm is the example: the report, the observed fall and the causal link are three separate items.
+- **Statements.** Each claim has a statement type and a verification state derived from its sources.
+- **Links.** A link from event to company counts evidence only if the evidence exists, was read and published by the cutoff, is verified well enough, and has been judged (with a date) to bear on that link. Otherwise the link is a stated assumption. A confirmed permit pause establishes the pause, not a company's revenue loss.
+- **Hypotheses.** Each is a test: what we would expect if it were true, what supports it, what challenges it, and what would weaken it.
+- **Corrections.** A wrong claim gets a dated correction; it is not silently rewritten.
 
 **Why do different benchmarks produce different conclusions?**
-Because "abnormal" means "beyond what the benchmark predicts", and the prediction is β times the benchmark's move. Both the β and the benchmark's move differ between benchmarks. On 5 Nov SPY fell 4.4% and RSP 2.9%; with SMH's β of 2.8 against SPY and 1.35 against RSP, the same 11% fall is normal against one and unusual against the other. Neither is the right benchmark for a sector shock, so the page reports both counts and calls the result benchmark-sensitive. It is not read as proof that the selloff was, or was not, sector-specific.
+"Abnormal" means beyond what the benchmark predicts, and the prediction is β times the benchmark's move. Both the β and the move change with the benchmark. On 5 Nov, SMH's 11% fall is normal against SPY (β 2.8) and unusual against RSP (β 1.35). So the result is reported as benchmark-sensitive, not as proof that the selloff was, or was not, sector-specific.
 
 **What would you improve next?**
-- A sector-neutral benchmark, such as an industry factor model.
-- Reading Qualcomm's own results and the hyperscalers' capex statements.
-- Replacing the keyword check on trigger wording with a structured field.
-- Letting the live forecasts accumulate before claiming anything about calibration.
+- Read Vistra's results call and the PUC and ERCOT filings, and update the channel reads.
+- Add a sector-neutral benchmark.
+- Work through a second company with different exposure, such as an equipment supplier, before generalising.
+- Replace the keyword check on trigger wording with a structured field.
+- Let live forecasts accumulate before saying anything about calibration.
 
 ---
 
 ## Known limits to state if asked
 
-- **Effective sample and design effect.** Both are approximations, so the coverage verdicts are evidence of miscalibration or of consistency under the test, not proof. Five-bar ranges in stressed markets covered 87% against a nominal 80% (too wide).
-- **Placebo rank.** It uses the previous 500 sessions, so its resolution is about 0.2%.
-- **Relative range.** It assumes log returns are symmetric. Correcting the scoring to relative wealth return changed none of the 16 relative ranges realized so far.
-- **T-AI-1's strengthening.** It rests on reported analyst views and model estimates (A-C20, A-C21). "Strengthened" means the evidence its author named arrived, not that positioning was proven to be the cause.
+- **Relevance is a judgement.** "Bears on this link" is a dated analyst judgement, not something the code proves; it is labelled as such.
+- **One company.** The company-level work covers Vistra only, from one release; its results call was not read. Other companies' exposure is an unverified classification.
+- **Release timing.** The Vistra release time of day was not recorded, so it is dated to the end of 6 Nov. VST's +10.6% that day may already include it, and the market rebounded the same day.
+- **Statistical approximations.** Effective sample size and design effect are approximations; the placebo rank resolves to about 0.2%.
+- **No user testing.** The 30-second, two-minute and three-minute reading targets have not been tested with readers.

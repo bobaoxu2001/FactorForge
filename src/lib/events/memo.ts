@@ -1,6 +1,6 @@
 import "server-only";
 import type { ResearchCase } from "@/data/events/types";
-import { benchmarkSensitivity, eventView, impacts, scoredForecasts, thesisViews, windowView } from "./view";
+import { benchmarkSensitivity, caseAsOf, eventView, impacts, scoredForecasts, thesisViews, windowView } from "./view";
 import type { VerificationState } from "./types";
 
 /**
@@ -24,12 +24,37 @@ const n = (count: number, one: string, many: string) => `${count} ${count === 1 
 function refText(id: string): string {
   if (id.startsWith("MKT:")) return `the ${id.split(":")[2]} market check`;
   if (id.startsWith("EXP:")) return `the ${id.split(":")[1]} exposure entry`;
+  if (id.startsWith("FIG:")) return "a company-disclosed figure";
   return `[${id}]`;
+}
+
+const withRefs = (text: string, refs: string[]) => (refs.length ? `${text} ${refs.map(refText).join(" ")}` : text);
+const day = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+
+/**
+ * The current assessment, written once in the case file and rendered here and
+ * on the brief from the same record, so the two cannot drift apart.
+ */
+export function assessmentParagraphs(c: ResearchCase): string[] {
+  const a = c.currentAssessment;
+  if (!a) return [];
+  return [
+    `Current assessment, ${day(a.at)}. ${a.view}`,
+    `Strength of this interpretation: ${a.interpretation.strength}. ${a.interpretation.reason}`,
+    `Why it matters. ${a.whyItMatters}`,
+    `Strongest evidence: ${a.strongest.map((x) => withRefs(x.text, x.refs)).join(" ")}`,
+    `Key uncertainty: ${a.uncertainty.map((x) => withRefs(x.text, x.refs)).join(" ")}`,
+    `Next verification step: ${a.nextStep}`,
+    `What would change the view: ${a.wouldChange.map((x) => withRefs(x.text, x.refs)).join(" ")}`,
+  ];
 }
 
 export function buildEventMemo(c: ResearchCase): MemoSection[] {
   const primary = eventView(c.primaryEventId);
   const sections: MemoSection[] = [];
+
+  // 0. Current assessment (analyst, dated; shared with the brief)
+  if (c.currentAssessment) sections.push({ title: "Current assessment", kind: "analyst", paragraphs: assessmentParagraphs(c) });
 
   // 1. What happened
   if (primary) {
@@ -103,17 +128,31 @@ export function buildEventMemo(c: ResearchCase): MemoSection[] {
   // 5. Exposure
   const imp = impacts(c);
   const byNet = (n: string) => imp.filter((i) => i.net === n).map((i) => i.ticker ?? i.label);
-  const contradicted = imp.filter((i) => i.marketCheck === "contradicted");
   sections.push({
     title: "Who is exposed",
     kind: "data",
     paragraphs: [
-      `On evidence-backed paths of the impact map: negative for ${list(byNet("negative")) || "none"}; positive for ${list(byNet("positive")) || "none"}; ambiguous (paths disagree) for ${list(byNet("ambiguous")) || "none"}. Paths that rest only on hypotheses are shown on the map but do not set a direction.`,
-      contradicted.length
-        ? `Measured reactions contradict the map for ${list(contradicted.map((i) => i.ticker ?? i.label))}; the map does not override the data.`
-        : "No measured day-0 reaction contradicts the map's direction.",
+      `A link on the impact map counts evidence only when that evidence was available by ${day(caseAsOf(c))} and an analyst has judged it to bear on the link itself; evidence that only establishes a background fact, such as that a permit pause exists, leaves the link an assumption. Evidence-backed direction: negative for ${list(byNet("negative")) || "none"}; positive for ${list(byNet("positive")) || "none"}; ambiguous for ${list(byNet("ambiguous")) || "none"}. ${n(byNet("unsupported").length, "company has", "companies have")} no evidence-backed path yet.`,
+      "The map's hypotheses concern revenue and earnings over months, so a one-day price move cannot confirm or refute them; measured price responses are reported beside the map, not as tests of it.",
     ],
   });
+
+  // 5b. Company example
+  for (const cc of c.companyCases ?? []) {
+    const channels = cc.channels.map((ch) => `${ch.channel.replace(/-/g, " ")}: ${ch.read}`);
+    sections.push({
+      title: `Company example: ${cc.company}`,
+      kind: "analyst",
+      paragraphs: [
+        `${cc.question} ${cc.whyThisCompany}`,
+        cc.exposureNote,
+        `Channels, read as of ${day(cc.at)}. ${channels.join(" ")}`,
+        cc.expectationGap.reference ? `Expectation gap against ${cc.expectationGap.reference}: ${cc.expectationGap.gap}` : cc.expectationGap.note,
+        `Unknown: ${cc.unknowns.join(" ")}`,
+        `Next research action: ${cc.nextAction}`,
+      ],
+    });
+  }
 
   // 6. Scenarios
   sections.push({

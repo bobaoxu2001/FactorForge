@@ -6,6 +6,25 @@ This project follows a human-maintained changelog. There is no automated release
 
 ## Unreleased
 
+### Event intelligence: research logic and a conclusion-first brief
+
+#### Changed
+
+- **Impact-map evidence.** A citation now counts for a link only if it resolves, was available from a read source by the cutoff, is verified well enough, and an analyst has judged (with a date) that it bears on that link. Each key link states what its evidence establishes, the assumption that carries it, and what would challenge it. Signs along a path are labelled a scenario aid. In the AI case no company path is fully evidence-backed, so the map gives no evidence-backed direction; before, any citation on every link counted.
+- **Business impact versus market response.** `reconcileWithMarket` is replaced by `compareWithMarket`: no direction is "not assessable" (it used to read "consistent"), operating hypotheses and other windows are "not comparable" with a one-day move, moves within noise are "inconclusive", same-direction moves are "aligned in this window; mechanism not established", and opposite moves are a review prompt, not a contradiction.
+- **Exposure metrics.** "Sentiment" (beta) is now "Market sensitivity (estimated beta)"; positioning is "Not measured"; forward P/E and EV/sales are shown separately (the EV/sales × 4 conversion is gone); net debt ÷ market value is explained as one ratio, not a risk assessment. No metric is turned into a high/medium/low rating.
+- **Brief** opens with the research question, current assessment, fact verification and interpretation strength shown separately, the strongest evidence, the key uncertainty (including benchmark sensitivity), why it matters and the next check, with as-of times. Then mechanism, price response, company implications, competing explanations as tests, what would change the view, next action, what changed, and the original theses. Market tables, evidence counts and forecasts sit in keyboard-accessible details.
+- **Navigation.** Sidebar grouped as Research cases, Evidence, Thesis monitor, Methods & labs and Workspace; the last two open only when they contain the current page. Case sections are Brief, Business impact, Evidence and Updates, with market reaction, scenarios and memo as secondary links.
+
+#### Added
+
+- **Vistra company case** from its Q3 2026 release (SEC 8-K exhibit, read 8 Nov): disclosed and derived figures with period, unit, denominator, source and dates; six impact channels; assumptions; unknowns; expectation gap "not established"; four hypotheses as research tests; a next research action. A new event, source (A-S9) and five claims (A-C30 to A-C34).
+- **Research-test fields** on competing explanations: mechanism, premise (kept apart from supporting evidence), what to expect if true, what would weaken it, next step, and an optional price check.
+- **Channel-check plan**: four planned conversations, each tied to a hypothesis, with limitations and compliance boundaries. None has taken place.
+- **Current-assessment record** shared by the brief and the memo; an **Updates** feed of dated assessment changes, corrections and thesis revisions.
+- Deep links and descriptive evidence labels ("Texas permit halt — confirmed") in summaries; ids stay on the evidence page.
+- Tests for each rule above, including that later evidence cannot support an earlier assessment and that the assessment text lives only in the case file.
+
 ### Event intelligence: research audit
 
 #### Changed
