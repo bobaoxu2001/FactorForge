@@ -171,7 +171,7 @@ export function EvidenceRef({ id, caseSlug }: { id: string; caseSlug: string }) 
   if (id.startsWith("MKT:")) {
     const [, windowId, symbol] = id.split(":");
     return (
-      <Link href={`/events/${caseSlug}/market#${windowId}`} className="num rounded border border-ink/15 bg-panel2 px-1 py-px text-[11px] text-ink-muted hover:text-ink">
+      <Link href={`/events/${caseSlug}/market#${windowId}`} className="num inline-block whitespace-nowrap rounded border border-ink/15 bg-panel2 px-1 py-px text-[11px] text-ink-muted hover:text-ink">
         market: {symbol}
       </Link>
     );
@@ -179,13 +179,13 @@ export function EvidenceRef({ id, caseSlug }: { id: string; caseSlug: string }) 
   if (id.startsWith("EXP:")) {
     const [, ticker, dim] = id.split(":");
     return (
-      <Link href={`/events/${caseSlug}/impact#exposure`} className="num rounded border border-ink/15 bg-panel2 px-1 py-px text-[11px] text-ink-muted hover:text-ink">
+      <Link href={`/events/${caseSlug}/impact#exposure`} className="num inline-block whitespace-nowrap rounded border border-ink/15 bg-panel2 px-1 py-px text-[11px] text-ink-muted hover:text-ink">
         exposure: {ticker} {dim === "directRevenue" ? "revenue" : dim}
       </Link>
     );
   }
   return (
-    <Link href={`/events/${caseSlug}/evidence#${id}`} className="num rounded border border-accent/20 bg-accent-soft px-1 py-px text-[11px] font-medium text-accent hover:underline">
+    <Link href={`/events/${caseSlug}/evidence#${id}`} className="num inline-block whitespace-nowrap rounded border border-accent/20 bg-accent-soft px-1 py-px text-[11px] font-medium text-accent hover:underline">
       {id}
     </Link>
   );
