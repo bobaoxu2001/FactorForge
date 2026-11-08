@@ -40,7 +40,8 @@ import {
 import { useEffect, useState } from "react";
 import SearchCommand from "./SearchCommand";
 
-type NavItem = { href: string; label: string; icon: typeof Gauge; tag?: string };
+/** `match` is the path prefix that marks the item active, when it differs from where the link opens (a case opens on its brief but owns every case page). */
+type NavItem = { href: string; label: string; icon: typeof Gauge; tag?: string; match?: string };
 /** `primary` groups are always open; the rest open only when they contain the current page. */
 type NavSection = { label: string; items: NavItem[]; primary?: boolean };
 
@@ -49,13 +50,13 @@ type NavSection = { label: string; items: NavItem[]; primary?: boolean };
 // route is still reachable.
 const startItems: NavItem[] = [{ href: "/", label: "Research Home", icon: Telescope }];
 
-const sections: NavSection[] = [
+export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Research cases",
     primary: true,
     items: [
-      { href: "/events/ai-datacenter-shock", label: "AI data-center restrictions", icon: Zap },
-      { href: "/events/binance-breach", label: "Binance breach", icon: ShieldAlert },
+      { href: "/events/ai-datacenter-shock/brief", match: "/events/ai-datacenter-shock", label: "AI data-center restrictions", icon: Zap },
+      { href: "/events/binance-breach/brief", match: "/events/binance-breach", label: "Binance breach", icon: ShieldAlert },
       { href: "/research/freight", label: "Freight recovery", icon: Truck },
       { href: "/events", label: "Event radar", icon: Activity },
       { href: "/research/freight/sample", label: "Freight one-page brief", icon: FileText },
@@ -112,12 +113,13 @@ const sections: NavSection[] = [
   },
 ];
 
-const ALL_HREFS = [...startItems, ...sections.flatMap((s) => s.items)].map((i) => i.href);
+const sections = NAV_SECTIONS;
+const ALL_ITEMS = [...startItems, ...sections.flatMap((s) => s.items)];
 
-/** The single nav item for a path: the longest href that equals it or is a parent of it. */
+/** The single nav item for a path (returned as its href): the item whose match prefix is the longest that equals the path or is a parent of it. */
 export function activeHref(pathname: string): string | null {
-  const matches = ALL_HREFS.filter((href) => (href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`)));
-  return matches.sort((a, b) => b.length - a.length)[0] ?? null;
+  const matches = ALL_ITEMS.map((i) => ({ href: i.href, prefix: i.match ?? i.href })).filter(({ prefix }) => (prefix === "/" ? pathname === "/" : pathname === prefix || pathname.startsWith(`${prefix}/`)));
+  return matches.sort((a, b) => b.prefix.length - a.prefix.length)[0]?.href ?? null;
 }
 
 /** Secondary groups open only when the current page is inside them, so a research page does not expand the labs. */

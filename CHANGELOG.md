@@ -6,6 +6,15 @@ This project follows a human-maintained changelog. There is no automated release
 
 ## Unreleased
 
+### Homepage and entry points
+
+#### Changed
+
+- **Homepage** opens with a one-line description of FactorForge and a featured case. The featured case shows its research question, current assessment, interpretation strength, first-listed uncertainty and as-of dates, all taken from the shared assessment record. Freight and Binance follow as other cases; the freight workspace panels follow below.
+- **Case entry links** on the homepage and in the sidebar open the brief. `/events/<case>` stays the Updates page, and the case stays highlighted on every case page.
+- **Catalyst calendar** is labelled as the research edition's schedule, with today's date in New York time. Passed dates move to a "Passed dates" list marked "Scheduled date passed — outcome not checked"; there is an empty state when none are upcoming.
+- Removed "(unchanged engine)" from the quantitative lab heading.
+
 ### Event intelligence: wording kept within the evidence
 
 #### Changed
