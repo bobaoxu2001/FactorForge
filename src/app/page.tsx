@@ -43,22 +43,27 @@ export default function ResearchHomePage() {
   return (
     <div className="space-y-5">
       <section className="card overflow-hidden" aria-labelledby="home-title">
-        <div className="border-b border-line p-6 md:px-10 md:py-8">
+        <div className="border-b border-line p-6 md:px-10 md:py-6">
           <p className="text-[13px] font-medium text-ink-soft">FactorForge</p>
-          <h1 id="home-title" className="mt-2 max-w-[30ch] text-[28px] font-semibold leading-[1.12] text-ink md:text-[38px]">
+          <h1 id="home-title" className="mt-1.5 max-w-[40ch] text-[24px] font-semibold leading-[1.15] text-ink md:text-[30px]">
             An independent equity research workbench for examining business events, tracing evidence, and documenting how research views change.
           </h1>
-          <p className="mt-3 max-w-[72ch] text-[14px] leading-relaxed text-ink-muted">
+          <p className="mt-2 max-w-[80ch] text-[13.5px] leading-relaxed text-ink-muted">
             Built from public sources. Every claim states whether it is verified, interpretation is labelled as such, and when a view changes the earlier wording is kept and dated. A research draft, not investment advice; no live trading, and not a proven forecasting tool.
           </p>
         </div>
         <div className="grid xl:grid-cols-[1.5fr_1fr]">
-          <div className="p-6 md:p-10">
+          <div className="p-6 md:px-10 md:py-7">
             <p className="text-[13px] font-medium text-accent">Start here · featured research case</p>
-            <h2 className="mt-2 text-[24px] font-semibold leading-snug text-ink md:text-[28px]">
-              <Link href={featured.briefHref} className="hover:text-accent">{featured.title}</Link>
-            </h2>
-            <dl className="mt-5 space-y-4">
+            <div className="mt-1.5 flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+              <h2 className="max-w-[34ch] text-[22px] font-semibold leading-snug text-ink md:text-[26px]">
+                <Link href={featured.briefHref} className="hover:text-accent">{featured.title}</Link>
+              </h2>
+              <Link href={featured.briefHref} className="inline-flex shrink-0 items-center gap-2 rounded-md bg-accent px-4 py-2.5 text-[14px] font-medium text-paper transition-colors hover:bg-ink">
+                Read research brief <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+            <dl className="mt-4 space-y-3.5">
               <div>
                 <dt className="text-[12.5px] font-medium text-ink-soft">Research question</dt>
                 <dd className="mt-1 font-serif text-[19px] leading-snug text-ink">{featured.question}</dd>
@@ -78,13 +83,11 @@ export default function ResearchHomePage() {
             <p className="mt-4 text-[12px] text-ink-soft">
               Assessment dated <When iso={featured.assessedAt} /> · sources through <When iso={featured.sourcesThrough} /> · prices through <span className="num">{featured.pricesThrough}</span>
             </p>
-            <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3">
-              <Link href={featured.briefHref} className="inline-flex items-center gap-2 rounded-md bg-accent px-4 py-2.5 text-[14px] font-medium text-paper transition-colors hover:bg-ink">
-                Read research brief <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link href={featured.impactHref} className="text-[14px] font-medium text-accent hover:underline">Business impact</Link>
-              <Link href={featured.evidenceHref} className="text-[14px] font-medium text-accent hover:underline">Evidence</Link>
-            </div>
+            <p className="mt-2 flex flex-wrap gap-x-5 text-[13.5px]">
+              <Link href={featured.briefHref} className="font-medium text-accent hover:underline">Full assessment in the brief</Link>
+              <Link href={featured.impactHref} className="font-medium text-accent hover:underline">Business impact</Link>
+              <Link href={featured.evidenceHref} className="font-medium text-accent hover:underline">Evidence</Link>
+            </p>
           </div>
           <aside className="border-t border-line bg-panel2 p-6 md:p-8 xl:border-l xl:border-t-0" aria-labelledby="other-cases">
             <h2 id="other-cases" className="text-[17px] font-semibold text-ink">Other research cases</h2>
