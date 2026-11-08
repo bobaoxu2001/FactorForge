@@ -45,8 +45,11 @@ The event layer (`src/lib/events`, routes `/events`, `/theses`, `/forecasts`) ha
   - Market-model abnormal returns are measured from the first bar that closed after the event (an event after the New York close starts on the next session), with t-statistics and persistence.
   - Windows that overlap other events are flagged.
 - **Impact map.** Event → mechanism → industry → company → expectations → valuation → price.
-  - Signs multiply along paths, conflicting paths are reported as *ambiguous*, and hypothesis-only paths don't set a direction.
-  - A measured reaction that contradicts the map is flagged, never re-explained.
+  - A citation counts for a link only if it exists, was available and read by the cutoff, is verified well enough, and has been judged (dated) to bear on that link; otherwise the link is a stated assumption.
+  - Signs along a path are a qualitative scenario aid, not an estimate; only fully evidence-backed paths set a direction.
+  - Business hypotheses are not tested by one-day price moves: no direction is "not assessable", a different metric or horizon is "not comparable", a move within noise is "inconclusive".
+- **Company case (AI case: Vistra).** Primary disclosures with period, unit, source and dates; six impact channels kept apart; hypotheses as research tests; a planned (not conducted) channel-check list; expectation gap "not established" without a consensus reference.
+- **Conclusion-first brief.** One dated current-assessment record feeds the brief and the memo.
 - **Forecasts on a hash-chained ledger.**
   - Baseline: zero drift with an EWMA 80% range, relative to the benchmark, at 1/5/20/60 bars.
   - It abstains on direction unless walk-forward testing up to the cutoff shows skill. Tests prove future prices cannot change a prediction.
@@ -578,16 +581,19 @@ Security notes:
 
 ## Testing
 
-583 tests across 90 files under vitest + jsdom (plus one ledger-writer suite that runs only under `npm run events:forecast`).
+599 tests across 90 files under vitest + jsdom (plus one ledger-writer suite that runs only under `npm run events:forecast`).
 
-The event-intelligence layer has 133 tests in 9 files. They cover:
+The event-intelligence layer has 149 tests in 9 files. They cover:
 - Contradictory sources, and rumours versus enacted rules (lifecycle guard).
 - Time zones and DST, including events after the New York close.
 - One story syndicated by many outlets.
 - Missing and stale prices.
 - Frozen versus recovered amounts.
 - Entity-to-ticker mapping (no invented tickers).
-- Causal paths without evidence, and the map never overriding measured prices.
+- Link evidence: unknown ids, unread sources, evidence or relevance judgements after the cutoff, and background facts never verify a downstream mechanism.
+- Business hypotheses versus price moves: no direction is not assessable, other metrics or windows are not comparable, moves within noise stay inconclusive.
+- Beta never labelled sentiment or positioning; no P/E ↔ EV/sales conversion; missing and undisclosed values never shown as zero.
+- One current-assessment record behind the brief and the memo.
 - No future leakage (stored forecasts re-derived from data to their cutoff).
 - Hash-chain tamper detection, immutable theses and live-thesis prefix stability.
 - Excess return against the benchmark over the same interval.

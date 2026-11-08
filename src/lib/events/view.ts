@@ -8,13 +8,13 @@ import { ALL_CLAIMS, ALL_EVENTS, ALL_SOURCES, INSTRUMENTS, RESEARCH_CASES, caseB
 import type { ResearchCase, ThesisAssessment } from "@/data/events/types";
 import { applyFamily, pooledCoverage, summarize, walkForward, type PooledCoverage, type WalkForwardSummary } from "./evaluation";
 import { HORIZONS, MODEL_VERSION, SCORING_VERSION, scoreForecast, type ForecastRecord, type ForecastScore, type Horizon } from "./forecast";
-import { companyImpacts, measuredCells, validateGraph, type CompanyImpact, type ExposureProfile } from "./impact";
+import { compareWithMarket, companyImpacts, measuredMetrics, missingEvidence, validateGraph, EXPOSURE_DIMENSIONS, type CompanyImpact, type EvidenceResolver, type ExposureKey, type ExposureProfile, type MarketComparison, type MeasuredMetric, type ResolvedEvidence } from "./impact";
 import { canonicalJson, verifyChain, type ChainCheck } from "./ledger";
 import { eventStudy, groupReactions, returnOn, type EventStudy, type GroupReaction, type PriceSeries } from "./market";
 import { replayThesis, triggerWordingFindings, validateThesis, type MarketObservation, type ThesisReplay, type ThesisRecord } from "./thesis";
 import { barCloseInstant, firstReactionIndex, parseInstant, toIso, type MarketCalendar } from "./time";
-import type { EventRecord, EventView } from "./types";
-import { eventAsOf, validateCase, type ValidationIssue } from "./verification";
+import type { Claim, CompetingExplanation, EventRecord, EventView, SourceRecord } from "./types";
+import { availableAt, eventAsOf, validateCase, verifyClaim, type ValidationIssue } from "./verification";
 import { createHash } from "node:crypto";
 
 /**
@@ -247,11 +247,131 @@ export const eventView = (eventId: string, asOf = PLATFORM_AS_OF) => {
   return e ? eventAsOf(e, ALL_CLAIMS, ALL_SOURCES, asOf) : null;
 };
 
+// ── Evidence resolution ─────────────────────────────────────────────────────
+
+/** The moment a case's current view speaks for: its dated assessment, or the snapshot. */
+export const caseAsOf = (c: ResearchCase) => c.currentAssessment?.at ?? PLATFORM_AS_OF;
+
+const shorten = (text: string, max = 72) => (text.length <= max ? text : `${text.slice(0, text.lastIndexOf(" ", max - 1))}…`);
+const STATE_WORD = { CONFIRMED: "confirmed", CORROBORATED: "corroborated", REPORTED: "reported, unverified", RUMOR: "rumour", DISPUTED: "disputed" } as const;
+
+/**
+ * Resolves an evidence id as it stood at `asOf`: claims are re-verified on the
+ * sources published and read by then (and recorded by then), market checks
+ * count only after their day-0 close, figures only from a read document
+ * published by then. Exposure entries are analyst classifications and never
+ * count as evidence until checked against a filing.
+ */
+export function evidenceResolver(c: ResearchCase, asOf: string): EvidenceResolver {
+  const asOfMs = parseInstant(asOf, "asOf");
+  const claims = new Map(ALL_CLAIMS.map((x) => [x.id, x]));
+  const figures = new Map((c.companyCases ?? []).flatMap((cc) => cc.figures).map((f) => [f.id, f]));
+  const signedPct = (x: number) => `${x >= 0 ? "+" : "−"}${Math.abs(x * 100).toFixed(1)}%`;
+  return (id: string): ResolvedEvidence => {
+    if (id.startsWith("MKT:")) {
+      const [, windowId, symbol] = id.split(":");
+      const v = windowView(c, windowId);
+      const study = v?.studies.find((x) => x.symbol === symbol);
+      const w = study?.windows[0];
+      if (!study || !w || !study.day0) return missingEvidence(id);
+      const available = barCloseInstant(study.day0, study.calendar) <= asOfMs;
+      const abn = w.abnormal === null ? "n/a" : signedPct(w.abnormal);
+      return {
+        id,
+        kind: "market",
+        exists: true,
+        label: `${symbol}, ${study.day0}: ${abn} against ${study.benchmark ?? "its own history"}`,
+        available,
+        status: w.significant ? "beyond noise" : "within noise",
+        admissible: available && w.significant,
+        note: w.significant ? "A measured price response; it describes the move, not its cause." : "Within normal noise: inconclusive, not evidence of no effect.",
+      };
+    }
+    if (id.startsWith("EXP:")) {
+      const [, ticker, dim] = id.split(":");
+      const cell = c.exposures.find((x) => x.ticker === ticker)?.cells[dim as ExposureKey];
+      if (!cell) return missingEvidence(id);
+      const label = EXPOSURE_DIMENSIONS.find((d) => d.key === dim)?.label ?? dim;
+      return {
+        id,
+        kind: "exposure",
+        exists: true,
+        label: `${ticker} ${label.toLowerCase()}: ${cell.level}`,
+        available: true,
+        status: cell.verified ? "checked against filing" : "analyst classification, unverified",
+        admissible: cell.verified,
+        note: cell.basis,
+      };
+    }
+    if (id.startsWith("FIG:")) {
+      const f = figures.get(id.slice(4));
+      const src = f ? ALL_SOURCES.find((x) => x.id === f.sourceId) : undefined;
+      if (!f || !src) return missingEvidence(id);
+      const available = src.retrieval === "read" && availableAt(src) <= asOfMs;
+      return {
+        id,
+        kind: "figure",
+        exists: true,
+        label: f.label,
+        available,
+        status: f.value === null ? "not disclosed" : f.basis === "disclosed" ? "disclosed by the company" : "derived from disclosed figures",
+        admissible: available && f.value !== null,
+        note: `${src.publisher}, ${f.period}; ${f.where}.`,
+      };
+    }
+    const claim = claims.get(id);
+    return claim ? resolveClaimEvidence(claim, ALL_SOURCES, asOfMs) : missingEvidence(id);
+  };
+}
+
+/**
+ * A claim as evidence at a cutoff: it counts only if it was recorded by then
+ * and a source that was actually read had published it by then. Rumours and
+ * disputed claims are shown but are not admissible.
+ */
+export function resolveClaimEvidence(claim: Claim, sources: SourceRecord[], asOfMs: number): ResolvedEvidence {
+  const label = claim.short ?? shorten(claim.statement);
+  const recorded = parseInstant(claim.recordedAt, `${claim.id}.recordedAt`) <= asOfMs;
+  const v = recorded ? verifyClaim(claim, sources, asOfMs) : null;
+  if (!v) {
+    const cited = claim.citations.map((ci) => sources.find((x) => x.id === ci.sourceId)).filter((x) => x !== undefined);
+    const published = cited.filter((x) => availableAt(x) <= asOfMs);
+    const note = !recorded
+      ? "Recorded after the cutoff."
+      : published.length === 0
+        ? "Not yet published at the cutoff."
+        : "Its sources published by the cutoff were not read (blocked or not attempted).";
+    return { id: claim.id, kind: "claim", exists: true, label, available: false, status: "not available at cutoff", admissible: false, note };
+  }
+  return {
+    id: claim.id,
+    kind: "claim",
+    exists: true,
+    label,
+    available: true,
+    status: STATE_WORD[v.verification],
+    admissible: v.verification !== "DISPUTED" && v.verification !== "RUMOR",
+    note: v.verificationReason,
+  };
+}
+
+export const resolveRefs = (c: ResearchCase, ids: string[], asOf = caseAsOf(c)) => {
+  const resolve = evidenceResolver(c, asOf);
+  return ids.map(resolve);
+};
+
+/** A research test's price prediction against its one measured window; null when it makes none. */
+export function testPriceCheck(c: ResearchCase, t: CompetingExplanation): MarketComparison | null {
+  if (!t.priceCheck) return null;
+  const study = windowView(c, t.priceCheck.windowId)?.studies.find((s) => s.symbol === t.priceCheck!.symbol);
+  return compareWithMarket({ direction: t.priceCheck.direction, target: "price", metric: `${t.priceCheck.symbol}'s price`, horizon: "event-window", windowLabel: "[0,0]" }, study, "[0,0]");
+}
+
 // ── Exposure ────────────────────────────────────────────────────────────────
 
 export interface ExposureRow extends ExposureProfile {
   name: string;
-  measured: ReturnType<typeof measuredCells>;
+  metrics: MeasuredMetric[];
   fundamentals: Fundamentals | null;
   study: EventStudy | null;
 }
@@ -268,22 +388,23 @@ export function exposureRows(c: ResearchCase): ExposureRow[] {
       if (i > 60) momentum60 = s.adj[i - 1] / s.adj[i - 61] - 1;
     }
     const netDebt = f && f.totalDebt !== null && f.totalCash !== null && f.marketCap ? (f.totalDebt - f.totalCash) / f.marketCap : null;
-    const measured = measuredCells({
+    const metrics = measuredMetrics({
       forwardPE: f?.forwardPE ?? null,
       evToRevenue: f?.evToRevenue ?? null,
       netDebtToMarketCap: netDebt,
       beta: study && study.model.method === "market-model" ? study.model.beta : null,
+      benchmark: study?.benchmark ?? null,
       momentum60,
       volumeRatio: study?.volumeRatio ?? null,
     });
-    return { ...p, name: instrument(p.ticker)?.name ?? p.ticker, measured, fundamentals: f, study };
+    return { ...p, name: instrument(p.ticker)?.name ?? p.ticker, metrics, fundamentals: f, study };
   });
 }
 
-export function impacts(c: ResearchCase): CompanyImpact[] {
+export function impacts(c: ResearchCase, asOf = caseAsOf(c)): CompanyImpact[] {
   const w = windowView(c, c.graphWindowId);
   const studies = new Map((w?.studies ?? []).map((s) => [s.symbol, s]));
-  return companyImpacts(c.graph, studies);
+  return companyImpacts(c.graph, studies, evidenceResolver(c, asOf), parseInstant(asOf, "asOf"));
 }
 
 // ── Forecasts ───────────────────────────────────────────────────────────────

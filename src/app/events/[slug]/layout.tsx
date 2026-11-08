@@ -23,13 +23,13 @@ export default async function EventCaseLayout({ children, params }: { children: 
   const theses = thesisViews().filter((t) => t.replay.thesis.caseId === c.id);
   const through = pricesThrough();
   const stages: Stage[] = [
-    { slug: "brief", label: "Three-minute brief", step: "00" },
-    { slug: "", label: "Overview", step: "01" },
-    { slug: "evidence", label: "Evidence & timeline", step: "02", status: `${confirmed}/${claims.length} confirmed` },
-    { slug: "market", label: "Market reaction", step: "03", status: `${c.windows.length} windows` },
-    { slug: "impact", label: "Impact map & exposure", step: "04" },
-    { slug: "scenarios", label: "Scenarios & forecasts", step: "05" },
-    { slug: "memo", label: "Research memo", step: "06" },
+    { slug: "brief", label: "Brief", step: "" },
+    { slug: "impact", label: "Business impact", step: "" },
+    { slug: "evidence", label: "Evidence", step: "", status: `${confirmed}/${claims.length} confirmed` },
+    { slug: "", label: "Updates", step: "" },
+    { slug: "market", label: "Market reaction", step: "", status: `${c.windows.length} windows`, secondary: true },
+    { slug: "scenarios", label: "Scenarios", step: "", secondary: true },
+    { slug: "memo", label: "Memo", step: "", secondary: true },
   ];
   return (
     <div className="space-y-6">

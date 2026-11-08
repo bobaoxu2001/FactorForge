@@ -134,15 +134,38 @@ Each link carries:
 - its evidence ids
 - a confidence and a horizon
 
-A company's direction is the product of signs along each path from the event. Rules:
-- Paths that disagree make the company *ambiguous*. Restrictions can delay demand and raise the value of scarce capacity at the same time.
-- Paths whose links have no evidence are shown but do not set the direction.
-- The map is compared with the measured day-0 abnormal return. A clear reaction against the map is flagged *contradicted* and is never re-explained.
-- Validation rejects backward links and any causal link labelled an observed fact.
+**A citation is not evidence for a link until four checks pass**, each as of an explicit cutoff (`assessLink`, `evidenceResolver`):
+1. *Reference*: the claim, market check (`MKT:`), exposure entry (`EXP:`) or company figure (`FIG:`) exists. Unknown ids never count.
+2. *Availability*: a claim was recorded by the cutoff and published by a source that was actually read; a market check's day-0 bar had closed; a figure's document was read and published. Later evidence never improves an earlier assessment.
+3. *Verification*: rumours and disputed claims, moves within noise and unverified exposure classifications are shown but not admissible.
+4. *Relevance*: an analyst's dated judgement (`relevance: { at, direct }`) that the citation bears on this link's mechanism, company, geography, metric and period. Unjudged citations are background. A confirmed permit pause establishes that the pause exists; it does not establish that a company's revenue falls.
 
-Exposure profiles cover seven dimensions: direct revenue, supply chain, cost, geography, valuation, leverage and sentiment.
-- Valuation, leverage and sentiment are measured from the snapshot and price history.
-- The other four are analyst classifications of public business descriptions, marked "not yet checked against filings".
+Each important link also states, in words, what its evidence establishes, the assumption that carries it to the business effect, and what would challenge that assumption. A link is then *direct evidence (still an inference)*, *an assumption resting on background facts*, or *an assumption with no evidence*.
+
+Direction:
+- Signs multiplied along a path are a **scenario aid** ("this mechanism would lower the company's business"), not an estimate of earnings or returns.
+- The **evidence-backed direction** counts only paths whose every link has direct, admissible evidence. In the AI case no company path qualifies yet, so none has one.
+
+**Business hypotheses and price responses are kept apart** (`compareWithMarket`):
+- no directional hypothesis → *not assessable* (absence of a prediction is not agreement);
+- a hypothesis about revenue, orders or earnings, or about a different window → *not comparable* with a one-day move;
+- a move within noise → *inconclusive*, never "no effect";
+- same direction → *directionally aligned in this window; mechanism not established*;
+- opposite direction → *review*, not refutation: prices can reflect other news, prior expectations or another horizon.
+Only research tests that make an explicit price prediction (`priceCheck`) are compared with a window.
+
+Validation rejects backward links, causal links labelled observed facts, and relevance judgements on evidence a link does not cite.
+
+**Exposure.** Four business dimensions (direct revenue, supply chain, cost, geography) are analyst classifications of public descriptions, marked "not yet checked against filings". Market metrics are shown raw, with what each does and does not measure, and are never turned into a sensitivity rating:
+- forward P/E and EV/sales, separately and never converted into each other;
+- net debt ÷ market value, explained as one balance-sheet ratio at one date, not a full measure of financial risk;
+- market sensitivity: an *estimated* beta, which measures co-movement, not sentiment;
+- positioning: *not measured* (no holdings or flow data are loaded).
+Missing, not measured, not disclosed and zero stay distinct.
+
+**Company case.** One company per case can be worked through from primary disclosures (`companyCases`): affected segment, geography and customers; disclosed figures with period, unit, denominator, source, publication and retrieval dates, and whether each is disclosed or derived; six channels kept apart (permanent demand loss, delayed revenue, project relocation, pricing, cost, risk premium); critical assumptions; unknowns; an expectation gap that stays "not established" without a documented reference expectation (company guidance is not consensus); hypotheses as research tests; and a next research action. A planned channel-check list ties each question to the hypothesis it would test; every entry is planned, none done.
+
+**Current assessment.** A case's working judgement is one dated record (`currentAssessment`) that the brief and the memo both render: question, view, interpretation strength (separate from fact verification), why it matters, strongest evidence, key uncertainty, next step, what would change the view, and what changed since the original thesis.
 
 ## 5. Forecasts and their scoring
 

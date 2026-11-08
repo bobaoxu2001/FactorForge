@@ -217,3 +217,44 @@ export function CitedProse({ text, caseSlug }: { text: string; caseSlug: string 
 
 export const pct = (v: number | null | undefined, d = 1) => (v === null || v === undefined || !Number.isFinite(v) ? "—" : `${v >= 0 ? "+" : ""}${(v * 100).toFixed(d)}%`);
 export const tone = (v: number | null | undefined) => (v === null || v === undefined || !Number.isFinite(v) ? "text-ink-muted" : v >= 0 ? "text-emerald-700" : "text-rose-700");
+
+/** Where an evidence id lives in the case. */
+export function evidenceHref(id: string, caseSlug: string): string {
+  if (id.startsWith("MKT:")) return `/events/${caseSlug}/market#${id.split(":")[1]}`;
+  if (id.startsWith("EXP:")) return `/events/${caseSlug}/impact#exposure`;
+  if (id.startsWith("FIG:")) return `/events/${caseSlug}/impact#fig-${id.slice(4)}`;
+  return `/events/${caseSlug}/evidence#${id}`;
+}
+
+/**
+ * A resolved citation in words: what it is and how strong it is as of the
+ * cutoff ("Texas permit halt — confirmed"). The id is kept for traceability
+ * when `showId` is set; summaries leave it out.
+ */
+export function ResolvedRef({ r, caseSlug, showId = false, relevance }: { r: { id: string; label: string; status: string; exists: boolean; available: boolean; admissible: boolean }; caseSlug: string; showId?: boolean; relevance?: "direct" | "background" }) {
+  if (!r.exists) {
+    return <span className="rounded border border-rose-600/40 px-1 py-px text-[11.5px] text-rose-800">unknown reference {r.id}</span>;
+  }
+  const weak = !r.available || !r.admissible;
+  return (
+    <Link
+      href={evidenceHref(r.id, caseSlug)}
+      className={`inline rounded border px-1 py-px text-[12px] leading-snug hover:underline ${weak ? "border-dashed border-ink/25 text-ink-muted" : "border-ink/15 bg-panel2 text-ink"}`}
+    >
+      {r.label} <span className="text-ink-soft">— {r.available ? r.status : "not available at cutoff"}</span>
+      {relevance && <span className="text-ink-soft">{relevance === "direct" ? " · bears on this link" : " · background"}</span>}
+      {showId && <span className="num ml-1 text-[11px] text-ink-soft">{r.id}</span>}
+    </Link>
+  );
+}
+
+export function ResolvedRefs({ refs, caseSlug, empty = "none", showId = false }: { refs: Array<{ id: string; label: string; status: string; exists: boolean; available: boolean; admissible: boolean }>; caseSlug: string; empty?: ReactNode; showId?: boolean }) {
+  if (refs.length === 0) return <span className="text-[12px] text-ink-soft">{empty}</span>;
+  return (
+    <span className="inline-flex flex-wrap gap-1 align-middle">
+      {refs.map((r) => (
+        <ResolvedRef key={r.id} r={r} caseSlug={caseSlug} showId={showId} />
+      ))}
+    </span>
+  );
+}

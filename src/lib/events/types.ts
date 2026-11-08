@@ -107,6 +107,8 @@ export interface Claim {
   id: string;
   eventId: string;
   statement: string;
+  /** A few words naming the claim for summaries ("Texas permit halt"); the id stays visible in the evidence view. */
+  short?: string;
   epistemic: EpistemicClass;
   topic: string;
   citations: Citation[];
@@ -159,6 +161,19 @@ export interface CompetingExplanation {
    * detected move is not evidence that no company-specific cause existed.
    */
   inconclusive?: string[];
+  /**
+   * Research-test fields: how the explanation would work, what should be
+   * observable if it is true, what would weaken it and what to check next.
+   * Explanations are not mutually exclusive; several can hold at once.
+   */
+  mechanism?: string;
+  /** Facts the hypothesis starts from (that a restriction exists, say). They set it up; they do not test it. */
+  premise?: string[];
+  expectIfTrue?: string;
+  wouldWeaken?: string;
+  nextStep?: string;
+  /** A price-response prediction that can be compared with one measured window. */
+  priceCheck?: { windowId: string; symbol: string; direction: "up" | "down" };
 }
 
 export interface EventRecord {

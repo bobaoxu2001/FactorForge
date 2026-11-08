@@ -27,8 +27,13 @@ describe("case data integrity", () => {
   });
 
   it("never records a retrieval from the future", () => {
-    const built = parseInstant(SNAPSHOT.builtAt);
-    for (const s of ALL_SOURCES) expect(parseInstant(s.retrievedAt), s.id).toBeLessThanOrEqual(built);
+    // The platform's latest recorded moment: the market snapshot, or a later
+    // dated assessment for which a primary document was read. Neither may lie
+    // in the future.
+    const assessed = RESEARCH_CASES.flatMap((c) => [c.currentAssessment?.at, ...(c.companyCases ?? []).map((x) => x.at)]).filter((x): x is string => !!x);
+    const latest = Math.max(parseInstant(SNAPSHOT.builtAt), ...assessed.map((x) => parseInstant(x)));
+    expect(latest).toBeLessThanOrEqual(Date.now());
+    for (const s of ALL_SOURCES) expect(parseInstant(s.retrievedAt), s.id).toBeLessThanOrEqual(latest);
   });
 
   it("keeps verbatim excerpts out of the case files (paraphrase only)", () => {
@@ -127,7 +132,7 @@ describe("reported, observed and hypothesized stay apart (Qualcomm, 5 Nov)", () 
 });
 
 describe("competing explanations", () => {
-  const explanations = RESEARCH_CASES.flatMap((c) => c.events.flatMap((e) => e.competingExplanations.map((x) => ({ c, x }))));
+  const explanations = RESEARCH_CASES.flatMap((c) => [...c.events.flatMap((e) => e.competingExplanations), ...(c.companyCases ?? []).flatMap((cc) => cc.tests)].map((x) => ({ c, x })));
   const check = (c: (typeof RESEARCH_CASES)[number], ref: string) => {
     const [, windowId, symbol] = ref.split(":");
     const v = windowView(c, windowId)!;
@@ -138,6 +143,20 @@ describe("competing explanations", () => {
     for (const { x } of explanations) {
       if (x.epistemic !== "CAUSAL_HYPOTHESIS") continue;
       expect(x.summary, x.id).not.toMatch(/\b(drove|drives|caused|because|absorbs|is market-wide)\b/);
+    }
+  });
+
+  it("keep premises (facts the hypothesis starts from) out of the evidence that tests it", () => {
+    for (const { x } of explanations) for (const id of x.premise ?? []) expect([...x.supportedBy, ...x.challengedBy], `${x.id} ${id}`).not.toContain(id);
+  });
+
+  it("tie every planned channel check to a hypothesis that exists, and keep it planned", () => {
+    for (const c of RESEARCH_CASES) {
+      const ids = new Set(explanations.filter((e) => e.c === c).map((e) => e.x.id));
+      for (const k of c.channelChecks ?? []) {
+        expect(k.status, k.id).toBe("planned");
+        for (const t of k.tests) expect(ids.has(t), `${k.id} ${t}`).toBe(true);
+      }
     }
   });
 

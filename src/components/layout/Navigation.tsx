@@ -41,38 +41,50 @@ import { useEffect, useState } from "react";
 import SearchCommand from "./SearchCommand";
 
 type NavItem = { href: string; label: string; icon: typeof Gauge; tag?: string };
-type NavSection = { label: string; items: NavItem[] };
+/** `primary` groups are always open; the rest open only when they contain the current page. */
+type NavSection = { label: string; items: NavItem[]; primary?: boolean };
 
-// Research-first information architecture. The quantitative lab is intact
-// under its own group; every pre-existing route is still reachable.
+// Grouped by task: the research cases, the evidence behind them, the theses
+// being monitored, then methods, labs and workspace tools. Every pre-existing
+// route is still reachable.
 const startItems: NavItem[] = [{ href: "/", label: "Research Home", icon: Telescope }];
 
 const sections: NavSection[] = [
   {
-    label: "Research",
+    label: "Research cases",
+    primary: true,
     items: [
-      { href: "/research/freight", label: "Freight case study", icon: Truck },
-      { href: "/research/freight/sample", label: "One-page research brief", icon: FileText },
-      { href: "/research/freight/companies", label: "Company research", icon: LibraryBig },
-      { href: "/research/freight/evidence", label: "Evidence explorer", icon: FileSearch },
-      { href: "/research/freight/memo", label: "Research memo", icon: FileText },
-      { href: "/research/freight/copilot", label: "AI research copilot", icon: MessagesSquare },
-      { href: "/research/frameworks", label: "KPI frameworks", icon: BookOpenCheck },
+      { href: "/events/ai-datacenter-shock", label: "AI data-center restrictions", icon: Zap },
+      { href: "/events/binance-breach", label: "Binance breach", icon: ShieldAlert },
+      { href: "/research/freight", label: "Freight recovery", icon: Truck },
+      { href: "/events", label: "Event radar", icon: Activity },
+      { href: "/research/freight/sample", label: "Freight one-page brief", icon: FileText },
+      { href: "/research/freight/memo", label: "Freight research memo", icon: FileText },
     ],
   },
   {
-    label: "Event intelligence",
+    label: "Evidence",
+    primary: true,
     items: [
-      { href: "/events", label: "Event radar", icon: Activity },
-      { href: "/events/ai-datacenter-shock", label: "AI data-center shock", icon: Zap },
-      { href: "/events/binance-breach", label: "Binance breach", icon: ShieldAlert },
+      { href: "/research/freight/evidence", label: "Freight evidence explorer", icon: FileSearch },
+      { href: "/research/freight/companies", label: "Company research", icon: LibraryBig },
+      { href: "/research/frameworks", label: "KPI frameworks", icon: BookOpenCheck },
+      { href: "/data", label: "Data sources", icon: Database },
+    ],
+  },
+  {
+    label: "Thesis monitor",
+    primary: true,
+    items: [
       { href: "/theses", label: "Thesis tracker", icon: History },
+      { href: "/research/freight/thesis", label: "Freight thesis monitor", icon: Target },
       { href: "/forecasts", label: "Forecast scorecard", icon: ClipboardCheck },
     ],
   },
   {
-    label: "Quantitative",
+    label: "Methods & labs",
     items: [
+      { href: "/research/freight/copilot", label: "AI research copilot", icon: MessagesSquare },
       { href: "/quant", label: "Quant overview", icon: Gauge },
       { href: "/factors", label: "Factor research", icon: Network },
       { href: "/strategies", label: "Strategy lab", icon: LineChart },
@@ -82,12 +94,6 @@ const sections: NavSection[] = [
       { href: "/picks", label: "Quant screen", icon: Sparkles },
       { href: "/ai-market", label: "Market stress", icon: BrainCircuit },
       { href: "/hotspots", label: "Thematic hypotheses", icon: Flame },
-    ],
-  },
-  {
-    label: "Portfolio & monitoring",
-    items: [
-      { href: "/research/freight/thesis", label: "Thesis monitor", icon: Target },
       { href: "/paper-trading", label: "Paper observation", icon: WalletCards },
       { href: "/simulator", label: "Trade simulator", icon: CandlestickChart },
       { href: "/track-record", label: "Track record", icon: Trophy },
@@ -96,7 +102,6 @@ const sections: NavSection[] = [
   {
     label: "Workspace",
     items: [
-      { href: "/data", label: "Data sources", icon: Database },
       { href: "/reports", label: "Report cards", icon: FileText },
       { href: "/learn", label: "Learn (Stocks 101)", icon: GraduationCap },
       { href: "/oss", label: "OSS & Maintainers", icon: ShieldCheck },
@@ -115,11 +120,17 @@ export function activeHref(pathname: string): string | null {
   return matches.sort((a, b) => b.length - a.length)[0] ?? null;
 }
 
+/** Secondary groups open only when the current page is inside them, so a research page does not expand the labs. */
+export function sectionOpen(section: { primary?: boolean; items: Array<{ href: string }> }, pathname: string): boolean {
+  if (section.primary) return true;
+  const active = activeHref(pathname);
+  return section.items.some((i) => i.href === active);
+}
+
 export default function Navigation({ persistenceAvailable = true }: { persistenceAvailable?: boolean }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState("");
-  const researchPage = pathname.startsWith("/research/");
 
   // Cached server HTML and the visitor's browser can be on different days.
   // Fill the local date after hydration so the initial render stays consistent.
@@ -135,10 +146,10 @@ export default function Navigation({ persistenceAvailable = true }: { persistenc
           {startItems.map((item) => (
             <DesktopNavLink key={item.href} item={item} pathname={pathname} />
           ))}
-          {sections.map((section) => section.label === "Research" ? (
+          {sections.map((section) => section.primary ? (
             <div key={section.label} className="pt-5"><div className="px-3 pb-1.5 text-[12px] font-semibold text-ink-soft">{section.label}</div><div className="space-y-0.5">{section.items.map((item) => <DesktopNavLink key={item.href} item={item} pathname={pathname} />)}</div></div>
           ) : (
-            <details key={section.label} open={!researchPage} className="pt-4"><summary className="cursor-pointer px-3 py-1.5 text-[12px] font-semibold text-ink-soft">{section.label}</summary><div className="mt-1 space-y-0.5">{section.items.map((item) => <DesktopNavLink key={item.href} item={item} pathname={pathname} />)}</div></details>
+            <details key={`${section.label}:${sectionOpen(section, pathname)}`} open={sectionOpen(section, pathname)} className="pt-4"><summary className="cursor-pointer rounded px-3 py-1.5 text-[12px] font-semibold text-ink-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent">{section.label}</summary><div className="mt-1 space-y-0.5">{section.items.map((item) => <DesktopNavLink key={item.href} item={item} pathname={pathname} />)}</div></details>
           ))}
         </nav>
         <div className="mt-4 shrink-0 border-t border-line pt-4">
@@ -190,12 +201,12 @@ export default function Navigation({ persistenceAvailable = true }: { persistenc
             </div>
             <nav className="mt-8 max-h-[calc(100dvh-100px)] space-y-0.5 overflow-y-auto">
               {startItems.map((item) => (
-                <MobileNavLink key={item.href} item={item} onNavigate={() => setOpen(false)} />
+                <MobileNavLink key={item.href} item={item} pathname={pathname} onNavigate={() => setOpen(false)} />
               ))}
-              {sections.map((section) => section.label === "Research" ? (
-                <div key={section.label} className="pt-5"><div className="px-3 pb-1.5 text-[12px] font-semibold text-ink-soft">{section.label}</div>{section.items.map((item) => <MobileNavLink key={item.href} item={item} onNavigate={() => setOpen(false)} />)}</div>
+              {sections.map((section) => section.primary ? (
+                <div key={section.label} className="pt-5"><div className="px-3 pb-1.5 text-[12px] font-semibold text-ink-soft">{section.label}</div>{section.items.map((item) => <MobileNavLink key={item.href} item={item} pathname={pathname} onNavigate={() => setOpen(false)} />)}</div>
               ) : (
-                <details key={section.label} open={!researchPage} className="pt-4"><summary className="cursor-pointer px-3 py-1.5 text-[12px] font-semibold text-ink-soft">{section.label}</summary>{section.items.map((item) => <MobileNavLink key={item.href} item={item} onNavigate={() => setOpen(false)} />)}</details>
+                <details key={`${section.label}:${sectionOpen(section, pathname)}`} open={sectionOpen(section, pathname)} className="pt-4"><summary className="cursor-pointer rounded px-3 py-1.5 text-[12px] font-semibold text-ink-soft">{section.label}</summary>{section.items.map((item) => <MobileNavLink key={item.href} item={item} pathname={pathname} onNavigate={() => setOpen(false)} />)}</details>
               ))}
             </nav>
           </div>
@@ -229,10 +240,11 @@ function DesktopNavLink({ item, pathname }: { item: NavItem; pathname: string })
   );
 }
 
-function MobileNavLink({ item, onNavigate }: { item: NavItem; onNavigate: () => void }) {
+function MobileNavLink({ item, pathname, onNavigate }: { item: NavItem; pathname: string; onNavigate: () => void }) {
   const Icon = item.icon;
+  const active = activeHref(pathname) === item.href;
   return (
-    <Link href={item.href} onClick={onNavigate} className="flex h-10 items-center gap-3 rounded-md px-3 text-[14px] text-ink-muted">
+    <Link href={item.href} onClick={onNavigate} aria-current={active ? "page" : undefined} className={`flex h-10 items-center gap-3 rounded-md px-3 text-[14px] ${active ? "bg-accent-soft font-medium text-ink" : "text-ink-muted"}`}>
       <Icon className="h-4 w-4" />
       {item.label}
       {item.tag && (

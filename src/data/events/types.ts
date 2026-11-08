@@ -1,6 +1,6 @@
 import type { ExposureProfile, ImpactGraph } from "@/lib/events/impact";
 import type { ThesisRecord } from "@/lib/events/thesis";
-import type { Claim, EventRecord, SourceRecord } from "@/lib/events/types";
+import type { Claim, CompetingExplanation, EventRecord, SourceRecord } from "@/lib/events/types";
 
 /** A market window the engine measures: abnormal returns around one event's time. */
 export interface MarketWindowSpec {
@@ -69,6 +69,110 @@ export interface ThesisAssessment {
   note: string;
 }
 
+/**
+ * A figure taken from a company document. `value: null` means not disclosed,
+ * which is never shown as zero. Derived figures say how they were computed.
+ */
+export interface DisclosedFigure {
+  id: string;
+  label: string;
+  /** A number, a disclosed [low, high] range, or null when not disclosed. */
+  value: number | [number, number] | null;
+  unit: "USD m" | "MW" | "%" | "years";
+  /** Reporting period, e.g. "three months ended 30 Sep 2026". */
+  period: string;
+  /** For ratios: what the figure is divided by. */
+  denominator?: string;
+  sourceId: string;
+  /** Where in the document, e.g. "page 2, Adjusted EBITDA by Segment". */
+  where: string;
+  basis: "disclosed" | "derived";
+  derivation?: string;
+}
+
+/** Ways a restriction could reach a company's economics; they can occur together. */
+export type ImpactChannel = "permanent-demand-loss" | "delayed-revenue" | "project-relocation" | "pricing" | "cost" | "risk-premium";
+
+export interface ChannelAssessment {
+  channel: ImpactChannel;
+  mechanism: string;
+  /** Operating measure that would show it. */
+  kpi: string;
+  financialImplication: string;
+  timing: string;
+  /** Evidence ids (claims, FIG:, MKT:) bearing on it, as of the company case date. */
+  evidenceFor: string[];
+  evidenceAgainst: string[];
+  assumption: string;
+  /** Analyst's working read, in words; no probability. */
+  read: string;
+}
+
+/** One company worked through from mechanism to economics. */
+export interface CompanyCase {
+  ticker: string;
+  company: string;
+  /** Date of this analyst assessment; evidence after it does not count. */
+  at: string;
+  question: string;
+  segment: string;
+  geography: string;
+  customers: string;
+  whyThisCompany: string;
+  figures: DisclosedFigure[];
+  /** What the disclosed figures do, and do not, measure. */
+  exposureNote: string;
+  channels: ChannelAssessment[];
+  criticalAssumptions: string[];
+  unknowns: string[];
+  /**
+   * What differs between this assessment and a documented reference
+   * expectation. Company guidance is not market consensus; with no reliable
+   * reference, `reference` is null and the gap is not established.
+   */
+  expectationGap: { reference: string | null; gap: string | null; note: string };
+  /** Hypotheses as research tests. */
+  tests: CompetingExplanation[];
+  /** Impact-map node path shown first as the main mechanism. */
+  mainPath: string[];
+  nextAction: string;
+}
+
+/** A planned (or completed) conversation with an industry participant. Planned calls are never presented as done. */
+export interface ChannelCheck {
+  id: string;
+  participant: string;
+  whyTheyKnow: string;
+  /** Open, non-leading wording. */
+  question: string;
+  /** Research-test ids the answer would bear on. */
+  tests: string[];
+  limitations: string;
+  status: "planned" | "completed";
+}
+
+/**
+ * The case's current working judgement, dated and written by the analyst. One
+ * record feeds the brief, the memo and the summaries, so they cannot drift.
+ * Fact verification is derived elsewhere; `interpretation` rates only the
+ * reading of those facts.
+ */
+export interface CurrentAssessment {
+  at: string;
+  question: string;
+  /** Bounded working judgement. "Insufficient evidence to distinguish..." is allowed. */
+  view: string;
+  interpretation: { strength: "weak" | "tentative" | "moderate" | "strong"; reason: string };
+  whyItMatters: string;
+  strongest: Array<{ text: string; refs: string[] }>;
+  uncertainty: Array<{ text: string; refs: string[] }>;
+  nextStep: string;
+  wouldChange: Array<{ text: string; refs: string[] }>;
+  /** Thesis this assessment updates, and what changed since it was written. */
+  updatesThesisId?: string;
+  changes: Array<{ at: string; text: string; refs: string[] }>;
+}
+
 export interface ResearchCase {
   id: string;
   slug: string;
@@ -97,4 +201,7 @@ export interface ResearchCase {
   limitations: string[];
   /** Current assessments of this case's theses (see ThesisAssessment). */
   assessments?: ThesisAssessment[];
+  currentAssessment?: CurrentAssessment;
+  companyCases?: CompanyCase[];
+  channelChecks?: ChannelCheck[];
 }

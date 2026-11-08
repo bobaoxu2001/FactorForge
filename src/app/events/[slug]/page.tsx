@@ -9,7 +9,7 @@ import type { QuantityKind } from "@/lib/events/types";
 import { quantityLedger } from "@/lib/events/verification";
 import { eventView, thesisViews } from "@/lib/events/view";
 
-export const generateMetadata = ({ params }: { params: Promise<{ slug: string }> }) => caseMetadata(params, "Overview");
+export const generateMetadata = ({ params }: { params: Promise<{ slug: string }> }) => caseMetadata(params, "Updates", "What changed and when: assessment updates, corrections and thesis revisions, then each event with its timeline.");
 
 const QUANTITY_LABEL: Partial<Record<QuantityKind, string>> = {
   affected: "Affected",
@@ -26,9 +26,30 @@ export default async function EventCaseOverview({ params }: { params: Promise<{ 
   if (!c) notFound();
   const primary = eventView(c.primaryEventId);
   const theses = thesisViews().filter((t) => t.replay.thesis.caseId === c.id);
+  const short = (id: string) => c.claims.find((x) => x.id === id)?.short ?? id;
+  const updates = [
+    ...(c.currentAssessment?.changes ?? []).map((x) => ({ at: x.at, kind: "Assessment", text: x.text, href: `/events/${c.slug}/brief#what-changed` })),
+    ...c.claims.flatMap((cl) => (cl.corrections ?? []).map((x) => ({ at: x.at, kind: "Correction", text: `${short(cl.id)} (${cl.id}): ${x.note}`, href: `/events/${c.slug}/evidence#${cl.id}` }))),
+    ...theses.flatMap((t) => t.replay.revisions.map((r) => ({ at: r.at, kind: "Thesis revision", text: `${t.replay.thesis.title}: ${r.from.toLowerCase()} → ${r.to.toLowerCase()}. ${r.explanation}`, href: `/theses#${t.replay.thesis.id}` }))),
+    ...theses.flatMap((t) => t.assessments.map((x) => ({ at: x.at, kind: "Thesis note", text: `${t.replay.thesis.title} (${x.target === "statement" ? "statement" : x.target.replace("trigger:", "trigger ")}): ${x.note.replace(/\[([A-Z]-C\d+)\]/g, "$1")}`, href: `/theses#${t.replay.thesis.id}` }))),
+  ].sort((a, b) => b.at.localeCompare(a.at));
 
   return (
     <div className="space-y-5">
+      {updates.length > 0 && (
+        <Panel title="What changed" eyebrow="Newest first" source="Dated entries from the case file, claim corrections and thesis replays. Original records are not edited; changes sit beside them.">
+          <ol className="space-y-2">
+            {updates.map((u) => (
+              <li key={`${u.kind}${u.at}${u.text.slice(0, 40)}`} className="grid gap-1 text-[13px] leading-relaxed sm:grid-cols-[150px_110px_1fr] sm:gap-3">
+                <span className="num text-[12px] text-ink-soft"><When iso={u.at} /></span>
+                <span className="text-[12px] font-medium text-ink-soft">{u.kind}</span>
+                <Link href={u.href} className="text-ink-muted hover:text-ink hover:underline">{u.text}</Link>
+              </li>
+            ))}
+          </ol>
+        </Panel>
+      )}
+
       <section className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
         <div className="card p-5 md:p-6">
           <div className="text-[12.5px] font-medium text-ink-soft">The research question</div>
