@@ -21,7 +21,7 @@ This project follows a human-maintained changelog. There is no automated release
 - **Competing explanations** are worded as hypotheses ("may have contributed"), and a market check with no statistically distinguishable move is listed as inconclusive rather than as evidence for or against.
 - **Forecast scorecard header** says only live forecasts are recorded before their outcome; backfilled examples are reconstructions shown apart. Coverage misses are described as evidence of miscalibration under the test, and the Brier column is named as a skill score.
 - **Market tables** print each day-0 figure's t-statistic and placebo rank under it, so they read without hovering.
-- **Deep links** such as `/events/<case>/market#<window>` land on their section again. The loading states stream content into a hidden container first, so the browser's own anchor scroll found nothing; a small client component now retries until the target renders. Evidence-id chips no longer break across lines on phones.
+- **Deep links** such as `/events/<case>/market#<window>` land on their section again. The loading states stream content into a hidden container first, so the browser's own anchor scroll found nothing; a small client component now retries until the target renders (up to eight seconds). Evidence-id chips no longer break across lines on phones, and a linked claim card gets padding inside its highlight ring.
 - **Trigger wording rules** for theses published from 8 Nov 2026, 10:00 UTC: "confirmed" needs CONFIRMED; causal labels may only prompt a review. T-AI-1 is kept as published, with a dated current assessment of its statement and of trigger TR-A2.
 
 #### Added

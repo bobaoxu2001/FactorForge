@@ -124,7 +124,7 @@ export function SourceLine({ source }: { source: SourceRecord }) {
 /** A claim with its kind, verification and every citation, each linked to its source. */
 export function ClaimCard({ claim, sources, compact = false }: { claim: ClaimView; sources: Map<string, SourceRecord>; compact?: boolean }) {
   return (
-    <article id={claim.id} className="scroll-mt-28 border-t border-line py-3 first:border-t-0">
+    <article id={claim.id} className="scroll-mt-28 border-t border-line py-3 first:border-t-0 target:-mx-2 target:rounded-md target:px-2">
       <div className="flex flex-wrap items-center gap-1.5">
         <span className="num text-[11.5px] font-medium text-ink-soft">{claim.id}</span>
         <VerificationChip state={claim.verification} title={claim.verificationReason} />
