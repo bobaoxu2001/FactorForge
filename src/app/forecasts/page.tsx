@@ -9,7 +9,7 @@ import { EVALUATED_SYMBOLS, evaluation, evaluationFamily, integrity, pooled, sco
 
 export const metadata = {
   title: "Forecast scorecard",
-  description: "Every forecast the event engine has made, with its information cutoff, what happened, and how the baseline model has performed out of sample: interval calibration by regime and directional skill against constant rules.",
+  description: "Live forecasts recorded before their outcome, backfilled worked examples shown apart, and how the baseline model has performed out of sample: interval calibration by regime and directional skill against constant rules.",
 };
 
 const share = (num: number, den: number) => (den ? `${Math.round((num / den) * 100)}%` : "—");
@@ -124,7 +124,7 @@ export default function ForecastScorecardPage() {
       <PageHeader
         eyebrow="Event intelligence"
         title="Forecast scorecard"
-        subtitle="Every forecast is written to a hash-chained ledger before its outcome is known, with the data cutoff it used. Live forecasts and backfilled worked examples are kept apart, and the baseline's out-of-sample record sits underneath both."
+        subtitle="Only live forecasts are recorded before their outcome is known: each is written to a hash-chained ledger with the data cutoff it used. Backfilled worked examples were reconstructed afterwards from data available at each cutoff; they are shown separately and are not a forward-looking record. The baseline's out-of-sample record sits underneath both."
       />
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
@@ -211,7 +211,7 @@ export default function ForecastScorecardPage() {
         source={`Walk-forward over the snapshot's three years: ${symbols.length} instruments, a forecast every 5 bars, no refitting on the test period. Regimes from the benchmark's 20-day volatility percentile within its trailing year.`}
       >
         <p className="text-[13px] leading-relaxed text-ink">
-          An 80% range should contain the outcome 80% of the time. The dot is the share that did, pooled across instruments; the bar is a 95% interval on the effective sample size, after allowing for overlapping horizons and for instruments missing together (a market-wide shock breaks every range at once). A bar that does not reach the blue 80% line means the range is miscalibrated, not unlucky.
+          An 80% range should contain the outcome 80% of the time. The dot is the share that did, pooled across instruments; the bar is a 95% interval on the effective sample size, after allowing for overlapping horizons and for instruments missing together (a market-wide shock breaks every range at once). When the whole bar sits off the 80% line, the gap is larger than chance usually produces at that effective sample size: evidence of miscalibration under this test, not proof, since the effective-sample adjustment is itself an approximation.
         </p>
         <div className="-mx-5 mt-4 overflow-x-auto md:-mx-6">
           <table className="w-full min-w-[720px] text-[12.5px]" aria-label="Pooled interval coverage by horizon and volatility regime">
@@ -263,7 +263,7 @@ export default function ForecastScorecardPage() {
         source="Same walk-forward. The skill test compares the rule with the better of 'always up' and 'always down' on the same dates, then corrects for every test run together (Holm)."
       >
         <p className="text-[13px] leading-relaxed text-ink">
-          Beating 50% is not skill: a stock that fell on 60% of days makes &ldquo;always down&rdquo; right 60% of the time. A direction is allowed only if the rule beats the better constant rule in a paired sign test on the effective sample, the result survives a Holm correction across all {family.length} tests, its Brier score beats the hindsight base rate, and both halves of the sample agree.{" "}
+          Beating 50% is not skill: a stock that fell on 60% of days makes &ldquo;always down&rdquo; right 60% of the time. A direction is allowed only if the rule beats the better constant rule in a paired sign test on the effective sample, the result survives a Holm correction across all {family.length} tests, its Brier skill score against the hindsight base rate is above zero, and both halves of the sample agree.{" "}
           {validated === 0 ? "None does, so every new forecast abstains on direction and the range is the forecast." : `${validated} pass${validated === 1 ? "es" : ""}; every other forecast abstains on direction.`}
         </p>
         <p className="mb-1 mt-3 text-[11.5px] text-ink-soft md:hidden">Scroll sideways for more columns; the instrument stays pinned.</p>
@@ -278,7 +278,7 @@ export default function ForecastScorecardPage() {
                 <th scope="col" className="px-2 py-2 text-right font-medium">Calm / normal / stressed</th>
                 <th scope="col" className="px-2 py-2 text-right font-medium">Hit rate vs best constant</th>
                 <th scope="col" className="px-2 py-2 text-right font-medium">p (Holm)</th>
-                <th scope="col" className="px-2 py-2 text-right font-medium">Brier vs base rate</th>
+                <th scope="col" className="px-2 py-2 text-right font-medium">Brier skill vs base rate</th>
                 <th scope="col" className="px-2 py-2 text-left font-medium md:pr-6">Direction</th>
               </tr>
             </thead>
@@ -312,7 +312,7 @@ export default function ForecastScorecardPage() {
           </table>
         </div>
         <p className="mt-3 text-[12.5px] leading-relaxed text-ink-muted">
-          &ldquo;Best constant&rdquo; is chosen with hindsight, which makes the bar higher, not lower. A Brier score below zero against the base rate means the probabilities were worse than simply quoting how often the instrument rose. Previous rule ({Object.keys(MODEL_HISTORY).filter((v) => v !== MODEL_VERSION).join(", ")}): {Object.entries(MODEL_HISTORY).filter(([v]) => v !== MODEL_VERSION).map(([, d]) => d).join(" ")}
+          &ldquo;Best constant&rdquo; is chosen with hindsight, which makes the bar higher, not lower. Brier skill vs base rate is 1 − (the rule&apos;s Brier score ÷ the Brier score of always quoting the share of periods the instrument rose); below zero, the rule&apos;s probabilities scored worse than that constant. Previous rule ({Object.keys(MODEL_HISTORY).filter((v) => v !== MODEL_VERSION).join(", ")}): {Object.entries(MODEL_HISTORY).filter(([v]) => v !== MODEL_VERSION).map(([, d]) => d).join(" ")}
         </p>
       </Panel>
     </div>

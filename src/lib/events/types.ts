@@ -153,6 +153,12 @@ export interface CompetingExplanation {
   supportedBy: string[];
   /** Claims or market checks against it. */
   challengedBy: string[];
+  /**
+   * Checks that were run but cannot decide it either way, such as a market
+   * check with no statistically distinguishable abnormal return: absence of a
+   * detected move is not evidence that no company-specific cause existed.
+   */
+  inconclusive?: string[];
 }
 
 export interface EventRecord {

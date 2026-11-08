@@ -22,15 +22,22 @@ function describe(w: WindowResult | undefined): string | undefined {
   return `t = ${w.tStat.toFixed(2)}${placebo}${w.complete ? "" : " · window not complete"}`;
 }
 
-function Cell({ w, value, emphasis = false }: { w?: WindowResult; value: number | null; emphasis?: boolean }) {
+/** Day-0 cells print t and placebo rank under the figure, so they read without hovering (and on touch screens). */
+function Cell({ w, value, emphasis = false, detail = false }: { w?: WindowResult; value: number | null; emphasis?: boolean; detail?: boolean }) {
   const sig = !!w?.significant;
   const complete = w?.complete ?? true;
   return (
-    <td className={`num px-2 py-2 text-right ${tone(value)} ${sig ? "font-semibold" : ""} ${emphasis ? "text-[13px]" : ""} ${complete ? "" : "opacity-60"}`} title={describe(w)}>
+    <td className={`num px-2 py-2 text-right align-top ${tone(value)} ${sig ? "font-semibold" : ""} ${emphasis ? "text-[13px]" : ""} ${complete ? "" : "opacity-60"}`} title={describe(w)}>
       {pct(value)}
       {sig && (
         <span className="ml-0.5 text-[11px] text-ink-soft" aria-label="significant">
           *
+        </span>
+      )}
+      {detail && w?.tStat != null && (
+        <span className="block text-[10.5px] font-normal text-ink-soft">
+          t {w.tStat.toFixed(1)}
+          {w.placeboShare != null && ` · ${(w.placeboShare * 100).toFixed(0)}%`}
         </span>
       )}
     </td>
@@ -45,7 +52,7 @@ export default async function EventMarketPage({ params }: { params: Promise<{ sl
   return (
     <div className="space-y-5">
       <Note>
-        <strong className="font-semibold">Associations around a date, not proof of cause.</strong> Abnormal return is the part of a move its benchmark does not explain: actual return minus α + β × benchmark return, with α and β fitted on 120 sessions that end ten sessions before day 0. Day 0 is the first daily bar that closed after the event, so an event after the New York close starts on the next session. A figure is bold with * only when two checks agree: the t-statistic (which includes the error in estimating α and β, so a big market day widens the band) is at least 1.96, and no more than 5% of the asset&apos;s own previous 500 sessions moved as much. Hover a figure for both numbers. Faded figures belong to windows that have not finished.
+        <strong className="font-semibold">Associations around a date, not proof of cause.</strong> Abnormal return is the part of a move its benchmark does not explain: actual return minus α + β × benchmark return, with α and β fitted on 120 sessions that end ten sessions before day 0. Day 0 is the first daily bar that closed after the event, so an event after the New York close starts on the next session. A figure is bold with * only when two checks agree: the t-statistic (which includes the error in estimating α and β, so a big market day widens the band) is at least 1.96, and no more than 5% of the asset&apos;s own previous 500 sessions moved as much. Under each day-0 figure are both numbers: the t-statistic, then the share of those 500 sessions that moved at least as much. The &ldquo;vs equal-weight&rdquo; column repeats day 0 against the equal-weight S&amp;P 500 (RSP), which the largest stocks do not dominate. Not passing both checks means no statistically distinguishable move under this benchmark and model; it does not show that nothing company-specific happened. Faded figures belong to windows that have not finished.
       </Note>
 
       {c.windows.map((w) => {
@@ -118,15 +125,15 @@ export default async function EventMarketPage({ params }: { params: Promise<{ sl
                       const ew = v.equalWeight[s.symbol]?.windows[0];
                       const adj = !!s.benchmark;
                       return (
-                        <tr key={s.symbol} className="border-b border-line last:border-0">
+                        <tr key={s.symbol} className="border-b border-line align-top last:border-0">
                           <th scope="row" className="sticky left-0 z-10 bg-panel px-5 py-2 text-left font-normal md:pl-6">
                             <span className="font-medium text-ink">{s.symbol}</span>
                             <span className="ml-1.5 hidden text-[11.5px] text-ink-soft sm:inline">{instrument(s.symbol)?.name}</span>
                             {day0s.length > 1 && <span className="num block text-[11px] text-ink-soft">day 0 {s.day0}</span>}
                           </th>
-                          {adj ? <Cell w={w0} value={w0?.abnormal ?? null} emphasis /> : <td className="px-2 py-2 text-right text-[11.5px] text-ink-soft">benchmark</td>}
+                          {adj ? <Cell w={w0} value={w0?.abnormal ?? null} emphasis detail /> : <td className="px-2 py-2 text-right align-top text-[11.5px] text-ink-soft">benchmark</td>}
                           <td className={`num px-2 py-2 text-right ${tone(w0?.raw ?? null)}`}>{pct(w0?.raw ?? null)}</td>
-                          {hasEqualWeight && (ew ? <Cell w={ew} value={ew.abnormal} /> : <td className="px-2 py-2 text-right text-ink-soft">—</td>)}
+                          {hasEqualWeight && (ew ? <Cell w={ew} value={ew.abnormal} detail /> : <td className="px-2 py-2 text-right align-top text-ink-soft">—</td>)}
                           <Cell w={adj ? w1 : undefined} value={(adj ? w1?.abnormal : w1?.raw) ?? null} />
                           <Cell w={adj ? w4 : undefined} value={(adj ? w4?.abnormal : w4?.raw) ?? null} />
                           <Cell w={adj ? w19 : undefined} value={(adj ? w19?.abnormal : w19?.raw) ?? null} />

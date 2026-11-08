@@ -172,12 +172,13 @@ export default async function EventCaseOverview({ params }: { params: Promise<{ 
                 <div className="mt-2 text-[12.5px] text-ink-muted">
                   <div className="flex flex-wrap items-center gap-1">For: <EvidenceRefs ids={x.supportedBy} caseSlug={c.slug} /></div>
                   <div className="mt-1 flex flex-wrap items-center gap-1">Against: <EvidenceRefs ids={x.challengedBy} caseSlug={c.slug} empty="nothing recorded yet" /></div>
+                  {x.inconclusive?.length ? <div className="mt-1 flex flex-wrap items-center gap-1">Inconclusive: <EvidenceRefs ids={x.inconclusive} caseSlug={c.slug} /></div> : null}
                 </div>
               </div>
             ))}
           </div>
           <div className="mt-4">
-            <Note tone="warn">An explanation is a hypothesis until evidence separates it from the others. One day of prices cannot do that when several drivers arrive together, so none is marked as the cause.</Note>
+            <Note tone="warn">An explanation is a hypothesis until evidence separates it from the others. One day of prices cannot do that when several drivers arrive together, so none is marked as the cause. A market check listed as inconclusive found no statistically distinguishable move under the current benchmark and model; that neither supports nor rules out the explanation.</Note>
           </div>
         </Panel>
       )}

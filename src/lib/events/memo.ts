@@ -20,6 +20,13 @@ const p1 = (v: number) => `${v >= 0 ? "+" : "−"}${Math.abs(v * 100).toFixed(1)
 const list = (xs: string[]) => (xs.length <= 1 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs.at(-1)}`);
 const n = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
 
+/** A claim stays a [citation]; a market check is named in words, because the memo links only claims. */
+function refText(id: string): string {
+  if (id.startsWith("MKT:")) return `the ${id.split(":")[2]} market check`;
+  if (id.startsWith("EXP:")) return `the ${id.split(":")[1]} exposure entry`;
+  return `[${id}]`;
+}
+
 export function buildEventMemo(c: ResearchCase): MemoSection[] {
   const primary = eventView(c.primaryEventId);
   const sections: MemoSection[] = [];
@@ -84,10 +91,11 @@ export function buildEventMemo(c: ResearchCase): MemoSection[] {
       title: "Competing explanations",
       kind: "data",
       paragraphs: primary.event.competingExplanations.map((x) => {
-        const claimsFor = x.supportedBy.filter((id) => !id.startsWith("MKT:"));
-        const marketFor = x.supportedBy.length - claimsFor.length;
-        const forText = claimsFor.length ? claimsFor.map((id) => `[${id}]`).join(" ") + (marketFor ? " plus market checks" : "") : marketFor ? "market checks only" : "nothing recorded";
-        return `${x.label} (${x.epistemic === "CAUSAL_HYPOTHESIS" ? "hypothesis" : x.epistemic.toLowerCase()}): ${x.summary} For: ${forText}. Against: ${x.challengedBy.map((id) => `[${id}]`).join(" ") || "nothing recorded yet"}.`;
+        const forText = x.supportedBy.map(refText).join(" ") || "nothing recorded";
+        const inconclusive = x.inconclusive?.length
+          ? ` Inconclusive: ${x.inconclusive.map(refText).join(" ")}, with no statistically distinguishable move under the current benchmark and model, which neither supports nor rules it out.`
+          : "";
+        return `${x.label} (${x.epistemic === "CAUSAL_HYPOTHESIS" ? "hypothesis" : x.epistemic.toLowerCase()}): ${x.summary} For: ${forText}. Against: ${x.challengedBy.map(refText).join(" ") || "nothing recorded yet"}.${inconclusive}`;
       }),
     });
   }

@@ -48,4 +48,12 @@ describe("event research memo", () => {
     expect(market).toMatch(/Neither comparison says why the stocks moved/);
     expect(market).not.toMatch(/absorbed|not market-wide|market-wide/);
   });
+
+  it("names an inconclusive market check in words and says it neither supports nor rules out the explanation", () => {
+    const ai = RESEARCH_CASES.find((c) => c.slug === "ai-datacenter-shock")!;
+    const x = buildEventMemo(ai).find((s) => s.title === "Competing explanations")!.paragraphs.join(" ");
+    expect(x).toMatch(/Earnings and guidance \(hypothesis\): Company news .* may have contributed to the decline\./);
+    expect(x).toMatch(/Inconclusive: the QCOM market check, with no statistically distinguishable move .* neither supports nor rules it out/);
+    expect(x).not.toMatch(/\[MKT:/);
+  });
 });

@@ -6,7 +6,7 @@ import { ALL_CLAIMS, ALL_SOURCES, INSTRUMENTS, RESEARCH_CASES } from "@/data/eve
 import { returnOn } from "./market";
 import { parseInstant } from "./time";
 import { validateCase, verifyClaim } from "./verification";
-import { SNAPSHOT, priceSeries, series } from "./view";
+import { SNAPSHOT, priceSeries, series, windowView } from "./view";
 
 describe("case data integrity", () => {
   it("passes validation with no errors", () => {
@@ -116,12 +116,40 @@ describe("reported, observed and hypothesized stay apart (Qualcomm, 5 Nov)", () 
     expect(claim("A-C18").corrections?.length).toBeGreaterThan(0);
   });
 
-  it("counts QCOM's within-noise move against, not for, the earnings explanation", () => {
+  it("lists QCOM's non-significant move as inconclusive for the earnings explanation, neither for nor against", () => {
     const ai = RESEARCH_CASES.find((c) => c.slug === "ai-datacenter-shock")!;
     const x = ai.events.flatMap((e) => e.competingExplanations).find((e) => e.id === "X-A2")!;
     expect(x.epistemic).toBe("CAUSAL_HYPOTHESIS");
     expect(x.supportedBy).not.toContain("MKT:W-A-SELL:QCOM");
-    expect(x.challengedBy).toContain("MKT:W-A-SELL:QCOM");
+    expect(x.challengedBy).not.toContain("MKT:W-A-SELL:QCOM");
+    expect(x.inconclusive).toContain("MKT:W-A-SELL:QCOM");
+  });
+});
+
+describe("competing explanations", () => {
+  const explanations = RESEARCH_CASES.flatMap((c) => c.events.flatMap((e) => e.competingExplanations.map((x) => ({ c, x }))));
+  const check = (c: (typeof RESEARCH_CASES)[number], ref: string) => {
+    const [, windowId, symbol] = ref.split(":");
+    const v = windowView(c, windowId)!;
+    return { own: v.studies.find((s) => s.symbol === symbol)!.windows[0], ew: v.equalWeight[symbol]?.windows[0] };
+  };
+
+  it("are worded as hypotheses, not established causes", () => {
+    for (const { x } of explanations) {
+      if (x.epistemic !== "CAUSAL_HYPOTHESIS") continue;
+      expect(x.summary, x.id).not.toMatch(/\b(drove|drives|caused|because|absorbs|is market-wide)\b/);
+    }
+  });
+
+  it("cite a market check for or against only when it passed both significance checks; a null result is inconclusive", () => {
+    for (const { c, x } of explanations) {
+      for (const ref of [...x.supportedBy, ...x.challengedBy].filter((r) => r.startsWith("MKT:"))) expect(check(c, ref).own?.significant, `${x.id} ${ref}`).toBe(true);
+      for (const ref of x.inconclusive ?? []) {
+        const { own, ew } = check(c, ref);
+        expect(own?.significant, `${x.id} ${ref}`).toBe(false);
+        expect(ew?.significant ?? false, `${x.id} ${ref} vs RSP`).toBe(false);
+      }
+    }
   });
 });
 

@@ -189,6 +189,11 @@ export default async function EventBriefPage({ params }: { params: Promise<{ slu
                 <span className="font-medium text-ink">{x.label}.</span> <span className="text-ink-muted">{x.summary}</span>
                 <div className="mt-0.5 flex flex-wrap items-center gap-1 text-[12px] text-ink-soft">
                   For: <EvidenceRefs ids={x.supportedBy} caseSlug={c.slug} empty="nothing yet" /> · Against: <EvidenceRefs ids={x.challengedBy} caseSlug={c.slug} empty="nothing recorded" />
+                  {x.inconclusive?.length ? (
+                    <>
+                      {" "}· Inconclusive: <EvidenceRefs ids={x.inconclusive} caseSlug={c.slug} />
+                    </>
+                  ) : null}
                 </div>
               </li>
             ))}
@@ -196,7 +201,11 @@ export default async function EventBriefPage({ params }: { params: Promise<{ slu
         ) : (
           <p className="text-ink-muted">No competing explanations recorded for the primary event.</p>
         )}
-        <p className="text-[12.5px] text-ink-muted">None is marked as the cause: one day of prices cannot separate drivers that arrive together.</p>
+        <p className="text-[12.5px] text-ink-muted">
+          None is marked as the cause: one day of prices cannot separate drivers that arrive together.
+          {primary?.event.competingExplanations.some((x) => x.inconclusive?.length) &&
+            " Inconclusive means a check found no statistically distinguishable move under the current benchmark and model, which neither supports nor rules out the explanation."}
+        </p>
       </Step>
 
       <Step n={5} title="What it means for the research view" href="/theses" linkLabel="Thesis tracker">
