@@ -4,12 +4,16 @@ A short script for presenting the event-research workflow. Every number below co
 
 ## Where to run it
 
-- **Production:** https://factor-forge-ashy.vercel.app. Checked 8 Nov 2026, 15:56 UTC: production served `main` at `aea70c1` (PR #21), which has every page used below.
-- **Wording:**
-  - The current-assessment wording quoted in this script comes from the correction PR on branch `fix/assessment-wording`.
-  - Until that PR is merged, production shows the earlier wording (dated 8 Nov, 14:00 UTC), and the new wording appears only on that PR's Vercel preview.
-  - Check which version is live before presenting.
-- **Main route:** `/events/ai-datacenter-shock/brief` → **Business impact** → **Evidence** → back to the brief. `/forecasts` is optional at the end.
+- **Production:** https://factor-forge-ashy.vercel.app. Checked 8 Nov 2026 at 20:02 UTC:
+  - it served `main` at `3350e96` (PR #22);
+  - that includes the corrected current assessment quoted below, and every page used in this script.
+- **Final-polish preview:** branch `polish/homepage-entry` changes only the homepage and the case entry links:
+  - a featured-case introduction on the homepage;
+  - case links that open on the brief;
+  - a dated catalyst calendar.
+
+  Until that PR is merged, those changes appear only on its Vercel preview. Production keeps the earlier homepage.
+- **Main route:** `/events/ai-datacenter-shock/brief` → **Business impact** → **Evidence** → back to the brief for *What would change the view*. On the preview, the homepage's "Read research brief" button opens the same brief. `/forecasts` is optional at the end.
 
 ---
 

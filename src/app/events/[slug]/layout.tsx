@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import StageNav, { type Stage } from "@/components/intel/StageNav";
 import { When } from "@/components/events/EventUI";
 import { RESEARCH_CASES, caseBySlug } from "@/data/events";
+import { caseStages } from "@/lib/events/caseNav";
 import { eventView, pricesThrough, thesisViews } from "@/lib/events/view";
 
 export const dynamicParams = false;
@@ -22,15 +23,7 @@ export default async function EventCaseLayout({ children, params }: { children: 
   const read = c.sources.filter((s) => s.retrieval === "read").length;
   const theses = thesisViews().filter((t) => t.replay.thesis.caseId === c.id);
   const through = pricesThrough();
-  const stages: Stage[] = [
-    { slug: "brief", label: "Brief", step: "" },
-    { slug: "impact", label: "Business impact", step: "" },
-    { slug: "evidence", label: "Evidence", step: "", status: `${confirmed}/${claims.length} confirmed` },
-    { slug: "", label: "Updates", step: "" },
-    { slug: "market", label: "Market reaction", step: "", status: `${c.windows.length} windows`, secondary: true },
-    { slug: "scenarios", label: "Scenarios", step: "", secondary: true },
-    { slug: "memo", label: "Memo", step: "", secondary: true },
-  ];
+  const stages: Stage[] = caseStages({ confirmed, claims: claims.length, windows: c.windows.length });
   return (
     <div className="space-y-6">
       <header className="relative pt-1">

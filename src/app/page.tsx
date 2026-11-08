@@ -8,7 +8,9 @@ import { FEATURED_PROJECT_ID } from "@/data/research/projects";
 import { ordinal } from "@/lib/intel/companies";
 import { getResearchProject } from "@/lib/intel/project";
 import { MEMO_STATUS_LABEL } from "@/lib/intel/quality";
-import { RESEARCH_CASES, thesisViews } from "@/lib/events/view";
+import { When } from "@/components/events/EventUI";
+import { TIMING_NOTE, partitionCatalysts } from "@/lib/intel/catalystTiming";
+import { featuredCase, otherEventCases } from "@/lib/events/homeEntries";
 
 export const revalidate = 3600;
 
@@ -33,14 +35,95 @@ export default function ResearchHomePage() {
   const headline = lead?.latest
     ? { name: view.kpis.find((k) => k.kpi.id === lead.kpiId)?.kpi.name ?? lead.kpiId, actual: lead.latest.actual, residual: lead.latest.residual }
     : null;
+  const featured = featuredCase();
+  const others = otherEventCases();
+  // Server-side, in New York time: the edition's schedule is a snapshot, and a passed date says nothing about the outcome.
+  const schedule = partitionCatalysts(view.catalysts, new Date());
 
   return (
     <div className="space-y-5">
+      <section className="card overflow-hidden" aria-labelledby="home-title">
+        <div className="border-b border-line p-6 md:px-10 md:py-6">
+          <p className="text-[13px] font-medium text-ink-soft">FactorForge</p>
+          <h1 id="home-title" className="mt-1.5 max-w-[40ch] text-[24px] font-semibold leading-[1.15] text-ink md:text-[30px]">
+            An independent equity research workbench for examining business events, tracing evidence, and documenting how research views change.
+          </h1>
+          <p className="mt-2 max-w-[80ch] text-[13.5px] leading-relaxed text-ink-muted">
+            Built from public sources. Every claim states whether it is verified, interpretation is labelled as such, and when a view changes the earlier wording is kept and dated. A research draft, not investment advice; no live trading, and not a proven forecasting tool.
+          </p>
+        </div>
+        <div className="grid xl:grid-cols-[1.5fr_1fr]">
+          <div className="p-6 md:px-10 md:py-7">
+            <p className="text-[13px] font-medium text-accent">Start here · featured research case</p>
+            <div className="mt-1.5 flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+              <h2 className="max-w-[34ch] text-[22px] font-semibold leading-snug text-ink md:text-[26px]">
+                <Link href={featured.briefHref} className="hover:text-accent">{featured.title}</Link>
+              </h2>
+              <Link href={featured.briefHref} className="inline-flex shrink-0 items-center gap-2 rounded-md bg-accent px-4 py-2.5 text-[14px] font-medium text-paper transition-colors hover:bg-ink">
+                Read research brief <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+            <dl className="mt-4 space-y-3.5">
+              <div>
+                <dt className="text-[12.5px] font-medium text-ink-soft">Research question</dt>
+                <dd className="mt-1 font-serif text-[19px] leading-snug text-ink">{featured.question}</dd>
+              </div>
+              <div>
+                <dt className="text-[12.5px] font-medium text-ink-soft">Current assessment</dt>
+                <dd className="mt-1 text-[15px] font-medium leading-relaxed text-ink">{featured.view}</dd>
+                <dd className="mt-1.5 text-[12.5px] text-ink-muted">
+                  {featured.factsVerification && <>Underlying facts: {featured.factsVerification} · </>}Interpretation: {featured.interpretation}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-[12.5px] font-medium text-ink-soft">Key uncertainty</dt>
+                <dd className="mt-1 text-[14px] leading-relaxed text-ink-muted">{featured.keyUncertainty}</dd>
+              </div>
+            </dl>
+            <p className="mt-4 text-[12px] text-ink-soft">
+              Assessment dated <When iso={featured.assessedAt} /> · sources through <When iso={featured.sourcesThrough} /> · prices through <span className="num">{featured.pricesThrough}</span>
+            </p>
+            <p className="mt-2 flex flex-wrap gap-x-5 text-[13.5px]">
+              <Link href={featured.briefHref} className="font-medium text-accent hover:underline">Full assessment in the brief</Link>
+              <Link href={featured.impactHref} className="font-medium text-accent hover:underline">Business impact</Link>
+              <Link href={featured.evidenceHref} className="font-medium text-accent hover:underline">Evidence</Link>
+            </p>
+          </div>
+          <aside className="border-t border-line bg-panel2 p-6 md:p-8 xl:border-l xl:border-t-0" aria-labelledby="other-cases">
+            <h2 id="other-cases" className="text-[17px] font-semibold text-ink">Other research cases</h2>
+            <ul className="mt-3 divide-y divide-line border-y border-line">
+              <li className="py-3">
+                <Link href={`/research/${pid}`} className="text-[14.5px] font-semibold leading-snug text-ink hover:text-accent">{view.config.title}</Link>
+                <p className="mt-1 text-[12.5px] leading-relaxed text-ink-muted">
+                  Freight industry case from SEC filings, FRED series and prices; research edition of {view.asOf}. Its hypotheses are scored against the data, and primary research is still outstanding.
+                </p>
+                <p className="mt-1 flex flex-wrap gap-x-4 text-[12.5px]">
+                  <Link href={`/research/${pid}`} className="text-accent hover:underline">Read the case study</Link>
+                  <Link href={`/research/${pid}/sample`} className="text-accent hover:underline">One-page brief</Link>
+                </p>
+              </li>
+              {others.map((o) => (
+                <li key={o.slug} className="py-3">
+                  <Link href={o.briefHref} className="text-[14.5px] font-semibold leading-snug text-ink hover:text-accent">{o.title}</Link>
+                  <p className="mt-1 text-[12.5px] leading-relaxed text-ink-muted">{o.question}</p>
+                  {!o.hasAssessment && <p className="mt-1 text-[12px] text-ink-soft">No current assessment written yet; the brief shows the evidence and hypotheses.</p>}
+                  <p className="mt-1 text-[12.5px]">
+                    <Link href={o.briefHref} className="text-accent hover:underline">Read research brief</Link>
+                  </p>
+                </li>
+              ))}
+            </ul>
+            <Link href="/events" className="mt-3 inline-block text-[12.5px] text-accent hover:underline">All events on the radar</Link>
+          </aside>
+        </div>
+      </section>
+
+      <h2 className="pt-3 text-[13px] font-semibold text-ink-soft">Freight case workspace</h2>
       <section className="card overflow-hidden">
         <div className="grid xl:grid-cols-[1.4fr_0.6fr]">
           <div className="p-6 md:p-10">
-            <div className="text-[13px] font-medium text-ink-soft">Featured research note · {view.config.industry}</div>
-            <h1 className="mt-3 text-[38px] font-semibold leading-[1.04] text-ink md:text-[54px]">{view.config.title}</h1>
+            <div className="text-[13px] font-medium text-ink-soft">Research note · {view.config.industry}</div>
+            <h2 className="mt-3 text-[30px] font-semibold leading-[1.08] text-ink md:text-[40px]">{view.config.title}</h2>
             {headline && (
               <KeyFinding className="mt-6">
                 {headline.name} is {headline.actual >= 0 ? "up" : "down"} {fmt.pctPlain(Math.abs(headline.actual))} on a year ago, but that is{" "}
@@ -75,31 +158,6 @@ export default function ResearchHomePage() {
           </aside>
         </div>
       </section>
-
-      <p className="max-w-[80ch] text-[14px] leading-relaxed text-ink-muted">
-        <span className="font-semibold text-ink">FactorForge</span> is an equity research workbench: industry maps, public filings, KPI trends, primary-research planning, valuation and quantitative signals in one place. Every number traces to a dated source, every claim states whether it is verified, and AI output is never treated as evidence.
-      </p>
-
-      <Panel
-        eyebrow="Event intelligence"
-        title="Events that could change a thesis"
-        actions={<Link href="/events" className="text-[12px] text-accent hover:text-ink">Event radar →</Link>}
-      >
-        <ul className="grid gap-4 md:grid-cols-2">
-          {RESEARCH_CASES.map((c) => {
-            const theses = thesisViews().filter((t) => t.replay.thesis.caseId === c.id);
-            return (
-              <li key={c.id} className="border-t-[3px] border-ink/15 pt-2">
-                <Link href={`/events/${c.slug}`} className="text-[15px] font-semibold leading-snug text-ink hover:text-accent">{c.title}</Link>
-                <p className="mt-1 text-[13px] leading-relaxed text-ink-muted">{c.dek}</p>
-                <p className="mt-1 text-[12px] text-ink-soft">
-                  {theses.map((t) => `${t.replay.thesis.id} ${t.replay.status.replace("_", " ").toLowerCase()}`).join(" · ")} · <Link href="/forecasts" className="text-accent hover:underline">forecast scorecard</Link>
-                </p>
-              </li>
-            );
-          })}
-        </ul>
-      </Panel>
 
       <Panel eyebrow="Research coverage tracker" title="Where the active thesis is in its lifecycle">
         <ol className="grid gap-2 sm:grid-cols-3 xl:grid-cols-6">
@@ -150,16 +208,45 @@ export default function ResearchHomePage() {
             ))}
           </ul>
         </Panel>
-        <Panel eyebrow="Upcoming catalysts" title="Scheduled data & estimated results">
-          <ul className="space-y-1.5 text-[12px]">
-            {view.catalysts.slice(0, 9).map((c) => (
-              <li key={c.date + c.label} className="flex items-center justify-between gap-2 border-b border-line/60 pb-1.5 last:border-0">
-                <span className="num text-[11px] text-ink-muted">{c.date}</span>
-                <span className="flex-1 text-ink">{c.label}</span>
-                <span className={`text-[10.5px] ${c.confirmed ? "text-emerald-700" : "text-amber-700"}`}>{c.confirmed ? "scheduled" : "estimate"}</span>
-              </li>
-            ))}
-          </ul>
+        <Panel eyebrow="Catalyst calendar" title="Scheduled data & estimated results">
+          <p className="mb-2 text-[11.5px] leading-relaxed text-ink-soft">
+            Schedule as of {view.asOf} (research edition). Dates compared with {schedule.today}, New York time. A passed date means the outcome has not been checked here, not that it was released.
+          </p>
+          <h3 className="text-[12px] font-semibold text-ink">Upcoming</h3>
+          {schedule.upcoming.length ? (
+            <ul className="mt-1 space-y-1.5 text-[12px]">
+              {schedule.upcoming.slice(0, 8).map(({ item: c, timing }) => (
+                <li key={c.date + c.label} className="flex items-start justify-between gap-2 border-b border-line/60 pb-1.5 last:border-0">
+                  <span className="num shrink-0 text-[11px] text-ink-muted">{c.date}</span>
+                  <span className="flex-1 text-ink">
+                    {c.label}
+                    {timing === "today" && <span className="block text-[11px] text-amber-800">{TIMING_NOTE.today}</span>}
+                  </span>
+                  <span className={`shrink-0 text-[10.5px] ${c.confirmed ? "text-emerald-700" : "text-amber-700"}`}>{c.confirmed ? "scheduled" : "estimate"}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-1 text-[12px] text-ink-muted">No upcoming dates in this edition&apos;s schedule. A refreshed research edition would add them; none are invented here.</p>
+          )}
+          {schedule.passed.length > 0 && (
+            <details className="mt-3">
+              <summary className="cursor-pointer rounded text-[12px] font-semibold text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent">
+                Passed dates ({schedule.passed.length})
+              </summary>
+              <ul className="mt-1 space-y-1.5 text-[12px]">
+                {schedule.passed.map(({ item: c }) => (
+                  <li key={c.date + c.label} className="flex items-start justify-between gap-2 border-b border-line/60 pb-1.5 last:border-0">
+                    <span className="num shrink-0 text-[11px] text-ink-soft">{c.date}</span>
+                    <span className="flex-1 text-ink-muted">
+                      {c.label}
+                      <span className="block text-[11px] text-ink-soft">{TIMING_NOTE.passed}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
         </Panel>
         <Panel eyebrow="Thesis monitoring" title="Invalidation triggers">
           <ul className="space-y-1.5 text-[12px]">
@@ -203,7 +290,7 @@ export default function ResearchHomePage() {
             ))}
           </ul>
         </Panel>
-        <Panel eyebrow="Quantitative lab" title="Factor research, backtests & risk (unchanged engine)">
+        <Panel eyebrow="Quantitative lab" title="Factor research, backtests & risk">
           <div className="grid grid-cols-2 gap-2 text-[12px]">
             {[
               ["/quant", "Quant overview", LineChart],
