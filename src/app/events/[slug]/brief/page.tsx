@@ -229,6 +229,7 @@ export default async function EventBriefPage({ params }: { params: Promise<{ slu
                 <span className="text-[12px] text-ink-soft">
                   ({f.basis === "derived" ? "derived from disclosed figures" : f.value === null ? "not in the documents read" : "disclosed"}; {f.period})
                 </span>
+                {f.qualification && <span className="block text-[12px] text-ink-muted">{f.qualification}</span>}
               </li>
             ))}
           </ul>
@@ -311,6 +312,15 @@ export default async function EventBriefPage({ params }: { params: Promise<{ slu
               </li>
             ))}
           </ul>
+          {(c.assessmentHistory ?? []).map((h) => (
+            <div key={h.at} className="border-l-2 border-line pl-3 text-[13px] text-ink-muted">
+              <p className="text-[12px] text-ink-soft">
+                Superseded assessment, <When iso={h.at} /> (history, not the current view):
+              </p>
+              <p className="mt-0.5">{h.view}</p>
+              <p className="mt-0.5 text-[12.5px]">{h.interpretation.reason}</p>
+            </div>
+          ))}
         </Section>
       )}
 

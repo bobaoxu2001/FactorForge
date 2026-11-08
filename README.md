@@ -581,9 +581,9 @@ Security notes:
 
 ## Testing
 
-599 tests across 90 files under vitest + jsdom (plus one ledger-writer suite that runs only under `npm run events:forecast`).
+607 tests across 91 files under vitest + jsdom (plus one ledger-writer suite that runs only under `npm run events:forecast`).
 
-The event-intelligence layer has 149 tests in 9 files. They cover:
+The event-intelligence layer has 157 tests in 10 files. They cover:
 - Contradictory sources, and rumours versus enacted rules (lifecycle guard).
 - Time zones and DST, including events after the New York close.
 - One story syndicated by many outlets.
