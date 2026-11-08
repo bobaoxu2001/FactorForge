@@ -3,15 +3,18 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Activity,
   Bell,
   BookOpenCheck,
   BrainCircuit,
   CandlestickChart,
+  ClipboardCheck,
   Database,
   FileSearch,
   FileText,
   Gauge,
   GraduationCap,
+  History,
   Layers,
   LibraryBig,
   LineChart,
@@ -22,6 +25,7 @@ import {
   PieChart,
   Server,
   Settings,
+  ShieldAlert,
   ShieldCheck,
   Sparkles,
   Star,
@@ -31,6 +35,7 @@ import {
   Truck,
   WalletCards,
   X,
+  Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import SearchCommand from "./SearchCommand";
@@ -53,6 +58,16 @@ const sections: NavSection[] = [
       { href: "/research/freight/memo", label: "Research memo", icon: FileText },
       { href: "/research/freight/copilot", label: "AI research copilot", icon: MessagesSquare },
       { href: "/research/frameworks", label: "KPI frameworks", icon: BookOpenCheck },
+    ],
+  },
+  {
+    label: "Event intelligence",
+    items: [
+      { href: "/events", label: "Event radar", icon: Activity },
+      { href: "/events/ai-datacenter-shock", label: "AI data-center shock", icon: Zap },
+      { href: "/events/binance-breach", label: "Binance breach", icon: ShieldAlert },
+      { href: "/theses", label: "Thesis tracker", icon: History },
+      { href: "/forecasts", label: "Forecast scorecard", icon: ClipboardCheck },
     ],
   },
   {

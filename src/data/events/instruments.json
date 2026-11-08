@@ -1,0 +1,48 @@
+{
+  "_comment": "Instruments the event engine prices. Read by scripts/build-event-snapshot.mjs and by src/data/events/instruments.ts. A row here is a research subject, not a recommendation. 'benchmark' is the series used for beta and abnormal returns; null means the row is itself a benchmark.",
+  "instruments": [
+    { "symbol": "SPY", "name": "SPDR S&P 500 ETF", "kind": "etf", "group": "benchmark", "benchmark": null },
+    { "symbol": "QQQ", "name": "Invesco QQQ (Nasdaq-100) ETF", "kind": "etf", "group": "benchmark", "benchmark": null },
+    { "symbol": "^IXIC", "name": "Nasdaq Composite index", "kind": "index", "group": "benchmark", "benchmark": null },
+    { "symbol": "SMH", "name": "VanEck Semiconductor ETF", "kind": "etf", "group": "sector-benchmark", "benchmark": "SPY" },
+    { "symbol": "XLU", "name": "Utilities Select Sector SPDR ETF", "kind": "etf", "group": "sector-benchmark", "benchmark": "SPY" },
+    { "symbol": "CIBR", "name": "First Trust NASDAQ Cybersecurity ETF", "kind": "etf", "group": "sector-benchmark", "benchmark": "QQQ" },
+
+    { "symbol": "BTC-USD", "name": "Bitcoin (USD)", "kind": "crypto", "group": "crypto-asset", "benchmark": null },
+    { "symbol": "ETH-USD", "name": "Ether (USD)", "kind": "crypto", "group": "crypto-asset", "benchmark": "BTC-USD" },
+    { "symbol": "BNB-USD", "name": "BNB (USD)", "kind": "crypto", "group": "crypto-asset", "benchmark": "BTC-USD" },
+    { "symbol": "XRP-USD", "name": "XRP (USD)", "kind": "crypto", "group": "crypto-asset", "benchmark": "BTC-USD" },
+    { "symbol": "SOL-USD", "name": "Solana (USD)", "kind": "crypto", "group": "crypto-asset", "benchmark": "BTC-USD" },
+
+    { "symbol": "COIN", "name": "Coinbase Global", "kind": "equity", "group": "crypto-equity", "benchmark": "QQQ" },
+    { "symbol": "HOOD", "name": "Robinhood Markets", "kind": "equity", "group": "crypto-equity", "benchmark": "QQQ" },
+    { "symbol": "MSTR", "name": "Strategy Inc", "kind": "equity", "group": "crypto-equity", "benchmark": "QQQ" },
+    { "symbol": "CRCL", "name": "Circle Internet Group", "kind": "equity", "group": "crypto-equity", "benchmark": "QQQ" },
+    { "symbol": "MARA", "name": "MARA Holdings", "kind": "equity", "group": "crypto-equity", "benchmark": "QQQ" },
+
+    { "symbol": "CRWD", "name": "CrowdStrike Holdings", "kind": "equity", "group": "cybersecurity", "benchmark": "QQQ" },
+    { "symbol": "PANW", "name": "Palo Alto Networks", "kind": "equity", "group": "cybersecurity", "benchmark": "QQQ" },
+    { "symbol": "ZS", "name": "Zscaler", "kind": "equity", "group": "cybersecurity", "benchmark": "QQQ" },
+    { "symbol": "OKTA", "name": "Okta", "kind": "equity", "group": "cybersecurity", "benchmark": "QQQ" },
+    { "symbol": "FTNT", "name": "Fortinet", "kind": "equity", "group": "cybersecurity", "benchmark": "QQQ" },
+    { "symbol": "S", "name": "SentinelOne", "kind": "equity", "group": "cybersecurity", "benchmark": "QQQ" },
+
+    { "symbol": "NVDA", "name": "NVIDIA", "kind": "equity", "group": "ai-semiconductors", "benchmark": "QQQ" },
+    { "symbol": "AMD", "name": "Advanced Micro Devices", "kind": "equity", "group": "ai-semiconductors", "benchmark": "QQQ" },
+    { "symbol": "AVGO", "name": "Broadcom", "kind": "equity", "group": "ai-semiconductors", "benchmark": "QQQ" },
+    { "symbol": "QCOM", "name": "Qualcomm", "kind": "equity", "group": "ai-semiconductors", "benchmark": "QQQ" },
+    { "symbol": "MSFT", "name": "Microsoft", "kind": "equity", "group": "hyperscaler", "benchmark": "QQQ" },
+    { "symbol": "AMZN", "name": "Amazon.com", "kind": "equity", "group": "hyperscaler", "benchmark": "QQQ" },
+    { "symbol": "GOOGL", "name": "Alphabet (Class A)", "kind": "equity", "group": "hyperscaler", "benchmark": "QQQ" },
+    { "symbol": "META", "name": "Meta Platforms", "kind": "equity", "group": "hyperscaler", "benchmark": "QQQ" },
+    { "symbol": "CRWV", "name": "CoreWeave", "kind": "equity", "group": "ai-cloud", "benchmark": "QQQ" },
+    { "symbol": "ANET", "name": "Arista Networks", "kind": "equity", "group": "networking", "benchmark": "QQQ" },
+    { "symbol": "VRT", "name": "Vertiv Holdings", "kind": "equity", "group": "dc-infrastructure", "benchmark": "SPY" },
+    { "symbol": "ETN", "name": "Eaton", "kind": "equity", "group": "grid-equipment", "benchmark": "SPY" },
+    { "symbol": "GEV", "name": "GE Vernova", "kind": "equity", "group": "grid-equipment", "benchmark": "SPY" },
+    { "symbol": "CEG", "name": "Constellation Energy", "kind": "equity", "group": "power-generation", "benchmark": "SPY" },
+    { "symbol": "VST", "name": "Vistra", "kind": "equity", "group": "power-generation", "benchmark": "SPY" },
+    { "symbol": "DLR", "name": "Digital Realty Trust", "kind": "equity", "group": "dc-reit", "benchmark": "SPY" },
+    { "symbol": "EQIX", "name": "Equinix", "kind": "equity", "group": "dc-reit", "benchmark": "SPY" }
+  ]
+}

@@ -2,6 +2,15 @@
 
 This roadmap is intentionally scoped to known project directions. It does not imply dates, external adoption, or committed release promises.
 
+## Event intelligence (next)
+
+- Quantify revenue exposure from 10-K segment notes and attach the facts to impact-map links.
+- Official-source ingestion adapters (Federal Register, governors' feeds, SEC 8-K) that *propose* claims for human review.
+- Sector-neutral or equal-weight benchmarks for event studies when affected stocks dominate the index.
+- Report live calibration once each horizon has 30+ effectively independent realized forecasts.
+- LLM-assisted tagging of new claims against open thesis triggers, with confirmation required.
+- Move the ledgers to an append-only table when a persistence backend exists; the hash chain carries over.
+
 ## Research platform (next)
 
 - FMCSA operating-authority adapter (public data) to test capacity exits directly.

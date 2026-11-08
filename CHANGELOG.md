@@ -6,6 +6,44 @@ This project follows a human-maintained changelog. There is no automated release
 
 ## Unreleased
 
+### Event intelligence: events, verification, impact, theses and scored forecasts
+
+#### Added
+
+- **Event and evidence foundation** (`src/lib/events/types.ts`, `time.ts`, `sources.ts`, `verification.ts`, `categories.ts`)
+  - Event, claim and source records; derived verification states; a separate lifecycle with a guard against "proposed" being shown as "enacted".
+  - Independence counting that collapses wire copies, AMP pages and article versions.
+  - Mandatory timestamp offsets with DST-correct New York closes.
+  - `eventAsOf()` point-in-time views, and a quantity ledger that keeps frozen, replenished and recovered apart.
+  - Case validation.
+- **Market transmission** (`market.ts`)
+  - Market-model abnormal returns from the first bar that closed after the event, with t-statistics, windows of 1, 2, 5 and 20 bars, persistence labels, volume ratios and group reactions.
+  - Flags for windows that overlap other events.
+- **Impact map and exposure** (`impact.ts`)
+  - Signed causal paths through seven layers. Conflicting paths are reported as ambiguous, and hypothesis-only paths are excluded from the direction.
+  - The map is reconciled against measured reactions.
+  - Seven-dimension exposure profiles, part classified and part measured.
+- **Forecasts** (`forecast.ts`, `evaluation.ts`, `ledger.ts`)
+  - Baseline `ewma-interval-v1` with a leakage-proof `predict()`. It abstains unless walk-forward testing up to the cutoff validates direction.
+  - Scoring against benchmarks, with costs on directional calls.
+  - Walk-forward coverage, MAE/RMSE versus a drift model, Brier skill, regimes and effective n.
+  - Hash-chained append-only ledger (`src/data/events/forecast-ledger.json`) with live/backfill labelling.
+- **Theses** (`thesis.ts`)
+  - Immutable originals hashed into `thesis-ledger.json`.
+  - Trigger-based replay with materiality, assumption tracking and lessons; price triggers are limited to review.
+  - Live theses keyed on record time, horizon close and outcome scoring.
+  - Validation that cited evidence existed at the cutoff.
+- **Cases**
+  - `binance-breach` (29 Oct 2026 incident) and `ai-datacenter-shock` (NY and TX orders, midterms, 5 Nov selloff).
+  - Every claim is paraphrased and linked to a source read on 8 Nov 2026; unreadable sources (Reuters, CNN, the FBI alert) are listed and support nothing.
+- **Pages:** `/events` (radar), `/events/[case]` with overview, evidence and timeline, market reaction, impact map and exposure, scenarios and forecast ranges, and a generated memo; `/theses`; `/forecasts`. Also navigation, a home-page block, sitemap and ⌘K entries.
+- **Data:** `scripts/build-event-snapshot.mjs` (`npm run events:refresh`) for 39 instruments, with a run log and a carry-over policy. `npm run events:forecast` (ledger writer). Two weekly-workflow steps.
+- 103 tests in 8 files; `docs/EVENT_INTELLIGENCE.md`.
+
+#### Changed
+
+- `StageNav` accepts an optional `basePath` (default unchanged).
+
 ### Research platform transformation (FactorForge → AI-native equity research & market intelligence)
 
 #### Added

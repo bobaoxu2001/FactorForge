@@ -11,7 +11,9 @@
     "typecheck": "tsc --noEmit",
     "fixture:refresh": "node scripts/build-fixture.mjs",
     "fundamentals:refresh": "node scripts/build-fundamentals-fixture.mjs",
-    "research:refresh": "node scripts/build-research-snapshot.mjs"
+    "research:refresh": "node scripts/build-research-snapshot.mjs",
+    "events:refresh": "node scripts/build-event-snapshot.mjs",
+    "events:forecast": "EVENTS_WRITE_LEDGER=1 vitest run src/lib/events/ledger.generate.test.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

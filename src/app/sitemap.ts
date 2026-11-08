@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { STRATEGY_CATALOG } from "@/data/strategyCatalog";
 import { RESEARCH_PROJECTS } from "@/data/research/projects";
+import { RESEARCH_CASES } from "@/data/events";
 import { SITE_URL } from "@/lib/config/site";
 
 /**
@@ -13,6 +14,9 @@ export const PUBLIC_ROUTES = [
   "/",
   "/quant",
   "/research/frameworks",
+  "/events",
+  "/theses",
+  "/forecasts",
   "/learn",
   "/data",
   "/factors",
@@ -58,5 +62,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.6,
     })),
   ]);
-  return [...routes, ...strategies, ...research];
+  const events = RESEARCH_CASES.flatMap((c) =>
+    ["", "/evidence", "/market", "/impact", "/scenarios", "/memo"].map((section) => ({
+      url: `${SITE_URL}/events/${c.slug}${section}`,
+      lastModified,
+      changeFrequency: "weekly" as const,
+      priority: section === "" ? 0.9 : 0.7,
+    })),
+  );
+  return [...routes, ...strategies, ...research, ...events];
 }

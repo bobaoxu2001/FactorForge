@@ -1,0 +1,2708 @@
+[
+ {
+  "id": "F-2026-11-05-SMH-1",
+  "instrument": "SMH",
+  "benchmark": "SPY",
+  "horizon": 1,
+  "informationCutoff": "2026-11-05",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-05",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-1",
+  "costBps": 5,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5618181818181818,
+   "center": 0,
+   "interval": [
+    -0.05012645497026069,
+    0.052771713911341056
+   ],
+   "relInterval": [
+    -0.03748314503573924,
+    0.03894284535633519
+   ],
+   "sigmaDaily": 0.040128243860945344,
+   "observations": 500
+  },
+  "prevHash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "hash": "aa261990e1f1ba75c3d36dc2d2fc2dfdce2d3afcdf32a6207ff1f0d074958739"
+ },
+ {
+  "id": "F-2026-11-05-SMH-5",
+  "instrument": "SMH",
+  "benchmark": "SPY",
+  "horizon": 5,
+  "informationCutoff": "2026-11-05",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-05",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-1",
+  "costBps": 5,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5769230769230769,
+   "center": 0,
+   "interval": [
+    -0.10862757815022506,
+    0.12186553620853702
+   ],
+   "relInterval": [
+    -0.08187898565907326,
+    0.08918103864320126
+   ],
+   "sigmaDaily": 0.040128243860945344,
+   "observations": 500
+  },
+  "prevHash": "aa261990e1f1ba75c3d36dc2d2fc2dfdce2d3afcdf32a6207ff1f0d074958739",
+  "hash": "e6568213460650fb4690058b4b777ee56f348334ada5f3bf4a6b21fcdcc7369a"
+ },
+ {
+  "id": "F-2026-11-05-SMH-20",
+  "instrument": "SMH",
+  "benchmark": "SPY",
+  "horizon": 20,
+  "informationCutoff": "2026-11-05",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-05",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-1",
+  "costBps": 5,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.64030131826742,
+   "center": 0,
+   "interval": [
+    -0.20545520556566688,
+    0.2585822813324681
+   ],
+   "relInterval": [
+    -0.1570538030255878,
+    0.1863153349398825
+   ],
+   "sigmaDaily": 0.040128243860945344,
+   "observations": 500
+  },
+  "prevHash": "e6568213460650fb4690058b4b777ee56f348334ada5f3bf4a6b21fcdcc7369a",
+  "hash": "48e7d1a75961857f30c9ad72603a0c5683048f20d6a6263f5289120679421f7a"
+ },
+ {
+  "id": "F-2026-11-05-SMH-60",
+  "instrument": "SMH",
+  "benchmark": "SPY",
+  "horizon": 60,
+  "informationCutoff": "2026-11-05",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-05",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-1",
+  "costBps": 5,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.725050916496945,
+   "center": 0,
+   "interval": [
+    -0.32857119197394846,
+    0.4893611773077211
+   ],
+   "relInterval": [
+    -0.25615648678330405,
+    0.34436878487462286
+   ],
+   "sigmaDaily": 0.040128243860945344,
+   "observations": 500
+  },
+  "prevHash": "48e7d1a75961857f30c9ad72603a0c5683048f20d6a6263f5289120679421f7a",
+  "hash": "02934efe10591905ddac2795a84af23ce202114e2a90cbfd74a37191a08cf2a1"
+ },
+ {
+  "id": "F-2026-11-05-NVDA-1",
+  "instrument": "NVDA",
+  "benchmark": "QQQ",
+  "horizon": 1,
+  "informationCutoff": "2026-11-05",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-05",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-1",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5127272727272727,
+   "center": 0,
+   "interval": [
+    -0.0401545706941866,
+    0.04183441361306217
+   ],
+   "relInterval": [
+    -0.02161887407035601,
+    0.02209657719001279
+   ],
+   "sigmaDaily": 0.03197921935064862,
+   "observations": 500
+  },
+  "prevHash": "02934efe10591905ddac2795a84af23ce202114e2a90cbfd74a37191a08cf2a1",
+  "hash": "d23e4ec792118c933316e69699380d1e824e221704f5372e8ea43a5036eaeef1"
+ },
+ {
+  "id": "F-2026-11-05-NVDA-5",
+  "instrument": "NVDA",
+  "benchmark": "QQQ",
+  "horizon": 5,
+  "informationCutoff": "2026-11-05",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-05",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-1",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5476190476190477,
+   "center": 0,
+   "interval": [
+    -0.08756717763885014,
+    0.09597109561693329
+   ],
+   "relInterval": [
+    -0.04769647802007171,
+    0.0500853739581959
+   ],
+   "sigmaDaily": 0.03197921935064862,
+   "observations": 500
+  },
+  "prevHash": "d23e4ec792118c933316e69699380d1e824e221704f5372e8ea43a5036eaeef1",
+  "hash": "c07effcb006614c922a67fbcc1209683b467d7a4f8ac707dcaa7b0a0cde79d3b"
+ },
+ {
+  "id": "F-2026-11-05-NVDA-20",
+  "instrument": "NVDA",
+  "benchmark": "QQQ",
+  "horizon": 20,
+  "informationCutoff": "2026-11-05",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-05",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-1",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5630885122410546,
+   "center": 0,
+   "interval": [
+    -0.16746634467806643,
+    0.20115264242778097
+   ],
+   "relInterval": [
+    -0.09311800202462428,
+    0.10267929260092412
+   ],
+   "sigmaDaily": 0.03197921935064862,
+   "observations": 500
+  },
+  "prevHash": "c07effcb006614c922a67fbcc1209683b467d7a4f8ac707dcaa7b0a0cde79d3b",
+  "hash": "2042d036bc615b8ab67f1c5e0a2d63d5a464de6d6812bf124196b02d4d3b8fc6"
+ },
+ {
+  "id": "F-2026-11-05-NVDA-60",
+  "instrument": "NVDA",
+  "benchmark": "QQQ",
+  "horizon": 60,
+  "informationCutoff": "2026-11-05",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-05",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-1",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.6659877800407332,
+   "center": 0,
+   "interval": [
+    -0.2719991747594691,
+    0.3736248165235263
+   ],
+   "relInterval": [
+    -0.15574081142957996,
+    0.18447037774417963
+   ],
+   "sigmaDaily": 0.03197921935064862,
+   "observations": 500
+  },
+  "prevHash": "2042d036bc615b8ab67f1c5e0a2d63d5a464de6d6812bf124196b02d4d3b8fc6",
+  "hash": "ffe051fcbacf538b2f6c5df023efdb7704d14d62d8aa7f92f942e3d53e8ebce2"
+ },
+ {
+  "id": "F-2026-11-05-AMD-1",
+  "instrument": "AMD",
+  "benchmark": "QQQ",
+  "horizon": 1,
+  "informationCutoff": "2026-11-05",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-05",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-1",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5254545454545455,
+   "center": 0,
+   "interval": [
+    -0.07930177422530393,
+    0.08613221140789928
+   ],
+   "relInterval": [
+    -0.0553759233436496,
+    0.05862218072999115
+   ],
+   "sigmaDaily": 0.06447103491666535,
+   "observations": 500
+  },
+  "prevHash": "ffe051fcbacf538b2f6c5df023efdb7704d14d62d8aa7f92f942e3d53e8ebce2",
+  "hash": "cd6c2ccdfd11faa0bc678ab9c44c9477a45ebe4f4ad9aef18386df051d6488ff"
+ },
+ {
+  "id": "F-2026-11-05-AMD-5",
+  "instrument": "AMD",
+  "benchmark": "QQQ",
+  "horizon": 5,
+  "informationCutoff": "2026-11-05",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-05",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-1",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5531135531135531,
+   "center": 0,
+   "interval": [
+    -0.1686883675946953,
+    0.2029183293232828
+   ],
+   "relInterval": [
+    -0.11960520532191588,
+    0.13585405779875082
+   ],
+   "sigmaDaily": 0.06447103491666535,
+   "observations": 500
+  },
+  "prevHash": "cd6c2ccdfd11faa0bc678ab9c44c9477a45ebe4f4ad9aef18386df051d6488ff",
+  "hash": "f4568a955d3c30a1745d43c7f6add64d4cd8f7df239fc83478325402f9ff540f"
+ },
+ {
+  "id": "F-2026-11-05-AMD-20",
+  "instrument": "AMD",
+  "benchmark": "QQQ",
+  "horizon": 20,
+  "informationCutoff": "2026-11-05",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-05",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-1",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5291902071563088,
+   "center": 0,
+   "interval": [
+    -0.3089209698276276,
+    0.44701250702191775
+   ],
+   "relInterval": [
+    -0.22490500550373416,
+    0.29016444061788826
+   ],
+   "sigmaDaily": 0.06447103491666535,
+   "observations": 500
+  },
+  "prevHash": "f4568a955d3c30a1745d43c7f6add64d4cd8f7df239fc83478325402f9ff540f",
+  "hash": "5c56a066d5f2ef8afd0c75bae2be4737db4f3a597d0d49c9fc63371def462fe8"
+ },
+ {
+  "id": "F-2026-11-05-AMD-60",
+  "instrument": "AMD",
+  "benchmark": "QQQ",
+  "horizon": 60,
+  "informationCutoff": "2026-11-05",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-05",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-1",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.659877800407332,
+   "center": 0,
+   "interval": [
+    -0.47270476184850374,
+    0.8964707580247324
+   ],
+   "relInterval": [
+    -0.35678358217506423,
+    0.5546866844312579
+   ],
+   "sigmaDaily": 0.06447103491666535,
+   "observations": 500
+  },
+  "prevHash": "5c56a066d5f2ef8afd0c75bae2be4737db4f3a597d0d49c9fc63371def462fe8",
+  "hash": "58234c50b68f30221e6e22cf87059a1de80018b83a07735c954d35e344e6fb1f"
+ },
+ {
+  "id": "F-2026-11-05-VRT-1",
+  "instrument": "VRT",
+  "benchmark": "SPY",
+  "horizon": 1,
+  "informationCutoff": "2026-11-05",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-05",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-1",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5218181818181818,
+   "center": 0,
+   "interval": [
+    -0.08330431542395367,
+    0.09087455829191593
+   ],
+   "relInterval": [
+    -0.07641683275480105,
+    0.08273952521539774
+   ],
+   "sigmaDaily": 0.06787063738052819,
+   "observations": 500
+  },
+  "prevHash": "58234c50b68f30221e6e22cf87059a1de80018b83a07735c954d35e344e6fb1f",
+  "hash": "0459cd761326269fe6646a150e031714a3e3df3b24259efef06ca5ebe725ec64"
+ },
+ {
+  "id": "F-2026-11-05-VRT-5",
+  "instrument": "VRT",
+  "benchmark": "SPY",
+  "horizon": 5,
+  "informationCutoff": "2026-11-05",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-05",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-1",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5457875457875457,
+   "center": 0,
+   "interval": [
+    -0.17674770511541038,
+    0.21469445783954777
+   ],
+   "relInterval": [
+    -0.16285245211987254,
+    0.19453255585858997
+   ],
+   "sigmaDaily": 0.06787063738052819,
+   "observations": 500
+  },
+  "prevHash": "0459cd761326269fe6646a150e031714a3e3df3b24259efef06ca5ebe725ec64",
+  "hash": "dc0a114c7a8035bf29d9151783c369bcd29153e60d9386c9e099347e2b9d5a32"
+ },
+ {
+  "id": "F-2026-11-05-VRT-20",
+  "instrument": "VRT",
+  "benchmark": "SPY",
+  "horizon": 20,
+  "informationCutoff": "2026-11-05",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-05",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-1",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.536723163841808,
+   "center": 0,
+   "interval": [
+    -0.3222556589672567,
+    0.4754826259061127
+   ],
+   "relInterval": [
+    -0.29918398307828964,
+    0.42690802700605524
+   ],
+   "sigmaDaily": 0.06787063738052819,
+   "observations": 500
+  },
+  "prevHash": "dc0a114c7a8035bf29d9151783c369bcd29153e60d9386c9e099347e2b9d5a32",
+  "hash": "088307511f73cce9a631f59cfb75f2c5ccc95b1e3bccafea8604fc9670d46a7c"
+ },
+ {
+  "id": "F-2026-11-05-VRT-60",
+  "instrument": "VRT",
+  "benchmark": "SPY",
+  "horizon": 60,
+  "informationCutoff": "2026-11-05",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-05",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-1",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.6089613034623218,
+   "center": 0,
+   "interval": [
+    -0.49020267099215,
+    0.9615638276217837
+   ],
+   "relInterval": [
+    -0.45977047445020003,
+    0.8510650616185489
+   ],
+   "sigmaDaily": 0.06787063738052819,
+   "observations": 500
+  },
+  "prevHash": "088307511f73cce9a631f59cfb75f2c5ccc95b1e3bccafea8604fc9670d46a7c",
+  "hash": "601add2d4c4cbaa21d564fd26141702a9807a4daaba03b31ef39043577581354"
+ },
+ {
+  "id": "F-2026-11-05-CEG-1",
+  "instrument": "CEG",
+  "benchmark": "SPY",
+  "horizon": 1,
+  "informationCutoff": "2026-11-05",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-05",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-1",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5018181818181818,
+   "center": 0,
+   "interval": [
+    -0.042327103990346115,
+    0.044197871910869546
+   ],
+   "relInterval": [
+    -0.04223334870915996,
+    0.044095655922284926
+   ],
+   "sigmaDaily": 0.03374737712152243,
+   "observations": 500
+  },
+  "prevHash": "601add2d4c4cbaa21d564fd26141702a9807a4daaba03b31ef39043577581354",
+  "hash": "3ae5c81d3c45069cede9e0528bcbfa5135eab52c7a063ba93fd687b562db1d27"
+ },
+ {
+  "id": "F-2026-11-05-CEG-5",
+  "instrument": "CEG",
+  "benchmark": "SPY",
+  "horizon": 5,
+  "informationCutoff": "2026-11-05",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-05",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-1",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5164835164835165,
+   "center": 0,
+   "interval": [
+    -0.09217868815136676,
+    0.10153836107202596
+   ],
+   "relInterval": [
+    -0.09197994590379677,
+    0.1012972626417914
+   ],
+   "sigmaDaily": 0.03374737712152243,
+   "observations": 500
+  },
+  "prevHash": "3ae5c81d3c45069cede9e0528bcbfa5135eab52c7a063ba93fd687b562db1d27",
+  "hash": "6a19061c8620806caad256ce41689704571f988cc93b968eb08ab62cbc0f55cb"
+ },
+ {
+  "id": "F-2026-11-05-CEG-20",
+  "instrument": "CEG",
+  "benchmark": "SPY",
+  "horizon": 20,
+  "informationCutoff": "2026-11-05",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-05",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-1",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5254237288135594,
+   "center": 0,
+   "interval": [
+    -0.17586046575342662,
+    0.21338676091324493
+   ],
+   "relInterval": [
+    -0.17549958135912813,
+    0.21285566070230288
+   ],
+   "sigmaDaily": 0.03374737712152243,
+   "observations": 500
+  },
+  "prevHash": "6a19061c8620806caad256ce41689704571f988cc93b968eb08ab62cbc0f55cb",
+  "hash": "b169f10ddd2feb1932eb2707290c08c9b33b607a18c5107495bbe43346115ba0"
+ },
+ {
+  "id": "F-2026-11-05-CEG-60",
+  "instrument": "CEG",
+  "benchmark": "SPY",
+  "horizon": 60,
+  "informationCutoff": "2026-11-05",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-05",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-1",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5091649694501018,
+   "center": 0,
+   "interval": [
+    -0.2846657366423766,
+    0.3979478563017764
+   ],
+   "relInterval": [
+    -0.28412310313266376,
+    0.3968882141272907
+   ],
+   "sigmaDaily": 0.03374737712152243,
+   "observations": 500
+  },
+  "prevHash": "b169f10ddd2feb1932eb2707290c08c9b33b607a18c5107495bbe43346115ba0",
+  "hash": "9160d9d1f4849b36bf469aa0a75ba732bebf5cfb3fd4ec5a6a67ecc1a96fae3f"
+ },
+ {
+  "id": "F-2026-11-06-QQQ-1",
+  "instrument": "QQQ",
+  "benchmark": null,
+  "horizon": 1,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-2",
+  "costBps": 5,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5454545454545454,
+   "center": 0,
+   "interval": [
+    -0.026513056243140265,
+    0.02723514312459252
+   ],
+   "relInterval": null,
+   "sigmaDaily": 0.020967448079482382,
+   "observations": 500
+  },
+  "prevHash": "9160d9d1f4849b36bf469aa0a75ba732bebf5cfb3fd4ec5a6a67ecc1a96fae3f",
+  "hash": "e21b3fa303265706671f4c8bbe6336efa8914c1f601e52d17c9ffb665bff5ba6"
+ },
+ {
+  "id": "F-2026-11-06-QQQ-5",
+  "instrument": "QQQ",
+  "benchmark": null,
+  "horizon": 5,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-2",
+  "costBps": 5,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5604395604395604,
+   "center": 0,
+   "interval": [
+    -0.058315590963886055,
+    0.061926894407837274
+   ],
+   "relInterval": null,
+   "sigmaDaily": 0.020967448079482382,
+   "observations": 500
+  },
+  "prevHash": "e21b3fa303265706671f4c8bbe6336efa8914c1f601e52d17c9ffb665bff5ba6",
+  "hash": "5a37793284b685a431387240db2d8edbedde4ace9a964e40a734836b40e6e6f1"
+ },
+ {
+  "id": "F-2026-11-06-QQQ-20",
+  "instrument": "QQQ",
+  "benchmark": null,
+  "horizon": 20,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-2",
+  "costBps": 5,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.615819209039548,
+   "center": 0,
+   "interval": [
+    -0.11323047377830475,
+    0.12768872906667372
+   ],
+   "relInterval": null,
+   "sigmaDaily": 0.020967448079482382,
+   "observations": 500
+  },
+  "prevHash": "5a37793284b685a431387240db2d8edbedde4ace9a964e40a734836b40e6e6f1",
+  "hash": "b0a354255ce0dec9fb37eb56a205a62614ed207925eedc09ac156cbf0945bd23"
+ },
+ {
+  "id": "F-2026-11-06-QQQ-60",
+  "instrument": "QQQ",
+  "benchmark": null,
+  "horizon": 60,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-2",
+  "costBps": 5,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.6904276985743381,
+   "center": 0,
+   "interval": [
+    -0.1879073402584538,
+    0.23138657640158522
+   ],
+   "relInterval": null,
+   "sigmaDaily": 0.020967448079482382,
+   "observations": 500
+  },
+  "prevHash": "b0a354255ce0dec9fb37eb56a205a62614ed207925eedc09ac156cbf0945bd23",
+  "hash": "79d33127c930927d3a674e8d54a740cbc2d1f968156d2fec6956bfa586dbbe32"
+ },
+ {
+  "id": "F-2026-11-06-SMH-1",
+  "instrument": "SMH",
+  "benchmark": "SPY",
+  "horizon": 1,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-2",
+  "costBps": 5,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5618181818181818,
+   "center": 0,
+   "interval": [
+    -0.04981384381334386,
+    0.05242535211548427
+   ],
+   "relInterval": [
+    -0.03768966160505427,
+    0.039165807641553085
+   ],
+   "sigmaDaily": 0.03987148162984751,
+   "observations": 500
+  },
+  "prevHash": "79d33127c930927d3a674e8d54a740cbc2d1f968156d2fec6956bfa586dbbe32",
+  "hash": "7235613d3771d5abf52c30ed50eea71e9c2403a8c118ac9bb3e91af57b193828"
+ },
+ {
+  "id": "F-2026-11-06-SMH-5",
+  "instrument": "SMH",
+  "benchmark": "SPY",
+  "horizon": 5,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-2",
+  "costBps": 5,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5769230769230769,
+   "center": 0,
+   "interval": [
+    -0.10797147638575244,
+    0.12104038551175744
+   ],
+   "relInterval": [
+    -0.08231941261954989,
+    0.08970377465925639
+   ],
+   "sigmaDaily": 0.03987148162984751,
+   "observations": 500
+  },
+  "prevHash": "7235613d3771d5abf52c30ed50eea71e9c2403a8c118ac9bb3e91af57b193828",
+  "hash": "300dfb96c909d2ff5208156e2a40de74c85d51797a36f86ff219b64a7b886fbf"
+ },
+ {
+  "id": "F-2026-11-06-SMH-20",
+  "instrument": "SMH",
+  "benchmark": "SPY",
+  "horizon": 20,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-2",
+  "costBps": 5,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.64030131826742,
+   "center": 0,
+   "interval": [
+    -0.20428511305858577,
+    0.2567315459483499
+   ],
+   "relInterval": [
+    -0.15786233954507212,
+    0.18745431650663136
+   ],
+   "sigmaDaily": 0.03987148162984751,
+   "observations": 500
+  },
+  "prevHash": "300dfb96c909d2ff5208156e2a40de74c85d51797a36f86ff219b64a7b886fbf",
+  "hash": "92bcf982f0dc0459bb20fb347ba7790a636a17cde7852acd660c51da12e0ab02"
+ },
+ {
+  "id": "F-2026-11-06-SMH-60",
+  "instrument": "SMH",
+  "benchmark": "SPY",
+  "horizon": 60,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-2",
+  "costBps": 5,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.725050916496945,
+   "center": 0,
+   "interval": [
+    -0.326857643423609,
+    0.4855698653194407
+   ],
+   "relInterval": [
+    -0.25739183524485676,
+    0.3466051781557309
+   ],
+   "sigmaDaily": 0.03987148162984751,
+   "observations": 500
+  },
+  "prevHash": "92bcf982f0dc0459bb20fb347ba7790a636a17cde7852acd660c51da12e0ab02",
+  "hash": "29399fef839c0ba967549af385ab74795be7923b104cd52db00407a1d48480b0"
+ },
+ {
+  "id": "F-2026-11-06-NVDA-1",
+  "instrument": "NVDA",
+  "benchmark": "QQQ",
+  "horizon": 1,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-2",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5127272727272727,
+   "center": 0,
+   "interval": [
+    -0.03983790044820934,
+    0.0414908070906006
+   ],
+   "relInterval": [
+    -0.021377085604842305,
+    0.02184404768209869
+   ],
+   "sigmaDaily": 0.03172182545567638,
+   "observations": 500
+  },
+  "prevHash": "29399fef839c0ba967549af385ab74795be7923b104cd52db00407a1d48480b0",
+  "hash": "4b979d219ea189ef89bcfe7ee9d29261c2da962d8745f1a8121726f9d734aed3"
+ },
+ {
+  "id": "F-2026-11-06-NVDA-5",
+  "instrument": "NVDA",
+  "benchmark": "QQQ",
+  "horizon": 5,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-2",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5457875457875457,
+   "center": 0,
+   "interval": [
+    -0.08689392136981877,
+    0.09516300833324287
+   ],
+   "relInterval": [
+    -0.04717015273536762,
+    0.04950532654994255
+   ],
+   "sigmaDaily": 0.03172182545567638,
+   "observations": 500
+  },
+  "prevHash": "4b979d219ea189ef89bcfe7ee9d29261c2da962d8745f1a8121726f9d734aed3",
+  "hash": "c58d3ebe77774d595b1864c7dd9689206797040fd3dc99a6dfdf539dde8975e5"
+ },
+ {
+  "id": "F-2026-11-06-NVDA-20",
+  "instrument": "NVDA",
+  "benchmark": "QQQ",
+  "horizon": 20,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-2",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5630885122410546,
+   "center": 0,
+   "interval": [
+    -0.16623728916861324,
+    0.19938201482151885
+   ],
+   "relInterval": [
+    -0.09211528216165721,
+    0.10146143045670164
+   ],
+   "sigmaDaily": 0.03172182545567638,
+   "observations": 500
+  },
+  "prevHash": "c58d3ebe77774d595b1864c7dd9689206797040fd3dc99a6dfdf539dde8975e5",
+  "hash": "6f19071585ef30b2405a139ce9fc1e9640992268e17f9953abb3a9b4177f73f7"
+ },
+ {
+  "id": "F-2026-11-06-NVDA-60",
+  "instrument": "NVDA",
+  "benchmark": "QQQ",
+  "horizon": 60,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-2",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.6659877800407332,
+   "center": 0,
+   "interval": [
+    -0.2701366726306971,
+    0.3701195312886445
+   ],
+   "relInterval": [
+    -0.154123323795186,
+    0.18220543033139225
+   ],
+   "sigmaDaily": 0.03172182545567638,
+   "observations": 500
+  },
+  "prevHash": "6f19071585ef30b2405a139ce9fc1e9640992268e17f9953abb3a9b4177f73f7",
+  "hash": "7ee138efc467d3bafaab07d006c640d462f58854089e0e6c9cb4229279f976de"
+ },
+ {
+  "id": "F-2026-11-06-VRT-1",
+  "instrument": "VRT",
+  "benchmark": "SPY",
+  "horizon": 1,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-2",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5218181818181818,
+   "center": 0,
+   "interval": [
+    -0.08149373581352248,
+    0.08872420253519064
+   ],
+   "relInterval": [
+    -0.07474303401613902,
+    0.08078083901444799
+   ],
+   "sigmaDaily": 0.06633096678879981,
+   "observations": 500
+  },
+  "prevHash": "7ee138efc467d3bafaab07d006c640d462f58854089e0e6c9cb4229279f976de",
+  "hash": "2eae6ad5fd84921e41afbab3f1d7c8eba40ce30fbe2398186a72412889d91301"
+ },
+ {
+  "id": "F-2026-11-06-VRT-5",
+  "instrument": "VRT",
+  "benchmark": "SPY",
+  "horizon": 5,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-2",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5439560439560439,
+   "center": 0,
+   "interval": [
+    -0.1731073790291614,
+    0.2093468663753697
+   ],
+   "relInterval": [
+    -0.1594561957198929,
+    0.18970599141642697
+   ],
+   "sigmaDaily": 0.06633096678879981,
+   "observations": 500
+  },
+  "prevHash": "2eae6ad5fd84921e41afbab3f1d7c8eba40ce30fbe2398186a72412889d91301",
+  "hash": "c9507659780cccd35c3ee0d42658e45350dc55eac6e3f4f9126bfcf2cc691a11"
+ },
+ {
+  "id": "F-2026-11-06-VRT-20",
+  "instrument": "VRT",
+  "benchmark": "SPY",
+  "horizon": 20,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-2",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5348399246704332,
+   "center": 0,
+   "interval": [
+    -0.31624859338397704,
+    0.4625198432119264
+   ],
+   "relInterval": [
+    -0.2934861130863251,
+    0.4154003460121436
+   ],
+   "sigmaDaily": 0.06633096678879981,
+   "observations": 500
+  },
+  "prevHash": "c9507659780cccd35c3ee0d42658e45350dc55eac6e3f4f9126bfcf2cc691a11",
+  "hash": "69193b49b2e1706eedc91ebbcc91022dce143d771d93510803ffbdf2b34ed176"
+ },
+ {
+  "id": "F-2026-11-06-VRT-60",
+  "instrument": "VRT",
+  "benchmark": "SPY",
+  "horizon": 60,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-2",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.6089613034623218,
+   "center": 0,
+   "interval": [
+    -0.4823510341211714,
+    0.9318110648637521
+   ],
+   "relInterval": [
+    -0.45214025499475907,
+    0.8252846811923256
+   ],
+   "sigmaDaily": 0.06633096678879981,
+   "observations": 500
+  },
+  "prevHash": "69193b49b2e1706eedc91ebbcc91022dce143d771d93510803ffbdf2b34ed176",
+  "hash": "1e43aadf6de955a525eb567420b9b69317032830019cf6fc153362997a2eb191"
+ },
+ {
+  "id": "F-2026-11-06-CEG-1",
+  "instrument": "CEG",
+  "benchmark": "SPY",
+  "horizon": 1,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-2",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5018181818181818,
+   "center": 0,
+   "interval": [
+    -0.043010694662698246,
+    0.04494375686626784
+   ],
+   "relInterval": [
+    -0.042651425119805575,
+    0.044551614990541166
+   ],
+   "sigmaDaily": 0.03430456016732761,
+   "observations": 500
+  },
+  "prevHash": "1e43aadf6de955a525eb567420b9b69317032830019cf6fc153362997a2eb191",
+  "hash": "48f4498c789420f5b2517598622c808f6566d6867ef2c7a4bfb86603b227317d"
+ },
+ {
+  "id": "F-2026-11-06-CEG-5",
+  "instrument": "CEG",
+  "benchmark": "SPY",
+  "horizon": 5,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-2",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5164835164835165,
+   "center": 0,
+   "interval": [
+    -0.09362703535535177,
+    0.10329857465691195
+   ],
+   "relInterval": [
+    -0.0928659979231623,
+    0.10237296552719921
+   ],
+   "sigmaDaily": 0.03430456016732761,
+   "observations": 500
+  },
+  "prevHash": "48f4498c789420f5b2517598622c808f6566d6867ef2c7a4bfb86603b227317d",
+  "hash": "683e3a2566ef429ccc4285db73734f8737aa530b823d0dc8d799ee264a4f487e"
+ },
+ {
+  "id": "F-2026-11-06-CEG-20",
+  "instrument": "CEG",
+  "benchmark": "SPY",
+  "horizon": 20,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-2",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5235404896421846,
+   "center": 0,
+   "interval": [
+    -0.17848804896127135,
+    0.21726774483997358
+   ],
+   "relInterval": [
+    -0.17710790227605988,
+    0.21522615512523147
+   ],
+   "sigmaDaily": 0.03430456016732761,
+   "observations": 500
+  },
+  "prevHash": "683e3a2566ef429ccc4285db73734f8737aa530b823d0dc8d799ee264a4f487e",
+  "hash": "b6a49c83b9aafa87b62e67030fc52bb2ccddecf41bff40bd74c2c712fd0bd312"
+ },
+ {
+  "id": "F-2026-11-06-CEG-60",
+  "instrument": "CEG",
+  "benchmark": "SPY",
+  "horizon": 60,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-2",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5071283095723014,
+   "center": 0,
+   "interval": [
+    -0.2886113827234891,
+    0.4057014347915946
+   ],
+   "relInterval": [
+    -0.28654006921813635,
+    0.4016204090173978
+   ],
+   "sigmaDaily": 0.03430456016732761,
+   "observations": 500
+  },
+  "prevHash": "b6a49c83b9aafa87b62e67030fc52bb2ccddecf41bff40bd74c2c712fd0bd312",
+  "hash": "25507c2be5c7108b6fe64a7506207341f4c1a75a60aac1bc0dd606d03df6f291"
+ },
+ {
+  "id": "F-2026-11-06-VST-1",
+  "instrument": "VST",
+  "benchmark": "SPY",
+  "horizon": 1,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-2",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5054545454545455,
+   "center": 0,
+   "interval": [
+    -0.06845903932363484,
+    0.07349010104067633
+   ],
+   "relInterval": [
+    -0.0665398542528558,
+    0.07128301573025064
+   ],
+   "sigmaDaily": 0.05533535988698264,
+   "observations": 500
+  },
+  "prevHash": "25507c2be5c7108b6fe64a7506207341f4c1a75a60aac1bc0dd606d03df6f291",
+  "hash": "76247e7e63badb5013b3b3b425120843820e421ec9eabe95ce54a9e83b240934"
+ },
+ {
+  "id": "F-2026-11-06-VST-5",
+  "instrument": "VST",
+  "benchmark": "SPY",
+  "horizon": 5,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-2",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.4945054945054945,
+   "center": 0,
+   "interval": [
+    -0.14663764624870623,
+    0.17183514787604848
+   ],
+   "relInterval": [
+    -0.14270136516403764,
+    0.16645467444532036
+   ],
+   "sigmaDaily": 0.05533535988698264,
+   "observations": 500
+  },
+  "prevHash": "76247e7e63badb5013b3b3b425120843820e421ec9eabe95ce54a9e83b240934",
+  "hash": "25f517e863e897bcc2737df2c0f20a2db3876e659ec4ff8268c6a8fcddb66a1b"
+ },
+ {
+  "id": "F-2026-11-06-VST-20",
+  "instrument": "VST",
+  "benchmark": "SPY",
+  "horizon": 20,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-2",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.4821092278719397,
+   "center": 0,
+   "interval": [
+    -0.27177269320005193,
+    0.37319761379768024
+   ],
+   "relInterval": [
+    -0.2650390507083953,
+    0.360616507535338
+   ],
+   "sigmaDaily": 0.05533535988698264,
+   "observations": 500
+  },
+  "prevHash": "25f517e863e897bcc2737df2c0f20a2db3876e659ec4ff8268c6a8fcddb66a1b",
+  "hash": "f41559168349068d714e0224b7c653343daecf735a7d0d3b2bf0e11060a42dba"
+ },
+ {
+  "id": "F-2026-11-06-VST-60",
+  "instrument": "VST",
+  "benchmark": "SPY",
+  "horizon": 60,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-AI-SELLOFF-2026-11-05",
+  "thesisId": "T-AI-2",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.40122199592668023,
+   "center": 0,
+   "interval": [
+    -0.4226497254168131,
+    0.7320507913881942
+   ],
+   "relInterval": [
+    -0.4133718341214734,
+    0.7046573249724775
+   ],
+   "sigmaDaily": 0.05533535988698264,
+   "observations": 500
+  },
+  "prevHash": "f41559168349068d714e0224b7c653343daecf735a7d0d3b2bf0e11060a42dba",
+  "hash": "e252c10ae4581108d587b83ca832f8c4913c8f61750660f09505d78538766c8f"
+ },
+ {
+  "id": "F-2026-10-29-BTC-USD-1",
+  "instrument": "BTC-USD",
+  "benchmark": null,
+  "horizon": 1,
+  "informationCutoff": "2026-10-29",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-10-29",
+  "calendar": "crypto-utc",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-1",
+  "costBps": 20,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.48545454545454547,
+   "center": 0,
+   "interval": [
+    -0.022473571233496914,
+    0.022990244122458536
+   ],
+   "relInterval": null,
+   "sigmaDaily": 0.01773627452686301,
+   "observations": 500
+  },
+  "prevHash": "e252c10ae4581108d587b83ca832f8c4913c8f61750660f09505d78538766c8f",
+  "hash": "94430cb3239f9f3b3bebf9ddd8a261c000f2662f99764df68d237b68ab991835"
+ },
+ {
+  "id": "F-2026-10-29-BTC-USD-5",
+  "instrument": "BTC-USD",
+  "benchmark": null,
+  "horizon": 5,
+  "informationCutoff": "2026-10-29",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-10-29",
+  "calendar": "crypto-utc",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-1",
+  "costBps": 20,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.47435897435897434,
+   "center": 0,
+   "interval": [
+    -0.04955569494644185,
+    0.05213950431703562
+   ],
+   "relInterval": null,
+   "sigmaDaily": 0.01773627452686301,
+   "observations": 500
+  },
+  "prevHash": "94430cb3239f9f3b3bebf9ddd8a261c000f2662f99764df68d237b68ab991835",
+  "hash": "cd4eab9f0b13ff96ac2e7fe50292223d6c2f0e80e12d7a608c10741a8cd001a9"
+ },
+ {
+  "id": "F-2026-10-29-BNB-USD-1",
+  "instrument": "BNB-USD",
+  "benchmark": "BTC-USD",
+  "horizon": 1,
+  "informationCutoff": "2026-10-29",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-10-29",
+  "calendar": "crypto-utc",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-1",
+  "costBps": 20,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5272727272727272,
+   "center": 0,
+   "interval": [
+    -0.031634393745151534,
+    0.03266782043973815
+   ],
+   "relInterval": [
+    -0.018307437049466357,
+    0.018648849691233593
+   ],
+   "sigmaDaily": 0.025083322018096717,
+   "observations": 500
+  },
+  "prevHash": "cd4eab9f0b13ff96ac2e7fe50292223d6c2f0e80e12d7a608c10741a8cd001a9",
+  "hash": "9f9597a7ceb4e4f2e9cb5a531f9f001ae3649287f33cd2a91c5923d7be624992"
+ },
+ {
+  "id": "F-2026-10-29-BNB-USD-5",
+  "instrument": "BNB-USD",
+  "benchmark": "BTC-USD",
+  "horizon": 5,
+  "informationCutoff": "2026-10-29",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-10-29",
+  "calendar": "crypto-utc",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-1",
+  "costBps": 20,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.521978021978022,
+   "center": 0,
+   "interval": [
+    -0.06935713694353651,
+    0.07452605042900173
+   ],
+   "relInterval": [
+    -0.040474160506183576,
+    0.042181417988217174
+   ],
+   "sigmaDaily": 0.025083322018096717,
+   "observations": 500
+  },
+  "prevHash": "9f9597a7ceb4e4f2e9cb5a531f9f001ae3649287f33cd2a91c5923d7be624992",
+  "hash": "fe565a98d70c385bd5818655e23c2c038ad5b3fc9ed139e0bc8c85eac1c74935"
+ },
+ {
+  "id": "F-2026-10-30-COIN-1",
+  "instrument": "COIN",
+  "benchmark": "QQQ",
+  "horizon": 1,
+  "informationCutoff": "2026-10-30",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-10-30",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-1",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.4690909090909091,
+   "center": 0,
+   "interval": [
+    -0.05641927340041597,
+    0.05979273612734359
+   ],
+   "relInterval": [
+    -0.04666453643791524,
+    0.0489487050692059
+   ],
+   "sigmaDaily": 0.04531488128228059,
+   "observations": 500
+  },
+  "prevHash": "fe565a98d70c385bd5818655e23c2c038ad5b3fc9ed139e0bc8c85eac1c74935",
+  "hash": "44eb596825966073aac9a070d7eca6ef10ce48b7719d7b4d9b30381ee5a630e2"
+ },
+ {
+  "id": "F-2026-10-30-COIN-5",
+  "instrument": "COIN",
+  "benchmark": "QQQ",
+  "horizon": 5,
+  "informationCutoff": "2026-10-30",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-10-30",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-1",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.44505494505494503,
+   "center": 0,
+   "interval": [
+    -0.12177809143852925,
+    0.13866437429009482
+   ],
+   "relInterval": [
+    -0.10134688594122254,
+    0.11277642547021083
+   ],
+   "sigmaDaily": 0.04531488128228059,
+   "observations": 500
+  },
+  "prevHash": "44eb596825966073aac9a070d7eca6ef10ce48b7719d7b4d9b30381ee5a630e2",
+  "hash": "70aa46fdd307d0f3f9974cd08a9ab31f7c8dcb9daf80610977c2b868e0aae2a1"
+ },
+ {
+  "id": "F-2026-10-30-HOOD-1",
+  "instrument": "HOOD",
+  "benchmark": "QQQ",
+  "horizon": 1,
+  "informationCutoff": "2026-10-30",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-10-30",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-1",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5272727272727272,
+   "center": 0,
+   "interval": [
+    -0.048375391263193124,
+    0.05083453161999141
+   ],
+   "relInterval": [
+    -0.03916754296493874,
+    0.04076417556272194
+   ],
+   "sigmaDaily": 0.03869110057033013,
+   "observations": 500
+  },
+  "prevHash": "70aa46fdd307d0f3f9974cd08a9ab31f7c8dcb9daf80610977c2b868e0aae2a1",
+  "hash": "36fa6e0f2364ad203832b46a4432e89a0244ec661e3fa1c47f8e351a1d5a813a"
+ },
+ {
+  "id": "F-2026-10-30-HOOD-5",
+  "instrument": "HOOD",
+  "benchmark": "QQQ",
+  "horizon": 5,
+  "informationCutoff": "2026-10-30",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-10-30",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-1",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5457875457875457,
+   "center": 0,
+   "interval": [
+    -0.10494904271762062,
+    0.11725482427980949
+   ],
+   "relInterval": [
+    -0.08546780323021519,
+    0.09345521517131439
+   ],
+   "sigmaDaily": 0.03869110057033013,
+   "observations": 500
+  },
+  "prevHash": "36fa6e0f2364ad203832b46a4432e89a0244ec661e3fa1c47f8e351a1d5a813a",
+  "hash": "8673a6209de0c533855b233aa0f375e75c4a259bd240307a436cd46bc6399145"
+ },
+ {
+  "id": "F-2026-10-30-MSTR-1",
+  "instrument": "MSTR",
+  "benchmark": "QQQ",
+  "horizon": 1,
+  "informationCutoff": "2026-10-30",
+  "directionValidated": true,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-10-30",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-1",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "DOWN",
+   "directionReason": "Walk-forward evaluation found directional skill at this horizon.",
+   "pUp": 0.46,
+   "center": 0,
+   "interval": [
+    -0.061210903362067914,
+    0.06520197516277237
+   ],
+   "relInterval": [
+    -0.05114271394119574,
+    0.05389926882853313
+   ],
+   "sigmaDaily": 0.04928746600515602,
+   "observations": 500
+  },
+  "prevHash": "8673a6209de0c533855b233aa0f375e75c4a259bd240307a436cd46bc6399145",
+  "hash": "5c22711681c34f4a77b1273c7002f54308b2c8513afd0c4dce9ec8626d5170bf"
+ },
+ {
+  "id": "F-2026-10-30-MSTR-5",
+  "instrument": "MSTR",
+  "benchmark": "QQQ",
+  "horizon": 5,
+  "informationCutoff": "2026-10-30",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-10-30",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-1",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.46703296703296704,
+   "center": 0,
+   "interval": [
+    -0.13171906382237497,
+    0.15170097411355465
+   ],
+   "relInterval": [
+    -0.11075863756042204,
+    0.1245540774852878
+   ],
+   "sigmaDaily": 0.04928746600515602,
+   "observations": 500
+  },
+  "prevHash": "5c22711681c34f4a77b1273c7002f54308b2c8513afd0c4dce9ec8626d5170bf",
+  "hash": "8e487b2aee0ef612f3338014baf384a8b5e67eb979cfd26b83533251b34f8ae9"
+ },
+ {
+  "id": "F-2026-10-30-CRCL-1",
+  "instrument": "CRCL",
+  "benchmark": "QQQ",
+  "horizon": 1,
+  "informationCutoff": "2026-10-30",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-10-30",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-1",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.4813895781637717,
+   "center": 0,
+   "interval": [
+    -0.060698641902230066,
+    0.06462105199672452
+   ],
+   "relInterval": [
+    -0.05299508631430061,
+    0.055960730032588835
+   ],
+   "sigmaDaily": 0.0488617998718884,
+   "observations": 353
+  },
+  "prevHash": "8e487b2aee0ef612f3338014baf384a8b5e67eb979cfd26b83533251b34f8ae9",
+  "hash": "909688f5d67c709b005987b58a4028b38da62d1a9de42f122a833a5aa9357529"
+ },
+ {
+  "id": "F-2026-10-30-CRCL-5",
+  "instrument": "CRCL",
+  "benchmark": "QQQ",
+  "horizon": 5,
+  "informationCutoff": "2026-10-30",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-10-30",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-1",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.46115288220551376,
+   "center": 0,
+   "interval": [
+    -0.1306592847091772,
+    0.1502969807015968
+   ],
+   "relInterval": [
+    -0.11463574493641748,
+    0.12947862338104543
+   ],
+   "sigmaDaily": 0.0488617998718884,
+   "observations": 353
+  },
+  "prevHash": "909688f5d67c709b005987b58a4028b38da62d1a9de42f122a833a5aa9357529",
+  "hash": "f84732eae12a4317f9bc48309aada5d2f859777a554db9a88f64a2c7d83736be"
+ },
+ {
+  "id": "F-2026-11-06-BTC-USD-1",
+  "instrument": "BTC-USD",
+  "benchmark": null,
+  "horizon": 1,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "crypto-utc",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-2",
+  "costBps": 20,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.48727272727272725,
+   "center": 0,
+   "interval": [
+    -0.027865329262055094,
+    0.028664062810251023
+   ],
+   "relInterval": null,
+   "sigmaDaily": 0.022052123954102647,
+   "observations": 500
+  },
+  "prevHash": "f84732eae12a4317f9bc48309aada5d2f859777a554db9a88f64a2c7d83736be",
+  "hash": "c44d9401e9ffd7db0f8e1d9e164102eee61610831f8c4e28863646c563ff447e"
+ },
+ {
+  "id": "F-2026-11-06-BTC-USD-5",
+  "instrument": "BTC-USD",
+  "benchmark": null,
+  "horizon": 5,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "crypto-utc",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-2",
+  "costBps": 20,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.4652014652014652,
+   "center": 0,
+   "interval": [
+    -0.061238071768999314,
+    0.06523280283042165
+   ],
+   "relInterval": null,
+   "sigmaDaily": 0.022052123954102647,
+   "observations": 500
+  },
+  "prevHash": "c44d9401e9ffd7db0f8e1d9e164102eee61610831f8c4e28863646c563ff447e",
+  "hash": "1df338828c9efd78c1285cde352337bc2d6ec281d66c3a125881639de37b389c"
+ },
+ {
+  "id": "F-2026-11-06-BTC-USD-20",
+  "instrument": "BTC-USD",
+  "benchmark": null,
+  "horizon": 20,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "crypto-utc",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-2",
+  "costBps": 20,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.4444444444444444,
+   "center": 0,
+   "interval": [
+    -0.1187260421040135,
+    0.13472092422595594
+   ],
+   "relInterval": null,
+   "sigmaDaily": 0.022052123954102647,
+   "observations": 500
+  },
+  "prevHash": "1df338828c9efd78c1285cde352337bc2d6ec281d66c3a125881639de37b389c",
+  "hash": "ca1408d423cee82da15b0d1a6823c36ef7f368befe42f84a37aaaf4511f9dfe5"
+ },
+ {
+  "id": "F-2026-11-06-BTC-USD-60",
+  "instrument": "BTC-USD",
+  "benchmark": null,
+  "horizon": 60,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "crypto-utc",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-2",
+  "costBps": 20,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.42362525458248473,
+   "center": 0,
+   "interval": [
+    -0.19660457633424455,
+    0.24471707274255028
+   ],
+   "relInterval": null,
+   "sigmaDaily": 0.022052123954102647,
+   "observations": 500
+  },
+  "prevHash": "ca1408d423cee82da15b0d1a6823c36ef7f368befe42f84a37aaaf4511f9dfe5",
+  "hash": "56f64e76634ca20f4177dcce3b0d6ccc11d92fe542b1b2dad77d75a584e840f5"
+ },
+ {
+  "id": "F-2026-11-06-BNB-USD-1",
+  "instrument": "BNB-USD",
+  "benchmark": "BTC-USD",
+  "horizon": 1,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "crypto-utc",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-2",
+  "costBps": 20,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5327272727272727,
+   "center": 0,
+   "interval": [
+    -0.030256804665912296,
+    0.031200842461687417
+   ],
+   "relInterval": [
+    -0.016041488096156464,
+    0.016303012679994122
+   ],
+   "sigmaDaily": 0.023974056480206316,
+   "observations": 500
+  },
+  "prevHash": "56f64e76634ca20f4177dcce3b0d6ccc11d92fe542b1b2dad77d75a584e840f5",
+  "hash": "6b10795b30e47e391eed2b49833057a683d976059cf3e250297ad50e18bb390c"
+ },
+ {
+  "id": "F-2026-11-06-BNB-USD-5",
+  "instrument": "BNB-USD",
+  "benchmark": "BTC-USD",
+  "horizon": 5,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "crypto-utc",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-2",
+  "costBps": 20,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5183150183150184,
+   "center": 0,
+   "interval": [
+    -0.0663941475313592,
+    0.07111582190257248
+   ],
+   "relInterval": [
+    -0.03551468772177835,
+    0.036822424633806694
+   ],
+   "sigmaDaily": 0.023974056480206316,
+   "observations": 500
+  },
+  "prevHash": "6b10795b30e47e391eed2b49833057a683d976059cf3e250297ad50e18bb390c",
+  "hash": "f74403d8987a578f39dc68f6ddc1d20d4db35eea2c4b2a2179bcfabf5169e839"
+ },
+ {
+  "id": "F-2026-11-06-BNB-USD-20",
+  "instrument": "BNB-USD",
+  "benchmark": "BTC-USD",
+  "horizon": 20,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "crypto-utc",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-2",
+  "costBps": 20,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5649717514124294,
+   "center": 0,
+   "interval": [
+    -0.1283801122363024,
+    0.14728910393002326
+   ],
+   "relInterval": [
+    -0.06976808239958121,
+    0.07500074022352576
+   ],
+   "sigmaDaily": 0.023974056480206316,
+   "observations": 500
+  },
+  "prevHash": "f74403d8987a578f39dc68f6ddc1d20d4db35eea2c4b2a2179bcfabf5169e839",
+  "hash": "27ecf326d79b58d4b9125d48bd182d3f540de7da76971ab58bfb78184dfb1b06"
+ },
+ {
+  "id": "F-2026-11-06-BNB-USD-60",
+  "instrument": "BNB-USD",
+  "benchmark": "BTC-USD",
+  "horizon": 60,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "crypto-utc",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "backfill",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-2",
+  "costBps": 20,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5132382892057027,
+   "center": 0,
+   "interval": [
+    -0.21178706237275158,
+    0.26869269998319556
+   ],
+   "relInterval": [
+    -0.11773626901408851,
+    0.13344793045331316
+   ],
+   "sigmaDaily": 0.023974056480206316,
+   "observations": 500
+  },
+  "prevHash": "27ecf326d79b58d4b9125d48bd182d3f540de7da76971ab58bfb78184dfb1b06",
+  "hash": "174af0d629c8262836af2a420a85c949bc5f61db71f12e07b2b042ba370dbbe0"
+ },
+ {
+  "id": "F-2026-11-06-COIN-1",
+  "instrument": "COIN",
+  "benchmark": "QQQ",
+  "horizon": 1,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-2",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.4636363636363636,
+   "center": 0,
+   "interval": [
+    -0.06105183919231072,
+    0.06502152274284612
+   ],
+   "relInterval": [
+    -0.04579407734796426,
+    0.047991818391451835
+   ],
+   "sigmaDaily": 0.04915526600650573,
+   "observations": 500
+  },
+  "prevHash": "174af0d629c8262836af2a420a85c949bc5f61db71f12e07b2b042ba370dbbe0",
+  "hash": "1180d87c0da2a11c4932851947f736564d2e4ac58b12df431e8faa6816f71815"
+ },
+ {
+  "id": "F-2026-11-06-COIN-5",
+  "instrument": "COIN",
+  "benchmark": "QQQ",
+  "horizon": 5,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-2",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.4358974358974359,
+   "center": 0,
+   "interval": [
+    -0.13139006444939993,
+    0.15126474965556724
+   ],
+   "relInterval": [
+    -0.09951108864707925,
+    0.11050784456365026
+   ],
+   "sigmaDaily": 0.04915526600650573,
+   "observations": 500
+  },
+  "prevHash": "1180d87c0da2a11c4932851947f736564d2e4ac58b12df431e8faa6816f71815",
+  "hash": "cb09e52aa81a55feff1cb881b0961da91108a7a376905489903c31f5e00560f1"
+ },
+ {
+  "id": "F-2026-11-06-COIN-20",
+  "instrument": "COIN",
+  "benchmark": "QQQ",
+  "horizon": 20,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-2",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.4331450094161959,
+   "center": 0,
+   "interval": [
+    -0.24551677986278242,
+    0.325410523799496
+   ],
+   "relInterval": [
+    -0.18911972053043158,
+    0.23322767283740453
+   ],
+   "sigmaDaily": 0.04915526600650573,
+   "observations": 500
+  },
+  "prevHash": "cb09e52aa81a55feff1cb881b0961da91108a7a376905489903c31f5e00560f1",
+  "hash": "c49d2aab122780670a6b06fa179af22861942b46136e8e2e30950387b0654745"
+ },
+ {
+  "id": "F-2026-11-06-COIN-60",
+  "instrument": "COIN",
+  "benchmark": "QQQ",
+  "horizon": 60,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-2",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.37474541751527496,
+   "center": 0,
+   "interval": [
+    -0.38612087471550194,
+    0.62898518423567
+   ],
+   "relInterval": [
+    -0.30448188554925293,
+    0.4377770747059597
+   ],
+   "sigmaDaily": 0.04915526600650573,
+   "observations": 500
+  },
+  "prevHash": "c49d2aab122780670a6b06fa179af22861942b46136e8e2e30950387b0654745",
+  "hash": "95d59f370123488bf7c44c627b56f5b7f00ce747c02a9c2ee1229e429bab9ca8"
+ },
+ {
+  "id": "F-2026-11-06-CIBR-1",
+  "instrument": "CIBR",
+  "benchmark": "QQQ",
+  "horizon": 1,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-2",
+  "costBps": 5,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5436363636363636,
+   "center": 0,
+   "interval": [
+    -0.03397480382988127,
+    0.03516968704809864
+   ],
+   "relInterval": [
+    -0.020599759490962932,
+    0.021033034952346208
+   ],
+   "sigmaDaily": 0.02697149537111631,
+   "observations": 500
+  },
+  "prevHash": "95d59f370123488bf7c44c627b56f5b7f00ce747c02a9c2ee1229e429bab9ca8",
+  "hash": "18e5e4501685e13d22521551f5597a1f0fbcc842393c29adcc51d96661554f21"
+ },
+ {
+  "id": "F-2026-11-06-CIBR-5",
+  "instrument": "CIBR",
+  "benchmark": "QQQ",
+  "horizon": 5,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-2",
+  "costBps": 5,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.554945054945055,
+   "center": 0,
+   "interval": [
+    -0.07437907774172603,
+    0.08035587350409124
+   ],
+   "relInterval": [
+    -0.04547697951049523,
+    0.04764366970130629
+   ],
+   "sigmaDaily": 0.02697149537111631,
+   "observations": 500
+  },
+  "prevHash": "18e5e4501685e13d22521551f5597a1f0fbcc842393c29adcc51d96661554f21",
+  "hash": "297b6baf242b295fe364556c1356fb45ffe05116b1a8a9f8c6363db06a224f29"
+ },
+ {
+  "id": "F-2026-11-06-CIBR-20",
+  "instrument": "CIBR",
+  "benchmark": "QQQ",
+  "horizon": 20,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-2",
+  "costBps": 5,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5555555555555556,
+   "center": 0,
+   "interval": [
+    -0.1432259082777424,
+    0.16716881341478773
+   ],
+   "relInterval": [
+    -0.08888580335559237,
+    0.0975572586652198
+   ],
+   "sigmaDaily": 0.02697149537111631,
+   "observations": 500
+  },
+  "prevHash": "297b6baf242b295fe364556c1356fb45ffe05116b1a8a9f8c6363db06a224f29",
+  "hash": "3529a509a64187e27e5b0ba285a4ace94513fe14170190777fd75bff2dda3cfa"
+ },
+ {
+  "id": "F-2026-11-06-CIBR-60",
+  "instrument": "CIBR",
+  "benchmark": "QQQ",
+  "horizon": 60,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-2",
+  "costBps": 5,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.6415478615071283,
+   "center": 0,
+   "interval": [
+    -0.2348949571575879,
+    0.3070100757471663
+   ],
+   "relInterval": [
+    -0.1489049604206285,
+    0.17495691256081147
+   ],
+   "sigmaDaily": 0.02697149537111631,
+   "observations": 500
+  },
+  "prevHash": "3529a509a64187e27e5b0ba285a4ace94513fe14170190777fd75bff2dda3cfa",
+  "hash": "49c32f436fca214ecbcfb8bccbfb7fd37c7c3536d113316af5d2f25dcb7c0e3e"
+ },
+ {
+  "id": "F-2026-11-06-CRWD-1",
+  "instrument": "CRWD",
+  "benchmark": "QQQ",
+  "horizon": 1,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-2",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5218181818181818,
+   "center": 0,
+   "interval": [
+    -0.05219169200151508,
+    0.05506566207646957
+   ],
+   "relInterval": [
+    -0.038551727839201244,
+    0.04009755798152148
+   ],
+   "sigmaDaily": 0.04182664620563368,
+   "observations": 500
+  },
+  "prevHash": "49c32f436fca214ecbcfb8bccbfb7fd37c7c3536d113316af5d2f25dcb7c0e3e",
+  "hash": "29e57eca87fd7a9489bfadff432f5612b87d65f46f9c550f70fd87261ce9cf9c"
+ },
+ {
+  "id": "F-2026-11-06-CRWD-5",
+  "instrument": "CRWD",
+  "benchmark": "QQQ",
+  "horizon": 5,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-2",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5586080586080586,
+   "center": 0,
+   "interval": [
+    -0.11295535075988572,
+    0.1273389686264934
+   ],
+   "relInterval": [
+    -0.08415663417379804,
+    0.09188976774197455
+   ],
+   "sigmaDaily": 0.04182664620563368,
+   "observations": 500
+  },
+  "prevHash": "29e57eca87fd7a9489bfadff432f5612b87d65f46f9c550f70fd87261ce9cf9c",
+  "hash": "387830e7e0d01ed1921867d2210d91765a74c00cec08301fb53ef20f861f0380"
+ },
+ {
+  "id": "F-2026-11-06-CRWD-20",
+  "instrument": "CRWD",
+  "benchmark": "QQQ",
+  "horizon": 20,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-2",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.5932203389830508,
+   "center": 0,
+   "interval": [
+    -0.2131517902544826,
+    0.27089315018384585
+   ],
+   "relInterval": [
+    -0.16123092927213356,
+    0.19222326489962338
+   ],
+   "sigmaDaily": 0.04182664620563368,
+   "observations": 500
+  },
+  "prevHash": "387830e7e0d01ed1921867d2210d91765a74c00cec08301fb53ef20f861f0380",
+  "hash": "a1be7b9d0d9afadc2a438d1426a5747738a97906bde2bde0e1d3dbb493188339"
+ },
+ {
+  "id": "F-2026-11-06-CRWD-60",
+  "instrument": "CRWD",
+  "benchmark": "QQQ",
+  "horizon": 60,
+  "informationCutoff": "2026-11-06",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T04:13:07.287Z",
+  "dataAsOf": "2026-11-06",
+  "calendar": "us-equity",
+  "modelVersion": "ewma-interval-v1",
+  "origin": "live",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-2",
+  "costBps": 10,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.6415478615071283,
+   "center": 0,
+   "interval": [
+    -0.339796450401083,
+    0.5146843736413023
+   ],
+   "relInterval": [
+    -0.26252929964252636,
+    0.3559860744505112
+   ],
+   "sigmaDaily": 0.04182664620563368,
+   "observations": 500
+  },
+  "prevHash": "a1be7b9d0d9afadc2a438d1426a5747738a97906bde2bde0e1d3dbb493188339",
+  "hash": "f47a56ef443fce5f852b14b0938a3a3c01e0ee5debb5dfef823c043e8949d2b2"
+ }
+]

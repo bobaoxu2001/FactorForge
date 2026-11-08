@@ -3,6 +3,8 @@ name: Scheduled fixture refresh
 # Keeps the committed data snapshots fresh on a schedule:
 #   - src/__fixtures__/yahoo-snapshot.json        (3y OHLCV, npm run fixture:refresh)
 #   - src/__fixtures__/fundamentals-snapshot.json (valuation/quality, npm run fundamentals:refresh)
+#   - src/__fixtures__/events/*                   (event-engine prices and run log, npm run events:refresh)
+#   - src/data/events/forecast-ledger.json        (appends rolling forecasts, npm run events:forecast)
 #
 # Runs on GitHub's US-based runners where the keyless Yahoo endpoints are
 # reachable. The full verification suite (lint/typecheck/test/build) runs
@@ -63,15 +65,24 @@ jobs:
         if: ${{ env.SEC_EDGAR_USER_AGENT != '' }}
         run: npm run research:refresh
 
+      # Event engine: refresh its market snapshot, then append this week's
+      # rolling forecasts to the hash-chained ledger. Existing records are
+      # never rewritten; past forecasts are scored at render time.
+      - name: Refresh event-intelligence snapshot
+        run: npm run events:refresh
+
+      - name: Append rolling forecasts to the ledger
+        run: npm run events:forecast
+
       - name: Detect changes
         id: diff
         run: |
-          if git diff --quiet -- src/__fixtures__; then
+          if git diff --quiet -- src/__fixtures__ src/data/events; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "Fixtures unchanged — nothing to refresh."
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
-            git diff --stat -- src/__fixtures__
+            git diff --stat -- src/__fixtures__ src/data/events
           fi
 
       # The refreshed fixtures must pass the same gates as any other change:

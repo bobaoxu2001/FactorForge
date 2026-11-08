@@ -8,6 +8,7 @@ import { FEATURED_PROJECT_ID } from "@/data/research/projects";
 import { ordinal } from "@/lib/intel/companies";
 import { getResearchProject } from "@/lib/intel/project";
 import { MEMO_STATUS_LABEL } from "@/lib/intel/quality";
+import { RESEARCH_CASES, thesisViews } from "@/lib/events/view";
 
 export const revalidate = 3600;
 
@@ -78,6 +79,27 @@ export default function ResearchHomePage() {
       <p className="max-w-[80ch] text-[14px] leading-relaxed text-ink-muted">
         <span className="font-semibold text-ink">FactorForge</span> is an equity research workbench: industry maps, public filings, KPI trends, primary-research planning, valuation and quantitative signals in one place. Every number traces to a dated source, every claim states whether it is verified, and AI output is never treated as evidence.
       </p>
+
+      <Panel
+        eyebrow="Event intelligence"
+        title="Events that could change a thesis"
+        actions={<Link href="/events" className="text-[12px] text-accent hover:text-ink">Event radar →</Link>}
+      >
+        <ul className="grid gap-4 md:grid-cols-2">
+          {RESEARCH_CASES.map((c) => {
+            const theses = thesisViews().filter((t) => t.replay.thesis.caseId === c.id);
+            return (
+              <li key={c.id} className="border-t-[3px] border-ink/15 pt-2">
+                <Link href={`/events/${c.slug}`} className="text-[15px] font-semibold leading-snug text-ink hover:text-accent">{c.title}</Link>
+                <p className="mt-1 text-[13px] leading-relaxed text-ink-muted">{c.dek}</p>
+                <p className="mt-1 text-[12px] text-ink-soft">
+                  {theses.map((t) => `${t.replay.thesis.id} ${t.replay.status.replace("_", " ").toLowerCase()}`).join(" · ")} · <Link href="/forecasts" className="text-accent hover:underline">forecast scorecard</Link>
+                </p>
+              </li>
+            );
+          })}
+        </ul>
+      </Panel>
 
       <Panel eyebrow="Research coverage tracker" title="Where the active thesis is in its lifecycle">
         <ol className="grid gap-2 sm:grid-cols-3 xl:grid-cols-6">

@@ -16,9 +16,9 @@ export interface Stage {
  * Sticky stage navigator for a research project. Keeps the analyst in the
  * same project context while moving between workflow stages.
  */
-export default function StageNav({ projectId, stages }: { projectId: string; stages: Stage[] }) {
+export default function StageNav({ projectId, stages, basePath, label = "Research stages" }: { projectId: string; stages: Stage[]; basePath?: string; label?: string }) {
   const pathname = usePathname();
-  const base = `/research/${projectId}`;
+  const base = basePath ?? `/research/${projectId}`;
   const listRef = useRef<HTMLOListElement>(null);
   const activeRef = useRef<HTMLAnchorElement>(null);
   useEffect(() => {
@@ -32,7 +32,7 @@ export default function StageNav({ projectId, stages }: { projectId: string; sta
     }
   }, [pathname]);
   return (
-    <nav aria-label="Research stages" className="sticky top-14 z-30 -mx-4 border-b border-line bg-bg/95 px-4 backdrop-blur md:-mx-8 md:px-8">
+    <nav aria-label={label} className="sticky top-14 z-30 -mx-4 border-b border-line bg-bg/95 px-4 backdrop-blur md:-mx-8 md:px-8">
       <ol ref={listRef} className="flex gap-5 overflow-x-auto text-[13.5px]">
         {stages.map((stage) => {
           const href = stage.slug ? `${base}/${stage.slug}` : base;
