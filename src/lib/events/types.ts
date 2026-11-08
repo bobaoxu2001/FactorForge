@@ -127,6 +127,12 @@ export interface Claim {
   /** Claim this one refines or replaces, kept for the audit trail. */
   supersedes?: string;
   notes?: string;
+  /**
+   * Wording fixed after re-reading a source. The claim keeps its id and
+   * recordedAt; each entry says what changed and why, so the correction is
+   * visible rather than silent.
+   */
+  corrections?: Array<{ at: string; note: string }>;
 }
 
 // ── Events ──────────────────────────────────────────────────────────────────
@@ -147,6 +153,12 @@ export interface CompetingExplanation {
   supportedBy: string[];
   /** Claims or market checks against it. */
   challengedBy: string[];
+  /**
+   * Checks that were run but cannot decide it either way, such as a market
+   * check with no statistically distinguishable abnormal return: absence of a
+   * detected move is not evidence that no company-specific cause existed.
+   */
+  inconclusive?: string[];
 }
 
 export interface EventRecord {

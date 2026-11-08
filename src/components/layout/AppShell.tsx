@@ -1,3 +1,4 @@
+import HashScroll from "./HashScroll";
 import Navigation from "./Navigation";
 import PublicDemoNotice from "@/components/research/PublicDemoNotice";
 import { isPersistenceAvailable } from "@/lib/persistence/db";
@@ -16,6 +17,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         Skip to content
       </a>
       <Navigation persistenceAvailable={persistenceAvailable} />
+      <HashScroll />
       <main id="main-content" className="px-4 pb-10 pt-4 md:px-8 lg:ml-[256px]">
         <div className="mx-auto max-w-[1280px]">
           <div className="public-demo-notice mb-6">

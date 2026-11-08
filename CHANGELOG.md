@@ -6,6 +6,34 @@ This project follows a human-maintained changelog. There is no automated release
 
 ## Unreleased
 
+### Event intelligence: research audit
+
+#### Changed
+
+- **Direction gate (`ewma-interval-v2`).** A direction now needs to beat the better constant rule (always up or always down) in a paired sign test on the effective sample, survive a Holm correction across every instrument and horizon tested together, and have a positive Brier skill score against the hindsight base rate. v1 compared the hit rate with 50% and tested instruments one at a time; its one directional call (MSTR, 1 day) was a constant rule and would abstain under v2. Ledger records are unchanged; the scorecard shows the v2 verdict beside the v1 call.
+- **Effective sample size** is the smaller of the overlap count and an autocorrelation-adjusted count.
+- **Event-study significance** needs both a t-statistic that includes estimation error and a placebo rank against the asset's own previous 500 sessions. BTC on 29 Oct and CRWV on 4 Nov no longer pass.
+- **Market pages** say the figures are associations, show the expected number of chance passes, and list events inside the estimation window.
+- **Eleven claims corrected** after re-reading every readable source; each correction is shown on its claim with the reason.
+- **Relative-range scoring (`score-v2`).** The relative range targets relative wealth return (1 + r) / (1 + r_b) − 1, which is what it is built from; it was scored against arithmetic excess r − r_b. Scores now use the same quantity, carry their version and keep the v1 comparison beside them. Arithmetic excess is still reported. No stored forecast changes.
+- **Benchmark-dependent results** are labelled by benchmark and described as benchmark-sensitive, without causal attribution.
+- **Qualcomm, 5 Nov.** The reported miss, the observed price fall and the causal link are separate items. QCOM shows no statistically distinguishable abnormal return against QQQ or RSP; that is listed as inconclusive for the earnings explanation, since a null result neither confirms nor rules out a company-specific cause.
+- **Competing explanations** are worded as hypotheses ("may have contributed"), and a market check with no statistically distinguishable move is listed as inconclusive rather than as evidence for or against.
+- **Forecast scorecard header** says only live forecasts are recorded before their outcome; backfilled examples are reconstructions shown apart. Coverage misses are described as evidence of miscalibration under the test, and the Brier column is named as a skill score.
+- **Market tables** print each day-0 figure's t-statistic and placebo rank under it, so they read without hovering.
+- **Deep links** such as `/events/<case>/market#<window>` land on their section again. The loading states stream content into a hidden container first, so the browser's own anchor scroll found nothing; a small client component now retries until the target renders (up to eight seconds). Evidence-id chips no longer break across lines on phones, and a linked claim card gets padding inside its highlight ring.
+- **Trigger wording rules** for theses published from 8 Nov 2026, 10:00 UTC: "confirmed" needs CONFIRMED; causal labels may only prompt a review. T-AI-1 is kept as published, with a dated current assessment of its statement and of trigger TR-A2.
+
+#### Added
+
+- Interval calibration on `/forecasts`: nominal 80% against empirical coverage with Wilson intervals, by regime and pooled across instruments with a design effect.
+- Equal-weight S&P 500 (RSP) as a second benchmark for US equities, with every count labelled by benchmark. The 5 Nov stock-level result is benchmark-sensitive: 0 of 19 moves beyond noise against QQQ or SPY, 7 of 19 against RSP.
+- The Texas governor's signed letter to TCEQ as a primary source (A-C28), the president's doubt about the attribution (B-C25), and Binance's SAFU pledge (B-C26).
+- A six-step research brief for each case (`/events/<case>/brief`).
+- Phone layout for the radar, pinned instrument columns on wide tables, case names in page titles, table header scope and labels, and loading states for the event pages.
+- First two forecasts under v2 (BTC, 5 and 20 days, live).
+- `docs/INTERVIEW_DEMO.md`: a 30-second introduction, a three-minute demo route (brief, evidence and market, theses, then forecasts), the AI data-center case in full, and answers to likely questions.
+
 ### Event intelligence: events, verification, impact, theses and scored forecasts
 
 #### Added

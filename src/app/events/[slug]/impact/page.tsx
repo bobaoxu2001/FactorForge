@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { caseMetadata } from "@/lib/events/caseMetadata";
 import ImpactMap from "@/components/events/ImpactMap";
 import { EPISTEMIC_LABEL, pct, tone } from "@/components/events/EventUI";
 import { Note, Panel } from "@/components/intel/ui";
@@ -6,7 +7,7 @@ import { caseBySlug } from "@/data/events";
 import { EXPOSURE_DIMENSIONS, LAYERS, type ExposureCell, type ExposureLevel } from "@/lib/events/impact";
 import { exposureRows, impacts } from "@/lib/events/view";
 
-export const metadata = { title: "Event impact map and exposure" };
+export const generateMetadata = ({ params }: { params: Promise<{ slug: string }> }) => caseMetadata(params, "Impact map");
 
 const LEVEL_STYLE: Record<ExposureLevel, string> = {
   high: "bg-ink/[0.85] text-paper",
@@ -48,10 +49,10 @@ export default async function EventImpactPage({ params }: { params: Promise<{ sl
           <table className="w-full min-w-[720px] text-left text-[13px]">
             <thead className="border-b border-line text-[12px] text-ink-soft">
               <tr>
-                <th className="px-5 py-2 font-medium md:pl-6">Company</th>
-                <th className="px-3 py-2 font-medium">Map direction</th>
-                <th className="px-3 py-2 font-medium">Paths (with evidence / total)</th>
-                <th className="px-3 py-2 font-medium md:pr-6">Market check</th>
+                <th scope="col" className="px-5 py-2 font-medium md:pl-6">Company</th>
+                <th scope="col" className="px-3 py-2 font-medium">Map direction</th>
+                <th scope="col" className="px-3 py-2 font-medium">Paths (with evidence / total)</th>
+                <th scope="col" className="px-3 py-2 font-medium md:pr-6">Market check</th>
               </tr>
             </thead>
             <tbody>
@@ -86,11 +87,11 @@ export default async function EventImpactPage({ params }: { params: Promise<{ sl
             <table className="w-full min-w-[1080px] text-left text-[12.5px]">
               <thead className="border-b border-line text-[11.5px] text-ink-soft">
                 <tr>
-                  <th className="px-5 py-2 font-medium md:pl-6">Company</th>
+                  <th scope="col" className="px-5 py-2 font-medium md:pl-6">Company</th>
                   {EXPOSURE_DIMENSIONS.map((d) => (
                     <th key={d.key} className="px-2 py-2 font-medium">{d.label}</th>
                   ))}
-                  <th className="px-2 py-2 text-right font-medium md:pr-6">Day-0 abnormal</th>
+                  <th scope="col" className="px-2 py-2 text-right font-medium md:pr-6">Day-0 abnormal</th>
                 </tr>
               </thead>
               <tbody>

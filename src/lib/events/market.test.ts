@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { BINANCE_CASE } from "@/data/events/cases/binance";
 import { AI_DATACENTER_CASE } from "@/data/events/cases/aiDatacenter";
-import { eventStudy, fitMarketModel, alignReturns, type PriceSeries } from "./market";
+import { carVariance, eventStudy, fitMarketModel, alignReturns, type PriceSeries } from "./market";
 import { barCloseInstant, firstReactionIndex, parseInstant } from "./time";
 import { windowView } from "./view";
 
@@ -83,6 +83,31 @@ describe("benchmark-adjusted (abnormal) returns", () => {
     expect(study.persistence).toBe("reversed");
   });
 
+  it("widens the CAR band on a day the benchmark itself moved a lot (estimation error)", () => {
+    const m = noise(300, 21);
+    const r = alignReturns(synthetic("A", m.map((x, i) => 1.2 * x + noise(300, 4)[i] * 0.5)), synthetic("B", m));
+    const fit = fitMarketModel(r, 0, 120);
+    const quiet = [...r.bench!];
+    quiet[200] = fit.meanBench;
+    const loud = [...r.bench!];
+    loud[200] = fit.meanBench - 0.06;
+    expect(carVariance(fit, quiet, [200])).toBeCloseTo(fit.residualSd ** 2 * (1 + 1 / fit.n), 12);
+    expect(carVariance(fit, loud, [200])).toBeGreaterThan(carVariance(fit, quiet, [200]) * 1.05);
+  });
+
+  it("does not call a move significant when moves that size are routine for the asset (placebo)", () => {
+    // Fat tails: one day in ten moves ±6% on its own, but a normal-theory t on the typical day says that is rare.
+    const m = noise(300, 13);
+    const own = noise(300, 77).map((x, i) => (i % 10 === 3 ? (i % 20 === 3 ? 0.06 : -0.06) : x * 0.2));
+    const day0 = 271;
+    const r = m.map((x, i) => x + (i === day0 ? -0.06 : own[i]));
+    const study = eventStudy(synthetic("A", r), synthetic("B", m), "2026-09-30T12:00:00Z");
+    const w0 = study.windows[0];
+    expect(w0.placeboShare!).toBeGreaterThan(0.05);
+    expect(w0.significant).toBe(false);
+    expect(study.persistence).toBe("no-significant-reaction");
+  });
+
   it("compares against the benchmark over the same dates when calendars differ", () => {
     const crypto = synthetic("C", noise(30, 3));
     const equityDates = synthetic("E", noise(30, 5), "2026-01-01", "us-equity");
@@ -106,6 +131,22 @@ describe("what the cases' market data show", () => {
     const bnb = windowView(BINANCE_CASE, "W-B-CRYPTO")!.studies.find((s) => s.symbol === "BNB-USD")!;
     expect(bnb.windows[0].abnormal!).toBeLessThan(-0.03);
     expect(Math.abs(bnb.windows[0].tStat!)).toBeGreaterThan(1.96);
+    expect(bnb.windows[0].significant).toBe(true);
+  });
+
+  it("finds no US crypto or security stock beyond noise on the first session after the breach", () => {
+    const w = windowView(BINANCE_CASE, "W-B-EQ")!;
+    expect(w.day0Tests.significant).toBe(0);
+  });
+
+  it("finds far more significant election-day reactions than chance would produce", () => {
+    const w = windowView(AI_DATACENTER_CASE, "W-A-ELECT")!;
+    expect(w.day0Tests.significant).toBeGreaterThan(3 * w.day0Tests.expectedByChance);
+  });
+
+  it("flags earlier events inside the estimation window", () => {
+    const w = windowView(AI_DATACENTER_CASE, "W-A-ELECT")!;
+    expect(w.estimationOverlaps.map((o) => o.eventId)).toEqual(expect.arrayContaining(["EV-NY-MORATORIUM-2026-07-14", "EV-TX-PERMIT-HALT-2026-09-21"]));
   });
 
   it("finds the power and grid group's abnormal decline on the first post-election session", () => {

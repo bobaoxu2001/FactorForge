@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { EpistemicChip, EvidenceRefs, LifecycleChip, ThesisStatusChip, VerificationChip, When } from "@/components/events/EventUI";
+import { caseMetadata } from "@/lib/events/caseMetadata";
+import { CitedProse, EpistemicChip, EvidenceRefs, LifecycleChip, ThesisStatusChip, VerificationChip, When } from "@/components/events/EventUI";
 import { KeyFinding, Note, Panel } from "@/components/intel/ui";
 import { caseBySlug } from "@/data/events";
 import { EVENT_CATEGORIES } from "@/lib/events/categories";
@@ -8,7 +9,7 @@ import type { QuantityKind } from "@/lib/events/types";
 import { quantityLedger } from "@/lib/events/verification";
 import { eventView, thesisViews } from "@/lib/events/view";
 
-export const metadata = { title: "Event case overview" };
+export const generateMetadata = ({ params }: { params: Promise<{ slug: string }> }) => caseMetadata(params, "Overview");
 
 const QUANTITY_LABEL: Partial<Record<QuantityKind, string>> = {
   affected: "Affected",
@@ -98,10 +99,10 @@ export default async function EventCaseOverview({ params }: { params: Promise<{ 
                     <table className="w-full min-w-[560px] text-left text-[13px]">
                       <thead className="text-[12px] text-ink-soft">
                         <tr className="border-b border-line">
-                          <th className="py-1.5 pr-3 font-medium">Measure</th>
-                          <th className="py-1.5 pr-3 font-medium">Latest figure</th>
-                          <th className="py-1.5 pr-3 font-medium">As of</th>
-                          <th className="py-1.5 font-medium">Earlier figures</th>
+                          <th scope="col" className="py-1.5 pr-3 font-medium">Measure</th>
+                          <th scope="col" className="py-1.5 pr-3 font-medium">Latest figure</th>
+                          <th scope="col" className="py-1.5 pr-3 font-medium">As of</th>
+                          <th scope="col" className="py-1.5 font-medium">Earlier figures</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -142,7 +143,9 @@ export default async function EventCaseOverview({ params }: { params: Promise<{ 
                   <h3 className="section-label">Open questions</h3>
                   <ul className="mt-2 space-y-1.5 text-[13px] leading-relaxed text-ink-muted">
                     {e.openQuestions.map((q) => (
-                      <li key={q}>· {q}</li>
+                      <li key={q}>
+                        · <CitedProse text={q} caseSlug={c.slug} />
+                      </li>
                     ))}
                   </ul>
                 </div>
@@ -169,12 +172,13 @@ export default async function EventCaseOverview({ params }: { params: Promise<{ 
                 <div className="mt-2 text-[12.5px] text-ink-muted">
                   <div className="flex flex-wrap items-center gap-1">For: <EvidenceRefs ids={x.supportedBy} caseSlug={c.slug} /></div>
                   <div className="mt-1 flex flex-wrap items-center gap-1">Against: <EvidenceRefs ids={x.challengedBy} caseSlug={c.slug} empty="nothing recorded yet" /></div>
+                  {x.inconclusive?.length ? <div className="mt-1 flex flex-wrap items-center gap-1">Inconclusive: <EvidenceRefs ids={x.inconclusive} caseSlug={c.slug} /></div> : null}
                 </div>
               </div>
             ))}
           </div>
           <div className="mt-4">
-            <Note tone="warn">An explanation is a hypothesis until evidence separates it from the others. One day of prices cannot do that when several drivers arrive together, so none is marked as the cause.</Note>
+            <Note tone="warn">An explanation is a hypothesis until evidence separates it from the others. One day of prices cannot do that when several drivers arrive together, so none is marked as the cause. A market check listed as inconclusive found no statistically distinguishable move under the current benchmark and model; that neither supports nor rules out the explanation.</Note>
           </div>
         </Panel>
       )}

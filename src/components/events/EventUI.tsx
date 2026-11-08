@@ -124,7 +124,7 @@ export function SourceLine({ source }: { source: SourceRecord }) {
 /** A claim with its kind, verification and every citation, each linked to its source. */
 export function ClaimCard({ claim, sources, compact = false }: { claim: ClaimView; sources: Map<string, SourceRecord>; compact?: boolean }) {
   return (
-    <article id={claim.id} className="scroll-mt-28 border-t border-line py-3 first:border-t-0">
+    <article id={claim.id} className="scroll-mt-28 border-t border-line py-3 first:border-t-0 target:-mx-2 target:rounded-md target:px-2">
       <div className="flex flex-wrap items-center gap-1.5">
         <span className="num text-[11.5px] font-medium text-ink-soft">{claim.id}</span>
         <VerificationChip state={claim.verification} title={claim.verificationReason} />
@@ -151,6 +151,15 @@ export function ClaimCard({ claim, sources, compact = false }: { claim: ClaimVie
             })}
           </ul>
           {claim.notes && <p className="mt-1.5 text-[12.5px] italic text-ink-muted">{claim.notes}</p>}
+          {claim.corrections?.length ? (
+            <ul className="mt-1.5 space-y-0.5 text-[12px] text-ink-muted" aria-label="Corrections">
+              {claim.corrections.map((c) => (
+                <li key={c.at + c.note}>
+                  <span className="font-medium text-ink">Corrected {c.at.slice(0, 10)}:</span> {c.note}
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </>
       )}
     </article>
@@ -162,7 +171,7 @@ export function EvidenceRef({ id, caseSlug }: { id: string; caseSlug: string }) 
   if (id.startsWith("MKT:")) {
     const [, windowId, symbol] = id.split(":");
     return (
-      <Link href={`/events/${caseSlug}/market#${windowId}`} className="num rounded border border-ink/15 bg-panel2 px-1 py-px text-[11px] text-ink-muted hover:text-ink">
+      <Link href={`/events/${caseSlug}/market#${windowId}`} className="num inline-block whitespace-nowrap rounded border border-ink/15 bg-panel2 px-1 py-px text-[11px] text-ink-muted hover:text-ink">
         market: {symbol}
       </Link>
     );
@@ -170,13 +179,13 @@ export function EvidenceRef({ id, caseSlug }: { id: string; caseSlug: string }) 
   if (id.startsWith("EXP:")) {
     const [, ticker, dim] = id.split(":");
     return (
-      <Link href={`/events/${caseSlug}/impact#exposure`} className="num rounded border border-ink/15 bg-panel2 px-1 py-px text-[11px] text-ink-muted hover:text-ink">
+      <Link href={`/events/${caseSlug}/impact#exposure`} className="num inline-block whitespace-nowrap rounded border border-ink/15 bg-panel2 px-1 py-px text-[11px] text-ink-muted hover:text-ink">
         exposure: {ticker} {dim === "directRevenue" ? "revenue" : dim}
       </Link>
     );
   }
   return (
-    <Link href={`/events/${caseSlug}/evidence#${id}`} className="num rounded border border-accent/20 bg-accent-soft px-1 py-px text-[11px] font-medium text-accent hover:underline">
+    <Link href={`/events/${caseSlug}/evidence#${id}`} className="num inline-block whitespace-nowrap rounded border border-accent/20 bg-accent-soft px-1 py-px text-[11px] font-medium text-accent hover:underline">
       {id}
     </Link>
   );

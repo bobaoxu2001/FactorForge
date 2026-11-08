@@ -1,5 +1,5 @@
 {
- "builtAt": "2026-11-08T03:50:35.590Z",
+ "builtAt": "2026-11-08T08:38:29.753Z",
  "builder": "scripts/build-event-snapshot.mjs",
  "range": "3y",
  "providers": {
@@ -7,8 +7,8 @@
   "fundamentals": "Yahoo Finance quoteSummary (vendor-computed fields; not audited figures)"
  },
  "counts": {
-  "instruments": 39,
-  "pricesOk": 39,
+  "instruments": 40,
+  "pricesOk": 40,
   "pricesCarriedOver": 0,
   "pricesFailed": 0,
   "fundamentalsOk": 28
@@ -36,6 +36,15 @@
   },
   {
    "symbol": "^IXIC",
+   "step": "prices",
+   "status": "ok",
+   "rows": 753,
+   "first": "2023-11-07",
+   "last": "2026-11-06",
+   "missingCloses": 0
+  },
+  {
+   "symbol": "RSP",
    "step": "prices",
    "status": "ok",
    "rows": 753,
@@ -74,46 +83,46 @@
    "symbol": "BTC-USD",
    "step": "prices",
    "status": "ok",
-   "rows": 1095,
+   "rows": 1096,
    "first": "2023-11-08",
-   "last": "2026-11-06",
-   "missingCloses": 1
+   "last": "2026-11-07",
+   "missingCloses": 0
   },
   {
    "symbol": "ETH-USD",
    "step": "prices",
    "status": "ok",
-   "rows": 1095,
+   "rows": 1096,
    "first": "2023-11-08",
-   "last": "2026-11-06",
-   "missingCloses": 1
+   "last": "2026-11-07",
+   "missingCloses": 0
   },
   {
    "symbol": "BNB-USD",
    "step": "prices",
    "status": "ok",
-   "rows": 1095,
+   "rows": 1096,
    "first": "2023-11-08",
-   "last": "2026-11-06",
-   "missingCloses": 1
+   "last": "2026-11-07",
+   "missingCloses": 0
   },
   {
    "symbol": "XRP-USD",
    "step": "prices",
    "status": "ok",
-   "rows": 1095,
+   "rows": 1096,
    "first": "2023-11-08",
-   "last": "2026-11-06",
-   "missingCloses": 1
+   "last": "2026-11-07",
+   "missingCloses": 0
   },
   {
    "symbol": "SOL-USD",
    "step": "prices",
    "status": "ok",
-   "rows": 1095,
+   "rows": 1096,
    "first": "2023-11-08",
-   "last": "2026-11-06",
-   "missingCloses": 1
+   "last": "2026-11-07",
+   "missingCloses": 0
   },
   {
    "symbol": "COIN",

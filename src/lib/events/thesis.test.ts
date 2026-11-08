@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import thesisLedger from "@/data/events/thesis-ledger.json";
 import { ALL_CLAIMS, ALL_SOURCES } from "@/data/events";
 import { verifyChain } from "./ledger";
-import { replayThesis, validateThesis, type MarketObservation, type ThesisRecord } from "./thesis";
+import { THESIS_RULES_V2_FROM, replayThesis, triggerWordingFindings, validateThesis, type MarketObservation, type ThesisRecord } from "./thesis";
 import type { Claim, SourceRecord } from "./types";
 import { ALL_THESES, observations, thesisContentHash, thesisViews } from "./view";
 
@@ -113,3 +113,29 @@ describe("rules on what may change a conclusion", () => {
     expect(r.revisions[0].lessons).toEqual(["It missed positioning."]);
   });
 });
+
+describe("separating reported, verified and causal", () => {
+  it("flags a trigger that claims more than its condition can show (T-AI-1 TR-A2)", () => {
+    const findings = triggerWordingFindings(thesis("T-AI-1"), ALL_CLAIMS);
+    expect(findings).toEqual(expect.arrayContaining([expect.stringMatching(/^TR-A2: says "confirmed" but fires at REPORTED/), expect.stringMatching(/^TR-A2: treats a cause as established/)]));
+  });
+
+  it("binds the wording rules only for theses published after they took effect", () => {
+    expect(validateThesis(thesis("T-AI-1"), ALL_CLAIMS, observations(), ALL_SOURCES)).toEqual([]); // immutable history is not rejected
+    const later: ThesisRecord = { ...thesis("T-AI-1"), id: "T-NEW", publishedAt: THESIS_RULES_V2_FROM, informationCutoff: THESIS_RULES_V2_FROM };
+    expect(validateThesis(later, ALL_CLAIMS, observations())).toEqual(expect.arrayContaining([expect.stringMatching(/TR-A2: says "confirmed"/)]));
+  });
+
+  it("shows a current assessment beside the original thesis without changing it", () => {
+    const v = view("T-AI-1");
+    expect(v.replay.thesis.statement).toMatch(/carried an earnings miss/); // original wording kept
+    expect(v.integrity).toEqual({ recorded: true, matches: true });
+    expect(v.assessments.map((a) => a.target)).toEqual(expect.arrayContaining(["statement", "trigger:TR-A2"]));
+    expect(v.ruleFindings.length).toBeGreaterThan(0);
+  });
+
+  it("does not let a single aggregator report fire the earnings trigger", () => {
+    expect(view("T-AI-1").replay.revisions.some((r) => r.fired.some((f) => f.id === "TR-A2"))).toBe(false);
+  });
+});
+

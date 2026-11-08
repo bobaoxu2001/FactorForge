@@ -1,6 +1,6 @@
 import "server-only";
 import type { ResearchCase } from "@/data/events/types";
-import { eventView, impacts, scoredForecasts, thesisViews, windowView } from "./view";
+import { benchmarkSensitivity, eventView, impacts, scoredForecasts, thesisViews, windowView } from "./view";
 import type { VerificationState } from "./types";
 
 /**
@@ -19,6 +19,13 @@ export interface MemoSection {
 const p1 = (v: number) => `${v >= 0 ? "+" : "−"}${Math.abs(v * 100).toFixed(1)}%`;
 const list = (xs: string[]) => (xs.length <= 1 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs.at(-1)}`);
 const n = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
+
+/** A claim stays a [citation]; a market check is named in words, because the memo links only claims. */
+function refText(id: string): string {
+  if (id.startsWith("MKT:")) return `the ${id.split(":")[2]} market check`;
+  if (id.startsWith("EXP:")) return `the ${id.split(":")[1]} exposure entry`;
+  return `[${id}]`;
+}
 
 export function buildEventMemo(c: ResearchCase): MemoSection[] {
   const primary = eventView(c.primaryEventId);
@@ -57,16 +64,25 @@ export function buildEventMemo(c: ResearchCase): MemoSection[] {
   for (const w of c.windows) {
     const v = windowView(c, w.id);
     if (!v) continue;
-    const sig = v.studies.filter((s) => s.benchmark && s.windows[0]?.tStat != null && Math.abs(s.windows[0].tStat!) >= 1.96);
-    const quiet = v.studies.filter((s) => s.benchmark && s.windows[0]?.tStat != null && Math.abs(s.windows[0].tStat!) < 1.96);
+    const tested = v.studies.filter((s) => s.benchmark && s.windows[0]?.tStat != null);
+    const sig = tested.filter((s) => s.windows[0].significant);
     const day0 = v.studies.find((s) => s.day0)?.day0 ?? "n/a";
-    const sigText = sig.length
-      ? `Moves beyond what the benchmark explains (|t| ≥ 1.96): ${list(sig.map((s) => `${s.symbol} ${p1(s.windows[0].abnormal!)} vs ${s.benchmark}`))}.`
-      : "No instrument moved significantly more than its benchmark explains.";
+    const sensitivity = benchmarkSensitivity(v);
+    const ewText = sensitivity && v.day0TestsEqualWeight.significant !== v.day0Tests.significant ? ` ${sensitivity}` : "";
+    const names = list(sig.map((s) => `${s.symbol} ${p1(s.windows[0].abnormal!)} vs ${s.benchmark}`));
+    const sigText = ewText
+      ? sig.length
+        ? `Against their own benchmarks, beyond noise (both the t-test and the placebo rank): ${names}.`
+        : ""
+      : sig.length
+        ? `Moves beyond what the benchmark explains (both the t-test and the placebo rank): ${names}. That is ${sig.length} of ${tested.length} tests, where chance alone would produce about ${v.day0Tests.expectedByChance.toFixed(1)}.`
+        : `No instrument moved significantly more than its benchmark explains (${tested.length} tested).`;
     const overlap = v.overlaps["[0,4]"]?.length ? ` The five-session window overlaps ${list(v.overlaps["[0,4]"].map((o) => `"${o.title}" (${o.date})`))}, so multi-day figures mix events.` : "";
-    marketParas.push(`${w.label}. Day 0: ${day0}. ${sigText} ${n(quiet.length, "other instrument", "other instruments")} stayed within normal noise.${overlap}`);
+    marketParas.push(`${w.label}. Day 0: ${day0}. ${sigText}${ewText}${overlap}`.replace(/\s+/g, " ").trim());
   }
-  marketParas.push("Abnormal returns use a market model fitted on 120 sessions ending ten sessions before day 0. When the affected stocks are a large part of the benchmark itself (AI names in QQQ), benchmark-adjusted figures understate the event's effect; read them alongside raw returns.");
+  marketParas.push(
+    "These are associations around a date, not proof that the event caused the move. Abnormal returns use a market model fitted on 120 sessions ending ten sessions before day 0; a move counts only if its t-statistic (with estimation error) and its rank among the asset's own previous 500 sessions both say it is unusual. US stocks are measured against their own benchmark and against the equal-weight S&P 500; where the two disagree, the finding is benchmark-sensitive.",
+  );
   sections.push({ title: "How the event reached markets", kind: "data", paragraphs: marketParas });
 
   // 4. Competing explanations
@@ -75,10 +91,11 @@ export function buildEventMemo(c: ResearchCase): MemoSection[] {
       title: "Competing explanations",
       kind: "data",
       paragraphs: primary.event.competingExplanations.map((x) => {
-        const claimsFor = x.supportedBy.filter((id) => !id.startsWith("MKT:"));
-        const marketFor = x.supportedBy.length - claimsFor.length;
-        const forText = claimsFor.length ? claimsFor.map((id) => `[${id}]`).join(" ") + (marketFor ? " plus market checks" : "") : marketFor ? "market checks only" : "nothing recorded";
-        return `${x.label} (${x.epistemic === "CAUSAL_HYPOTHESIS" ? "hypothesis" : x.epistemic.toLowerCase()}): ${x.summary} For: ${forText}. Against: ${x.challengedBy.map((id) => `[${id}]`).join(" ") || "nothing recorded yet"}.`;
+        const forText = x.supportedBy.map(refText).join(" ") || "nothing recorded";
+        const inconclusive = x.inconclusive?.length
+          ? ` Inconclusive: ${x.inconclusive.map(refText).join(" ")}, with no statistically distinguishable move under the current benchmark and model, which neither supports nor rules it out.`
+          : "";
+        return `${x.label} (${x.epistemic === "CAUSAL_HYPOTHESIS" ? "hypothesis" : x.epistemic.toLowerCase()}): ${x.summary} For: ${forText}. Against: ${x.challengedBy.map(refText).join(" ") || "nothing recorded yet"}.${inconclusive}`;
       }),
     });
   }

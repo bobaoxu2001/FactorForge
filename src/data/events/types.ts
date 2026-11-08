@@ -56,6 +56,19 @@ export interface MemoParagraph {
   body: string;
 }
 
+/**
+ * A dated note on part of an immutable thesis: what the evidence available now
+ * says about a sentence or a trigger. The thesis and its ledger hash are not
+ * touched; the note sits beside them.
+ */
+export interface ThesisAssessment {
+  thesisId: string;
+  at: string;
+  /** "statement", or "trigger:<id>". */
+  target: string;
+  note: string;
+}
+
 export interface ResearchCase {
   id: string;
   slug: string;
@@ -82,4 +95,6 @@ export interface ResearchCase {
   forecastPlans: ForecastPlan[];
   memo: MemoParagraph[];
   limitations: string[];
+  /** Current assessments of this case's theses (see ThesisAssessment). */
+  assessments?: ThesisAssessment[];
 }

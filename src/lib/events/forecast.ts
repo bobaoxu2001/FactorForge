@@ -3,7 +3,7 @@ import type { PriceSeries } from "./market";
 /**
  * Baseline market forecasts and their scoring (pure; no I/O).
  *
- * Model "ewma-interval-v1" makes no directional call. Its point forecast is a
+ * Model "ewma-interval-v2" makes no directional call. Its point forecast is a
  * zero log return (random walk). Its job is an honest range: an 80% interval
  * from exponentially weighted volatility (λ = 0.94), widened by √horizon. A
  * probability of a positive return comes from the instrument's own base rate,
@@ -11,13 +11,23 @@ import type { PriceSeries } from "./market";
  * evaluation has shown skill for that horizon; otherwise the forecast says
  * ABSTAIN, which is a result, not a gap.
  *
+ * v1 → v2 changed only that gate (see MODEL_HISTORY). Records made under v1
+ * stay on the ledger unchanged; the scorecard shows how the v2 gate would
+ * have treated any v1 directional call.
+ *
  * Leakage guard: the model is handed the full series and slices it to bars
  * dated on or before the information cutoff itself, so a caller cannot pass
  * future prices in by mistake. Tests check that appending future bars leaves
  * every prediction unchanged.
  */
 
-export const MODEL_VERSION = "ewma-interval-v1";
+export const MODEL_VERSION = "ewma-interval-v2";
+export const MODEL_HISTORY: Record<string, string> = {
+  "ewma-interval-v1":
+    "Direction allowed when the hit rate beat 50% at p < 0.05 on an overlap-adjusted n, Brier beat a coin flip, and both halves agreed. Tested each instrument and horizon on its own.",
+  "ewma-interval-v2":
+    "Direction allowed only when the rule beats the better constant rule (always up or always down) in a paired sign test, survives a Holm correction across every instrument and horizon tested together, beats the hindsight base rate on Brier score, and both halves agree. Effective n also accounts for autocorrelation.",
+};
 export const HORIZONS = [1, 5, 20, 60] as const;
 export type Horizon = (typeof HORIZONS)[number];
 export const INTERVAL_LEVEL = 0.8;
@@ -39,7 +49,11 @@ export interface Prediction {
   /** Point forecast of the simple return (zero for a random walk). */
   center: number;
   interval: [number, number] | null;
-  /** Interval for return minus benchmark return. */
+  /**
+   * Interval for the relative wealth return (1 + r) / (1 + r_benchmark) − 1.
+   * Built from log(asset) − log(benchmark) returns, so that is its target —
+   * not the arithmetic difference r − r_benchmark.
+   */
   relInterval: [number, number] | null;
   sigmaDaily: number | null;
   observations: number;
@@ -179,6 +193,17 @@ export function predict(spec: ForecastSpec, assetFull: PriceSeries, benchFull: P
 
 // ── Scoring ─────────────────────────────────────────────────────────────────
 
+/**
+ * Scoring methodology. Scores are derived at read time from the ledger and
+ * prices, so a scoring fix changes no stored record; the version says which
+ * rules produced the numbers shown.
+ */
+export const SCORING_VERSION = "score-v2";
+export const SCORING_HISTORY: Record<string, string> = {
+  "score-v1": "Scored the relative range against the arithmetic excess return r − r_benchmark, which is not what the range was built for.",
+  "score-v2": "Scores the relative range against the relative wealth return (1 + r) / (1 + r_benchmark) − 1, the quantity it was built from. Arithmetic excess is still reported, as a separate figure.",
+};
+
 export interface ForecastScore {
   status: "scored" | "pending" | "not-scorable";
   note: string;
@@ -186,11 +211,18 @@ export interface ForecastScore {
   barsRemaining: number | null;
   realized: number | null;
   benchmarkReturn: number | null;
+  /** Arithmetic excess r − r_benchmark. Reported for reference; the relative range does not target it. */
   excess: number | null;
+  /** Relative wealth return (1 + r) / (1 + r_benchmark) − 1: what the relative range targets. */
+  relative: number | null;
   /** Realized minus the point forecast. */
   error: number | null;
   inInterval: boolean | null;
+  /** `relative` inside the relative range (score-v2). */
   inRelInterval: boolean | null;
+  /** The score-v1 comparison (arithmetic excess inside the relative range), kept to show where the versions disagree. */
+  inRelIntervalV1: boolean | null;
+  scoringVersion: string;
   directionHit: boolean | null;
   brier: number | null;
   /** Return of acting on the direction, after costs; null when the forecast abstained. */
@@ -217,7 +249,22 @@ export function scoreForecast(
   asset: PriceSeries,
   bench: PriceSeries | null,
 ): ForecastScore {
-  const blank = { targetDate: null, barsRemaining: null, realized: null, benchmarkReturn: null, excess: null, error: null, inInterval: null, inRelInterval: null, directionHit: null, brier: null, netDirectionalReturn: null };
+  const blank = {
+    targetDate: null,
+    barsRemaining: null,
+    realized: null,
+    benchmarkReturn: null,
+    excess: null,
+    relative: null,
+    error: null,
+    inInterval: null,
+    inRelInterval: null,
+    inRelIntervalV1: null,
+    scoringVersion: SCORING_VERSION,
+    directionHit: null,
+    brier: null,
+    netDirectionalReturn: null,
+  };
   if (record.prediction.status !== "OK" || !record.dataAsOf) return { status: "not-scorable", note: record.prediction.reason ?? "No prediction was made.", ...blank };
   const start = asset.dates.indexOf(record.dataAsOf);
   if (start < 0) return { status: "not-scorable", note: `The bar the forecast used (${record.dataAsOf}) is no longer in the price history.`, ...blank };
@@ -232,7 +279,9 @@ export function scoreForecast(
   const b1 = bench ? valueOnOrBefore(bench, targetDate) : null;
   const benchmarkReturn = b0 && b1 ? b1 / b0 - 1 : null;
   const excess = benchmarkReturn === null ? null : realized - benchmarkReturn;
+  const relative = benchmarkReturn === null ? null : (1 + realized) / (1 + benchmarkReturn) - 1;
   const p = record.prediction;
+  const inside = (x: number | null, range: [number, number] | null) => (range && x !== null ? x >= range[0] && x <= range[1] : null);
   const up = realized > 0 ? 1 : 0;
   const directional = p.direction === "ABSTAIN" ? null : p.direction === "UP" ? 1 : -1;
   return {
@@ -243,9 +292,12 @@ export function scoreForecast(
     realized,
     benchmarkReturn,
     excess,
+    relative,
     error: realized - p.center,
-    inInterval: p.interval ? realized >= p.interval[0] && realized <= p.interval[1] : null,
-    inRelInterval: p.relInterval && excess !== null ? excess >= p.relInterval[0] && excess <= p.relInterval[1] : null,
+    inInterval: inside(realized, p.interval),
+    inRelInterval: inside(relative, p.relInterval),
+    inRelIntervalV1: inside(excess, p.relInterval),
+    scoringVersion: SCORING_VERSION,
     directionHit: directional === null ? null : (directional === 1) === (realized > 0),
     brier: p.pUp === null ? null : (p.pUp - up) ** 2,
     netDirectionalReturn: directional === null ? null : directional * realized - record.costBps / 10_000,

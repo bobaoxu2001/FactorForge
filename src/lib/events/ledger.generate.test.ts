@@ -5,11 +5,11 @@ import { describe, expect, it } from "vitest";
 import forecastLedger from "@/data/events/forecast-ledger.json";
 import thesisLedger from "@/data/events/thesis-ledger.json";
 import { RESEARCH_CASES } from "@/data/events";
-import { summarize, walkForward } from "./evaluation";
-import { MODEL_VERSION, predict, type ForecastRecord } from "./forecast";
+import { applyFamily, summarize, walkForward } from "./evaluation";
+import { HORIZONS, MODEL_VERSION, predict, type ForecastRecord, type Horizon } from "./forecast";
 import { appendRecord, verifyChain } from "./ledger";
 import { barCloseInstant } from "./time";
-import { ALL_THESES, benchmarkOf, instrumentKindCost, series, thesisContentHash } from "./view";
+import { ALL_THESES, EVALUATED_SYMBOLS, benchmarkOf, instrumentKindCost, series, thesisContentHash } from "./view";
 
 /**
  * Ledger writer. Skipped in normal test runs; `npm run events:forecast` sets
@@ -30,6 +30,26 @@ function nextBarDate(date: string, calendar: "us-equity" | "crypto-utc"): string
   return d.toISOString().slice(0, 10);
 }
 
+/**
+ * Direction gate for one cutoff: every instrument in any plan × every horizon
+ * is tested with data to the cutoff, and the family is Holm-corrected together,
+ * so adding instruments makes the bar stricter, not looser.
+ */
+const gateCache = new Map<string, Map<string, boolean>>();
+function directionGate(cutoff: string): Map<string, boolean> {
+  if (gateCache.has(cutoff)) return gateCache.get(cutoff)!;
+  const symbols = [...new Set([...EVALUATED_SYMBOLS(), ...RESEARCH_CASES.flatMap((c) => c.forecastPlans.flatMap((p) => p.instruments))])];
+  const raw = symbols.flatMap((symbol) => {
+    const asset = series(symbol);
+    if (!asset) return [];
+    const bench = series(benchmarkOf(symbol));
+    return HORIZONS.map((h: Horizon) => summarize(symbol, h, walkForward(asset, bench, bench ?? asset, h, 5, cutoff)));
+  });
+  const gate = new Map(applyFamily(raw).map((s) => [`${s.instrument}:${s.horizon}`, s.directionValidated]));
+  gateCache.set(cutoff, gate);
+  return gate;
+}
+
 describe.skipIf(!WRITE)("ledger writer", () => {
   it("appends planned forecasts and new theses", () => {
     const now = new Date();
@@ -48,9 +68,9 @@ describe.skipIf(!WRITE)("ledger writer", () => {
             if (have.has(id)) continue;
             const benchmark = benchmarkOf(symbol);
             const bench = series(benchmark);
-            // Validation uses only data up to the cutoff, like the forecast itself.
-            const validation = summarize(symbol, horizon, walkForward(asset, bench, bench ?? asset, horizon, 5, cutoff));
-            const spec = { instrument: symbol, benchmark, horizon, informationCutoff: cutoff, directionValidated: validation.directionValidated };
+            // Validation uses only data up to the cutoff, like the forecast itself, and is corrected across the family.
+            const directionValidated = directionGate(cutoff).get(`${symbol}:${horizon}`) ?? false;
+            const spec = { instrument: symbol, benchmark, horizon, informationCutoff: cutoff, directionValidated };
             const { dataAsOf, prediction } = predict(spec, asset, bench);
             const firstTargetClose = dataAsOf ? barCloseInstant(nextBarDate(dataAsOf, asset.calendar), asset.calendar) : 0;
             const record: Omit<ForecastRecord, "hash" | "prevHash"> = {

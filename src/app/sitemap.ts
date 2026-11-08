@@ -63,7 +63,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
   ]);
   const events = RESEARCH_CASES.flatMap((c) =>
-    ["", "/evidence", "/market", "/impact", "/scenarios", "/memo"].map((section) => ({
+    ["", "/brief", "/evidence", "/market", "/impact", "/scenarios", "/memo"].map((section) => ({
       url: `${SITE_URL}/events/${c.slug}${section}`,
       lastModified,
       changeFrequency: "weekly" as const,

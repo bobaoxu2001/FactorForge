@@ -5,8 +5,8 @@ import { describe, expect, it } from "vitest";
 import { ALL_CLAIMS, ALL_SOURCES, INSTRUMENTS, RESEARCH_CASES } from "@/data/events";
 import { returnOn } from "./market";
 import { parseInstant } from "./time";
-import { validateCase } from "./verification";
-import { SNAPSHOT, priceSeries, series } from "./view";
+import { validateCase, verifyClaim } from "./verification";
+import { SNAPSHOT, priceSeries, series, windowView } from "./view";
 
 describe("case data integrity", () => {
   it("passes validation with no errors", () => {
@@ -91,7 +91,7 @@ describe("typed market statements agree with the data", () => {
     expect(pct("AMD", "2026-11-06")).toBeCloseTo(0.11, 3);
   });
 
-  it("QCOM −9.5% on 5 Nov matches the reported move (A-C18), though the reason is unverified", () => {
+  it("QCOM −9.5% on 5 Nov (A-C29); the reported miss behind it (A-C18) is unverified", () => {
     expect(pct("QCOM", "2026-11-05")).toBeCloseTo(-0.095, 3);
   });
 });
@@ -102,3 +102,54 @@ describe("snapshot run log", () => {
     for (const i of INSTRUMENTS) expect(SNAPSHOT.runLog.some((r) => r.symbol === i.symbol && r.step === "prices"), i.symbol).toBe(true);
   });
 });
+
+describe("reported, observed and hypothesized stay apart (Qualcomm, 5 Nov)", () => {
+  const now = Date.parse(SNAPSHOT.builtAt);
+  const claim = (id: string) => verifyClaim(ALL_CLAIMS.find((c) => c.id === id)!, ALL_SOURCES, now)!;
+
+  it("keeps the price move as an observed fact and the miss as an unverified report", () => {
+    expect(claim("A-C29").epistemic).toBe("OBSERVED_FACT");
+    expect(claim("A-C29").verification).toBe("CONFIRMED");
+    expect(claim("A-C18").epistemic).toBe("REPORTED_CLAIM");
+    expect(claim("A-C18").verification).toBe("RUMOR");
+    expect(claim("A-C18").statement).not.toMatch(/\b(after|because|due to)\b/);
+    expect(claim("A-C18").corrections?.length).toBeGreaterThan(0);
+  });
+
+  it("lists QCOM's non-significant move as inconclusive for the earnings explanation, neither for nor against", () => {
+    const ai = RESEARCH_CASES.find((c) => c.slug === "ai-datacenter-shock")!;
+    const x = ai.events.flatMap((e) => e.competingExplanations).find((e) => e.id === "X-A2")!;
+    expect(x.epistemic).toBe("CAUSAL_HYPOTHESIS");
+    expect(x.supportedBy).not.toContain("MKT:W-A-SELL:QCOM");
+    expect(x.challengedBy).not.toContain("MKT:W-A-SELL:QCOM");
+    expect(x.inconclusive).toContain("MKT:W-A-SELL:QCOM");
+  });
+});
+
+describe("competing explanations", () => {
+  const explanations = RESEARCH_CASES.flatMap((c) => c.events.flatMap((e) => e.competingExplanations.map((x) => ({ c, x }))));
+  const check = (c: (typeof RESEARCH_CASES)[number], ref: string) => {
+    const [, windowId, symbol] = ref.split(":");
+    const v = windowView(c, windowId)!;
+    return { own: v.studies.find((s) => s.symbol === symbol)!.windows[0], ew: v.equalWeight[symbol]?.windows[0] };
+  };
+
+  it("are worded as hypotheses, not established causes", () => {
+    for (const { x } of explanations) {
+      if (x.epistemic !== "CAUSAL_HYPOTHESIS") continue;
+      expect(x.summary, x.id).not.toMatch(/\b(drove|drives|caused|because|absorbs|is market-wide)\b/);
+    }
+  });
+
+  it("cite a market check for or against only when it passed both significance checks; a null result is inconclusive", () => {
+    for (const { c, x } of explanations) {
+      for (const ref of [...x.supportedBy, ...x.challengedBy].filter((r) => r.startsWith("MKT:"))) expect(check(c, ref).own?.significant, `${x.id} ${ref}`).toBe(true);
+      for (const ref of x.inconclusive ?? []) {
+        const { own, ew } = check(c, ref);
+        expect(own?.significant, `${x.id} ${ref}`).toBe(false);
+        expect(ew?.significant ?? false, `${x.id} ${ref} vs RSP`).toBe(false);
+      }
+    }
+  });
+});
+

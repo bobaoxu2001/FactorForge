@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation";
+import { caseMetadata } from "@/lib/events/caseMetadata";
 import { CitedProse, When } from "@/components/events/EventUI";
 import { Note } from "@/components/intel/ui";
 import { caseBySlug } from "@/data/events";
 import { buildEventMemo } from "@/lib/events/memo";
 import { PLATFORM_AS_OF } from "@/lib/events/view";
 
-export const metadata = { title: "Event research memo" };
+export const generateMetadata = ({ params }: { params: Promise<{ slug: string }> }) => caseMetadata(params, "Research memo");
 
 export default async function EventMemoPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
