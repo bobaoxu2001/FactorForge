@@ -46,6 +46,7 @@ export function assessmentParagraphs(c: ResearchCase): string[] {
     `Key uncertainty: ${a.uncertainty.map((x) => withRefs(x.text, x.refs)).join(" ")}`,
     `Next verification step: ${a.nextStep}`,
     `What would change the view: ${a.wouldChange.map((x) => withRefs(x.text, x.refs)).join(" ")}`,
+    ...(c.assessmentHistory ?? []).map((h) => `This replaces the assessment dated ${day(h.at)}, kept as history on the brief.`),
   ];
 }
 
@@ -145,6 +146,7 @@ export function buildEventMemo(c: ResearchCase): MemoSection[] {
       kind: "analyst",
       paragraphs: [
         `${cc.question} ${cc.whyThisCompany}`,
+        ...(cc.revisions ?? []).map((r) => `Revised ${day(r.at)}: ${r.note}`),
         cc.exposureNote,
         `Channels, read as of ${day(cc.at)}. ${channels.join(" ")}`,
         cc.expectationGap.reference ? `Expectation gap against ${cc.expectationGap.reference}: ${cc.expectationGap.gap}` : cc.expectationGap.note,

@@ -53,6 +53,11 @@ function CompanyCaseView({ cc, caseSlug }: { cc: CompanyCase; caseSlug: string }
       <div>
         <p className="font-serif text-[20px] leading-snug text-ink">{cc.question}</p>
         <p className="mt-1.5 max-w-[80ch] text-[13.5px] leading-relaxed text-ink-muted">{cc.whyThisCompany}</p>
+        {cc.revisions?.map((r) => (
+          <p key={r.at} className="mt-2 max-w-[80ch] border-l-2 border-amber-600 pl-2 text-[12.5px] leading-relaxed text-ink-muted">
+            <span className="font-medium text-amber-900">Revised {new Date(r.at).toISOString().slice(0, 16).replace("T", " ")} UTC:</span> {r.note}
+          </p>
+        ))}
         <dl className="mt-3 grid gap-3 text-[12.5px] md:grid-cols-3">
           <div><dt className="text-ink-soft">Business possibly affected</dt><dd className="text-ink">{cc.segment}</dd></div>
           <div><dt className="text-ink-soft">Geography</dt><dd className="text-ink">{cc.geography}</dd></div>
@@ -87,6 +92,7 @@ function CompanyCaseView({ cc, caseSlug }: { cc: CompanyCase; caseSlug: string }
                     <td className="px-2 py-2 text-ink-muted">
                       {f.basis === "derived" ? "derived" : f.value === null ? "not disclosed" : "disclosed"}
                       {f.derivation && <span className="block text-[11.5px] text-ink-soft">{f.derivation}</span>}
+                      {f.qualification && <span className="block text-[11.5px] text-amber-900">{f.qualification}</span>}
                     </td>
                     <td className="px-2 py-2 text-ink-muted md:pr-6">
                       {src ? (

@@ -6,6 +6,28 @@ This project follows a human-maintained changelog. There is no automated release
 
 ## Unreleased
 
+### Event intelligence: wording kept within the evidence
+
+#### Changed
+
+- **Current assessment (AI case)** corrected at 16:00 UTC on 8 Nov.
+  - It now reads that the price pattern is *consistent with* a repricing of policy or valuation risk, and that the cause of the selloff is not established. The 14:00 version said the evidence "shows" it.
+  - Absence statements are limited to the sources reviewed, with that coverage listed.
+  - The 14:00 version is kept verbatim in `assessmentHistory` and shown on the brief as superseded.
+- **Vistra company case.**
+  - Vistra is described as a company with disclosed Texas operations, not the most Texas-exposed.
+  - The risk-premium channel is "consistent with the price pattern", not "best supported".
+  - The hedge percentage no longer dates an earnings effect. The release, re-read at 15:57 UTC, gives no scope or terms for its hedges, and both guidance years rest on 2 Nov market curves.
+  - Each change is recorded as a dated revision; claims A-C30 and A-C32 carry dated corrections.
+- **`docs/INTERVIEW_DEMO.md`.**
+  - Production status, as checked, replaces the stale preview-only instruction.
+  - Project-level wording replaces first-person claims, and the commit co-author count is removed.
+  - Adds an `[AUTHOR TO COMPLETE]` section for personal contribution.
+
+#### Added
+
+- Tests that check current wording separately from labelled history: scoped absence, no unsupported exposure ranking, no hedge-based timing, the same view in the memo and the interview script, and history kept with later-dated corrections.
+
 ### Event intelligence: research logic and a conclusion-first brief
 
 #### Changed

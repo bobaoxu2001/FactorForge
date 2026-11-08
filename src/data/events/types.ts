@@ -88,6 +88,8 @@ export interface DisclosedFigure {
   where: string;
   basis: "disclosed" | "derived";
   derivation?: string;
+  /** What the figure does not say: scope, definitions or the date of the assumptions behind it. */
+  qualification?: string;
 }
 
 /** Ways a restriction could reach a company's economics; they can occur together. */
@@ -135,6 +137,8 @@ export interface CompanyCase {
   tests: CompetingExplanation[];
   /** Impact-map node path shown first as the main mechanism. */
   mainPath: string[];
+  /** Dated corrections to this company assessment, quoting what the earlier wording said. */
+  revisions?: Array<{ at: string; note: string }>;
   nextAction: string;
 }
 
@@ -202,6 +206,8 @@ export interface ResearchCase {
   /** Current assessments of this case's theses (see ThesisAssessment). */
   assessments?: ThesisAssessment[];
   currentAssessment?: CurrentAssessment;
+  /** Earlier versions of the current assessment, kept verbatim with their dates; shown as history, never as the current view. */
+  assessmentHistory?: CurrentAssessment[];
   companyCases?: CompanyCase[];
   channelChecks?: ChannelCheck[];
 }
