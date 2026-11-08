@@ -2704,5 +2704,71 @@
   },
   "prevHash": "a1be7b9d0d9afadc2a438d1426a5747738a97906bde2bde0e1d3dbb493188339",
   "hash": "f47a56ef443fce5f852b14b0938a3a3c01e0ee5debb5dfef823c043e8949d2b2"
+ },
+ {
+  "id": "F-2026-11-07-BTC-USD-5",
+  "instrument": "BTC-USD",
+  "benchmark": null,
+  "horizon": 5,
+  "informationCutoff": "2026-11-07",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T09:27:01.567Z",
+  "dataAsOf": "2026-11-07",
+  "calendar": "crypto-utc",
+  "modelVersion": "ewma-interval-v2",
+  "origin": "live",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-2",
+  "costBps": 20,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.4633699633699634,
+   "center": 0,
+   "interval": [
+    -0.05942909766337279,
+    0.0631840699257602
+   ],
+   "relInterval": null,
+   "sigmaDaily": 0.021380327523925984,
+   "observations": 500
+  },
+  "prevHash": "f47a56ef443fce5f852b14b0938a3a3c01e0ee5debb5dfef823c043e8949d2b2",
+  "hash": "039727ff1df1ac7f7ce331a8ef33a5bdb9eabbb3983a0e90b277d3e5a09ce67f"
+ },
+ {
+  "id": "F-2026-11-07-BTC-USD-20",
+  "instrument": "BTC-USD",
+  "benchmark": null,
+  "horizon": 20,
+  "informationCutoff": "2026-11-07",
+  "directionValidated": false,
+  "createdAt": "2026-11-08T09:27:01.567Z",
+  "dataAsOf": "2026-11-07",
+  "calendar": "crypto-utc",
+  "modelVersion": "ewma-interval-v2",
+  "origin": "live",
+  "eventId": "EV-BINANCE-2026-10-29",
+  "thesisId": "T-BNB-2",
+  "costBps": 20,
+  "prediction": {
+   "status": "OK",
+   "reason": null,
+   "direction": "ABSTAIN",
+   "directionReason": "No directional skill shown out of sample at this horizon; the range is the forecast.",
+   "pUp": 0.4425612052730697,
+   "center": 0,
+   "interval": [
+    -0.11532637767766285,
+    0.1303603665439037
+   ],
+   "relInterval": null,
+   "sigmaDaily": 0.021380327523925984,
+   "observations": 500
+  },
+  "prevHash": "039727ff1df1ac7f7ce331a8ef33a5bdb9eabbb3983a0e90b277d3e5a09ce67f",
+  "hash": "a34a75185b0403fa3ee7ef730ad87d5a645fc52fb4e8408f191164f4b00beefd"
  }
 ]

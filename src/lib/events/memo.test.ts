@@ -27,9 +27,22 @@ describe("event research memo", () => {
       expect(scen).toMatch(/No probabilities are attached/);
     });
 
+    it(`${c.slug}: calls market reactions associations, not causes`, () => {
+      const market = memo.find((s) => s.title === "How the event reached markets")!.paragraphs.join(" ");
+      expect(market).toMatch(/associations around a date, not proof/);
+      expect(market).not.toMatch(/\|t\| ≥ 1\.96\)/); // significance needs both checks, not the t-test alone
+    });
+
     it(`${c.slug}: carries its limitations and open questions`, () => {
       const last = memo.at(-1)!;
       for (const l of c.limitations) expect(last.paragraphs).toContain(l);
     });
   }
+
+  it("says when the cap-weighted benchmark absorbed the 5 Nov selloff", () => {
+    const ai = RESEARCH_CASES.find((c) => c.slug === "ai-datacenter-shock")!;
+    const market = buildEventMemo(ai).find((s) => s.title === "How the event reached markets")!.paragraphs.join(" ");
+    expect(market).toMatch(/equal-weight S&P 500 \(RSP\)/);
+    expect(market).toMatch(/absorbed part of the move/);
+  });
 });

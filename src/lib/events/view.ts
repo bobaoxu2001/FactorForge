@@ -6,8 +6,8 @@ import forecastLedger from "@/data/events/forecast-ledger.json";
 import thesisLedger from "@/data/events/thesis-ledger.json";
 import { ALL_CLAIMS, ALL_EVENTS, ALL_SOURCES, INSTRUMENTS, RESEARCH_CASES, caseBySlug, instrument } from "@/data/events";
 import type { ResearchCase } from "@/data/events/types";
-import { summarize, walkForward, type WalkForwardSummary } from "./evaluation";
-import { scoreForecast, type ForecastRecord, type ForecastScore, type Horizon } from "./forecast";
+import { applyFamily, pooledCoverage, summarize, walkForward, type PooledCoverage, type WalkForwardSummary } from "./evaluation";
+import { HORIZONS, MODEL_VERSION, scoreForecast, type ForecastRecord, type ForecastScore, type Horizon } from "./forecast";
 import { companyImpacts, measuredCells, validateGraph, type CompanyImpact, type ExposureProfile } from "./impact";
 import { canonicalJson, verifyChain, type ChainCheck } from "./ledger";
 import { eventStudy, groupReactions, type EventStudy, type GroupReaction, type PriceSeries } from "./market";
@@ -72,6 +72,12 @@ export function priceSeries(): Map<string, PriceSeries> {
 }
 
 export const series = (symbol: string | null) => (symbol ? (priceSeries().get(symbol) ?? null) : null);
+
+/** Last complete bar per calendar: US equities stop at Friday's close while crypto trades through the weekend. */
+export function pricesThrough(): { equity: string | null; crypto: string | null } {
+  const last = (cal: MarketCalendar) => [...priceSeries().values()].filter((s) => s.calendar === cal).map((s) => s.dates.at(-1)!).sort().at(-1) ?? null;
+  return { equity: last("us-equity"), crypto: last("crypto-utc") };
+}
 export const benchmarkOf = (symbol: string) => instrument(symbol)?.benchmark ?? null;
 /** Round-trip cost assumption for judging a directional call: ETFs 5 bp, stocks 10 bp, crypto 20 bp. */
 export const instrumentKindCost = (symbol: string) => {
@@ -89,6 +95,29 @@ export interface WindowView {
   groups: Record<string, GroupReaction[]>;
   /** Other registered events whose first reaction bar falls inside each window. */
   overlaps: Record<string, Array<{ eventId: string; title: string; date: string }>>;
+  /** Other registered events whose first reaction bar falls inside the estimation window. */
+  estimationOverlaps: Array<{ eventId: string; title: string; date: string }>;
+  /** Day-0 tests run, and how many pass both checks: the false-positive yardstick. */
+  day0Tests: { run: number; significant: number; expectedByChance: number };
+  /**
+   * The same US equities measured against the equal-weight S&P 500 (RSP).
+   * When the affected names are a large share of QQQ or SPY, the cap-weighted
+   * benchmark absorbs part of the event; this shows how much.
+   */
+  equalWeight: Record<string, EventStudy>;
+}
+
+export const EQUAL_WEIGHT_BENCHMARK = "RSP";
+
+function estimationOverlapsFor(study: EventStudy, eventId: string): WindowView["estimationOverlaps"] {
+  const s = series(study.symbol);
+  if (!s || !study.model.from || !study.model.to) return [];
+  const from = study.model.from;
+  const to = study.model.to;
+  return ALL_EVENTS.filter((e) => e.id !== eventId)
+    .map((e) => ({ e, i: firstReactionIndex(s.dates, parseInstant(e.occurredAt), s.calendar) }))
+    .filter(({ i }) => i >= 0 && s.dates[i] >= from && s.dates[i] <= to)
+    .map(({ e, i }) => ({ eventId: e.id, title: e.title, date: s.dates[i] }));
 }
 
 function overlapsFor(study: EventStudy, eventId: string): WindowView["overlaps"] {
@@ -123,9 +152,43 @@ export function windowView(c: ResearchCase, windowId: string): WindowView | null
   const groupOf = (sym: string) => c.groups[sym] ?? instrument(sym)?.group ?? "Other";
   const groups = Object.fromEntries(["[0,0]", "[0,1]", "[0,4]", "[0,19]"].map((w) => [w, groupReactions(studies.filter((s) => s.benchmark !== null), groupOf, w)]));
   const longest = studies.find((s) => s.calendar === "us-equity") ?? studies[0];
-  const view: WindowView = { spec, event, studies, groups, overlaps: longest ? overlapsFor(longest, event.id) : {} };
+  const tested = studies.filter((s) => s.benchmark !== null && s.windows[0]?.tStat != null);
+  const ew = series(EQUAL_WEIGHT_BENCHMARK);
+  const equalWeight: WindowView["equalWeight"] = {};
+  if (ew) {
+    for (const st of studies) {
+      const asset = series(st.symbol);
+      if (!asset || st.calendar !== "us-equity" || st.symbol === EQUAL_WEIGHT_BENCHMARK) continue;
+      equalWeight[st.symbol] = eventStudy(asset, ew, event.occurredAt);
+    }
+  }
+  const view: WindowView = {
+    spec,
+    event,
+    studies,
+    groups,
+    overlaps: longest ? overlapsFor(longest, event.id) : {},
+    estimationOverlaps: longest ? estimationOverlapsFor(longest, event.id) : [],
+    day0Tests: { run: tested.length, significant: tested.filter((s) => s.windows[0].significant).length, expectedByChance: tested.length * 0.05 },
+    equalWeight,
+  };
   windowCache.set(key, view);
   return view;
+}
+
+/** Day-0 tests across every window that measures an event: how many ran, how many passed both checks. */
+export function eventReactionSummary(eventId: string): { run: number; significant: number } {
+  let run = 0;
+  let significant = 0;
+  for (const c of RESEARCH_CASES) {
+    for (const w of c.windows.filter((x) => x.eventId === eventId)) {
+      const v = windowView(c, w.id);
+      if (!v) continue;
+      run += v.day0Tests.run;
+      significant += v.day0Tests.significant;
+    }
+  }
+  return { run, significant };
 }
 
 export function observations(): MarketObservation[] {
@@ -197,6 +260,7 @@ export const FORECASTS = forecastLedger as unknown as ForecastRecord[];
 export interface ScoredForecast {
   record: ForecastRecord;
   score: ForecastScore;
+  ruleCheck: RuleCheck | null;
 }
 
 export function scoredForecasts(): ScoredForecast[] {
@@ -205,25 +269,69 @@ export function scoredForecasts(): ScoredForecast[] {
     const score: ForecastScore = asset
       ? scoreForecast(record, asset, series(record.benchmark))
       : { status: "not-scorable", note: "Instrument missing from the snapshot.", targetDate: null, barsRemaining: null, realized: null, benchmarkReturn: null, excess: null, error: null, inInterval: null, inRelInterval: null, directionHit: null, brier: null, netDirectionalReturn: null };
-    return { record, score };
+    return { record, score, ruleCheck: ruleCheck(record) };
   });
 }
 
-const evalCache = new Map<string, WalkForwardSummary>();
-/** Walk-forward summary of the baseline for one instrument and horizon, on all data in the snapshot. */
-export function evaluation(symbol: string, horizon: Horizon): WalkForwardSummary | null {
-  const key = `${symbol}:${horizon}`;
-  if (evalCache.has(key)) return evalCache.get(key)!;
-  const asset = series(symbol);
-  if (!asset) return null;
-  const bench = series(benchmarkOf(symbol));
-  const regimeSource = bench ?? asset;
-  const summary = summarize(symbol, horizon, walkForward(asset, bench, regimeSource, horizon));
-  evalCache.set(key, summary);
-  return summary;
+export const EVALUATED_SYMBOLS = () => [...new Set(FORECASTS.map((f) => f.instrument))];
+
+const familyCache = new Map<string, Map<string, WalkForwardSummary>>();
+/**
+ * Walk-forward summaries for every evaluated instrument × horizon, with the
+ * skill test Holm-corrected across the whole family. `until` limits both the
+ * forecasts and their scoring to data on or before that date.
+ */
+export function evaluationFamily(until?: string): Map<string, WalkForwardSummary> {
+  const key = until ?? "all";
+  if (familyCache.has(key)) return familyCache.get(key)!;
+  const raw: WalkForwardSummary[] = [];
+  for (const symbol of EVALUATED_SYMBOLS()) {
+    const asset = series(symbol);
+    if (!asset) continue;
+    const bench = series(benchmarkOf(symbol));
+    for (const h of HORIZONS) raw.push(summarize(symbol, h, walkForward(asset, bench, bench ?? asset, h, 5, until)));
+  }
+  const family = new Map(applyFamily(raw).map((s) => [`${s.instrument}:${s.horizon}`, s]));
+  familyCache.set(key, family);
+  return family;
 }
 
-export const EVALUATED_SYMBOLS = () => [...new Set(FORECASTS.map((f) => f.instrument))];
+/** Walk-forward summary of the baseline for one instrument and horizon, on all data in the snapshot. */
+export const evaluation = (symbol: string, horizon: Horizon): WalkForwardSummary | null => evaluationFamily().get(`${symbol}:${horizon}`) ?? null;
+
+let pooledCache: PooledCoverage[] | null = null;
+export function pooled(): PooledCoverage[] {
+  if (pooledCache) return pooledCache;
+  const all = [...evaluationFamily().values()];
+  pooledCache = HORIZONS.map((h) => pooledCoverage(h, all));
+  return pooledCache;
+}
+
+/**
+ * How the current direction gate treats a record made under an older model
+ * version. History is not rewritten: the record keeps its call, and this sits
+ * beside it.
+ */
+export interface RuleCheck {
+  recordVersion: string;
+  currentVersion: string;
+  currentRuleWouldCall: boolean;
+  note: string;
+}
+
+export function ruleCheck(record: ForecastRecord): RuleCheck | null {
+  if (record.prediction.direction === "ABSTAIN" || record.modelVersion === MODEL_VERSION) return null;
+  const s = evaluationFamily(record.informationCutoff).get(`${record.instrument}:${record.horizon}`);
+  if (!s) return null;
+  return {
+    recordVersion: record.modelVersion,
+    currentVersion: MODEL_VERSION,
+    currentRuleWouldCall: s.directionValidated,
+    note: s.directionValidated
+      ? `Re-tested with data to ${record.informationCutoff}: the ${MODEL_VERSION} gate would also have called a direction.`
+      : `Re-tested with data to ${record.informationCutoff}: the ${MODEL_VERSION} gate would have abstained. ${s.validationNote}`,
+  };
+}
 
 // ── Theses ──────────────────────────────────────────────────────────────────
 

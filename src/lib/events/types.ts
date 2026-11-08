@@ -127,6 +127,12 @@ export interface Claim {
   /** Claim this one refines or replaces, kept for the audit trail. */
   supersedes?: string;
   notes?: string;
+  /**
+   * Wording fixed after re-reading a source. The claim keeps its id and
+   * recordedAt; each entry says what changed and why, so the correction is
+   * visible rather than silent.
+   */
+  corrections?: Array<{ at: string; note: string }>;
 }
 
 // ── Events ──────────────────────────────────────────────────────────────────

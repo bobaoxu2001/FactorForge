@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import StageNav, { type Stage } from "@/components/intel/StageNav";
 import { When } from "@/components/events/EventUI";
 import { RESEARCH_CASES, caseBySlug } from "@/data/events";
-import { SNAPSHOT, eventView, thesisViews } from "@/lib/events/view";
+import { eventView, pricesThrough, thesisViews } from "@/lib/events/view";
 
 export const dynamicParams = false;
 
@@ -21,14 +21,15 @@ export default async function EventCaseLayout({ children, params }: { children: 
   const confirmed = claims.filter((x) => x.verification === "CONFIRMED").length;
   const read = c.sources.filter((s) => s.retrieval === "read").length;
   const theses = thesisViews().filter((t) => t.replay.thesis.caseId === c.id);
-  const pricesThrough = SNAPSHOT.runLog.filter((r) => r.step === "prices" && r.last).map((r) => r.last!).sort().at(-1);
+  const through = pricesThrough();
   const stages: Stage[] = [
-    { slug: "", label: "Overview", step: "00" },
-    { slug: "evidence", label: "Evidence & timeline", step: "01", status: `${confirmed}/${claims.length} confirmed` },
-    { slug: "market", label: "Market reaction", step: "02", status: `${c.windows.length} windows` },
-    { slug: "impact", label: "Impact map & exposure", step: "03" },
-    { slug: "scenarios", label: "Scenarios & forecasts", step: "04" },
-    { slug: "memo", label: "Research memo", step: "05" },
+    { slug: "brief", label: "Three-minute brief", step: "00" },
+    { slug: "", label: "Overview", step: "01" },
+    { slug: "evidence", label: "Evidence & timeline", step: "02", status: `${confirmed}/${claims.length} confirmed` },
+    { slug: "market", label: "Market reaction", step: "03", status: `${c.windows.length} windows` },
+    { slug: "impact", label: "Impact map & exposure", step: "04" },
+    { slug: "scenarios", label: "Scenarios & forecasts", step: "05" },
+    { slug: "memo", label: "Research memo", step: "06" },
   ];
   return (
     <div className="space-y-6">
@@ -54,7 +55,8 @@ export default async function EventCaseLayout({ children, params }: { children: 
             </div>
             <div className="border-r border-t border-line px-3 py-2">
               <dt className="text-ink-soft">Prices through</dt>
-              <dd className="num mt-0.5 font-medium text-ink">{pricesThrough}</dd>
+              <dd className="num mt-0.5 font-medium text-ink">{through.equity}</dd>
+              {through.crypto && through.crypto !== through.equity && <span className="num text-[11px] text-ink-muted">crypto {through.crypto}</span>}
             </div>
             <div className="border-t border-line px-3 py-2">
               <dt className="text-ink-soft">Sources</dt>

@@ -9,6 +9,16 @@ import { barCloseInstant, firstReactionIndex, parseInstant, type MarketCalendar 
  * the first bar that closes after the event, which for a US equity can be the
  * next session. Windows that run past the data are marked incomplete rather
  * than truncated silently.
+ *
+ * Two checks on each cumulative abnormal return (CAR):
+ * - t-statistic with the market-model prediction-error variance
+ *   σ²·(L + L²/n + (ΣRm − L·R̄m)²/Sxx), so a large benchmark move on the event
+ *   day widens the band (Campbell, Lo & MacKinlay, ch. 4);
+ * - placebo rank: the share of the asset's own pre-event L-day windows whose
+ *   |CAR| was at least as large. It does not assume normal returns, so fat
+ *   tails cannot make an ordinary move look rare.
+ * A cell is "significant" only when both agree. These are associations
+ * around a date, not proof that the event caused the move.
  */
 
 export interface PriceSeries {
@@ -60,6 +70,12 @@ export interface MarketModel {
   beta: number;
   residualSd: number;
   n: number;
+  /** Mean benchmark return and its sum of squared deviations over the estimation window (market model only). */
+  meanBench: number;
+  sxx: number;
+  /** Dates of the estimation window, for contamination checks. */
+  from: string | null;
+  to: string | null;
 }
 
 /** OLS of asset on benchmark over [from, to). Falls back when the sample is short. */
@@ -67,16 +83,17 @@ export function fitMarketModel(r: AlignedReturns, from: number, to: number, minO
   const lo = Math.max(0, from);
   const hi = Math.max(lo, Math.min(r.asset.length, to));
   const ys = r.asset.slice(lo, hi);
+  const span = { from: r.dates[lo] ?? null, to: r.dates[hi - 1] ?? null };
   if (!r.bench) {
     const mean = ys.reduce((s, x) => s + x, 0) / Math.max(1, ys.length);
     const sd = Math.sqrt(ys.reduce((s, x) => s + (x - mean) ** 2, 0) / Math.max(1, ys.length - 1));
-    return { method: "raw", alpha: 0, beta: 0, residualSd: sd, n: ys.length };
+    return { method: "raw", alpha: 0, beta: 0, residualSd: sd, n: ys.length, meanBench: 0, sxx: 0, ...span };
   }
   const xs = r.bench.slice(lo, hi);
   if (ys.length < minObs) {
     const resid = ys.map((y, i) => y - xs[i]);
     const sd = Math.sqrt(resid.reduce((s, x) => s + x * x, 0) / Math.max(1, resid.length - 1));
-    return { method: "market-adjusted", alpha: 0, beta: 1, residualSd: sd || Number.NaN, n: ys.length };
+    return { method: "market-adjusted", alpha: 0, beta: 1, residualSd: sd || Number.NaN, n: ys.length, meanBench: 0, sxx: 0, ...span };
   }
   const mx = xs.reduce((s, x) => s + x, 0) / xs.length;
   const my = ys.reduce((s, y) => s + y, 0) / ys.length;
@@ -90,7 +107,16 @@ export function fitMarketModel(r: AlignedReturns, from: number, to: number, minO
   const alpha = my - beta * mx;
   const resid = ys.map((y, i) => y - alpha - beta * xs[i]);
   const residualSd = Math.sqrt(resid.reduce((s, e) => s + e * e, 0) / Math.max(1, resid.length - 2));
-  return { method: "market-model", alpha, beta, residualSd, n: ys.length };
+  return { method: "market-model", alpha, beta, residualSd, n: ys.length, meanBench: mx, sxx, ...span };
+}
+
+/** Variance of a CAR over window days `idx`, including estimation error for the market model. */
+export function carVariance(model: MarketModel, benchReturns: number[] | null, idx: number[]): number {
+  const L = idx.length;
+  const s2 = model.residualSd ** 2;
+  if (model.method !== "market-model" || !benchReturns || model.sxx <= 0) return s2 * L;
+  const sumRm = idx.reduce((a, i) => a + benchReturns[i], 0);
+  return s2 * (L + (L * L) / model.n + (sumRm - L * model.meanBench) ** 2 / model.sxx);
 }
 
 export interface WindowResult {
@@ -103,6 +129,11 @@ export interface WindowResult {
   benchmark: number | null;
   abnormal: number | null;
   tStat: number | null;
+  /** Share of pre-event windows of the same length with |CAR| at least this large. */
+  placeboShare: number | null;
+  placeboN: number;
+  /** |t| ≥ 1.96 and placebo share ≤ 5% (with at least 100 placebo windows). */
+  significant: boolean;
 }
 
 export type Persistence = "persistent" | "partially-reversed" | "reversed" | "no-significant-reaction" | "insufficient-data";
@@ -122,6 +153,9 @@ export interface EventStudy {
 }
 
 const compound = (xs: number[]) => xs.reduce((p, x) => p * (1 + x), 1) - 1;
+
+/** Sessions before day 0 used for placebo windows (about two years of trading days). */
+const PLACEBO_LOOKBACK = 500;
 
 export const DEFAULT_WINDOWS: Array<[number, number]> = [
   [0, 0],
@@ -145,7 +179,7 @@ export function eventStudy(
     calendar: asset.calendar,
     day0: null,
     lastPreEventBar: r.dates.at(-1) ?? null,
-    model: { method: bench ? "market-model" : "raw", alpha: 0, beta: 0, residualSd: Number.NaN, n: 0 },
+    model: { method: bench ? "market-model" : "raw", alpha: 0, beta: 0, residualSd: Number.NaN, n: 0, meanBench: 0, sxx: 0, from: null, to: null },
     windows: [],
     volumeRatio: null,
     persistence: "insufficient-data",
@@ -163,14 +197,31 @@ export function eventStudy(
     const end = Math.min(endWanted, r.asset.length - 1);
     const complete = endWanted <= r.asset.length - 1;
     if (start > r.asset.length - 1) {
-      return { label: `[${s},${e}]`, startDate: r.dates[day0], endDate: null, days: e - s + 1, complete: false, raw: null, benchmark: null, abnormal: null, tStat: null };
+      return { label: `[${s},${e}]`, startDate: r.dates[day0], endDate: null, days: e - s + 1, complete: false, raw: null, benchmark: null, abnormal: null, tStat: null, placeboShare: null, placeboN: 0, significant: false };
     }
     const idx = Array.from({ length: end - start + 1 }, (_, k) => start + k);
     const raw = compound(idx.map((i) => r.asset[i]));
     const benchmark = r.bench ? compound(idx.map((i) => r.bench![i])) : null;
     const abnormal = idx.reduce((sum, i) => sum + (r.asset[i] - expected(i)), 0);
-    const tStat = Number.isFinite(model.residualSd) && model.residualSd > 0 ? abnormal / (model.residualSd * Math.sqrt(idx.length)) : null;
-    return { label: `[${s},${e}]`, startDate: r.dates[start], endDate: r.dates[end], days: idx.length, complete, raw, benchmark, abnormal, tStat };
+    const variance = carVariance(model, r.bench, idx);
+    const tStat = Number.isFinite(variance) && variance > 0 ? abnormal / Math.sqrt(variance) : null;
+    // Placebo: every earlier window of the same length that ends before day 0.
+    const L = idx.length;
+    let placeboN = 0;
+    let asLarge = 0;
+    let rolling = 0;
+    const firstPlacebo = Math.max(1, day0 - PLACEBO_LOOKBACK);
+    for (let i = firstPlacebo; i < day0; i++) {
+      rolling += r.asset[i] - expected(i);
+      if (i - firstPlacebo >= L) rolling -= r.asset[i - L] - expected(i - L);
+      if (i - firstPlacebo >= L - 1) {
+        placeboN += 1;
+        if (Math.abs(rolling) >= Math.abs(abnormal) - 1e-12) asLarge += 1;
+      }
+    }
+    const placeboShare = placeboN ? asLarge / placeboN : null;
+    const significant = tStat !== null && Math.abs(tStat) >= 1.96 && placeboShare !== null && placeboN >= 100 && placeboShare <= 0.05;
+    return { label: `[${s},${e}]`, startDate: r.dates[start], endDate: r.dates[end], days: L, complete, raw, benchmark, abnormal, tStat, placeboShare, placeboN, significant };
   });
 
   const prior = r.volume.slice(Math.max(0, day0 - 20), day0).filter((x) => x > 0);
@@ -180,9 +231,10 @@ export function eventStudy(
   const w4 = results.find((w) => w.label === "[0,4]");
   let persistence: Persistence = "insufficient-data";
   let persistenceNote = "Fewer than five bars since day 0.";
-  if (w0?.abnormal != null && w0.tStat != null && Math.abs(w0.tStat) < 1.96) {
+  if (w0?.abnormal != null && w0.tStat != null && !w0.significant) {
     persistence = "no-significant-reaction";
-    persistenceNote = `Day-0 abnormal return is within normal noise (|t| = ${Math.abs(w0.tStat).toFixed(1)} < 1.96).`;
+    const placebo = w0.placeboShare === null ? "" : `; ${(w0.placeboShare * 100).toFixed(1)}% of the previous ${w0.placeboN} sessions moved at least as much`;
+    persistenceNote = `Day-0 abnormal return is within normal noise (|t| = ${Math.abs(w0.tStat).toFixed(1)}${placebo}).`;
   } else if (w0?.abnormal != null && w4?.complete && w4.abnormal != null) {
     const a0 = w0.abnormal;
     const a4 = w4.abnormal;

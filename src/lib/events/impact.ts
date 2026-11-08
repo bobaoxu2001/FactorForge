@@ -123,7 +123,10 @@ export function reconcileWithMarket(net: CompanyImpact["net"], study: EventStudy
   const w = study?.windows.find((x) => x.label === windowLabel);
   if (!w || w.abnormal === null || w.tStat === null) return { marketCheck: "no-data", marketNote: "No measured reaction for this window." };
   const pct = `${w.abnormal >= 0 ? "+" : ""}${(w.abnormal * 100).toFixed(1)}%`;
-  if (Math.abs(w.tStat) < 1.96) return { marketCheck: "not-significant", marketNote: `Abnormal ${pct} (t = ${w.tStat.toFixed(1)}) is within normal noise.` };
+  if (!w.significant) {
+    const placebo = w.placeboShare === null ? "" : `; ${(w.placeboShare * 100).toFixed(1)}% of earlier sessions moved as much`;
+    return { marketCheck: "not-significant", marketNote: `Abnormal ${pct} (t = ${w.tStat.toFixed(1)}${placebo}) is within normal noise.` };
+  }
   if (net === "ambiguous" || net === "unsupported") return { marketCheck: "consistent", marketNote: `Abnormal ${pct} (t = ${w.tStat.toFixed(1)}); the map takes no net side, so the data cannot contradict it.` };
   const agrees = (net === "positive") === w.abnormal > 0;
   return agrees

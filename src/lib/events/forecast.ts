@@ -3,7 +3,7 @@ import type { PriceSeries } from "./market";
 /**
  * Baseline market forecasts and their scoring (pure; no I/O).
  *
- * Model "ewma-interval-v1" makes no directional call. Its point forecast is a
+ * Model "ewma-interval-v2" makes no directional call. Its point forecast is a
  * zero log return (random walk). Its job is an honest range: an 80% interval
  * from exponentially weighted volatility (λ = 0.94), widened by √horizon. A
  * probability of a positive return comes from the instrument's own base rate,
@@ -11,13 +11,23 @@ import type { PriceSeries } from "./market";
  * evaluation has shown skill for that horizon; otherwise the forecast says
  * ABSTAIN, which is a result, not a gap.
  *
+ * v1 → v2 changed only that gate (see MODEL_HISTORY). Records made under v1
+ * stay on the ledger unchanged; the scorecard shows how the v2 gate would
+ * have treated any v1 directional call.
+ *
  * Leakage guard: the model is handed the full series and slices it to bars
  * dated on or before the information cutoff itself, so a caller cannot pass
  * future prices in by mistake. Tests check that appending future bars leaves
  * every prediction unchanged.
  */
 
-export const MODEL_VERSION = "ewma-interval-v1";
+export const MODEL_VERSION = "ewma-interval-v2";
+export const MODEL_HISTORY: Record<string, string> = {
+  "ewma-interval-v1":
+    "Direction allowed when the hit rate beat 50% at p < 0.05 on an overlap-adjusted n, Brier beat a coin flip, and both halves agreed. Tested each instrument and horizon on its own.",
+  "ewma-interval-v2":
+    "Direction allowed only when the rule beats the better constant rule (always up or always down) in a paired sign test, survives a Holm correction across every instrument and horizon tested together, beats the hindsight base rate on Brier score, and both halves agree. Effective n also accounts for autocorrelation.",
+};
 export const HORIZONS = [1, 5, 20, 60] as const;
 export type Horizon = (typeof HORIZONS)[number];
 export const INTERVAL_LEVEL = 0.8;

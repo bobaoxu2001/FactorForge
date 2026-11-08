@@ -112,7 +112,13 @@ Quantities are kept on separate lines:
 - Day 0 is the first daily bar that closed after the event.
   - An event at 17:05 Brasília (16:05 New York) is after the NYSE close, so US equities react on the next session.
   - Crypto UTC bars react the same day.
-- Windows are [0,0], [0,1], [0,4] and [0,19], each with a t-statistic.
+- Windows are [0,0], [0,1], [0,4] and [0,19]. Each cumulative abnormal return (CAR) gets two checks:
+  - a t-statistic whose variance includes the error in estimating α and β, σ²·(L + L²/n + (ΣRm − L·R̄m)²/Sxx). On a day the benchmark itself moves 4–5%, this widens the band noticeably;
+  - a placebo rank: the share of the asset's own previous 500 sessions (L-day windows) whose |CAR| was at least as large. It does not assume normal returns.
+- A move counts as significant only when |t| ≥ 1.96 **and** the placebo share is at most 5%. Each window also reports how many day-0 tests passed against how many would by chance (5% of tests).
+- Every US equity is also measured against the equal-weight S&P 500 (RSP). When the affected stocks are a large part of QQQ or SPY, the cap-weighted benchmark moves with them and absorbs the reaction; the equal-weight comparison shows how much.
+- Registered events whose reaction falls inside the 120-session estimation window are listed, with whether they themselves produced a significant reaction.
+- All of this measures association around a date. It does not establish that the event caused the move.
 - A window that runs past the data is marked incomplete, never truncated.
 - Persistence after five bars is labelled persistent, partly reversed, reversed or within noise.
 - Windows that contain another registered event's first reaction bar are flagged as overlapping, so multi-day figures are not attributed to one event.
@@ -140,11 +146,17 @@ Exposure profiles cover seven dimensions: direct revenue, supply chain, cost, ge
 
 ## 5. Forecasts and their scoring
 
-Model `ewma-interval-v1` (`forecast.ts`):
+Model `ewma-interval-v2` (`forecast.ts`; v1 → v2 changed only the direction gate, see below):
 - **Point forecast:** zero log return (random walk).
 - **80% range:** EWMA volatility (λ = 0.94) × √horizon. A relative range is built the same way on returns minus the benchmark.
 - **P(up):** the instrument's base rate over the last 500 bars, shrunk toward 0.5 with 50 pseudo-observations.
-- **Direction:** issued only if walk-forward testing *up to the cutoff* finds skill. That means a hit rate above 50% at p < 0.05 on effective (de-overlapped) observations, a Brier score below a coin flip's, and both halves of the sample agreeing. Otherwise **ABSTAIN**.
+- **Direction:** issued only if walk-forward testing *up to the cutoff* finds skill. Under v2 that means all of:
+  - the rule beats the better constant rule (always up or always down) in a paired sign test on the origins where they disagree, scaled to the effective sample size;
+  - the result survives a Holm correction across every instrument × horizon tested together (60 tests today);
+  - its Brier score beats the hindsight base rate (a constant forecast equal to the realized up share), not merely a coin flip;
+  - both halves of the sample agree.
+  Otherwise **ABSTAIN**.
+- **Why v2:** v1 compared the hit rate with 50% and tested each instrument alone. A trailing base-rate rule on a drifting asset just calls the drift's side every time, so v1 could "validate" a constant rule. Its one directional call, MSTR one day down (cutoff 30 Oct), was exactly that: 62% hits against 60% for "always down", raw p = 0.44 against the constant rule, adjusted p = 1.00. The record stays on the ledger unchanged; the scorecard shows beside it that v2 would have abstained.
 - **INSUFFICIENT_DATA:** returned when there are fewer than 250 returns, or the last price is more than five days older than the cutoff.
 
 Leakage guard:
@@ -170,11 +182,12 @@ A forecast stays pending until its horizon has passed.
 
 Walk-forward evaluation (`evaluation.ts`):
 - **Sampling:** origins every five bars, no refitting on the test period.
-- **Range quality:** coverage and relative coverage, and coverage split into calm, normal and stressed regimes (benchmark 20-day volatility percentile).
+- **Range quality:** empirical coverage against the nominal 80%, with a 95% Wilson interval on the effective sample, overall and by calm, normal and stressed regime (benchmark 20-day volatility percentile). Each row is labelled consistent, too narrow, too wide or too few to judge.
+- **Pooled coverage:** across instruments per horizon. Instruments miss together, so the pooled effective n is the sum of per-instrument effective n divided by the design effect 1 + (m − 1)·ρ̄, where ρ̄ is the mean pairwise correlation of the inside-the-range indicators.
 - **Errors:** MAE and RMSE of zero drift versus a trailing-mean drift.
-- **Skill:** Brier skill and hit rate versus the share of up outcomes.
+- **Skill:** hit rate against both constant rules, the paired sign test, Holm-adjusted p, Brier skill against a coin flip and against the base rate.
 - **Calibration:** a calibration table.
-- **Sample size:** an effective n that corrects for overlapping horizons.
+- **Sample size:** effective n is the smaller of the overlap count (n × step / horizon) and an autocorrelation-adjusted count with Bartlett weights, so dependence from volatility clustering is caught as well as path overlap.
 
 Generating forecasts:
 - `npm run events:forecast` appends every planned forecast not yet on the ledger.
@@ -225,9 +238,9 @@ Amounts:
 - Recovered: unknown.
 
 Market reaction:
-- BNB fell 5.2% more than bitcoin explains on the event day (t ≈ −4.2), and the gap persisted over five days.
-- Other large coins moved with bitcoin.
-- US-listed crypto equities fell on 30 Oct, but the Nasdaq-100 fell 3.5% that day. Benchmark-adjusted, no crypto equity's move was significant.
+- BNB fell 5.2% more than bitcoin explains on the event day (t ≈ −4.1; only 2% of its previous 500 days moved as much). About four-fifths of the gap remained after five days, though the five-day figure on its own is within noise.
+- Other large coins moved with bitcoin. Bitcoin's own −4.3% against QQQ no longer counts once fat tails are allowed for (5.8% of earlier days moved as much).
+- US-listed crypto equities fell on 30 Oct, but the Nasdaq-100 fell 3.5% that day. Against QQQ, none of the 12 equities measured moved beyond noise. Against the equal-weight S&P 500, COIN (−9.0%) sits right at the 5% placebo threshold; the rest do not. QQQ itself fell 2.7% more than the equal-weight index that day, a megacap move, not a crypto one.
 - Security stocks showed no significant day-0 reaction. Their larger five-day declines overlap the 4–5 Nov election and AI selloff and cannot be attributed to the breach.
 
 **AI data centers, 5 Nov 2026**
@@ -239,15 +252,15 @@ Policy status:
 
 Market reaction:
 - Neither enacted order produced a reaction beyond noise in the instruments measured (first sessions 15 Jul and 22 Sep).
-- On 4 Nov, the first session after the results, power, cooling, grid and generation names fell sharply relative to SPY: VRT −17.3%, VST −16.1%, ETN −13.5%, GEV −12.3%, CEG −8.7%. CoreWeave fell 11.7% relative to QQQ. MSFT and AMZN *rose* about 6%.
-- On 5 Nov the decline was market-wide: Nasdaq Composite −5.5%, S&P 500 −4.4%. No single stock moved significantly beyond what its benchmark explains.
-- Caveat: AI names dominate QQQ, so benchmark-adjusted returns understate a sector-wide shock. Raw returns are shown alongside.
+- On 4 Nov, the first session after the results, power, cooling, grid and generation names fell sharply relative to SPY: VRT −17.3%, VST −16.1%, ETN −13.5%, GEV −12.3%, CEG −8.7%. MSFT and AMZN *rose* about 6%. 9 of 18 day-0 tests pass both checks, against about 1 expected by chance, and the power and grid results hold against the equal-weight index too. CoreWeave's −11.7% against QQQ does not pass the placebo check (6.7% of its earlier days moved as much); SMH and NVDA pass against their own benchmarks but not against the equal-weight index.
+- On 5 Nov, against QQQ and SPY, no single stock moved beyond noise (0 of 19). That is benchmark contamination, not a market-wide move: against the equal-weight S&P 500, semiconductors (SMH −7.4%, NVDA −7.0%, AMD −12.3%, AVGO −8.3%), networking (ANET −8.6%) and data-center equipment (VRT −10.0%) all fell beyond noise, while the hyperscalers did not. The selloff was concentrated in AI suppliers; it only looks market-wide because those suppliers are a large part of the cap-weighted benchmarks.
 - Coverage of 5 Nov names policy, a Qualcomm miss (aggregator-sourced), positioning and financing worries. Yields fell. The engine lists these as competing explanations and does not pick one.
 
 **Forecasts**
-- 76 forecasts on the ledger, 75 abstaining on direction.
-- One validated call (MSTR, one day, down) missed: MSTR rose 0.2%.
-- Of 17 realized forecasts, 16 landed inside their 80% range. AMD's +11% on 6 Nov did not.
+- 78 forecasts on the ledger, 77 abstaining on direction. The two newest are the first made under v2.
+- One v1 call (MSTR, one day, down) missed: MSTR rose 0.2%. The v2 gate would have abstained.
+- No live forecast has realized yet. Of 19 realized backfilled forecasts (worked examples, not foresight), 18 landed inside their 80% range. AMD's +11% on 6 Nov did not.
+- Walk-forward over three years: no instrument × horizon shows directional skill after the v2 checks (0 of 60). Pooled one-bar coverage is 80% (95% interval 75–85%). Ranges run wide in stressed regimes (5-bar: 87%, judged too wide) and slightly narrow in calm ones (77–79%).
 
 ## 8. Known limitations
 
@@ -266,8 +279,10 @@ Market reaction:
 - Overlapping 20- and 60-bar forecasts leave few independent observations.
 
 **Event studies**
-- They use a single benchmark per instrument.
-- A sector-neutral or equal-weight benchmark would reduce contamination when the affected stocks dominate the index.
+- They measure association around a date, not cause. Several drivers often arrive on the same day.
+- The equal-weight S&P 500 reduces, but does not remove, contamination: semiconductors are still in it, and no sector-neutral or factor model is used.
+- The placebo rank uses the asset's own history (up to 500 sessions), so its resolution is about 0.2%, and newly listed stocks (CRWV, CRCL) have fewer placebo windows.
+- With roughly 100 day-0 tests across both cases, a few passes are expected by chance; each window reports the expected count beside the observed one.
 
 **Track record**
 - The backfilled theses and forecasts demonstrate the machinery on real outcomes.
@@ -314,7 +329,28 @@ Market reaction:
 
 1. Quantify revenue exposure from 10-K segment notes, and attach the facts as evidence ids on impact links.
 2. Add an ingestion adapter for official sources (Federal Register, state governors' feeds, SEC 8-K) that proposes claims for human review.
-3. Add sector-neutral benchmarks for event studies (equal-weight sector baskets, or a factor model).
+3. Add sector-neutral benchmarks for event studies (equal-weight sector baskets, or a factor model); the equal-weight S&P 500 check is a first step.
 4. Fill in the live forecast record weekly; report calibration once each horizon has 30+ effectively independent realized forecasts.
 5. Have an LLM assist with tagging new claims against open thesis triggers, with every suggestion requiring confirmation.
 6. Move the ledgers from committed JSON to an append-only table once there is a persistence backend. The hash chain carries over unchanged.
+
+## 11. Research audit, 8 Nov 2026
+
+A second pass over the merged implementation, for statistical overconfidence and source accuracy.
+
+**Statistics**
+- Direction gate rewritten (v1 → v2, see §5). Under v1 one call passed by being a constant rule; under v2 nothing passes.
+- Interval coverage now reports nominal against empirical, with Wilson intervals on effective n, per regime and pooled with a design effect.
+- Event-study t-statistics include estimation error; a placebo rank guards against fat tails; significance needs both. Two previously "significant" moves (BTC on 29 Oct, CRWV on 4 Nov) no longer pass.
+- Equal-weight benchmark added, which reversed the reading of 5 Nov (see §7).
+
+**Evidence re-read** (every readable source, 08:20–08:33 UTC)
+- Corrected and marked on the claim, with the reason: B-C14 (demand window), B-C15 (several threads, not one chain), B-C17 ("may involve"), B-C21 (campaign date), B-C23 (whose words), B-C24 (transfers, not totals), A-C04 (no month given), A-C08 ("grid officials", second-hand), A-C16 (AP figures not described as closes), A-C24 (borrowing, not "debt-financed").
+- Added: the Texas governor's signed letter to TCEQ (primary source), which also tells every other state agency to hold data-center approvals and lists no exception for applications already filed (A-C28); the president's same-day doubt about the North Korea attribution (B-C25); Binance's SAFU pledge, which differs from the "corporate reserves" wording elsewhere (B-C26).
+- Confirmed unchanged: all headline amounts (US$6.34bn affected, US$2.85bn frozen or intercepted, 98% replenished), the stablecoin freezes, publication times, and both state orders' terms.
+- Still unread: the FBI alert (403), Reuters, CNN. The North Korea attribution stays short of confirmed.
+
+**Interface**
+- A six-step brief per case (`/events/<case>/brief`) runs question → industry impact → evidence → competing explanations → implications → what would change the conclusion.
+- Phone layouts: the radar becomes a list; wide tables pin the instrument column. Case pages carry the case name in their titles; tables carry header scope and labels; event pages have their own loading state.
+

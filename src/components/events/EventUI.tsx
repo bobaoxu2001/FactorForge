@@ -151,6 +151,15 @@ export function ClaimCard({ claim, sources, compact = false }: { claim: ClaimVie
             })}
           </ul>
           {claim.notes && <p className="mt-1.5 text-[12.5px] italic text-ink-muted">{claim.notes}</p>}
+          {claim.corrections?.length ? (
+            <ul className="mt-1.5 space-y-0.5 text-[12px] text-ink-muted" aria-label="Corrections">
+              {claim.corrections.map((c) => (
+                <li key={c.at + c.note}>
+                  <span className="font-medium text-ink">Corrected {c.at.slice(0, 10)}:</span> {c.note}
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </>
       )}
     </article>

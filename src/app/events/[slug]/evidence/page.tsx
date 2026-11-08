@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation";
+import { caseMetadata } from "@/lib/events/caseMetadata";
 import { ClaimCard, EvidenceRefs, When } from "@/components/events/EventUI";
 import { Note, Panel } from "@/components/intel/ui";
 import { caseBySlug } from "@/data/events";
 import { TIER_LABEL } from "@/lib/events/sources";
 import { eventView } from "@/lib/events/view";
 
-export const metadata = { title: "Event evidence and timeline" };
+export const generateMetadata = ({ params }: { params: Promise<{ slug: string }> }) => caseMetadata(params, "Evidence");
 
 export default async function EventEvidencePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -58,11 +59,11 @@ export default async function EventEvidencePage({ params }: { params: Promise<{ 
           <table className="w-full min-w-[820px] text-left text-[13px]">
             <thead className="border-b border-line text-[12px] text-ink-soft">
               <tr>
-                <th className="px-5 py-2 font-medium md:pl-6">Source</th>
-                <th className="px-3 py-2 font-medium">Type</th>
-                <th className="px-3 py-2 font-medium">Published</th>
-                <th className="px-3 py-2 font-medium">Retrieval</th>
-                <th className="px-3 py-2 font-medium md:pr-6">Cited by</th>
+                <th scope="col" className="px-5 py-2 font-medium md:pl-6">Source</th>
+                <th scope="col" className="px-3 py-2 font-medium">Type</th>
+                <th scope="col" className="px-3 py-2 font-medium">Published</th>
+                <th scope="col" className="px-3 py-2 font-medium">Retrieval</th>
+                <th scope="col" className="px-3 py-2 font-medium md:pr-6">Cited by</th>
               </tr>
             </thead>
             <tbody>

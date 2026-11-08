@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { caseMetadata } from "@/lib/events/caseMetadata";
 import { OriginChip, pct } from "@/components/events/EventUI";
 import { Note, Panel } from "@/components/intel/ui";
 import { caseBySlug, instrument } from "@/data/events";
 import { HORIZONS } from "@/lib/events/forecast";
 import { evaluation, scoredForecasts } from "@/lib/events/view";
 
-export const metadata = { title: "Event scenarios and forecast ranges" };
+export const generateMetadata = ({ params }: { params: Promise<{ slug: string }> }) => caseMetadata(params, "Scenarios");
 
 const CASE_STYLE = { base: "border-ink/25", bull: "border-emerald-700/40", bear: "border-rose-700/40" } as const;
 
@@ -61,14 +62,14 @@ export default async function EventScenariosPage({ params }: { params: Promise<{
           <table className="w-full min-w-[980px] text-[12.5px]">
             <thead className="border-b border-line text-[11.5px] text-ink-soft">
               <tr>
-                <th className="px-5 py-2 text-left font-medium md:pl-6">Instrument</th>
-                <th className="px-2 py-2 text-left font-medium">Horizon</th>
-                <th className="px-2 py-2 text-left font-medium">Direction</th>
-                <th className="px-2 py-2 text-right font-medium">80% range</th>
-                <th className="px-2 py-2 text-right font-medium">vs benchmark (80%)</th>
-                <th className="px-2 py-2 text-right font-medium">Base rate up</th>
-                <th className="px-2 py-2 text-right font-medium">Past coverage</th>
-                <th className="px-2 py-2 text-left font-medium md:pr-6">Made</th>
+                <th scope="col" className="px-5 py-2 text-left font-medium md:pl-6">Instrument</th>
+                <th scope="col" className="px-2 py-2 text-left font-medium">Horizon</th>
+                <th scope="col" className="px-2 py-2 text-left font-medium">Direction</th>
+                <th scope="col" className="px-2 py-2 text-right font-medium">80% range</th>
+                <th scope="col" className="px-2 py-2 text-right font-medium">vs benchmark (80%)</th>
+                <th scope="col" className="px-2 py-2 text-right font-medium">Base rate up</th>
+                <th scope="col" className="px-2 py-2 text-right font-medium">Past coverage</th>
+                <th scope="col" className="px-2 py-2 text-left font-medium md:pr-6">Made</th>
               </tr>
             </thead>
             <tbody>

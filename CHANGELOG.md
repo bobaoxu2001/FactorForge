@@ -6,6 +6,25 @@ This project follows a human-maintained changelog. There is no automated release
 
 ## Unreleased
 
+### Event intelligence: research audit
+
+#### Changed
+
+- **Direction gate (`ewma-interval-v2`).** A direction now needs to beat the better constant rule (always up or always down) in a paired sign test on the effective sample, survive a Holm correction across every instrument and horizon tested together, and beat the hindsight base rate on Brier score. v1 compared the hit rate with 50% and tested instruments one at a time; its one directional call (MSTR, 1 day) was a constant rule and would abstain under v2. Ledger records are unchanged; the scorecard shows the v2 verdict beside the v1 call.
+- **Effective sample size** is the smaller of the overlap count and an autocorrelation-adjusted count.
+- **Event-study significance** needs both a t-statistic that includes estimation error and a placebo rank against the asset's own previous 500 sessions. BTC on 29 Oct and CRWV on 4 Nov no longer pass.
+- **Market pages** say the figures are associations, show the expected number of chance passes, and list events inside the estimation window.
+- **Ten claims corrected** after re-reading every readable source; each correction is shown on its claim with the reason.
+
+#### Added
+
+- Interval calibration on `/forecasts`: nominal 80% against empirical coverage with Wilson intervals, by regime and pooled across instruments with a design effect.
+- Equal-weight S&P 500 (RSP) as a second benchmark for US equities. It shows the 5 Nov selloff was concentrated in AI suppliers, not market-wide.
+- The Texas governor's signed letter to TCEQ as a primary source (A-C28), the president's doubt about the attribution (B-C25), and Binance's SAFU pledge (B-C26).
+- A six-step research brief for each case (`/events/<case>/brief`).
+- Phone layout for the radar, pinned instrument columns on wide tables, case names in page titles, table header scope and labels, and loading states for the event pages.
+- First two forecasts under v2 (BTC, 5 and 20 days, live).
+
 ### Event intelligence: events, verification, impact, theses and scored forecasts
 
 #### Added

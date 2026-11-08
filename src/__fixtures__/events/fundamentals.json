@@ -1,5 +1,5 @@
 {
- "retrievedAt": "2026-11-08T03:50:35.590Z",
+ "retrievedAt": "2026-11-08T08:38:29.753Z",
  "fundamentals": {
   "COIN": {
    "symbol": "COIN",
@@ -291,7 +291,7 @@
    "symbol": "ETN",
    "asOf": "2026-11-08",
    "trailingPE": 34.137863,
-   "forwardPE": 20.909742,
+   "forwardPE": 20.878994,
    "evToRevenue": 4.781,
    "evToEbitda": 21.665,
    "revenueGrowthYoY": 0.28,

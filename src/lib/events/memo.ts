@@ -57,16 +57,23 @@ export function buildEventMemo(c: ResearchCase): MemoSection[] {
   for (const w of c.windows) {
     const v = windowView(c, w.id);
     if (!v) continue;
-    const sig = v.studies.filter((s) => s.benchmark && s.windows[0]?.tStat != null && Math.abs(s.windows[0].tStat!) >= 1.96);
-    const quiet = v.studies.filter((s) => s.benchmark && s.windows[0]?.tStat != null && Math.abs(s.windows[0].tStat!) < 1.96);
+    const tested = v.studies.filter((s) => s.benchmark && s.windows[0]?.tStat != null);
+    const sig = tested.filter((s) => s.windows[0].significant);
     const day0 = v.studies.find((s) => s.day0)?.day0 ?? "n/a";
     const sigText = sig.length
-      ? `Moves beyond what the benchmark explains (|t| ≥ 1.96): ${list(sig.map((s) => `${s.symbol} ${p1(s.windows[0].abnormal!)} vs ${s.benchmark}`))}.`
-      : "No instrument moved significantly more than its benchmark explains.";
+      ? `Moves beyond what the benchmark explains (both the t-test and the placebo rank): ${list(sig.map((s) => `${s.symbol} ${p1(s.windows[0].abnormal!)} vs ${s.benchmark}`))}. That is ${sig.length} of ${tested.length} tests, where chance alone would produce about ${v.day0Tests.expectedByChance.toFixed(1)}.`
+      : `No instrument moved significantly more than its benchmark explains (${tested.length} tested).`;
+    const ew = tested.map((s) => v.equalWeight[s.symbol]).filter((s) => s?.windows[0]?.significant);
+    const ewNew = ew.filter((e) => !sig.some((s) => s.symbol === e.symbol));
+    const ewText = ewNew.length
+      ? ` Against the equal-weight S&P 500 (RSP), which these names do not dominate, ${list(ewNew.map((s) => `${s.symbol} ${p1(s.windows[0].abnormal!)}`))} also fell beyond noise: the cap-weighted benchmark absorbed part of the move.`
+      : "";
     const overlap = v.overlaps["[0,4]"]?.length ? ` The five-session window overlaps ${list(v.overlaps["[0,4]"].map((o) => `"${o.title}" (${o.date})`))}, so multi-day figures mix events.` : "";
-    marketParas.push(`${w.label}. Day 0: ${day0}. ${sigText} ${n(quiet.length, "other instrument", "other instruments")} stayed within normal noise.${overlap}`);
+    marketParas.push(`${w.label}. Day 0: ${day0}. ${sigText}${ewText}${overlap}`);
   }
-  marketParas.push("Abnormal returns use a market model fitted on 120 sessions ending ten sessions before day 0. When the affected stocks are a large part of the benchmark itself (AI names in QQQ), benchmark-adjusted figures understate the event's effect; read them alongside raw returns.");
+  marketParas.push(
+    "These are associations around a date, not proof that the event caused the move. Abnormal returns use a market model fitted on 120 sessions ending ten sessions before day 0; a move counts only if its t-statistic (with estimation error) and its rank among the asset's own previous 500 sessions both say it is unusual. When the affected stocks are a large part of the benchmark (AI names in QQQ and SPY), the equal-weight comparison is the better guide.",
+  );
   sections.push({ title: "How the event reached markets", kind: "data", paragraphs: marketParas });
 
   // 4. Competing explanations

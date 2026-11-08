@@ -4,6 +4,7 @@
     { "symbol": "SPY", "name": "SPDR S&P 500 ETF", "kind": "etf", "group": "benchmark", "benchmark": null },
     { "symbol": "QQQ", "name": "Invesco QQQ (Nasdaq-100) ETF", "kind": "etf", "group": "benchmark", "benchmark": null },
     { "symbol": "^IXIC", "name": "Nasdaq Composite index", "kind": "index", "group": "benchmark", "benchmark": null },
+    { "symbol": "RSP", "name": "Invesco S&P 500 Equal Weight ETF", "kind": "etf", "group": "benchmark", "benchmark": null },
     { "symbol": "SMH", "name": "VanEck Semiconductor ETF", "kind": "etf", "group": "sector-benchmark", "benchmark": "SPY" },
     { "symbol": "XLU", "name": "Utilities Select Sector SPDR ETF", "kind": "etf", "group": "sector-benchmark", "benchmark": "SPY" },
     { "symbol": "CIBR", "name": "First Trust NASDAQ Cybersecurity ETF", "kind": "etf", "group": "sector-benchmark", "benchmark": "QQQ" },
