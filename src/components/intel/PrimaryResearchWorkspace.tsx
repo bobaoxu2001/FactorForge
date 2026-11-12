@@ -108,7 +108,7 @@ export default function PrimaryResearchWorkspace({ projectId, stakeholders }: { 
               </select>
             </label>
             <label className="text-[11px] text-ink-soft">Interview date
-              <input type="date" value={interviewDate} onChange={(e) => setInterviewDate(e.target.value)} className={`${input} mt-1`} />
+              <input type="date" value={interviewDate} onInput={(e) => setInterviewDate(e.currentTarget.value)} onChange={(e) => setInterviewDate(e.target.value)} className={`${input} mt-1`} />
             </label>
           </div>
           <label className="block text-[11px] text-ink-soft">Source description (role, not name)

@@ -44,13 +44,13 @@ describe("workspace file import", () => {
     expect(screen.getByRole("button", { name: "Import…" })).toBeDisabled();
   });
 
-  it("preserves interview text when a cleared interview date fails validation", () => {
+  it.each(["change", "input"] as const)("preserves interview text when a cleared date emits %s", (event) => {
     mock.dispatch.mockImplementation((action: WorkspaceAction) => {
       try { workspaceReducer(EMPTY_WORKSPACE, action); return null; }
       catch (error) { return error instanceof Error ? error.message : String(error); }
     });
     render(<PrimaryResearchWorkspace projectId="freight" stakeholders={[{ id: "carrier", label: "Carrier", why: "Direct market observations", hypothesisIds: [], questions: [], cautions: [] }]} />);
-    fireEvent.change(screen.getByLabelText("Interview date"), { target: { value: "" } });
+    fireEvent[event](screen.getByLabelText("Interview date"), { target: { value: "" } });
     fireEvent.change(screen.getByLabelText("Notes"), { target: { value: "Spot rates stayed flat this month." } });
     fireEvent.click(screen.getByRole("button", { name: "Save interview" }));
     expect(screen.getByText("Choose a valid interview date.")).toBeInTheDocument();

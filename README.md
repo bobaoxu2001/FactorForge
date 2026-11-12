@@ -581,7 +581,7 @@ Security notes:
 
 ## Testing
 
-684 tests across 102 files under vitest + jsdom (plus one ledger-writer suite that runs only under `npm run events:forecast`).
+685 tests across 102 files under vitest + jsdom (plus one ledger-writer suite that runs only under `npm run events:forecast`).
 
 The event-intelligence tests cover:
 - Contradictory sources, and rumours versus enacted rules (lifecycle guard).
