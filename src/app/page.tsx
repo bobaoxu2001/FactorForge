@@ -275,7 +275,7 @@ export default function ResearchHomePage() {
           </div>
         </Panel>
         <Panel eyebrow="Research quality" title="Featured project checks">
-          <QualityPanel checks={view.quality} projectId={pid} compact />
+          <QualityPanel checks={view.quality} projectId={pid} focusTickers={view.config.companies.filter((company) => company.focus).map((company) => company.ticker)} compact />
         </Panel>
       </div>
 

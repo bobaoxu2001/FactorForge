@@ -1,5 +1,6 @@
 import "server-only";
 import { createLogger } from "@/lib/observability/logger";
+import { getRateLimitCredentials } from "@/lib/config/rateLimitCredentials";
 import type { RateLimitResult, RateLimitStore } from "./types";
 import { InMemoryRateLimitStore } from "./memoryStore";
 import { UpstashRateLimitStore } from "./upstashStore";
@@ -10,20 +11,9 @@ const log = createLogger("ratelimit");
 
 let store: RateLimitStore | null = null;
 
-/**
- * Read the Upstash/Vercel-KV REST credentials. Accepts either provider's env
- * var names so the same code runs on Upstash or Vercel KV unchanged.
- */
-function upstashCredentials(): { url: string; token: string } | null {
-  const url = process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN;
-  if (url && token) return { url, token };
-  return null;
-}
-
 /** True when a distributed (multi-instance-safe) rate-limit backend is configured. */
 export function isDistributedRateLimitConfigured(): boolean {
-  return upstashCredentials() !== null;
+  return getRateLimitCredentials(process.env) !== null;
 }
 
 /**
@@ -33,7 +23,7 @@ export function isDistributedRateLimitConfigured(): boolean {
  */
 export function getRateLimitStore(): RateLimitStore {
   if (store) return store;
-  const creds = upstashCredentials();
+  const creds = getRateLimitCredentials(process.env);
   if (creds) {
     store = new UpstashRateLimitStore(creds.url, creds.token);
     log.info("rate-limit backend selected", { backend: "upstash" });

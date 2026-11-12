@@ -6,6 +6,19 @@ This project follows a human-maintained changelog. There is no automated release
 
 ## Unreleased
 
+### Research discovery and refresh integrity
+
+- Search now derives covered-company pages and one-page briefs from the research registry. Covered tickers open company research first; quant strategy results remain available. Event cases open on their briefs, with separate evidence and business-impact results.
+- Multi-word queries require every word to match; ticker dollar signs and hyphenated phrases are normalized. Search works on mobile and supports arrow navigation, Enter, trapped Tab focus, Escape, backdrop dismissal and focus restoration. The dialog is portalled outside the sticky header.
+- The sitemap includes project writing samples. The scheduled refresh stages both forecast and thesis ledgers alongside market/event fixtures, preserves pending ledger history and uses a captured remote SHA for its push lease. Fixed research editions require a deliberate source/cutoff/PDF update and are excluded from the weekly refresh.
+
+### Research workspace and evidence integrity
+
+- Workspace imports merge missing records and memo sections while retaining existing browser entries on conflicts. Unsupported exports and malformed nested records are rejected or sanitized. Synchronous reducer validation keeps invalid forms intact; mounted panels share in-memory edits when storage fails, with a visible backup notice.
+- Quality checks assess the configured company universe and focus names. Missing company data, incomplete probability distributions and unrelated scenario sets cannot produce a passing result. Zero-valued financial observations remain valid.
+- Evidence details follow active filters. Direct Cass extracts retain their original provenance and actual coverage dates instead of being labelled as FRED data.
+- Blank site origins use the production default. Shared auth rate limiting selects complete credentials from one provider; partial Upstash and KV settings are never mixed.
+
 ### Homepage and entry points
 
 #### Changed

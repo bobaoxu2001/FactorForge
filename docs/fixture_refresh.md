@@ -10,7 +10,15 @@ The committed market-data fixture (`src/__fixtures__/yahoo-snapshot.json`) is a 
 
 ## Scheduled refresh
 
-A weekly GitHub Actions workflow (`.github/workflows/refresh-fixtures.yml`, Mondays 05:00 UTC, also runnable via *workflow_dispatch*) re-runs both refresh scripts on a US-based runner, verifies lint/typecheck/tests/build against the refreshed fixtures, and opens (or updates) a `chore/scheduled-fixture-refresh` PR. The PR is the review gate — walk the steps below before merging; nothing lands on `main` automatically. Note that CI does not auto-trigger on the bot-created PR (GitHub token limitation); the same gates already ran inside the refresh workflow.
+A weekly GitHub Actions workflow (`.github/workflows/refresh-fixtures.yml`, Mondays 05:00 UTC, also runnable via *workflow_dispatch*) starts from `main`, refreshes market, fundamentals and event fixtures, and appends forecast and thesis records. It stages `src/__fixtures__/` plus both `src/data/events/forecast-ledger.json` and `src/data/events/thesis-ledger.json`, verifies lint/typecheck/tests/build against those changes, and opens (or updates) a `chore/scheduled-fixture-refresh` PR. The PR is the review gate — walk the steps below before merging; nothing lands on `main` automatically. Note that CI does not auto-trigger on the bot-created PR (GitHub token limitation); the same gates already ran inside the refresh workflow.
+
+Before any refresh, `scripts/check-refresh-history.mjs` reads the existing bot branch's two ledgers without checking out its code. Replacement is allowed only when every pending record is already preserved, in the same order, in the base checkout. If a prior PR contains unmerged records or a conflicting chain, the workflow stops with an instruction to merge or reconcile that PR first. Keep those records intact; do not delete the branch to bypass this check. Publication uses an explicit `--force-with-lease` against the inspected commit, so a concurrent branch update also stops the push.
+
+### Fixed research editions
+
+Scheduled refreshes deliberately leave `src/__fixtures__/research/` and the freight writing sample unchanged, even when a SEC contact secret is configured. `revision.json` pins that edition's information cutoff, and the app rejects retrievals newer than it. Running `research:refresh` alone against the published edition would break the build and make its PDF inconsistent.
+
+To publish a new edition, run `npm run research:refresh` explicitly with a valid `SEC_EDGAR_USER_AGENT`, review source definitions and changed conclusions, update the edition ID/date/cutoff in `src/data/research/revision.json`, review the separately maintained direct-source extracts, and regenerate the writing-sample data/PDF together. Run all normal checks and compare the rendered sample with the PDF before merging that dedicated edition change. A macro-only refresh also requires a new edition; it is not an exception to the cutoff rule.
 
 ## When to refresh
 

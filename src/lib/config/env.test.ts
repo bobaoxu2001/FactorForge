@@ -67,6 +67,31 @@ describe("validateEnv", () => {
     expect(result.warnings.join(" ")).toMatch(/shared rate-limit store/);
   });
 
+  it("never treats cross-provider or whitespace-only credentials as a shared store", () => {
+    for (const env of [
+      { UPSTASH_REDIS_REST_URL: "https://x.upstash.io", KV_REST_API_TOKEN: "kv-token" },
+      { KV_REST_API_URL: "https://x.kv.vercel-storage.com", UPSTASH_REDIS_REST_TOKEN: "upstash-token" },
+      { UPSTASH_REDIS_REST_URL: " ", UPSTASH_REDIS_REST_TOKEN: "\n" },
+    ]) {
+      const result = validateEnv({ NODE_ENV: "production", SESSION_PASSWORD: longSecret, ...env });
+      expect(result.features.distributedRateLimit).toBe(false);
+      expect(result.warnings.join(" ")).toMatch(/shared rate-limit store/);
+    }
+  });
+
+  it("recognizes a complete KV pair even when the preferred Upstash pair is partial", () => {
+    const result = validateEnv({
+      NODE_ENV: "production",
+      SESSION_PASSWORD: longSecret,
+      UPSTASH_REDIS_REST_URL: "https://wrong.upstash.io",
+      UPSTASH_REDIS_REST_TOKEN: " ",
+      KV_REST_API_URL: " https://x.kv.vercel-storage.com ",
+      KV_REST_API_TOKEN: " kv-token ",
+    });
+    expect(result.features.distributedRateLimit).toBe(true);
+    expect(result.warnings.join(" ")).not.toMatch(/shared rate-limit store/);
+  });
+
   it("does not warn about rate limiting when a shared store is configured in production", () => {
     const result = validateEnv({
       NODE_ENV: "production",

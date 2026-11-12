@@ -49,7 +49,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
   const research = RESEARCH_PROJECTS.flatMap((project) => [
-    ...["", "/industry", "/evidence", "/kpis", "/companies", "/primary", "/thesis", "/memo", "/copilot"].map((stage) => ({
+    ...["", "/sample", "/industry", "/evidence", "/kpis", "/companies", "/primary", "/thesis", "/memo", "/copilot"].map((stage) => ({
       url: `${SITE_URL}/research/${project.id}${stage}`,
       lastModified,
       changeFrequency: "daily" as const,
