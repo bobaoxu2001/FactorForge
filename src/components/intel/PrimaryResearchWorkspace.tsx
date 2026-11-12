@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import type { StakeholderCategory } from "@/data/research/types";
 import { analyzeNotes, contradictionsWithHypotheses, crossSourceAgreement, redactPersonalData, screenText, type ScreenFlag } from "@/lib/intel/primary";
-import { migrateWorkspace, newId, serializeWorkspace, type InterviewRecord } from "@/lib/intel/workspace";
+import { newId, parseWorkspaceImport, serializeWorkspace, type InterviewRecord } from "@/lib/intel/workspace";
 import { OriginChip, StatusChip } from "./ui";
 import { useWorkspace } from "./useWorkspace";
 
@@ -82,11 +82,11 @@ export default function PrimaryResearchWorkspace({ projectId, stakeholders }: { 
 
   const importJson = async (file: File) => {
     try {
-      const imported = migrateWorkspace(JSON.parse(await file.text()));
-      dispatch({ type: "replace", state: { ...imported, interviews: [...state.interviews.filter((r) => !imported.interviews.some((i) => i.id === r.id)), ...imported.interviews] } });
-      setMessage(`Imported ${imported.interviews.length} interview(s). Invalid or mislabelled records were dropped.`);
-    } catch {
-      setMessage("Could not read that file.");
+      const imported = parseWorkspaceImport(JSON.parse(await file.text()));
+      const error = dispatch({ type: "import", state: imported });
+      setMessage(error ?? `Workspace merged: ${imported.interviews.length} valid interview record(s) in the file. Existing entries were kept on conflicts; invalid records were omitted.`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not read that file.");
     }
   };
 
@@ -108,7 +108,7 @@ export default function PrimaryResearchWorkspace({ projectId, stakeholders }: { 
               </select>
             </label>
             <label className="text-[11px] text-ink-soft">Interview date
-              <input type="date" value={interviewDate} onChange={(e) => setInterviewDate(e.target.value)} className={`${input} mt-1`} />
+              <input type="date" value={interviewDate} onInput={(e) => setInterviewDate(e.currentTarget.value)} onChange={(e) => setInterviewDate(e.target.value)} className={`${input} mt-1`} />
             </label>
           </div>
           <label className="block text-[11px] text-ink-soft">Source description (role, not name)
@@ -136,7 +136,7 @@ export default function PrimaryResearchWorkspace({ projectId, stakeholders }: { 
             </div>
           )}
           <div className="flex flex-wrap items-center gap-3">
-            <button onClick={save} disabled={!notes.trim()} className="rounded-lg border border-accent/35 bg-accent/[0.08] px-3 py-1.5 text-[12.5px] text-accent hover:bg-accent/[0.15] disabled:opacity-40">Save interview</button>
+            <button onClick={save} disabled={!ready || !notes.trim()} className="rounded-lg border border-accent/35 bg-accent/[0.08] px-3 py-1.5 text-[12.5px] text-accent hover:bg-accent/[0.15] disabled:opacity-40">Save interview</button>
             {message && <span className="text-[11.5px] text-ink-muted">{message}</span>}
           </div>
         </section>
@@ -153,10 +153,11 @@ export default function PrimaryResearchWorkspace({ projectId, stakeholders }: { 
           </ul>
           <div className="text-[12px] text-ink-muted">Fieldwork coverage: <span className="text-ink">{interviews.length === 0 ? "proposed; no completed interviews" : agreement.some((a) => a.agreement === "disagree") ? "recorded accounts contain disagreements requiring review" : "records available; corroboration and coverage still require review"}</span></div>
           <div className="flex flex-wrap gap-2 text-[12px]">
-            <button onClick={exportJson} className="rounded-lg border border-line px-3 py-1.5 text-ink-muted hover:text-ink">Export workspace (JSON)</button>
-            <button onClick={() => fileRef.current?.click()} className="rounded-lg border border-line px-3 py-1.5 text-ink-muted hover:text-ink">Import…</button>
-            <input ref={fileRef} type="file" accept="application/json" className="hidden" onChange={(e) => e.target.files?.[0] && importJson(e.target.files[0])} />
+            <button onClick={exportJson} disabled={!ready} className="rounded-lg border border-line px-3 py-1.5 text-ink-muted hover:text-ink disabled:opacity-40">Export workspace (JSON)</button>
+            <button onClick={() => fileRef.current?.click()} disabled={!ready} className="rounded-lg border border-line px-3 py-1.5 text-ink-muted hover:text-ink disabled:opacity-40">Import…</button>
+            <input ref={fileRef} type="file" accept="application/json" aria-label="Import workspace JSON" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ""; if (file) void importJson(file); }} />
           </div>
+          <p className="text-[11.5px] text-ink-soft">Import adds missing records and memo sections across your workspace. Existing browser entries are kept when IDs or fields conflict.</p>
           {agreement.length > 0 && (
             <div>
               <div className="mb-1 text-[11px] text-ink-soft">Cross-source comparison</div>

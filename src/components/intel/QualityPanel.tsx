@@ -1,6 +1,7 @@
 "use client";
 
 import type { QualityCheck } from "@/lib/intel/types";
+import { scenarioCoverage } from "@/lib/intel/quality";
 import { useWorkspace } from "./useWorkspace";
 
 const STATE_STYLE: Record<QualityCheck["state"], string> = {
@@ -14,16 +15,18 @@ const STATE_STYLE: Record<QualityCheck["state"], string> = {
  * client layer re-evaluates the primary-research check against the interviews
  * stored in the user's own browser (never sent to the server).
  */
-export default function QualityPanel({ checks, projectId, compact = false }: { checks: QualityCheck[]; projectId: string; compact?: boolean }) {
+export default function QualityPanel({ checks, projectId, focusTickers, compact = false }: { checks: QualityCheck[]; projectId: string; focusTickers: string[]; compact?: boolean }) {
   const { state, ready } = useWorkspace();
   const interviews = ready ? state.interviews.filter((i) => i.projectId === projectId).length : 0;
-  const probabilitySets = ready ? Object.values(state.scenarioProbabilities).filter((p) => Object.values(p.probabilities).every((v) => v !== null)).length : 0;
+  const probabilities = scenarioCoverage(focusTickers, ready ? state.scenarioProbabilities : {});
   const adjusted = checks.map((c) => {
     if (c.id === "primary-research" && interviews > 0) {
       return { ...c, state: "warn" as const, detail: `${interviews} user-provided primary research record(s) in your workspace. Counts alone do not validate a thesis; corroboration and conflicting accounts still require review.` };
     }
-    if (c.id === "valuation-assumptions" && probabilitySets > 0) {
-      return { ...c, state: probabilitySets >= 3 ? ("pass" as const) : ("warn" as const), detail: `${probabilitySets} company scenario set(s) with justified probabilities in your workspace.` };
+    if (c.id === "valuation-assumptions") {
+      const complete = probabilities.complete.length;
+      const required = probabilities.required.length;
+      return { ...c, state: required > 0 && probabilities.missing.length === 0 ? ("pass" as const) : ("warn" as const), detail: required === 0 ? "No focus companies are configured; scenario coverage has not been assessed." : `${complete} of ${required} focus companies have complete, justified scenario probabilities.${probabilities.missing.length ? ` Still required: ${probabilities.missing.join(", ")}.` : " These are your assumptions, not verified forecasts."}` };
     }
     return c;
   });

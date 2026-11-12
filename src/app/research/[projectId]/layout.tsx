@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import StageNav, { type Stage } from "@/components/intel/StageNav";
 import { getResearchProject, listProjectIds } from "@/lib/intel/project";
 import { MEMO_STATUS_LABEL } from "@/lib/intel/quality";
+import WorkspaceStorageNotice from "@/components/intel/WorkspaceStorageNotice";
 
 // Every valid id is known at build time; anything else is a real 404.
 export const dynamicParams = false;
@@ -70,6 +71,7 @@ export default async function ResearchProjectLayout({ children, params: paramsPr
         </div>
       </header>
       <StageNav projectId={view.config.id} stages={stages} />
+      <WorkspaceStorageNotice projectId={view.config.id} />
       {children}
       <footer className="research-project-footer border-t border-line pt-3 text-[12px] leading-relaxed text-ink-soft">
         Independent research workbench. Not affiliated with, or endorsed by, any company, data provider or research firm named here. Sources: SEC EDGAR; FRED (BTS, BLS, EIA, Census Bureau, Federal Reserve Board, and Cass Information Systems, whose data are copyrighted and shown with citation as FRED&apos;s terms require); Yahoo Finance prices. Not investment advice.

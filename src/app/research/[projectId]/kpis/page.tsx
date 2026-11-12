@@ -22,6 +22,7 @@ export default async function KpiPage({ params: paramsPromise, searchParams: sea
   const anomalies = selected.readings.filter((r) => r.anomaly).slice(-6).reverse();
   const yoySeries: YoySeries[] = view.kpis.map((k) => ({ id: k.kpi.id, name: k.kpi.name, seasonalAdjustment: k.kpi.seasonalAdjustment, frequency: k.kpi.frequency, points: monthlyYoy(k) }));
   const groups = ["volume", "pricing", "spend", "cost", "capacity", "demand-driver"] as const;
+  const directSource = selected.source.id.startsWith("Cass:");
 
   return (
     <div className="space-y-5">
@@ -58,7 +59,7 @@ export default async function KpiPage({ params: paramsPromise, searchParams: sea
         </div>
       </Panel>
 
-      <Panel eyebrow={`${selected.kpi.category} · ${selected.kpi.timing}`} title={selected.kpi.name} source={`${selected.source.publisher} via FRED, series ${selected.source.seriesId}${selected.source.licence ? ` (${selected.source.licence})` : ""}.`} actions={<EvidenceLinks ids={[`EV-KPI-${selected.kpi.id}`, `EV-KPI-${selected.kpi.id}-3M`].filter((id) => view.evidence.some((e) => e.id === id))} projectId={pid} />}>
+      <Panel eyebrow={`${selected.kpi.category} · ${selected.kpi.timing}`} title={selected.kpi.name} source={`${selected.source.publisher}, series ${selected.source.seriesId}${selected.source.licence ? ` (${selected.source.licence})` : ""}.`} actions={<EvidenceLinks ids={[`EV-KPI-${selected.kpi.id}`, `EV-KPI-${selected.kpi.id}-3M`].filter((id) => view.evidence.some((e) => e.id === id))} projectId={pid} />}>
         <div className="grid gap-5 xl:grid-cols-[1.4fr_1fr]">
           <TimeSeriesChart
             data={chartData}
@@ -78,12 +79,12 @@ export default async function KpiPage({ params: paramsPromise, searchParams: sea
               ["Source", selected.source.url ? <a href={selected.source.url} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">{selected.source.seriesId} ↗</a> : selected.source.seriesId],
               ["Agency / release", `${selected.source.sourceAgency ?? "—"} · ${selected.source.release ?? "—"}`],
               ["Latest observation", `${selected.latest?.date ?? "—"} = ${selected.latest ? fmt.num(selected.latest.value, 3) : "—"}`],
-              ["Published (FRED updated)", selected.source.sourceUpdated ?? "—"],
+              [directSource ? "Published / updated by source" : "Published (FRED updated)", selected.source.sourceUpdated ?? "Not recorded; see the dated source release"],
               ["Next release", selected.source.nextRelease ?? "—"],
               ["Freshness", <span key="f"><FreshnessDot freshness={selected.freshness} /> {selected.freshnessNote}</span>],
               ["Collection method", selected.kpi.collectionMethod],
-              ["Missing values", `${selected.missingValues} gap(s) in the monthly record since 2015`],
-              ["Revisions", "FRED shows the latest vintage; earlier published values may have been revised. Point-in-time vintages are not stored."],
+              ["Missing values", `${selected.missingValues} gap(s) in the monthly record${selected.readings.length ? ` from ${selected.readings[0].date}` : ""}`],
+              ["Revisions", directSource ? "Selected levels from Cass's public historical workbook, checked against the dated report. Earlier workbook vintages are not stored." : "FRED shows the latest vintage; earlier published values may have been revised. Point-in-time vintages are not stored."],
               ["Comparability", <ul key="c" className="space-y-0.5">{selected.kpi.comparabilityNotes.map((n) => <li key={n}>• {n}</li>)}</ul>],
               ["Timing rationale", selected.kpi.timingRationale],
             ]}

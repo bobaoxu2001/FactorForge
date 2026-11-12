@@ -1,6 +1,7 @@
 import type { ResearchProjectConfig } from "@/data/research/types";
 import type { CompanyView } from "./companies";
 import type { CheckState, Evidence, HypothesisView, KpiSeriesView, MemoStatus, QualityCheck } from "./types";
+import type { ScenarioProbability } from "./workspace";
 
 /**
  * Research-completeness checks. Each one is a pass/warn/fail with the reason
@@ -21,6 +22,20 @@ export interface QualityInputs {
 }
 
 const state = (ok: boolean, warn: boolean): CheckState => (ok ? "pass" : warn ? "warn" : "fail");
+
+/** Count only required companies with a complete, justified probability distribution. */
+export function scenarioCoverage(focusTickers: readonly string[], sets: Record<string, ScenarioProbability>) {
+  const required = [...new Set(focusTickers)];
+  const complete = required.filter((ticker) => {
+    const saved = sets[ticker];
+    if (!saved || saved.ticker !== ticker || typeof saved.justification !== "string" || saved.justification.trim().length < 20) return false;
+    const probabilities = [saved.probabilities?.bull, saved.probabilities?.base, saved.probabilities?.bear];
+    if (!probabilities.every((p): p is number => typeof p === "number" && Number.isFinite(p) && p >= 0 && p <= 1)) return false;
+    // Same rounding tolerance as the scenario valuation engine.
+    return Math.abs(probabilities.reduce((sum, p) => sum + p, 0) - 1) <= 0.005;
+  });
+  return { required, complete, missing: required.filter((ticker) => !complete.includes(ticker)) };
+}
 
 export function runQualityChecks(input: QualityInputs): QualityCheck[] {
   const { config, evidence, hypotheses, kpis, companies } = input;
@@ -71,15 +86,30 @@ export function runQualityChecks(input: QualityInputs): QualityCheck[] {
         : `Stale: ${stale.map((k) => k.kpi.name).join(", ") || "none"}. Lagging: ${lagging.map((k) => k.kpi.name).join(", ") || "none"}.`,
   });
 
-  const incomplete = companies.filter((c) => !c.latestTtm || c.latestTtm.ttmFreeCashFlow === null || !c.latestTtm.debt || !c.valuation);
+  const companyByTicker = new Map(companies.map((company) => [company.ticker, company]));
+  const missingCompanies = config.companies.filter((company) => !companyByTicker.has(company.ticker));
+  const incomplete = config.companies.flatMap((coverage) => {
+    const company = companyByTicker.get(coverage.ticker);
+    if (!company) return [];
+    const row = company.latestTtm;
+    const missing = [
+      !row || !Number.isFinite(row.ttmRevenue) ? "TTM revenue" : null,
+      !row || !Number.isFinite(row.ttmOperatingMargin) ? "TTM operating margin" : null,
+      !row || !Number.isFinite(row.ttmFreeCashFlow) ? "TTM free cash flow" : null,
+      !row?.debt || !Number.isFinite(row.debt.total) ? "debt" : null,
+      !company.valuation ? "valuation" : null,
+    ].filter(Boolean);
+    return missing.length ? [{ ticker: company.ticker, missing }] : [];
+  });
+  const incompleteCount = missingCompanies.length + incomplete.length;
   checks.push({
     id: "financial-model",
     label: "Financial model completeness",
-    state: state(incomplete.length === 0, incomplete.length <= 2),
+    state: config.companies.length === 0 ? "warn" : state(incompleteCount === 0, incompleteCount <= 2),
     detail:
-      incomplete.length === 0
+      config.companies.length === 0 ? "No company coverage is configured; financial-model completeness has not been assessed." : incompleteCount === 0
         ? "TTM revenue, margins, FCF, debt and valuation are available for every covered company."
-        : `Incomplete inputs for ${incomplete.map((c) => c.ticker).join(", ")}. See each company's data gaps.`,
+        : [missingCompanies.length ? `Missing company data: ${missingCompanies.map((company) => company.ticker).join(", ")}.` : "", incomplete.length ? `Incomplete inputs: ${incomplete.map((company) => `${company.ticker} (${company.missing.join(", ")})`).join("; ")}.` : ""].filter(Boolean).join(" "),
   });
 
   const focus = config.companies.filter((c) => c.focus).length;

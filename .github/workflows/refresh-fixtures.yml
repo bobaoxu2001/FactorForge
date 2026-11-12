@@ -5,6 +5,8 @@ name: Scheduled fixture refresh
 #   - src/__fixtures__/fundamentals-snapshot.json (valuation/quality, npm run fundamentals:refresh)
 #   - src/__fixtures__/events/*                   (event-engine prices and run log, npm run events:refresh)
 #   - src/data/events/forecast-ledger.json        (appends rolling forecasts, npm run events:forecast)
+#   - src/data/events/thesis-ledger.json          (appends newly configured theses)
+# Fixed research editions and their PDFs are refreshed manually as one change.
 #
 # Runs on GitHub's US-based runners where the keyless Yahoo endpoints are
 # reachable. The full verification suite (lint/typecheck/test/build) runs
@@ -37,17 +39,21 @@ jobs:
     name: Refresh · Verify · Open PR
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    env:
-      SEC_EDGAR_USER_AGENT: ${{ secrets.SEC_EDGAR_USER_AGENT }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+        with:
+          ref: main
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version: "22"
           cache: "npm"
+
+      - name: Protect pending ledger history
+        id: history
+        run: node scripts/check-refresh-history.mjs
 
       - name: Install dependencies
         run: npm ci
@@ -58,12 +64,9 @@ jobs:
       - name: Refresh fundamentals snapshot
         run: npm run fundamentals:refresh
 
-      # SEC EDGAR requires a contact User-Agent; store it as a repository
-      # secret. Without the secret this step is skipped and the committed
-      # research snapshot stays as-is (its build date is shown in the UI).
-      - name: Refresh research snapshot (SEC EDGAR + FRED + prices)
-        if: ${{ env.SEC_EDGAR_USER_AGENT != '' }}
-        run: npm run research:refresh
+      # Do not run research:refresh here. The freight sample is a fixed edition:
+      # new source retrievals require a new cutoff, source review and matching
+      # PDF/export. Updating those fixtures alone intentionally fails the build.
 
       # Event engine: refresh its market snapshot, then append this week's
       # rolling forecasts to the hash-chained ledger. Existing records are
@@ -108,6 +111,7 @@ jobs:
         if: steps.diff.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          EXPECTED_REMOTE_SHA: ${{ steps.history.outputs.expected_remote_sha }}
         run: |
           set -euo pipefail
           DATE="$(date -u +%F)"
@@ -116,15 +120,20 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -B "$BRANCH"
-          git add src/__fixtures__
+          git add src/__fixtures__ src/data/events/forecast-ledger.json src/data/events/thesis-ledger.json
           git commit -m "chore(fixtures): scheduled snapshot refresh ($DATE)" \
-            -m "Automated weekly refresh of the committed Yahoo price and fundamentals snapshots. Lint, typecheck, the full test suite (universe drift guards + pipeline snapshot invariants), and a keyless production build all passed against the refreshed fixtures in this workflow run."
-          git push -f origin "$BRANCH"
+            -m "Automated weekly refresh of price, fundamentals and event snapshots, plus appended forecast and thesis records. Fixed research editions are unchanged. Lint, typecheck, the full test suite and a keyless production build all passed against these changes in this workflow run."
+          git push --force-with-lease="refs/heads/$BRANCH:$EXPECTED_REMOTE_SHA" origin "$BRANCH"
 
           BODY="Automated weekly refresh of the committed data snapshots (as of $DATE).
 
           - \`src/__fixtures__/yahoo-snapshot.json\` — 3y OHLCV for the research universe
           - \`src/__fixtures__/fundamentals-snapshot.json\` — valuation/quality fundamentals
+          - \`src/__fixtures__/events/\` — event prices, fundamentals and run manifest
+          - \`src/data/events/forecast-ledger.json\` — appended rolling forecasts (existing records preserved)
+          - \`src/data/events/thesis-ledger.json\` — appended newly configured theses
+
+          Fixed research editions and their PDF/export are unchanged. The preflight checked the existing refresh branch's ledger history; a concurrent remote update will reject this push.
 
           Lint, typecheck, the full test suite, and a keyless production build **already passed against these fixtures** in the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}). CI does not auto-trigger on token-created PRs — re-run it manually if you want the check mark.
 

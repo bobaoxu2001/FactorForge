@@ -103,7 +103,7 @@ Seeded with two real cases from public sources, each claim paraphrased and linke
 | **Yahoo Finance** chart API | Daily OHLCV + split events for valuation (raw price reconstructed) and returns | Unofficial keyless endpoint, research use |
 | **DeepSeek** (optional) | Copilot prose under a citation validator | `DEEPSEEK_API_KEY`; deterministic fallback otherwise |
 
-Snapshots live in `src/__fixtures__/research/<project>/` and are rebuilt by `npm run research:refresh` (and weekly in CI when the `SEC_EDGAR_USER_AGENT` secret is set). Not connected, and shown as explicit gaps: spot/contract rate feeds, tender rejections, Class 8 orders, consensus estimates, earnings-call transcripts (all licensed), and FMCSA authority data (public; adapter not built).
+Snapshots live in `src/__fixtures__/research/<project>/` and are rebuilt deliberately with `npm run research:refresh` when preparing a new research edition. They are excluded from the weekly refresh: source review, the edition cutoff and the matching PDF/export must be updated together. Not connected, and shown as explicit gaps: spot/contract rate feeds, tender rejections, Class 8 orders, consensus estimates, earnings-call transcripts (all licensed), and FMCSA authority data (public; adapter not built).
 
 `node scripts/build-research-snapshot.mjs --macro-only` refreshes FRED without replacing the SEC or price components. The direct Cass extract is maintained separately. Before publishing another research edition, update its fixed cutoff, regenerate the PDF, and review source changes; component retrieval dates must not imply a full refresh.
 
@@ -509,7 +509,7 @@ Inside the app, `/oss` provides the same contribution and maintainer story for v
 | Variable | Required? | What it does |
 |---|---|---|
 | `DEEPSEEK_API_KEY` | optional | Enables LLM-written strategy memo, market tape note, post-market Daily Review, and the research copilot's synthesised answers (under the citation validator). Without it the platform uses deterministic templates and deterministic copilot handlers, and labels the source. |
-| `SEC_EDGAR_USER_AGENT` | builder only | `"Name contact@email"`, required by SEC fair-access policy for `npm run research:refresh`. Not used at runtime and never stored in the snapshot. Add it as a GitHub secret to enable the weekly research refresh. |
+| `SEC_EDGAR_USER_AGENT` | builder only | `"Name contact@email"`, required by SEC fair-access policy for `npm run research:refresh` when preparing a new edition. Not used at runtime or stored in the snapshot. Fixed research editions are excluded from the weekly workflow. |
 | `COPILOT_RATE_LIMIT_PER_HOUR` | optional | Copilot requests per client IP per hour (default 30), enforced by the same rate-limit store as auth. |
 | `POLYGON_API_KEY` | optional | Polygon.io aggregates as a second-tier real-data source (split + dividend adjusted). Composite provider tries it after Yahoo. |
 | `ALPHA_VANTAGE_API_KEY` | optional | Alpha Vantage daily as a third-tier real-data source. Free-tier endpoint is NOT corporate-action adjusted; the UI surfaces that honestly. |
@@ -581,9 +581,9 @@ Security notes:
 
 ## Testing
 
-621 tests across 94 files under vitest + jsdom (plus one ledger-writer suite that runs only under `npm run events:forecast`).
+685 tests across 102 files under vitest + jsdom (plus one ledger-writer suite that runs only under `npm run events:forecast`).
 
-The event-intelligence layer has 162 tests in 11 files. They cover:
+The event-intelligence tests cover:
 - Contradictory sources, and rumours versus enacted rules (lifecycle guard).
 - Time zones and DST, including events after the New York close.
 - One story syndicated by many outlets.
@@ -634,7 +634,7 @@ Pre-existing suites (310 tests):
 - **Rate-limit stores** — in-memory fixed-window determinism, plus the Upstash adapter over a mocked `fetch`: allow/block paths, retry-after from TTL, and fail-open on both unreachable and non-2xx responses.
 - **Env validation** — production fail-fast on a missing session secret, dev warnings, feature-flag detection from optional keys, and the distributed rate-limit detection + prod warning.
 - **Trade simulator engine** — pure portfolio math for the browser desk: buy/sell validation and immutability, cost-basis averaging, realized P&L on partial sells, snapshot marking with price-gap degradation, open-book analytics (winners/losers, concentration, invested weight), realized trading stats (win rate, profit factor, expectancy, best/worst closed trade, scratch-trade handling), and sector-exposure grouping (weights sum to 1, unknown-sector bucket).
-- **Search index** — ⌘K relevance scoring plus drift guards asserting every universe symbol, catalog strategy, and glossary entry stays searchable, key routes are indexed, and hrefs are unique.
+- **Search index** — ⌘K relevance scoring, covered-company research before quant results, project briefs and event evidence/impact pages. Multi-word queries match every word. Drift guards cover project companies, universe symbols, catalog strategies, glossary terms and unique hrefs. Component tests cover keyboard navigation, modal focus/scroll restoration, Enter and backdrop dismissal; the search trigger is also available on mobile.
 - **Sitemap** — every public route and catalog-derived strategy page is listed, protected surfaces never leak in, urls are unique on one origin, and the sitemap covers everything the ⌘K search links to.
 - **Pipeline snapshot** — the full factors → backtests → radar → portfolio → concentration run against the committed real-data fixture, built once and shared across invariant checks.
 
@@ -674,7 +674,7 @@ Treat auth/session code, bcrypt password handling, iron-session cookie settings,
 
 Maintainers may use AI assistants for repetitive review and documentation work, but generated output should be checked against the code before merging.
 
-- **Scheduled fixture refresh** — a weekly GitHub Actions workflow (`.github/workflows/refresh-fixtures.yml`) re-fetches the committed price and fundamentals snapshots, runs the full gate suite against them, and opens a review PR; merging still follows [`docs/fixture_refresh.md`](docs/fixture_refresh.md).
+- **Scheduled fixture refresh** — a weekly GitHub Actions workflow (`.github/workflows/refresh-fixtures.yml`) refreshes market, fundamentals and event snapshots, appends both event ledgers, verifies the full gate suite and opens a review PR. Pending ledger history and concurrent branch updates are protected; fixed research editions are published separately. Merging follows [`docs/fixture_refresh.md`](docs/fixture_refresh.md).
 - **PR review checklists** — draft route/module-specific checks for data provenance, deterministic metrics, fallback labels, tests, and docs updates.
 - **Test generation for backtest edge cases** — propose cases for next-open execution, slippage/fees, stop exits, flat/long transitions, empty trades, and benchmark calendar alignment.
 - **Provider fallback testing** — generate mocked Yahoo/Polygon/Alpha Vantage failure cases and assertions that synthetic data remains clearly labeled.
@@ -725,7 +725,7 @@ The current roadmap is tracked in [ROADMAP.md](ROADMAP.md). Near-term maintainer
 
 **Research platform**
 - **One connected industry.** Freight is fully wired. Software, retail and healthcare exist only as KPI-framework definitions with no data adapters.
-- **Snapshot, not streaming.** Research data is a committed, dated snapshot (refreshed manually or weekly in CI). FRED shows latest vintages, so KPI revision history is noted but not stored point-in-time.
+- **Snapshot, not streaming.** Research data belongs to a committed, dated edition updated through deliberate source, cutoff and PDF review. Weekly CI refreshes market/event data separately. FRED shows latest vintages, so KPI revision history is noted but not stored point-in-time.
 - **XBRL coverage varies by filer.** Some concepts are not tagged in standard us-gaap form (e.g., Werner's quarterly D&A, broker fuel). Those metrics show as unavailable rather than estimated. Segment-level data (XBRL dimensions) is not ingested.
 - **No licensed market data.** Spot/contract rates, tender rejections, Class 8 orders, consensus estimates and call transcripts are listed as gaps with what would be required.
 - **Research workspace is per-browser.** Notes, memo edits and probabilities live in localStorage, with JSON export/import. There is no multi-user, server-side research store yet.

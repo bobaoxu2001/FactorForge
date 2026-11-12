@@ -11,6 +11,8 @@
  * point refuse to boot a misconfigured production process.
  */
 
+import { getRateLimitCredentials } from "./rateLimitCredentials";
+
 const VALID_LOG_LEVELS = ["debug", "info", "warn", "error"] as const;
 
 export interface EnvFeatures {
@@ -63,10 +65,7 @@ export function validateEnv(env: EnvLike = process.env): EnvValidation {
 
   // A shared rate-limit store needs both a REST URL and token. Accept either the
   // Upstash or the Vercel-KV env-var names (same REST protocol).
-  const distributedRateLimit = Boolean(
-    (env.UPSTASH_REDIS_REST_URL ?? env.KV_REST_API_URL) &&
-      (env.UPSTASH_REDIS_REST_TOKEN ?? env.KV_REST_API_TOKEN),
-  );
+  const distributedRateLimit = getRateLimitCredentials(env) !== null;
   const alpacaKey = Boolean(env.ALPACA_PAPER_API_KEY_ID);
   const alpacaSecret = Boolean(env.ALPACA_PAPER_API_SECRET);
 

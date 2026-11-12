@@ -1,6 +1,7 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { InMemoryRateLimitStore } from "./memoryStore";
 import { UpstashRateLimitStore } from "./upstashStore";
+import { __setRateLimitStore, getRateLimitStore, isDistributedRateLimitConfigured } from ".";
 
 describe("InMemoryRateLimitStore", () => {
   it("allows up to the limit then blocks, with a positive retry-after", async () => {
@@ -82,5 +83,47 @@ describe("UpstashRateLimitStore", () => {
     const store = new UpstashRateLimitStore("https://example.upstash.io", "tok");
     const res = await store.hit("signin:alice", 5, 300_000);
     expect(res.allowed).toBe(true);
+  });
+});
+
+describe("rate-limit credential selection", () => {
+  beforeEach(() => {
+    __setRateLimitStore(null);
+    for (const key of ["UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN", "KV_REST_API_URL", "KV_REST_API_TOKEN"]) vi.stubEnv(key, "");
+  });
+  afterEach(() => {
+    __setRateLimitStore(null);
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  it("uses in-memory throttling for mismatched provider credentials", () => {
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://upstash.example");
+    vi.stubEnv("KV_REST_API_TOKEN", "kv-token");
+    expect(isDistributedRateLimitConfigured()).toBe(false);
+    expect(getRateLimitStore().backend).toBe("memory");
+  });
+
+  it("sends the KV token only to the KV URL when Upstash is incomplete", async () => {
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://wrong.upstash.example");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", " ");
+    vi.stubEnv("KV_REST_API_URL", " https://kv.example ");
+    vi.stubEnv("KV_REST_API_TOKEN", " kv-token ");
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify([{ result: 1 }, { result: 1 }, { result: 1000 }]), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    expect(isDistributedRateLimitConfigured()).toBe(true);
+    await getRateLimitStore().hit("test", 5, 1000);
+    expect(fetchMock).toHaveBeenCalledWith("https://kv.example/pipeline", expect.objectContaining({ headers: expect.objectContaining({ authorization: "Bearer kv-token" }) }));
+  });
+
+  it("prefers the complete Upstash pair when both providers are configured", async () => {
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://upstash.example");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "upstash-token");
+    vi.stubEnv("KV_REST_API_URL", "https://kv.example");
+    vi.stubEnv("KV_REST_API_TOKEN", "kv-token");
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify([{ result: 1 }, { result: 1 }, { result: 1000 }]), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    await getRateLimitStore().hit("test", 5, 1000);
+    expect(fetchMock).toHaveBeenCalledWith("https://upstash.example/pipeline", expect.objectContaining({ headers: expect.objectContaining({ authorization: "Bearer upstash-token" }) }));
   });
 });

@@ -67,7 +67,7 @@ export default function EvidenceExplorer({ projectId, evidence, hypotheses, memo
       (hyp === "all" || e.hypothesisIds.includes(hyp)) &&
       (!q || `${e.id} ${e.subject} ${e.claim} ${e.tickers.join(" ")} ${e.source.publisher}`.toLowerCase().includes(q)),
   );
-  const selected = all.find((e) => e.id === selectedId) ?? filtered[0];
+  const selected = filtered.find((e) => e.id === selectedId) ?? filtered[0];
   const note = selected ? state.evidenceNotes[selected.id] ?? "" : "";
 
   const counts = (key: "origin" | "status", value: string) => all.filter((e) => e[key] === value).length;
@@ -103,6 +103,7 @@ export default function EvidenceExplorer({ projectId, evidence, hypotheses, memo
             <li key={e.id}>
               <button
                 onClick={() => setSelectedId(e.id)}
+                aria-pressed={selected?.id === e.id}
                 className={`w-full rounded-md border px-3 py-2 text-left transition-colors ${selected?.id === e.id ? "border-accent/45 bg-accent/[0.07]" : "border-line bg-ink/[0.02] hover:border-accent/25"}`}
               >
                 <div className="flex items-center justify-between gap-2">

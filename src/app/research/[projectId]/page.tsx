@@ -170,7 +170,7 @@ export default async function ProjectOverviewPage({ params: paramsPromise }: { p
 
       <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
         <Panel eyebrow="Research quality" title="Completeness checks (no composite score)">
-          <QualityPanel checks={view.quality} projectId={pid} />
+          <QualityPanel checks={view.quality} projectId={pid} focusTickers={view.config.companies.filter((company) => company.focus).map((company) => company.ticker)} />
         </Panel>
         <Panel eyebrow="Gaps" title="What is missing">
           <ul className="space-y-2 text-[12px] leading-relaxed">

@@ -4,16 +4,21 @@ A short script for presenting the event-research workflow. Every number below co
 
 ## Where to run it
 
-- **Production:** https://factor-forge-ashy.vercel.app. Checked 8 Nov 2026 at 20:02 UTC:
-  - it served `main` at `3350e96` (PR #22);
-  - that includes the corrected current assessment quoted below, and every page used in this script.
-- **Final-polish preview:** branch `polish/homepage-entry` changes only the homepage and the case entry links:
-  - a featured-case introduction on the homepage;
-  - case links that open on the brief;
-  - a dated catalyst calendar.
+Demonstrate from the production site: https://factor-forge-ashy.vercel.app
 
-  Until that PR is merged, those changes appear only on its Vercel preview. Production keeps the earlier homepage.
-- **Main route:** `/events/ai-datacenter-shock/brief` → **Business impact** → **Evidence** → back to the brief for *What would change the view*. On the preview, the homepage's "Read research brief" button opens the same brief. `/forecasts` is optional at the end.
+Start on the homepage, select **Read research brief**, and follow:
+1. AI brief.
+2. **Business impact**.
+3. **Evidence**.
+4. Back to the brief's *What would change the view* section.
+
+Forecasts (`/forecasts`) are optional method-validation material at the end.
+
+For the exact deployed revision, consult Vercel's production deployment metadata and the corresponding GitHub release and merge history.
+
+*Historical verification notes (not current status).*
+- **8 Nov 2026, 20:02 UTC:** production served `3350e96` (PR #22, the corrected current assessment).
+- **Later:** PR #23 (merge `3da3402`) added the homepage's featured-case entry and the brief-first case links.
 
 ---
 

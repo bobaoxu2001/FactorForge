@@ -1,11 +1,12 @@
 import { GLOSSARY } from "@/data/glossary";
 import { STRATEGY_CATALOG } from "@/data/strategyCatalog";
 import { UNIVERSE } from "@/data/watchlist";
+import { RESEARCH_PROJECTS } from "@/data/research/projects";
 
 export interface SearchItem {
   title: string;
   href: string;
-  category: "Route" | "Symbol" | "Strategy" | "Factor" | "Report" | "Glossary" | "Maintainer";
+  category: "Route" | "Company" | "Symbol" | "Strategy" | "Factor" | "Report" | "Glossary" | "Maintainer";
   description: string;
   keywords: string[];
 }
@@ -41,14 +42,14 @@ const ROUTE_ITEMS: SearchItem[] = [
   },
   {
     title: "AI data-center restrictions and the 5 Nov 2026 selloff",
-    href: "/events/ai-datacenter-shock",
+    href: "/events/ai-datacenter-shock/brief",
     category: "Report",
-    description: "New York and Texas permit pauses, post-election restriction risk, the Nasdaq −5.5% day, exposure map and scenarios.",
+    description: "Public-source brief on policy risk, company economics and the 5 November selloff; causality remains unestablished.",
     keywords: ["ai", "data center", "moratorium", "texas", "new york", "nasdaq", "nvda", "vrt", "ceg", "vst", "power", "grid"],
   },
   {
     title: "Binance security incident, 29 Oct 2026",
-    href: "/events/binance-breach",
+    href: "/events/binance-breach/brief",
     category: "Report",
     description: "What failed, frozen versus recovered, AI-tool role, and transmission to crypto assets and US-listed crypto and security stocks.",
     keywords: ["binance", "hack", "breach", "crypto", "bnb", "btc", "coin", "cybersecurity", "frozen"],
@@ -258,6 +259,44 @@ const ROUTE_ITEMS: SearchItem[] = [
   },
 ];
 
+/** Derive company coverage and briefs from the project registry, not the quant universe. */
+const RESEARCH_ITEMS: SearchItem[] = RESEARCH_PROJECTS.flatMap((project) => [
+  {
+    title: `${project.industry} · one-page brief`,
+    href: `/research/${project.id}/sample`,
+    category: "Report" as const,
+    description: `Read the conclusion, evidence, limitations and next validation steps for ${project.title}`,
+    keywords: [project.id, project.industry, "brief", "sample", "one page", "research"],
+  },
+  ...project.companies.map((company) => ({
+    title: company.ticker,
+    href: `/research/${project.id}/companies/${company.ticker}`,
+    category: "Company" as const,
+    description: `${company.displayName} — ${company.researchAngle}`,
+    keywords: [company.ticker, company.displayName, company.businessModel, project.id, project.industry, "company", "research", "filings", "margins", "valuation"],
+  })),
+]);
+
+/** Keep evidence and business-impact paths searchable without bundling source ledgers into the client. */
+const EVENT_RESEARCH_ITEMS: SearchItem[] = ROUTE_ITEMS
+  .filter((item) => item.href.startsWith("/events/") && item.href.endsWith("/brief"))
+  .flatMap((item) => [
+    {
+      title: `${item.title} · evidence`,
+      href: item.href.replace(/\/brief$/, "/evidence"),
+      category: "Report" as const,
+      description: "Inspect dated sources, individual claims and verification limits for this case.",
+      keywords: [...item.keywords, "evidence", "sources", "verification", "citations"],
+    },
+    {
+      title: `${item.title} · business impact`,
+      href: item.href.replace(/\/brief$/, "/impact"),
+      category: "Report" as const,
+      description: "Trace company exposure and economic mechanisms; distinguish sourced links from assumptions.",
+      keywords: [...item.keywords, "impact", "company", "exposure", "economics"],
+    },
+  ]);
+
 /** One entry per strategy detail page, straight from the catalog. */
 const STRATEGY_ITEMS: SearchItem[] = STRATEGY_CATALOG.map((definition) => ({
   title: definition.name,
@@ -301,34 +340,44 @@ const GLOSSARY_ITEMS: SearchItem[] = GLOSSARY.map((entry) => ({
 
 export const SEARCH_ITEMS: SearchItem[] = [
   ...ROUTE_ITEMS,
+  ...RESEARCH_ITEMS,
+  ...EVENT_RESEARCH_ITEMS,
   ...STRATEGY_ITEMS,
   ...SYMBOL_ITEMS,
   ...GLOSSARY_ITEMS,
 ];
 
+const normalize = (value: string) => value.toLowerCase().replace(/[$]/g, "").replace(/[-–—/·]+/g, " ").replace(/\s+/g, " ").trim();
+
 export function searchItems(query: string, limit = 8): SearchItem[] {
-  const normalized = query.trim().toLowerCase();
+  if (limit <= 0) return [];
+  const normalized = normalize(query);
   if (!normalized) return SEARCH_ITEMS.slice(0, limit);
   const terms = normalized.split(/\s+/).filter(Boolean);
   return SEARCH_ITEMS
     .map((item) => {
-      const haystack = [
+      const title = normalize(item.title);
+      const keywords = item.keywords.map(normalize);
+      const haystack = normalize([
         item.title,
         item.category,
         item.description,
         ...item.keywords,
-      ].join(" ").toLowerCase();
-      const score = terms.reduce((sum, term) => {
-        if (item.title.toLowerCase() === term) return sum + 8;
-        if (item.title.toLowerCase().includes(term)) return sum + 5;
-        if (item.keywords.some((keyword) => keyword.toLowerCase().includes(term))) return sum + 3;
+      ].join(" "));
+      // A multi-word request must match every word: "Binance evidence"
+      // must not return unrelated freight evidence just for sharing one term.
+      if (!terms.every((term) => haystack.includes(term))) return { item, score: 0 };
+      const score = (title === normalized ? 20 : 0) + terms.reduce((sum, term) => {
+        if (title === term) return sum + 8;
+        if (title.includes(term)) return sum + 5;
+        if (keywords.some((keyword) => keyword.includes(term))) return sum + 3;
         if (haystack.includes(term)) return sum + 1;
         return sum;
       }, 0);
       return { item, score };
     })
     .filter(({ score }) => score > 0)
-    .sort((a, b) => b.score - a.score || a.item.title.localeCompare(b.item.title))
+    .sort((a, b) => b.score - a.score || Number(b.item.category === "Company") - Number(a.item.category === "Company") || a.item.title.localeCompare(b.item.title))
     .slice(0, limit)
     .map(({ item }) => item);
 }
